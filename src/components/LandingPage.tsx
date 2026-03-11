@@ -1,12 +1,15 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { X, Check } from "lucide-react";
 import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "@/lib/auth";
+import logoSignMate from "@/asset/image/LOGO_SignMate.png";
 
 interface LandingPageProps {
   onLoginSuccess: () => void;
 }
 
 export function LandingPage({ onLoginSuccess }: LandingPageProps) {
+  const navigate = useNavigate();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState("");
@@ -123,12 +126,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
       <nav className="w-full py-6 px-8 flex justify-between items-center border-b-4 border-sq-black bg-white">
         <div className="flex items-center gap-3">
           <div className="bg-sq-pink p-2 rounded-xl sq-border">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path>
-              <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"></path>
-              <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path>
-              <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path>
-            </svg>
+            <img src={logoSignMate} alt="SignMate Logo" className="w-8 h-8 object-contain" />
           </div>
           <div>
             <span className="brand-font text-3xl tracking-tight text-sq-pink">SignMate</span>
@@ -172,7 +170,10 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
             >
               เริ่มเกม
             </button>
-            <button className="bg-white text-lg px-8 py-4 rounded-2xl sq-border sq-button-hover font-bold flex items-center gap-3">
+            <button 
+              onClick={() => navigate("/categories")}
+              className="bg-white text-lg px-8 py-4 rounded-2xl sq-border sq-button-hover font-bold flex items-center gap-3"
+            >
               สำรวจบทเรียน
             </button>
           </div>
@@ -182,7 +183,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
               <div className="w-10 h-10 rounded-full border-3 border-sq-black bg-green-400 flex items-center justify-center text-white font-bold text-sm">AS</div>
               <div className="w-10 h-10 rounded-full border-3 border-sq-black bg-sq-pink flex items-center justify-center text-white font-bold text-sm">MK</div>
             </div>
-            <p className="font-bold text-sq-black/60 text-sm">มีผู้เรียนลงทะเบียน +12,000 คนในสัปดาห์นี้!</p>
+            <p className="font-bold text-sq-black/60 text-sm">มีผู้เรียนลงทะเบียน 0 คนในสัปดาห์นี้!</p>
           </div>
         </div>
 
@@ -275,24 +276,21 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
       </main>
 
       {/* Feature Section */}
-      <section className="bg-sq-pink border-y-4 border-sq-black py-16">
+      {/* <section className="bg-sq-pink border-y-4 border-sq-black py-16">
         <div className="max-w-7xl mx-auto px-8">
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
             <div className="bg-white p-8 rounded-3xl sq-border flex flex-col items-center text-center">
               <div className="w-20 h-20 bg-sq-yellow rounded-full sq-border flex items-center justify-center text-4xl mb-6">👁️</div>
               <h3 className="brand-font text-2xl mb-4">AI Vision Recognition</h3>
               <p className="font-bold text-sq-black/60">Our camera AI gives you instant feedback on your hand gestures and signs.</p>
             </div>
 
-            {/* Feature 2 */}
             <div className="bg-white p-8 rounded-3xl sq-border flex flex-col items-center text-center mt-0 md:mt-8">
               <div className="w-20 h-20 bg-sq-pink rounded-full sq-border flex items-center justify-center text-4xl mb-6 text-white">🎮</div>
               <h3 className="brand-font text-2xl mb-4">Gamified Path</h3>
               <p className="font-bold text-sq-black/60">Unlock new levels, earn badges, and climb the leaderboard while learning.</p>
             </div>
 
-            {/* Feature 3 */}
             <div className="bg-white p-8 rounded-3xl sq-border flex flex-col items-center text-center">
               <div className="w-20 h-20 bg-sq-yellow rounded-full sq-border flex items-center justify-center text-4xl mb-6">🤟</div>
               <h3 className="brand-font text-2xl mb-4">Real Life Phrases</h3>
@@ -300,19 +298,19 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Footer */}
-      <footer className="bg-sq-cream py-12 px-8 border-t-4 border-sq-black">
+      <footer className="bg-sq-pink py-12 px-8 border-t-4 border-sq-black">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-3">
-            <span className="brand-font text-2xl tracking-tight text-sq-pink">SignMate</span>
+            <span className="brand-font text-2xl tracking-tight text-sq-cream">SignMate</span>
           </div>
           <div className="flex gap-8 font-bold text-sq-black/60">
-            <a className="hover:text-sq-pink transition-colors" href="#">Privacy</a>
-            <a className="hover:text-sq-pink transition-colors" href="#">Terms</a>
-            <a className="hover:text-sq-pink transition-colors" href="#">Support</a>
-            <a className="hover:text-sq-pink transition-colors" href="#">About</a>
+            <a className="hover:text-sq-cream transition-colors" href="#">Privacy</a>
+            <a className="hover:text-sq-cream transition-colors" href="#">Terms</a>
+            <a className="hover:text-sq-cream transition-colors" href="#">Support</a>
+            <a className="hover:text-sq-cream transition-colors" href="#">About</a>
           </div>
           <p className="font-bold text-sq-black/40">© 2026 SignMate Interactive. All rights reserved.</p>
         </div>

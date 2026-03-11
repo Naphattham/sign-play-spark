@@ -31,6 +31,11 @@ export function VideoCard({ phrase, category }: VideoCardProps) {
       }
     }
     
+    // Remove question marks from Q&A category video filenames
+    if (category === "qa") {
+      videoFileName = videoFileName.replace("?", "");
+    }
+    
     return `/videos/${category}/${videoFileName}.mp4`;
   };
 

@@ -33,7 +33,11 @@ const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isAuthTransitioning, setIsAuthTransitioning] = useState(false);
-  const [showInitialLoading, setShowInitialLoading] = useState(true);
+  // Only show loading on first visit, not on navigation back
+  const [showInitialLoading, setShowInitialLoading] = useState(() => {
+    const hasLoaded = sessionStorage.getItem('hasInitialLoaded');
+    return !hasLoaded;
+  });
   const [category, setCategory] = useState<Category>("general");
   const [activePhrase, setActivePhrase] = useState<Phrase>(getPhrasesByCategory("general")[0]);
   const [completedPhrases, setCompletedPhrases] = useState<Set<string>>(new Set(["g1", "g2", "e1"]));
@@ -46,14 +50,17 @@ const Index = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [userStreak, setUserStreak] = useState(0);
 
-  // Ensure loading animation plays completely (minimum 3.5 seconds)
+  // Ensure loading animation plays completely (minimum 3.5 seconds) only on first visit
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowInitialLoading(false);
-    }, 3500);
+    if (showInitialLoading) {
+      const timer = setTimeout(() => {
+        setShowInitialLoading(false);
+        sessionStorage.setItem('hasInitialLoaded', 'true');
+      }, 3500);
 
-    return () => clearTimeout(timer);
-  }, []);
+      return () => clearTimeout(timer);
+    }
+  }, [showInitialLoading]);
 
   // Monitor authentication state
   useEffect(() => {

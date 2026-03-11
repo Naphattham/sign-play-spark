@@ -62,6 +62,11 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, comp
       }
     }
     
+    // Remove question marks from Q&A category video filenames
+    if (lastCategory === "qa") {
+      videoFileName = videoFileName.replace("?", "");
+    }
+    
     return `/videos/${lastCategory}/${videoFileName}.mp4`;
   };
 
