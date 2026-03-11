@@ -1,19 +1,109 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Cropper, { Area } from "react-easy-crop";
 import { ArrowLeft, Upload, Check } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { auth, database, storage } from "@/lib/firebase";
+import { ref as dbRef, update, get } from "firebase/database";
+import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
+import { updateProfile } from "firebase/auth";
+import { getAvatarUrl } from "@/lib/avatar";
 
 interface ProfileEditProps {
   onBack: () => void;
 }
 
 export function ProfileEdit({ onBack }: ProfileEditProps) {
-  const [username, setUsername] = useState("SignMaster99");
-  const [bio, setBio] = useState("Learning sign language one gesture at a time!");
+  const { toast } = useToast();
+  const [username, setUsername] = useState("");
+  const [bio, setBio] = useState("");
+  const [photoURL, setPhotoURL] = useState<string | null>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [showCropper, setShowCropper] = useState(false);
   const [croppedArea, setCroppedArea] = useState<Area | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [points, setPoints] = useState(0);
+
+  // Load user data on mount
+  useEffect(() => {
+    const loadUserData = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        // Reload user to get latest data from Firebase Auth
+        await user.reload();
+        
+        console.log("Loading user data:", {
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          email: user.email
+        });
+        
+        setUsername(user.displayName || "");
+        
+        // Load data from database
+        const userRef = dbRef(database, `users/${user.uid}`);
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          console.log("User data from database:", userData);
+          setBio(userData.bio || "");
+          setPoints(userData.points || 0);
+          // Use photo from database if available, otherwise use Auth photoURL
+          setPhotoURL(userData.photoURL || user.photoURL || null);
+        } else {
+          // Fallback to Auth photoURL
+          setPhotoURL(user.photoURL || null);
+        }
+      }
+    };
+    loadUserData();
+  }, []);
+
+  const createCroppedImage = async (
+    imageSrc: string,
+    croppedAreaPixels: Area
+  ): Promise<Blob> => {
+    const image = new Image();
+    image.src = imageSrc;
+    await new Promise((resolve) => {
+      image.onload = resolve;
+    });
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) {
+      throw new Error("Failed to get canvas context");
+    }
+
+    canvas.width = croppedAreaPixels.width;
+    canvas.height = croppedAreaPixels.height;
+
+    ctx.drawImage(
+      image,
+      croppedAreaPixels.x,
+      croppedAreaPixels.y,
+      croppedAreaPixels.width,
+      croppedAreaPixels.height,
+      0,
+      0,
+      croppedAreaPixels.width,
+      croppedAreaPixels.height
+    );
+
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error("Failed to create blob"));
+        }
+      }, "image/jpeg");
+    });
+  };
 
   const onCropComplete = useCallback((_: Area, croppedAreaPixels: Area) => {
     setCroppedArea(croppedAreaPixels);
@@ -31,16 +121,102 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
     }
   };
 
-  const handleCropDone = () => {
-    setShowCropper(false);
-    // In a real app, you'd generate the cropped image here
+  const handleCropDone = async () => {
+    if (!imageSrc || !croppedArea) return;
+
+    try {
+      const croppedBlob = await createCroppedImage(imageSrc, croppedArea);
+      const croppedUrl = URL.createObjectURL(croppedBlob);
+      setPhotoURL(croppedUrl);
+      setImageError(false); // Reset error state
+      setShowCropper(false);
+      console.log("Image cropped successfully");
+    } catch (error) {
+      console.error("Error cropping image:", error);
+      toast({
+        title: "Error",
+        description: "Failed to crop image. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to update your profile.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      let uploadedPhotoURL = user.photoURL;
+
+      // If there's a new cropped image, upload it
+      if (imageSrc && croppedArea && photoURL?.startsWith("blob:")) {
+        const croppedBlob = await createCroppedImage(imageSrc, croppedArea);
+        const fileName = `profile-photos/${user.uid}/${Date.now()}.jpg`;
+        const imageRef = storageRef(storage, fileName);
+        await uploadBytes(imageRef, croppedBlob);
+        uploadedPhotoURL = await getDownloadURL(imageRef);
+      }
+
+      // Update Firebase Auth profile
+      await updateProfile(user, {
+        displayName: username,
+        photoURL: uploadedPhotoURL,
+      });
+
+      // Update Realtime Database
+      const userRef = dbRef(database, `users/${user.uid}`);
+      await update(userRef, {
+        username: username,
+        displayName: username,
+        photoURL: uploadedPhotoURL,
+        updatedAt: new Date().toISOString(),
+      });
+
+      // Update local photo URL if it was uploaded
+      if (uploadedPhotoURL && uploadedPhotoURL !== user.photoURL) {
+        setPhotoURL(uploadedPhotoURL);
+        setImageError(false); // Reset error state
+      }
+
+      // Clear the temporary blob URL
+      if (photoURL?.startsWith('blob:')) {
+        URL.revokeObjectURL(photoURL);
+      }
+
+      toast({
+        title: "Success!",
+        description: "Your profile has been updated successfully.",
+        variant: "success",
+        duration: 3000,
+      });
+
+      console.log("Profile saved successfully");
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save profile. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <div className="max-w-lg mx-auto">
       <button onClick={onBack} className="brutal-btn-secondary flex items-center gap-2 text-sm mb-6">
         <ArrowLeft size={16} />
-        Back to Game
+        Back to Home
       </button>
 
       <div className="brutal-card-lg overflow-hidden">
@@ -49,23 +225,59 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
         </div>
 
         <div className="p-6 space-y-5">
-          {/* Avatar */}
+          {/* Avatar and User Info */}
           <div className="flex flex-col items-center gap-3">
-            {showCropper && imageSrc ? (
-              <div className="w-full">
-                <div className="relative w-full h-64 border-[3px] border-foreground rounded-lg overflow-hidden bg-foreground">
-                  <Cropper
-                    image={imageSrc}
-                    crop={crop}
-                    zoom={zoom}
-                    aspect={1}
-                    cropShape="round"
-                    onCropChange={setCrop}
-                    onZoomChange={setZoom}
-                    onCropComplete={onCropComplete}
-                  />
+            <div className="w-24 h-24 rounded-full border-[3px] border-foreground bg-secondary flex items-center justify-center text-3xl font-display text-secondary-foreground overflow-hidden" style={{ boxShadow: "3px 3px 0px 0px hsl(0 0% 0%)" }}>
+              <img 
+                src={photoURL && !imageError ? photoURL : getAvatarUrl(null, username || auth.currentUser?.email || "user")} 
+                alt="Avatar" 
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  const img = e.target as HTMLImageElement;
+                  console.log("Image failed to load:", photoURL);
+                  console.log("Will use fallback avatar");
+                  if (!imageError) {
+                    setImageError(true);
+                    // Set fallback immediately
+                    img.src = getAvatarUrl(null, username || auth.currentUser?.email || "user");
+                  }
+                }}
+                onLoad={() => {
+                  console.log("Image loaded successfully:", photoURL || "generated avatar");
+                }}
+              />
+            </div>
+            <label className="brutal-btn-secondary flex items-center gap-2 text-sm cursor-pointer">
+              <Upload size={14} />
+              {photoURL && !photoURL.startsWith('blob:') && !imageError ? 'Change Photo' : 'Upload Photo'}
+              <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+            </label>
+          </div>
+
+          {/* Cropper Modal */}
+          <Dialog open={showCropper} onOpenChange={setShowCropper}>
+            <DialogContent className="brutal-card-lg max-w-2xl">
+              <DialogHeader>
+                <DialogTitle className="font-display text-xl">Crop Your Photo</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="relative w-full h-96 border-[3px] border-foreground rounded-lg overflow-hidden bg-foreground">
+                  {imageSrc && (
+                    <Cropper
+                      image={imageSrc}
+                      crop={crop}
+                      zoom={zoom}
+                      aspect={1}
+                      cropShape="round"
+                      onCropChange={setCrop}
+                      onZoomChange={setZoom}
+                      onCropComplete={onCropComplete}
+                    />
+                  )}
                 </div>
-                <div className="flex items-center gap-2 mt-3">
+                <div className="flex items-center gap-3">
+                  <label className="text-sm font-semibold font-body">Zoom:</label>
                   <input
                     type="range"
                     min={1}
@@ -75,33 +287,18 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
                     onChange={(e) => setZoom(Number(e.target.value))}
                     className="flex-1"
                   />
-                  <button onClick={handleCropDone} className="brutal-btn-primary flex items-center gap-1 text-sm">
-                    <Check size={14} />
+                  <button onClick={handleCropDone} className="brutal-btn-primary flex items-center gap-2 text-sm">
+                    <Check size={16} />
                     Done
                   </button>
                 </div>
               </div>
-            ) : (
-              <>
-                <div className="w-24 h-24 rounded-full border-[3px] border-foreground bg-secondary flex items-center justify-center text-3xl font-display text-secondary-foreground" style={{ boxShadow: "3px 3px 0px 0px hsl(0 0% 0%)" }}>
-                  {imageSrc ? (
-                    <img src={imageSrc} alt="Avatar" className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    username[0]?.toUpperCase()
-                  )}
-                </div>
-                <label className="brutal-btn-secondary flex items-center gap-2 text-sm cursor-pointer">
-                  <Upload size={14} />
-                  Upload Photo
-                  <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-                </label>
-              </>
-            )}
-          </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Fields */}
           <div>
-            <label className="block text-sm font-semibold font-body mb-1">Username</label>
+            <label className="block text-sm font-semibold font-body mb-1">Display Name</label>
             <input
               type="text"
               value={username}
@@ -110,19 +307,25 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
             />
           </div>
 
+          {/* Points Display */}
           <div>
-            <label className="block text-sm font-semibold font-body mb-1">Bio</label>
-            <textarea
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              rows={3}
-              className="brutal-input w-full font-body resize-none"
-            />
+            <label className="block text-sm font-semibold font-body mb-1">คะแนนทั้งหมด</label>
+            <div className="brutal-card flex items-center justify-between px-4 py-3">
+              <span className="font-semibold text-muted-foreground">Total Points</span>
+              <div className="flex items-center gap-2">
+                <span className="font-display text-2xl font-bold text-primary">{points.toLocaleString()}</span>
+                <span className="text-xs text-muted-foreground">pts</span>
+              </div>
+            </div>
           </div>
 
-          <button className="w-full brutal-btn-primary py-3 font-body flex items-center justify-center gap-2">
+          <button 
+            onClick={handleSaveProfile} 
+            disabled={isSaving}
+            className="w-full brutal-btn-primary py-3 font-body flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Check size={18} />
-            Save Changes
+            {isSaving ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </div>

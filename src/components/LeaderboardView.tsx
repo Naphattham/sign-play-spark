@@ -1,5 +1,15 @@
 import { Trophy, Medal, Award } from "lucide-react";
-import { leaderboardData } from "@/lib/categories";
+import { useEffect, useState } from "react";
+import { ref, query, orderByChild, get } from "firebase/database";
+import { database } from "@/lib/firebase";
+import { getAvatarUrl } from "@/lib/avatar";
+
+interface LeaderboardEntry {
+  rank: number;
+  username: string;
+  points: number;
+  photoURL?: string;
+}
 
 const rankIcon = (rank: number) => {
   if (rank === 1) return <Trophy className="w-5 h-5 text-secondary-foreground" />;
@@ -9,35 +19,209 @@ const rankIcon = (rank: number) => {
 };
 
 export function LeaderboardView() {
-  return (
-    <div className="max-w-2xl mx-auto">
-      <div className="brutal-card-lg overflow-hidden">
-        <div className="bg-secondary border-b-[3px] border-foreground px-6 py-4">
-          <h2 className="font-display text-2xl text-secondary-foreground flex items-center gap-2">
-            <Trophy className="w-7 h-7" />
-            Leaderboard
-          </h2>
-        </div>
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
-        <div className="divide-y-[2px] divide-foreground">
-          {leaderboardData.map((entry, i) => (
-            <div
-              key={entry.rank}
-              className={`flex items-center gap-4 px-6 py-3 font-body transition-all animate-slide-up ${
-                i < 3 ? "bg-secondary/20" : "bg-card"
-              }`}
-              style={{ animationDelay: `${i * 50}ms` }}
-            >
-              <div className="w-10 h-10 flex items-center justify-center rounded-lg border-[2px] border-foreground bg-card" style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}>
-                {rankIcon(entry.rank)}
-              </div>
-              <span className="flex-1 font-semibold">{entry.username}</span>
-              <span className="font-display text-primary text-lg">{entry.points.toLocaleString()}</span>
-              <span className="text-xs text-muted-foreground">pts</span>
-            </div>
-          ))}
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        console.log("Fetching leaderboard data...");
+        const usersRef = ref(database, 'users');
+        const snapshot = await get(usersRef);
+
+        console.log("Snapshot exists:", snapshot.exists());
+        
+        if (snapshot.exists()) {
+          const users: LeaderboardEntry[] = [];
+          snapshot.forEach((childSnapshot) => {
+            const userData = childSnapshot.val();
+            console.log("User data:", userData);
+            users.push({
+              rank: 0,
+              username: userData.username || userData.displayName || 'Anonymous',
+              points: userData.points || 0,
+              photoURL: userData.photoURL,
+            });
+          });
+
+          users.sort((a, b) => b.points - a.points);
+          users.forEach((user, index) => {
+            user.rank = index + 1;
+          });
+
+          console.log("Total users found:", users.length);
+          console.log("Leaderboard data:", users);
+          setLeaderboardData(users);
+        } else {
+          console.log("No users found in database");
+        }
+      } catch (error) {
+        console.error("Error fetching leaderboard:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">กำลังโหลดอันดับ...</p>
         </div>
       </div>
+    );
+  }
+
+  const topThree = leaderboardData.filter(entry => entry.rank <= 3);
+  const rest = leaderboardData.filter(entry => entry.rank > 3);
+
+  if (leaderboardData.length === 0) {
+    return (
+      <div className="max-w-4xl mx-auto flex items-center justify-center h-64">
+        <div className="text-center brutal-card p-8">
+          <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+          <h3 className="font-display text-xl mb-2">ยังไม่มีข้อมูลผู้เล่น</h3>
+          <p className="text-muted-foreground">เริ่มเล่นเกมเพื่อติดอันดับกันเถอะ!</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-8">
+      {/* Podium for Top 3 */}
+      <div className="flex items-end justify-center gap-4 px-4">
+        {/* 2nd Place */}
+        <div className="flex flex-col items-center animate-slide-up" style={{ animationDelay: "100ms" }}>
+          <div className="flex flex-col items-center gap-2 mb-2">
+            <div className="text-4xl">🥈</div>
+            <div className="w-16 h-16 rounded-full border-[3px] border-foreground bg-muted overflow-hidden">
+              <img 
+                src={topThree.find(e => e.rank === 2)?.photoURL || getAvatarUrl(null, topThree.find(e => e.rank === 2)?.username || "user")}
+                alt={topThree.find(e => e.rank === 2)?.username}
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  const img = e.target as HTMLImageElement;
+                  const username = topThree.find(e => e.rank === 2)?.username || "user";
+                  console.log("Failed to load image for rank 2:", img.src);
+                  img.src = getAvatarUrl(null, username);
+                }}
+              />
+            </div>
+            <p className="font-black text-sm text-center line-clamp-1">
+              {topThree.find(e => e.rank === 2)?.username}
+            </p>
+            <p className="text-xs font-bold text-primary">
+              {topThree.find(e => e.rank === 2)?.points.toLocaleString()} PTS
+            </p>
+          </div>
+          <div className="w-32 h-24 brutal-card bg-muted flex items-center justify-center">
+            <span className="font-black text-4xl opacity-20">2</span>
+          </div>
+        </div>
+
+        {/* 1st Place */}
+        <div className="flex flex-col items-center animate-slide-up" style={{ animationDelay: "0ms" }}>
+          <div className="flex flex-col items-center gap-2 mb-2">
+            <div className="text-4xl">👑</div>
+            <div className="w-20 h-20 rounded-full border-[3px] border-foreground bg-accent overflow-hidden">
+              <img 
+                src={topThree.find(e => e.rank === 1)?.photoURL || getAvatarUrl(null, topThree.find(e => e.rank === 1)?.username || "user")}
+                alt={topThree.find(e => e.rank === 1)?.username}
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  const img = e.target as HTMLImageElement;
+                  const username = topThree.find(e => e.rank === 1)?.username || "user";
+                  console.log("Failed to load image for rank 1:", img.src);
+                  img.src = getAvatarUrl(null, username);
+                }}
+              />
+            </div>
+            <p className="font-black text-sm text-center line-clamp-1">
+              {topThree.find(e => e.rank === 1)?.username}
+            </p>
+            <p className="text-xs font-bold text-primary">
+              {topThree.find(e => e.rank === 1)?.points.toLocaleString()} PTS
+            </p>
+          </div>
+          <div className="w-36 h-32 brutal-card bg-secondary flex items-center justify-center">
+            <span className="font-black text-5xl opacity-20 text-secondary-foreground">1</span>
+          </div>
+        </div>
+
+        {/* 3rd Place */}
+        <div className="flex flex-col items-center animate-slide-up" style={{ animationDelay: "200ms" }}>
+          <div className="flex flex-col items-center gap-2 mb-2">
+            <div className="text-4xl">🥉</div>
+            <div className="w-16 h-16 rounded-full border-[3px] border-foreground bg-muted overflow-hidden">
+              <img 
+                src={topThree.find(e => e.rank === 3)?.photoURL || getAvatarUrl(null, topThree.find(e => e.rank === 3)?.username || "user")}
+                alt={topThree.find(e => e.rank === 3)?.username}
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  const img = e.target as HTMLImageElement;
+                  const username = topThree.find(e => e.rank === 3)?.username || "user";
+                  console.log("Failed to load image for rank 3:", img.src);
+                  img.src = getAvatarUrl(null, username);
+                }}
+              />
+            </div>
+            <p className="font-black text-sm text-center line-clamp-1">
+              {topThree.find(e => e.rank === 3)?.username}
+            </p>
+            <p className="text-xs font-bold text-primary">
+              {topThree.find(e => e.rank === 3)?.points.toLocaleString()} PTS
+            </p>
+          </div>
+          <div className="w-32 h-20 brutal-card bg-muted flex items-center justify-center">
+            <span className="font-black text-4xl opacity-20">3</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Rest of leaderboard */}
+      {rest.length > 0 && (
+        <div className="brutal-card-lg overflow-hidden">
+          <div className="divide-y-[2px] divide-foreground overflow-y-auto max-h-[320px]">
+            {rest.map((entry, i) => (
+              <div
+                key={entry.rank}
+                className="flex items-center gap-4 px-6 py-3 font-body transition-all animate-slide-up bg-card"
+                style={{ animationDelay: `${(i + 3) * 50}ms` }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full border-[2px] border-foreground bg-muted overflow-hidden" style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}>
+                    <img 
+                      src={entry.photoURL || getAvatarUrl(null, entry.username)}
+                      alt={entry.username}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        const img = e.target as HTMLImageElement;
+                        console.log(`Failed to load image for ${entry.username}:`, img.src);
+                        img.src = getAvatarUrl(null, entry.username);
+                      }}
+                    />
+                  </div>
+                  <div className="w-6 h-6 flex items-center justify-center">
+                    {rankIcon(entry.rank)}
+                  </div>
+                </div>
+                <span className="flex-1 font-semibold">{entry.username}</span>
+                <span className="font-display text-primary text-lg">{entry.points.toLocaleString()}</span>
+                <span className="text-xs text-muted-foreground">pts</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

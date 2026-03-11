@@ -8,38 +8,39 @@ export interface Phrase {
 }
 
 export const categories: { id: Category; label: string; icon: string; color: string }[] = [
-  { id: "general", label: "General", icon: "Hand", color: "bg-primary" },
-  { id: "emotions", label: "Emotions", icon: "Heart", color: "bg-accent" },
-  { id: "qa", label: "Q&A", icon: "HelpCircle", color: "bg-secondary" },
-  { id: "illness", label: "Illness", icon: "Thermometer", color: "bg-destructive" },
+  { id: "general", label: "บทสนทนาทั่วไป", icon: "Hand", color: "bg-primary" },
+  { id: "emotions", label: "อารมณ์", icon: "Heart", color: "bg-accent" },
+  { id: "qa", label: "คำถาม-คำตอบ", icon: "HelpCircle", color: "bg-secondary" },
+  { id: "illness", label: "อาการเจ็บป่วย", icon: "Thermometer", color: "bg-destructive" },
 ];
 
 export const phrases: Phrase[] = [
   // General
-  { id: "g1", text: "Hello", category: "general" },
-  { id: "g2", text: "Thank you", category: "general" },
-  { id: "g3", text: "Please", category: "general" },
-  { id: "g4", text: "Sorry", category: "general" },
-  { id: "g5", text: "Goodbye", category: "general" },
-  { id: "g6", text: "Yes", category: "general" },
-  { id: "g7", text: "No", category: "general" },
+  { id: "g1", text: "สวัสดี (ผู้ใหญ่ | เพื่อน)", category: "general" },
+  { id: "g2", text: "ลาก่อน", category: "general" },
+  { id: "g3", text: "กินข้าวแล้วหรือยัง?", category: "general" },
+  { id: "g4", text: "กินแล้ว | ยังไม่ได้กิน", category: "general" },
+  { id: "g5", text: "สบายดีไหม?", category: "general" },
+  { id: "g6", text: "สบายดี", category: "general" },
   // Emotions
-  { id: "e1", text: "Happy", category: "emotions" },
-  { id: "e2", text: "Sad", category: "emotions" },
-  { id: "e3", text: "Angry", category: "emotions" },
-  { id: "e4", text: "Scared", category: "emotions" },
-  { id: "e5", text: "Surprised", category: "emotions" },
+  { id: "e1", text: "โกรธ", category: "emotions" },
+  { id: "e2", text: "กลัว", category: "emotions" },
+  { id: "e3", text: "รัก", category: "emotions" },
+  { id: "e4", text: "ไม่สบายใจ", category: "emotions" },
+  { id: "e5", text: "เหนื่อย", category: "emotions" },
   // Q&A
-  { id: "q1", text: "What is your name?", category: "qa" },
-  { id: "q2", text: "How are you?", category: "qa" },
-  { id: "q3", text: "Where are you from?", category: "qa" },
-  { id: "q4", text: "How old are you?", category: "qa" },
+  { id: "q1", text: "อะไร?", category: "qa" },
+  { id: "q2", text: "ทำไม?", category: "qa" },
+  { id: "q3", text: "เท่าไหร่?", category: "qa" },
+  { id: "q4", text: "ใช่", category: "qa" },
+  { id: "q5", text: "ไม่", category: "qa" },
+
   // Illness
-  { id: "i1", text: "Stomachache", category: "illness" },
-  { id: "i2", text: "Headache", category: "illness" },
-  { id: "i3", text: "Fever", category: "illness" },
-  { id: "i4", text: "Cough", category: "illness" },
-  { id: "i5", text: "I need help", category: "illness" },
+  { id: "i1", text: "เป็นหวัด", category: "illness" },
+  { id: "i2", text: "เจ็บคอ", category: "illness" },
+  { id: "i3", text: "ปวดท้อง", category: "illness" },
+  { id: "i4", text: "ปวดหัว", category: "illness" },
+  { id: "i5", text: "เป็นไข้", category: "illness" },
 ];
 
 export const getPhrasesByCategory = (category: Category) =>

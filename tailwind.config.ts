@@ -61,11 +61,23 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // SignMate Landing Page Colors
+        "sq-pink": "#FF4D8D",
+        "sq-yellow": "#FFD369",
+        "sq-cream": "#F9F4EA",
+        "sq-black": "#1A1A1A",
+        "sq-dark-pink": "#E03D7A",
+        "sq-dark-yellow": "#E6BC5F",
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      borderWidth: {
+        '3': '3px',
+        '4': '4px',
+        '6': '6px',
       },
       keyframes: {
         "accordion-down": {
@@ -85,12 +97,22 @@ export default {
           from: { transform: "translateY(10px)", opacity: "0" },
           to: { transform: "translateY(0)", opacity: "1" },
         },
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "fade-in-up": {
+          from: { opacity: "0", transform: "translateY(20px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "bounce-in": "bounce-in 0.4s ease-out",
         "slide-up": "slide-up 0.3s ease-out",
+        "fade-in": "fade-in 0.3s ease-out",
+        "fade-in-up": "fade-in-up 0.4s ease-out",
       },
       boxShadow: {
         brutal: "4px 4px 0px 0px hsl(0 0% 0%)",

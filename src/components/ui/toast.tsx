@@ -23,12 +23,13 @@ const ToastViewport = React.forwardRef<
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName;
 
 const toastVariants = cva(
-  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full",
+  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border py-3 px-4 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full",
   {
     variants: {
       variant: {
         default: "border bg-background text-foreground",
         destructive: "destructive group border-destructive bg-destructive text-destructive-foreground",
+        success: "border-yellow-500 bg-yellow-500 text-yellow-950 border-[3px]",
       },
     },
     defaultVariants: {
@@ -39,9 +40,45 @@ const toastVariants = cva(
 
 const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & VariantProps<typeof toastVariants>
->(({ className, variant, ...props }, ref) => {
-  return <ToastPrimitives.Root ref={ref} className={cn(toastVariants({ variant }), className)} {...props} />;
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & 
+    VariantProps<typeof toastVariants> & 
+    { duration?: number }
+>(({ className, variant, duration = 3000, ...props }, ref) => {
+  const [progress, setProgress] = React.useState(100);
+  const [isOpen, setIsOpen] = React.useState(true);
+
+  React.useEffect(() => {
+    if (!isOpen || !duration) return;
+
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        const newProgress = prev - (100 / (duration / 100));
+        return newProgress <= 0 ? 0 : newProgress;
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [duration, isOpen]);
+
+  return (
+    <ToastPrimitives.Root 
+      ref={ref} 
+      className={cn(toastVariants({ variant }), "relative pb-2", className)} 
+      duration={duration}
+      onOpenChange={setIsOpen}
+      {...props}
+    >
+      <div className="flex-1">{props.children}</div>
+      {variant === "success" && (
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-yellow-950/20 overflow-hidden">
+          <div 
+            className="h-full bg-yellow-950 transition-all duration-100 ease-linear"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+    </ToastPrimitives.Root>
+  );
 });
 Toast.displayName = ToastPrimitives.Root.displayName;
 

@@ -1,11 +1,17 @@
-import { Hand, Heart, HelpCircle, Thermometer, Trophy, Menu, X, User } from "lucide-react";
+import { Menu, X, User, Home } from "lucide-react";
 import { Category, categories } from "@/lib/categories";
+import generalImg from "@/asset/image/general.png";
+import emotionalImg from "@/asset/image/emotional.png";
+import qaImg from "@/asset/image/qa.png";
+import illnessImg from "@/asset/image/illness.png";
+import trophyImg from "@/asset/image/Trophy.png";
+import logoImg from "@/asset/image/LOGO_SignMate.png";
 
-const iconMap: Record<string, React.ElementType> = {
-  Hand,
-  Heart,
-  HelpCircle,
-  Thermometer,
+const iconMap: Record<string, string> = {
+  Hand: generalImg,
+  Heart: emotionalImg,
+  HelpCircle: qaImg,
+  Thermometer: illnessImg,
 };
 
 interface GameSidebarProps {
@@ -13,7 +19,10 @@ interface GameSidebarProps {
   onCategoryChange: (cat: Category) => void;
   onLeaderboard: () => void;
   onProfile: () => void;
+  onHome: () => void;
   showLeaderboard: boolean;
+  showHome: boolean;
+  showProfile: boolean;
   isOpen: boolean;
   onToggle: () => void;
 }
@@ -23,7 +32,10 @@ export function GameSidebar({
   onCategoryChange,
   onLeaderboard,
   onProfile,
+  onHome,
   showLeaderboard,
+  showHome,
+  showProfile,
   isOpen,
   onToggle,
 }: GameSidebarProps) {
@@ -43,25 +55,38 @@ export function GameSidebar({
       )}
 
       <aside
-        className={`fixed lg:static z-40 top-0 left-0 h-full w-64 bg-primary border-r-[3px] border-foreground flex flex-col transition-transform duration-200 ${
+        className={`fixed lg:static z-40 top-0 left-0 h-screen w-64 bg-primary border-r-[3px] border-foreground flex flex-col transition-transform duration-200 ${
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
         <div className="p-6 border-b-[3px] border-foreground">
           <h1 className="text-2xl font-display text-primary-foreground tracking-wide flex items-center gap-2">
-            <Hand className="w-7 h-7" />
-            SignQuest
+            <img src={logoImg} alt="SignMate" className="w-7 h-7 object-contain" />
+            SignMate
           </h1>
           <p className="text-primary-foreground/80 text-sm mt-1 font-body">Learn. Sign. Level Up!</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-2">
+          <button
+            onClick={onHome}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body mb-4 ${
+              showHome
+                ? "bg-secondary text-secondary-foreground shadow-brutal-sm"
+                : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
+            }`}
+            style={showHome ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
+          >
+            <Home size={18} />
+            Home
+          </button>
+
           <p className="text-primary-foreground/60 text-xs font-semibold uppercase tracking-wider mb-3 font-body">
             Categories
           </p>
           {categories.map((cat) => {
-            const Icon = iconMap[cat.icon];
-            const isActive = activeCategory === cat.id && !showLeaderboard;
+            const iconSrc = iconMap[cat.icon];
+            const isActive = activeCategory === cat.id && !showLeaderboard && !showHome && !showProfile;
             return (
               <button
                 key={cat.id}
@@ -73,7 +98,7 @@ export function GameSidebar({
                 }`}
                 style={isActive ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
               >
-                <Icon size={18} />
+                <img src={iconSrc} alt={cat.label} className="w-[18px] h-[18px] object-contain" />
                 {cat.label}
               </button>
             );
@@ -89,7 +114,7 @@ export function GameSidebar({
               }`}
               style={showLeaderboard ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
             >
-              <Trophy size={18} />
+              <img src={trophyImg} alt="Leaderboard" className="w-[18px] h-[18px] object-contain" />
               Leaderboard
             </button>
           </div>
