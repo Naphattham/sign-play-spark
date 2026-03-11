@@ -92,15 +92,17 @@ export function VideoCard({ phrase, category }: VideoCardProps) {
         <h3 className="font-display text-lg text-secondary-foreground">📹 Tutorial Video</h3>
       </div>
 
-      <div className="flex-1 bg-muted flex items-center justify-center min-h-[240px] relative overflow-hidden">
-        <video
-          ref={videoRef}
-          src={getVideoUrl()}
-          loop
-          muted
-          className="w-full h-full object-contain"
-          playsInline
-        />
+      <div className="flex-1 bg-muted flex items-center justify-center relative overflow-hidden">
+        <div className="w-full aspect-square max-w-full">
+          <video
+            ref={videoRef}
+            src={getVideoUrl()}
+            loop
+            muted
+            className="w-full h-full object-cover"
+            playsInline
+          />
+        </div>
       </div>
 
       <div className="flex items-center gap-2 p-3 bg-card">

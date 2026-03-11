@@ -27,39 +27,42 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
   const [imageError, setImageError] = useState(false);
   const [points, setPoints] = useState(0);
 
-  // Load user data on mount
+  // Load user data on mount - Optimized for fast profile photo display
   useEffect(() => {
-    const loadUserData = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        // Reload user to get latest data from Firebase Auth
-        await user.reload();
-        
-        console.log("Loading user data:", {
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-          email: user.email
-        });
-        
-        setUsername(user.displayName || "");
-        
-        // Load data from database
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // Set initial data immediately from auth.currentUser (no await, instant!)
+    setUsername(user.displayName || "");
+    setPhotoURL(user.photoURL || null);
+
+    console.log("Initial user data loaded:", {
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+      email: user.email
+    });
+
+    // Load additional data from database asynchronously (non-blocking)
+    const loadDatabaseData = async () => {
+      try {
         const userRef = dbRef(database, `users/${user.uid}`);
         const snapshot = await get(userRef);
+        
         if (snapshot.exists()) {
           const userData = snapshot.val();
-          console.log("User data from database:", userData);
-          setBio(userData.bio || "");
-          setPoints(userData.points || 0);
-          // Use photo from database if available, otherwise use Auth photoURL
-          setPhotoURL(userData.photoURL || user.photoURL || null);
-        } else {
-          // Fallback to Auth photoURL
-          setPhotoURL(user.photoURL || null);
+          console.log("Database data loaded:", userData);
+          
+          // Update with database values if available
+          if (userData.bio !== undefined) setBio(userData.bio);
+          if (userData.points !== undefined) setPoints(userData.points);
+          if (userData.photoURL) setPhotoURL(userData.photoURL);
         }
+      } catch (error) {
+        console.error("Error loading database data:", error);
       }
     };
-    loadUserData();
+
+    loadDatabaseData();
   }, []);
 
   const createCroppedImage = async (

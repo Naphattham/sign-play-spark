@@ -125,7 +125,14 @@ const Index = () => {
 
   const requestCameraPermission = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: "user",
+          width: { ideal: 1280 },
+          height: { ideal: 1280 },
+          frameRate: { ideal: 30 }
+        } 
+      });
       // Stop the stream immediately, we just want permission
       stream.getTracks().forEach(track => track.stop());
       setCameraPermissionGranted(true);
@@ -344,22 +351,22 @@ const Index = () => {
           
           {/* Modal content */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-            <div className="brutal-card-lg max-w-6xl w-full max-h-[90vh] flex flex-col overflow-hidden pointer-events-auto">
+            <div className="brutal-card-lg max-w-4xl w-full max-h-[85vh] flex flex-col overflow-hidden pointer-events-auto">
               {/* Modal header */}
-              <div className="border-b-[3px] border-foreground bg-secondary px-6 py-3 flex items-center justify-center relative">
-                <h2 className="font-display text-4xl text-pink-500 font-bold">
+              <div className="border-b-[3px] border-foreground bg-secondary px-4 py-2 flex items-center justify-center relative">
+                <h2 className="font-display text-2xl lg:text-3xl text-pink-500 font-bold">
                   {activePhrase?.text ?? "Hello"}
                 </h2>
                 <button
                   onClick={() => setGameOpen(false)}
-                  className="brutal-btn-primary p-2 absolute right-6"
+                  className="brutal-btn-primary p-2 absolute right-4"
                 >
-                  <X size={20} />
+                  <X size={18} />
                 </button>
               </div>
 
               {/* Game content */}
-              <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 p-4 lg:p-6 overflow-auto bg-background">
+              <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4 p-3 lg:p-4 overflow-auto bg-background">
                 <VideoCard phrase={activePhrase?.text ?? "Hello"} category={activePhrase?.category ?? "general"} />
                 <WebcamView onNextLevel={handleNextLevel} cameraEnabled={cameraPermissionGranted} />
               </div>

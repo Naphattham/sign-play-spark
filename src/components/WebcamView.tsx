@@ -25,18 +25,29 @@ export function WebcamView({ onNextLevel, cameraEnabled = true }: WebcamViewProp
       </div>
 
       {/* Webcam area */}
-      <div className="flex-1 flex items-center justify-center overflow-auto p-2">
+      <div className="flex-1 flex items-center justify-center relative overflow-hidden">
         <div className="relative w-full aspect-square max-w-full">
           {cameraEnabled && (
             <Webcam
               ref={webcamRef}
               audio={false}
               className="w-full h-full object-cover"
+              style={{
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
+                willChange: 'transform'
+              }}
               mirrored
               videoConstraints={{ 
                 facingMode: "user",
-                aspectRatio: 1
+                aspectRatio: 1,
+                width: { ideal: 1280 },
+                height: { ideal: 1280 },
+                frameRate: { ideal: 30, max: 60 }
               }}
+              screenshotFormat="image/jpeg"
+              screenshotQuality={0.95}
             />
           )}
 

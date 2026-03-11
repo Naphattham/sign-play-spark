@@ -125,3 +125,16 @@
     @apply absolute w-6 h-6 border-secondary;
   }
 }
+
+/* Hardware acceleration for smooth video rendering */
+video {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform;
+}
+
+.webcam-container {
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+}

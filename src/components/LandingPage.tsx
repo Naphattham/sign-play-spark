@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { X, Check } from "lucide-react";
 import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "@/lib/auth";
 import logoSignMate from "@/asset/image/LOGO_SignMate.png";
+import generalImg from "@/asset/image/general.png";
 
 interface LandingPageProps {
   onLoginSuccess: () => void;
@@ -205,8 +206,8 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
             {/* Phrases Box */}
             <div className="bg-sq-pink/10 border-sq-pink border-3 rounded-2xl p-3 mb-4">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">🎯</span>
-                <span className="brand-font italic text-sq-pink text-lg">Phrases</span>
+                <img src={generalImg} alt="General" className="w-5 h-5 object-contain" />
+                <span className="brand-font italic text-sq-pink text-lg">บทสนทนาทั่วไป</span>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <button 

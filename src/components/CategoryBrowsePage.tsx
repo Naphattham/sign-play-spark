@@ -1,12 +1,90 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
+import { X, Check } from "lucide-react";
 import { categories, getPhrasesByCategory, type Category } from "@/lib/categories";
+import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "@/lib/auth";
 import logoSignMate from "@/asset/image/LOGO_SignMate.png";
 
 export function CategoryBrowsePage() {
   const navigate = useNavigate();
   const [selectedVideo, setSelectedVideo] = useState<{ phrase: string; category: Category } | null>(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isSignup, setIsSignup] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    
+    // Validate signup fields
+    if (isSignup) {
+      if (!username.trim()) {
+        setError("กรุณากรอก Username");
+        return;
+      }
+      if (password !== confirmPassword) {
+        setError("รหัสผ่านไม่ตรงกัน");
+        return;
+      }
+      if (password.length < 6) {
+        setError("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
+        return;
+      }
+    }
+    
+    setLoading(true);
+
+    try {
+      let result;
+      if (isSignup) {
+        result = await signUpWithEmail(email, password, username);
+      } else {
+        result = await signInWithEmail(email, password);
+      }
+
+      if (result.error) {
+        setError(result.error);
+        setLoading(false);
+        return;
+      }
+
+      // Success
+      setShowLoginModal(false);
+      setLoading(false);
+      // Firebase auth state will handle the transition
+    } catch (err) {
+      setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    setError("");
+    
+    try {
+      const result = await signInWithGoogle();
+      
+      if (result.error) {
+        setError(result.error);
+        setLoading(false);
+        return;
+      }
+
+      // Success
+      setShowLoginModal(false);
+      setLoading(false);
+      // Firebase auth state will handle the transition
+    } catch (err) {
+      setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+      setLoading(false);
+    }
+  };
 
   const getVideoUrl = (phrase: string, category: Category) => {
     let videoFileName = phrase;
@@ -87,17 +165,28 @@ export function CategoryBrowsePage() {
           </div>
           <div className="flex items-center gap-6">
             <button 
-              onClick={() => navigate(-1)}
+              onClick={() => setShowLoginModal(true)}
               className="bg-sq-yellow px-6 py-2 rounded-xl sq-border sq-button-hover flex items-center gap-2 font-bold"
             >
-              ← กลับ
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" viewBox="0 0 24 24">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                <polyline points="10 17 15 12 10 7"></polyline>
+                <line x1="15" x2="3" y1="12" y2="12"></line>
+              </svg>
+              Login
             </button>
           </div>
         </nav>
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-6 py-8 md:py-12">
-          <div className="text-center mb-12">
+          <div className="text-center mb-12 relative">
+            <button 
+              onClick={() => navigate(-1)}
+              className="absolute right-0 top-0 bg-sq-yellow px-6 py-2 rounded-xl sq-border sq-button-hover flex items-center gap-2 font-bold"
+            >
+              ← กลับ
+            </button>
             <h1 className="text-4xl md:text-5xl leading-tight brand-font mb-4">
               สำรวจ<span className="text-sq-pink">บทเรียน</span>ภาษามือ
             </h1>
@@ -213,6 +302,149 @@ export function CategoryBrowsePage() {
                   ดูวิดีโอและฝึกฝนท่าทางตามให้ได้ 🎯
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowLoginModal(false)}>
+          <div className="bg-white w-full max-w-md rounded-3xl sq-border-lg overflow-hidden animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="bg-sq-pink p-6 relative">
+              <button
+                onClick={() => {
+                  setShowLoginModal(false);
+                  setError('');
+                  setEmail('');
+                  setPassword('');
+                }}
+                className="absolute top-4 right-4 text-white hover:text-white/80 transition-colors"
+              >
+                <X size={24} />
+              </button>
+              <div className="text-center text-white">
+                <div className="text-5xl mb-4">👋</div>
+                <h2 className="brand-font text-3xl mb-2">
+                  {isSignup ? "New Player?" : "Welcome Back!"}
+                </h2>
+                <p className="font-bold text-white/80 text-sm">
+                  {isSignup ? "Create a profile to start winning." : "Log in to continue your streak."}
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-8">
+              {error && (
+                <div className="bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg mb-6 font-bold text-sm">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleAuth} className="space-y-4">
+                {isSignup && (
+                  <div>
+                    <label className="block text-sm font-bold text-sq-black mb-2">Username</label>
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="ชื่อผู้ใช้"
+                      disabled={loading}
+                      required
+                      className="w-full px-4 py-3 border-3 border-sq-black rounded-xl focus:outline-none focus:ring-2 focus:ring-sq-pink font-bold placeholder-gray-400 disabled:opacity-50"
+                    />
+                  </div>
+                )}
+                <div>
+                  <label className="block text-sm font-bold text-sq-black mb-2">Email</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    disabled={loading}
+                    required
+                    className="w-full px-4 py-3 border-3 border-sq-black rounded-xl focus:outline-none focus:ring-2 focus:ring-sq-pink font-bold placeholder-gray-400 disabled:opacity-50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-sq-black mb-2">Password</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    disabled={loading}
+                    required
+                    className="w-full px-4 py-3 border-3 border-sq-black rounded-xl focus:outline-none focus:ring-2 focus:ring-sq-pink font-bold placeholder-gray-400 disabled:opacity-50"
+                  />
+                </div>
+                {isSignup && (
+                  <div>
+                    <label className="block text-sm font-bold text-sq-black mb-2">Confirm Password</label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      disabled={loading}
+                      required
+                      className="w-full px-4 py-3 border-3 border-sq-black rounded-xl focus:outline-none focus:ring-2 focus:ring-sq-pink font-bold placeholder-gray-400 disabled:opacity-50"
+                    />
+                  </div>
+                )}
+
+                <button 
+                  type="submit" 
+                  className="w-full bg-sq-yellow py-4 rounded-xl sq-border sq-button-hover font-bold text-lg brand-font disabled:opacity-50"
+                  disabled={loading}
+                >
+                  {loading ? "Loading..." : (isSignup ? "Sign Up" : "Let's Go!")}
+                </button>
+              </form>
+
+              {!isSignup && (
+                <div className="mt-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex-1 h-px bg-gray-300"></div>
+                    <span className="text-gray-400 font-bold text-xs uppercase">Or continue with</span>
+                    <div className="flex-1 h-px bg-gray-300"></div>
+                  </div>
+
+                  <button
+                    onClick={handleGoogleSignIn}
+                    disabled={loading}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-3 border-sq-black rounded-xl hover:bg-gray-50 transition-all font-bold disabled:opacity-50 sq-border"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                    </svg>
+                    {loading ? "Loading..." : "Continue with Google"}
+                  </button>
+                </div>
+              )}
+
+              <div className="text-center mt-6">
+                  <button
+                    onClick={() => {
+                      setIsSignup(!isSignup);
+                      setError('');
+                      setPassword('');
+                      setUsername('');
+                      setConfirmPassword('');
+                    }}
+                    disabled={loading}
+                    className="text-sq-pink hover:text-sq-dark-pink font-bold hover:underline disabled:opacity-50 transition-all"
+                  >
+                    {isSignup ? "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ" : "ยังไม่มีบัญชี? สมัครสมาชิก"}
+                  </button>
+                </div>
             </div>
           </div>
         </div>
