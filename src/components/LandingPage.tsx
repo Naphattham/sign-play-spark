@@ -15,7 +15,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState("/videos/general/สวัสดี (ผู้ใหญ่).mp4");
+  const [selectedVideo, setSelectedVideo] = useState("/videos/general/สวัสดี (ผู้ใหญ่)main.mp4");
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,28 +209,28 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <button 
-                  onClick={() => setSelectedVideo("/videos/general/สวัสดี (ผู้ใหญ่).mp4")}
+                  onClick={() => setSelectedVideo("/videos/general/สวัสดี (ผู้ใหญ่)main.mp4")}
                   className={`p-2 rounded-xl sq-border flex justify-center items-center font-bold text-base relative transition-all ${
-                    selectedVideo === "/videos/general/สวัสดี (ผู้ใหญ่).mp4" 
+                    selectedVideo === "/videos/general/สวัสดี (ผู้ใหญ่)main.mp4" 
                       ? "bg-sq-yellow" 
                       : "bg-gray-100 opacity-50 hover:opacity-75"
                   }`}
                 >
                   สวัสดี(ผู้ใหญ่)
-                  {selectedVideo === "/videos/general/สวัสดี (ผู้ใหญ่).mp4" && (
+                  {selectedVideo === "/videos/general/สวัสดี (ผู้ใหญ่)main.mp4" && (
                     <div className="absolute -top-1 -right-1 w-2 h-2 bg-sq-pink rounded-full border-2 border-sq-black"></div>
                   )}
                 </button>
                 <button 
-                  onClick={() => setSelectedVideo("/videos/general/สวัสดี (เพื่อน).mp4")}
+                  onClick={() => setSelectedVideo("/videos/general/สวัสดี (เพื่อน)main.mp4")}
                   className={`p-2 rounded-xl sq-border flex justify-center items-center font-bold text-base relative transition-all ${
-                    selectedVideo === "/videos/general/สวัสดี (เพื่อน).mp4" 
+                    selectedVideo === "/videos/general/สวัสดี (เพื่อน)main.mp4" 
                       ? "bg-sq-yellow" 
                       : "bg-gray-100 opacity-50 hover:opacity-75"
                   }`}
                 >
                   สวัสดี(เพื่อน)
-                  {selectedVideo === "/videos/general/สวัสดี (เพื่อน).mp4" && (
+                  {selectedVideo === "/videos/general/สวัสดี (เพื่อน)main.mp4" && (
                     <div className="absolute -top-1 -right-1 w-2 h-2 bg-sq-pink rounded-full border-2 border-sq-black"></div>
                   )}
                 </button>

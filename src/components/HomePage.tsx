@@ -1,11 +1,70 @@
-import { Category } from "@/lib/categories";
+import { Category, getPhrasesByCategory } from "@/lib/categories";
+import { useLeaderboard } from "@/hooks/useLeaderboard";
+import { getAvatarUrl } from "@/lib/avatar";
+import { useMemo } from "react";
 
 interface HomePageProps {
   onCategorySelect: (category: Category) => void;
+  onResumeLesson: () => void;
   onLeaderboard: () => void;
+  completedPhrases: Set<string>;
+  streak: number;
 }
 
-export function HomePage({ onCategorySelect, onLeaderboard }: HomePageProps) {
+export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, completedPhrases, streak }: HomePageProps) {
+  const { leaderboardData, loading } = useLeaderboard();
+  const topThree = leaderboardData.slice(0, 3);
+
+  // Get last accessed category and phrase from localStorage
+  const lastCategory = (localStorage.getItem('lastCategory') as Category) || 'general';
+  const lastPhraseId = localStorage.getItem('lastPhraseId');
+  const categoryPhrases = getPhrasesByCategory(lastCategory);
+  const completedCount = categoryPhrases.filter(p => completedPhrases.has(p.id)).length;
+  const totalCount = categoryPhrases.length;
+  const progressPercent = Math.round((completedCount / totalCount) * 100);
+
+  // Get category display name
+  const categoryNames: Record<Category, string> = {
+    general: 'General Phrases',
+    emotions: 'Emotions',
+    illness: 'Illness & Health',
+    qa: 'Questions & Answers'
+  };
+
+  // Get category video folder
+  const categoryFolders: Record<Category, string> = {
+    general: 'general',
+    emotions: 'emotions',
+    illness: 'illness',
+    qa: 'qa'
+  };
+
+  // Get last accessed phrase or first uncompleted phrase for thumbnail
+  const lastPhrase = categoryPhrases.find(p => p.id === lastPhraseId);
+  const nextPhrase = lastPhrase || categoryPhrases.find(p => !completedPhrases.has(p.id)) || categoryPhrases[0];
+
+  // Build video URL (same logic as VideoCard)
+  const getVideoUrl = () => {
+    let videoFileName = nextPhrase.text;
+    
+    // Handle phrases with multiple options
+    if (lastCategory === "general") {
+      if (nextPhrase.text.includes("สวัสดี") && nextPhrase.text.includes("|")) {
+        videoFileName = "สวัสดี (ผู้ใหญ่)";
+      } else if (nextPhrase.text.includes("กินแล้ว") && nextPhrase.text.includes("|")) {
+        videoFileName = "กินแล้ว";
+      }
+      // Handle phrases with question marks
+      if (nextPhrase.text === "กินข้าวแล้วหรือยัง?") {
+        videoFileName = "กินข้าวแล้วหรือยัง";
+      } else if (nextPhrase.text === "สบายดีไหม?") {
+        videoFileName = "สบายดีไหม";
+      }
+    }
+    
+    return `/videos/${lastCategory}/${videoFileName}.mp4`;
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -23,7 +82,7 @@ export function HomePage({ onCategorySelect, onLeaderboard }: HomePageProps) {
               <div className="flex items-center gap-3 mt-6 justify-center md:justify-start">
                 <div className="bg-background border-2 border-foreground px-4 py-2 rounded-lg font-black flex items-center gap-2 shadow-brutal-sm">
                   <span className="text-2xl">🔥</span>
-                  <span className="text-foreground">15 DAY STREAK!</span>
+                  <span className="text-foreground">{streak} DAY STREAK!</span>
                 </div>
               </div>
             </div>
@@ -46,7 +105,7 @@ export function HomePage({ onCategorySelect, onLeaderboard }: HomePageProps) {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-2xl font-black uppercase italic tracking-tighter">Current Quest</h3>
               <button 
-                onClick={() => onCategorySelect("general")}
+                onClick={() => onCategorySelect(lastCategory)}
                 className="text-sm font-bold underline decoration-primary decoration-2 underline-offset-4"
               >
                 View All
@@ -54,33 +113,36 @@ export function HomePage({ onCategorySelect, onLeaderboard }: HomePageProps) {
             </div>
             <div className="brutal-card bg-card p-6 rounded-xl flex flex-col md:flex-row gap-6 items-center">
               <div className="w-full md:w-48 aspect-video md:aspect-square bg-muted rounded-lg border-2 border-foreground overflow-hidden">
-                <img
+                <video
                   className="w-full h-full object-cover"
-                  alt="Hands performing a simple sign language gesture"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdb16QwH9mPMaBXu21yghKM9TWbB47x2emb0lRYvIGt1ZznuzBhCP809EYXzkxeyq1twe_ibka8Ic9nxS0d2adbr8djMFg09t9iM3CgeLMZxRuIY9M5PV7iMROGTID2Am1PpRfy0_SGVeHmliLK1FrHicqv1z_4kLF-JVGQ2O5SfC9pBP5QTVZqCJj5c19-T6HDrP9AW7YXosJXl-UrAPVDyfgWi2pZz4Cry9PpU9B8LwJOf9PEU0Ug-6HTxTaNX1OVWMVom6zYTo"
+                  src={getVideoUrl()}
+                  muted
+                  loop
+                  autoPlay
+                  playsInline
                 />
               </div>
               <div className="flex-1 space-y-3 w-full">
                 <div className="flex justify-between items-end">
                   <div>
                     <p className="text-primary font-black text-xs uppercase tracking-widest mb-1">
-                      Lesson Category
+                      Last Learned
                     </p>
-                    <h4 className="text-2xl font-black uppercase">General Phrases</h4>
+                    <h4 className="text-2xl font-black">{nextPhrase.text}</h4>
                   </div>
                   <span className="font-black text-xl">
-                    2/7 <span className="text-sm text-muted-foreground font-bold uppercase italic">Signs</span>
+                    {completedCount}/{totalCount} <span className="text-sm text-muted-foreground font-bold uppercase italic">Signs</span>
                   </span>
                 </div>
                 <div className="w-full h-6 bg-muted border-2 border-foreground rounded-full overflow-hidden">
-                  <div className="h-full bg-primary border-r-2 border-foreground" style={{ width: "28%" }}></div>
+                  <div className="h-full bg-primary border-r-2 border-foreground" style={{ width: `${progressPercent}%` }}></div>
                 </div>
                 <div className="flex justify-end">
                   <button 
-                    onClick={() => onCategorySelect("general")}
+                    onClick={onResumeLesson}
                     className="brutal-btn-primary px-6 py-2 rounded-lg font-black uppercase text-sm"
                   >
-                    Resume Lesson
+                    Click to Resume
                   </button>
                 </div>
               </div>
@@ -96,53 +158,43 @@ export function HomePage({ onCategorySelect, onLeaderboard }: HomePageProps) {
               <span className="text-3xl">🏆</span>
               <h3 className="text-xl font-black uppercase italic tracking-tighter">Top Challengers</h3>
             </div>
-            <div className="space-y-4">
-              {/* Rank 1 */}
-              <div className="flex items-center gap-3 p-3 bg-accent/10 rounded-lg border-2 border-dashed border-foreground">
-                <span className="text-lg font-black italic w-6">1</span>
-                <div className="size-10 rounded-full border-2 border-foreground overflow-hidden flex-shrink-0">
-                  <img
-                    alt="Sarah"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvc2YrVtMBv34jg0aHdC-YCeLmqoiTCT9WdwyM3Ictul2eJY0jTYxTwQaylL51zhkVMiNoveqEI73LNnGH1xP61osoLypElYlcbzzVEnrXClRaLYl1hJTpex7iDWng612DiGp_7SE7rVuNxZrvQkhnbfVPt8Sjh2pgW3aWjOi8j4zm5yibCjFGfI66yJW9ouTeyhAFFowNNhsjgI1kxp8pB48VUQlLdkiWlVgbqucG54fkntoPvAfBWCzuNIZ7CRge1ZZc_fi5tx0"
-                  />
-                </div>
-                <div className="flex-1">
-                  <p className="font-black uppercase text-sm leading-none">Sarah Legend</p>
-                  <p className="text-xs font-bold text-muted-foreground mt-1">14,200 Pts</p>
-                </div>
-                <span className="text-accent text-2xl">🏅</span>
+            {loading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
               </div>
-
-              {/* Rank 2 */}
-              <div className="flex items-center gap-3 p-2">
-                <span className="text-lg font-black italic w-6">2</span>
-                <div className="size-10 rounded-full border-2 border-foreground overflow-hidden flex-shrink-0 bg-muted">
-                  <img
-                    alt="Mark"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwZNIEgMTBOUtFnFv_l6UDsTyKbzyAGoPxxZSPRLQxsAnfiWBVwhJdvLPzFWquVnd6cv7NaCHHe8sNZARmzqNxsVFkg5iKzqHmtiMKr33eJgsMGzSW3qPipdYDSlmghVvg76doVvWfkWGWBwhRHJIKqV4C7QE79mja8oPxvhs9ttTOTauC0BtDozlJ7-Eh9hHvn3F8Az6B4Af0GrJHL1M_yLKKbnHOPwXqxD8f3Kn2gJaDqCGsCe9IQYFN2CJRXa2zEv6Xi8ZCkzg"
-                  />
-                </div>
-                <div className="flex-1">
-                  <p className="font-black uppercase text-sm leading-none">Marky Mark</p>
-                  <p className="text-xs font-bold text-muted-foreground mt-1">12,850 Pts</p>
-                </div>
+            ) : topThree.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p className="text-sm">ยังไม่มีข้อมูลผู้เล่น</p>
               </div>
-
-              {/* Rank 3 */}
-              <div className="flex items-center gap-3 p-2">
-                <span className="text-lg font-black italic w-6">3</span>
-                <div className="size-10 rounded-full border-2 border-foreground overflow-hidden flex-shrink-0 bg-muted">
-                  <img
-                    alt="Jenna"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxd-cDT6PH97FOG1eK9q2pAzZpsqgQQSPKFXX67xbLlOdJysb-DJffX1RCAOGT2DLq24Jji1Qc_3jD_jMf3P3b8B6H-VhH3nF9KTXqNO38Wq9iciRiFvCaSjrwcdusHAcOz15fPqLMfovYcDDsZ5fkzJRO8qEC0zK9YEK1v1JBQF1wqmjK66BCtxMxVibChu1K0C5Rd2GhDPNfG52X_hkSjlgkiUoYCvWlaCYAyiBa7E8zvfprD56WoxG17NbS4VF2Py24GJydfas"
-                  />
-                </div>
-                <div className="flex-1">
-                  <p className="font-black uppercase text-sm leading-none">Jenna Sign</p>
-                  <p className="text-xs font-bold text-muted-foreground mt-1">11,400 Pts</p>
-                </div>
+            ) : (
+              <div className="space-y-4">
+                {topThree.map((entry, index) => (
+                  <div
+                    key={entry.rank}
+                    className={`flex items-center gap-3 p-${index === 0 ? '3 bg-accent/10 rounded-lg border-2 border-dashed border-foreground' : '2'}`}
+                  >
+                    <span className="text-lg font-black italic w-6">{entry.rank}</span>
+                    <div className="size-10 rounded-full border-2 border-foreground overflow-hidden flex-shrink-0 bg-muted">
+                      <img
+                        alt={entry.username}
+                        src={entry.photoURL || getAvatarUrl(null, entry.username)}
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          const img = e.target as HTMLImageElement;
+                          img.src = getAvatarUrl(null, entry.username);
+                        }}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-black uppercase text-sm leading-none">{entry.username}</p>
+                      <p className="text-xs font-bold text-muted-foreground mt-1">{entry.points.toLocaleString()} Pts</p>
+                    </div>
+                    {index === 0 && <span className="text-accent text-2xl">🏅</span>}
+                  </div>
+                ))}
               </div>
-            </div>
+            )}
             <button 
               onClick={onLeaderboard}
               className="w-full mt-6 brutal-btn-secondary py-2 font-black uppercase text-xs tracking-widest"

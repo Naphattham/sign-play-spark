@@ -10,12 +10,24 @@ import { LandingPage } from "@/components/LandingPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { HomePage } from "@/components/HomePage";
 import { Category, Phrase, getPhrasesByCategory } from "@/lib/categories";
-import { LogOut, X, Camera } from "lucide-react";
+import { LogOut, X, Camera, Home, User } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { signOutUser } from "@/lib/auth";
+import { signOutUser, updateStreakOnLogin, getUserData } from "@/lib/auth";
+import generalImg from "@/asset/image/general.png";
+import emotionalImg from "@/asset/image/emotional.png";
+import qaImg from "@/asset/image/qa.png";
+import illnessImg from "@/asset/image/illness.png";
+import trophyImg from "@/asset/image/Trophy.png";
 
 type View = "home" | "game" | "leaderboard" | "profile";
+
+const categoryIconMap: Record<string, string> = {
+  general: generalImg,
+  emotions: emotionalImg,
+  qa: qaImg,
+  illness: illnessImg,
+};
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -32,6 +44,7 @@ const Index = () => {
   const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
   const [showCameraPermission, setShowCameraPermission] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [userStreak, setUserStreak] = useState(0);
 
   // Ensure loading animation plays completely (minimum 3.5 seconds)
   useEffect(() => {
@@ -44,9 +57,21 @@ const Index = () => {
 
   // Monitor authentication state
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       const wasAuthenticated = isAuthenticated;
       const nowAuthenticated = !!user;
+      
+      // Update streak when user logs in
+      if (nowAuthenticated && user) {
+        try {
+          const streakResult = await updateStreakOnLogin(user.uid);
+          if (streakResult.streak !== undefined) {
+            setUserStreak(streakResult.streak);
+          }
+        } catch (error) {
+          console.error("Error updating streak:", error);
+        }
+      }
       
       // Show loading animation when auth state changes (login/logout)
       if (wasAuthenticated !== nowAuthenticated && !isCheckingAuth) {
@@ -79,11 +104,16 @@ const Index = () => {
     setActivePhrase(getPhrasesByCategory(cat)[0]);
     setView("game");
     setSidebarOpen(false);
+    // Save last accessed category
+    localStorage.setItem('lastCategory', cat);
   };
 
   const handlePhraseSelect = (phrase: Phrase) => {
     setActivePhrase(phrase);
     setGameOpen(true);
+    // Save last accessed category and phrase
+    localStorage.setItem('lastCategory', phrase.category);
+    localStorage.setItem('lastPhraseId', phrase.id);
   };
 
   const requestCameraPermission = async () => {
@@ -167,9 +197,32 @@ const Index = () => {
         {/* Top bar */}
         <header className="border-b-[3px] border-foreground bg-card px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3 pl-12 lg:pl-0">
-            <h2 className="font-display text-xl text-foreground">
-              {view === "home" ? "🏠 Home" : view === "leaderboard" ? "🏆 Leaderboard" : view === "profile" ? "👤 Profile" : `📚 ${category.charAt(0).toUpperCase() + category.slice(1)}`}
-            </h2>
+            {view === "home" && (
+              <>
+                <Home size={20} className="text-foreground" />
+                <h2 className="font-display text-xl text-foreground">Home</h2>
+              </>
+            )}
+            {view === "leaderboard" && (
+              <>
+                <img src={trophyImg} alt="Leaderboard" className="w-5 h-5 object-contain" />
+                <h2 className="font-display text-xl text-foreground">Leaderboard</h2>
+              </>
+            )}
+            {view === "profile" && (
+              <>
+                <User size={20} className="text-foreground" />
+                <h2 className="font-display text-xl text-foreground">Profile</h2>
+              </>
+            )}
+            {view === "game" && (
+              <>
+                <img src={categoryIconMap[category]} alt={category} className="w-5 h-5 object-contain" />
+                <h2 className="font-display text-xl text-foreground">
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </h2>
+              </>
+            )}
           </div>
           <button onClick={handleLogout} className="brutal-btn-secondary flex items-center gap-2 text-sm font-body">
             <LogOut size={16} />
@@ -184,8 +237,23 @@ const Index = () => {
                 setCategory(cat);
                 setActivePhrase(getPhrasesByCategory(cat)[0]);
                 setView("game");
+                localStorage.setItem('lastCategory', cat);
+              }}
+              onResumeLesson={() => {
+                // Resume to last accessed phrase
+                const lastPhraseId = localStorage.getItem('lastPhraseId');
+                const lastCat = (localStorage.getItem('lastCategory') as Category) || 'general';
+                const phrases = getPhrasesByCategory(lastCat);
+                const lastPhrase = phrases.find(p => p.id === lastPhraseId) || phrases[0];
+                
+                setCategory(lastCat);
+                setActivePhrase(lastPhrase);
+                setView("game"); // เปลี่ยนไปหน้า category ก่อน
+                setGameOpen(true); // จากนั้นเปิด modal
               }}
               onLeaderboard={() => setView("leaderboard")}
+              completedPhrases={completedPhrases}
+              streak={userStreak}
             />
           )}
           {view === "leaderboard" && <LeaderboardView />}
@@ -271,13 +339,13 @@ const Index = () => {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
             <div className="brutal-card-lg max-w-6xl w-full max-h-[90vh] flex flex-col overflow-hidden pointer-events-auto">
               {/* Modal header */}
-              <div className="border-b-[3px] border-foreground bg-secondary px-6 py-3 flex items-center justify-between">
-                <h2 className="font-display text-xl text-secondary-foreground">
-                  🎯 {activePhrase?.text ?? "Hello"}
+              <div className="border-b-[3px] border-foreground bg-secondary px-6 py-3 flex items-center justify-center relative">
+                <h2 className="font-display text-4xl text-pink-500 font-bold">
+                  {activePhrase?.text ?? "Hello"}
                 </h2>
                 <button
                   onClick={() => setGameOpen(false)}
-                  className="brutal-btn-primary p-2"
+                  className="brutal-btn-primary p-2 absolute right-6"
                 >
                   <X size={20} />
                 </button>
@@ -285,7 +353,7 @@ const Index = () => {
 
               {/* Game content */}
               <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 p-4 lg:p-6 overflow-auto bg-background">
-                <VideoCard phrase={activePhrase?.text ?? "Hello"} />
+                <VideoCard phrase={activePhrase?.text ?? "Hello"} category={activePhrase?.category ?? "general"} />
                 <WebcamView onNextLevel={handleNextLevel} cameraEnabled={cameraPermissionGranted} />
               </div>
             </div>

@@ -1,37 +1,85 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Play, Pause, RotateCcw } from "lucide-react";
+import type { Category } from "@/lib/categories";
 
 interface VideoCardProps {
   phrase: string;
+  category: Category;
 }
 
-export function VideoCard({ phrase }: VideoCardProps) {
+export function VideoCard({ phrase, category }: VideoCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Build video path based on category and phrase
+  const getVideoUrl = () => {
+    let videoFileName = phrase;
+    
+    // Handle phrases with multiple options (e.g., "สวัสดี (ผู้ใหญ่ | เพื่อน)")
+    if (category === "general") {
+      if (phrase.includes("สวัสดี") && phrase.includes("|")) {
+        videoFileName = "สวัสดี (ผู้ใหญ่)";
+      } else if (phrase.includes("กินแล้ว") && phrase.includes("|")) {
+        videoFileName = "กินแล้ว";
+      }
+      // Handle other phrases with question marks
+      if (phrase === "กินข้าวแล้วหรือยัง?") {
+        videoFileName = "กินข้าวแล้วหรือยัง";
+      } else if (phrase === "สบายดีไหม?") {
+        videoFileName = "สบายดีไหม";
+      }
+    }
+    
+    return `/videos/${category}/${videoFileName}.mp4`;
+  };
 
   const togglePlay = () => {
-    if (!isPlaying) {
-      setIsPlaying(true);
-      // Simulate video progress
-      let p = progress;
-      const interval = setInterval(() => {
-        p += 2;
-        if (p >= 100) {
-          p = 100;
-          setIsPlaying(false);
-          clearInterval(interval);
-        }
-        setProgress(p);
-      }, 100);
-    } else {
-      setIsPlaying(false);
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
     }
   };
 
   const reset = () => {
-    setIsPlaying(false);
-    setProgress(0);
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.pause();
+      setIsPlaying(false);
+      setProgress(0);
+    }
   };
+
+  // Handle video events and autoplay
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleTimeUpdate = () => {
+      const progress = (video.currentTime / video.duration) * 100;
+      setProgress(progress || 0);
+    };
+
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+    video.addEventListener("timeupdate", handleTimeUpdate);
+
+    // Auto-play video when loaded
+    video.play().catch(() => {
+      // Ignore autoplay errors (some browsers block it)
+    });
+
+    return () => {
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+    };
+  }, [phrase, category]);
 
   return (
     <div className="brutal-card-lg overflow-hidden h-full flex flex-col">
@@ -39,27 +87,14 @@ export function VideoCard({ phrase }: VideoCardProps) {
         <h3 className="font-display text-lg text-secondary-foreground">📹 Tutorial Video</h3>
       </div>
 
-      <div className="flex-1 bg-muted flex items-center justify-center min-h-[240px] relative">
-        <div className="text-center p-6">
-          <p className="font-display text-3xl text-foreground mb-2">{phrase}</p>
-          <p className="text-muted-foreground font-body text-sm">
-            {isPlaying ? "Watch and follow along..." : "Press play to learn this sign"}
-          </p>
-          {isPlaying && (
-            <div className="mt-4 flex justify-center">
-              <div className="w-16 h-16 border-[3px] border-primary rounded-full flex items-center justify-center animate-bounce-in">
-                <Hand className="w-8 h-8 text-primary" />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Progress bar */}
-      <div className="h-3 bg-muted border-t-[2px] border-foreground">
-        <div
-          className="h-full bg-primary transition-all duration-200"
-          style={{ width: `${progress}%` }}
+      <div className="flex-1 bg-muted flex items-center justify-center min-h-[240px] relative overflow-hidden">
+        <video
+          ref={videoRef}
+          src={getVideoUrl()}
+          loop
+          muted
+          className="w-full h-full object-contain"
+          playsInline
         />
       </div>
 
@@ -76,16 +111,5 @@ export function VideoCard({ phrase }: VideoCardProps) {
         </button>
       </div>
     </div>
-  );
-}
-
-function Hand(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/>
-      <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/>
-      <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/>
-      <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
-    </svg>
   );
 }

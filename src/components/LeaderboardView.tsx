@@ -1,15 +1,6 @@
 import { Trophy, Medal, Award } from "lucide-react";
-import { useEffect, useState } from "react";
-import { ref, query, orderByChild, get } from "firebase/database";
-import { database } from "@/lib/firebase";
 import { getAvatarUrl } from "@/lib/avatar";
-
-interface LeaderboardEntry {
-  rank: number;
-  username: string;
-  points: number;
-  photoURL?: string;
-}
+import { useLeaderboard } from "@/hooks/useLeaderboard";
 
 const rankIcon = (rank: number) => {
   if (rank === 1) return <Trophy className="w-5 h-5 text-secondary-foreground" />;
@@ -19,51 +10,7 @@ const rankIcon = (rank: number) => {
 };
 
 export function LeaderboardView() {
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchLeaderboard = async () => {
-      try {
-        console.log("Fetching leaderboard data...");
-        const usersRef = ref(database, 'users');
-        const snapshot = await get(usersRef);
-
-        console.log("Snapshot exists:", snapshot.exists());
-        
-        if (snapshot.exists()) {
-          const users: LeaderboardEntry[] = [];
-          snapshot.forEach((childSnapshot) => {
-            const userData = childSnapshot.val();
-            console.log("User data:", userData);
-            users.push({
-              rank: 0,
-              username: userData.username || userData.displayName || 'Anonymous',
-              points: userData.points || 0,
-              photoURL: userData.photoURL,
-            });
-          });
-
-          users.sort((a, b) => b.points - a.points);
-          users.forEach((user, index) => {
-            user.rank = index + 1;
-          });
-
-          console.log("Total users found:", users.length);
-          console.log("Leaderboard data:", users);
-          setLeaderboardData(users);
-        } else {
-          console.log("No users found in database");
-        }
-      } catch (error) {
-        console.error("Error fetching leaderboard:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLeaderboard();
-  }, []);
+  const { leaderboardData, loading } = useLeaderboard();
 
   if (loading) {
     return (

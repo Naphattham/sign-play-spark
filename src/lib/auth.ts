@@ -30,6 +30,8 @@ export const signUpWithEmail = async (
     });
 
     // Save user data to Realtime Database
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     await set(ref(database, `users/${user.uid}`), {
       uid: user.uid,
       email: user.email,
@@ -38,7 +40,8 @@ export const signUpWithEmail = async (
       createdAt: new Date().toISOString(),
       points: 0,
       level: 1,
-      streak: 0,
+      streak: 1,
+      lastLoginDate: today.toISOString(),
       completedPhrases: [],
     });
 
@@ -100,6 +103,8 @@ export const signInWithGoogle = async () => {
 
     // If new user, create profile in database
     if (!snapshot.exists()) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
       const userData = {
         uid: user.uid,
         email: user.email,
@@ -109,7 +114,8 @@ export const signInWithGoogle = async () => {
         createdAt: new Date().toISOString(),
         points: 0,
         level: 1,
-        streak: 0,
+        streak: 1,
+        lastLoginDate: today.toISOString(),
         completedPhrases: [],
       };
       console.log("Creating new user in database:", userData);
@@ -177,6 +183,58 @@ export const updateUserData = async (uid: string, data: any) => {
 // Get current user
 export const getCurrentUser = (): User | null => {
   return auth.currentUser;
+};
+
+// Update streak when user logs in
+export const updateStreakOnLogin = async (uid: string) => {
+  try {
+    const userRef = ref(database, `users/${uid}`);
+    const snapshot = await get(userRef);
+    
+    if (!snapshot.exists()) {
+      return { error: "User not found" };
+    }
+
+    const userData = snapshot.val();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset to start of day
+    
+    const lastLoginDate = userData.lastLoginDate ? new Date(userData.lastLoginDate) : null;
+    
+    let newStreak = userData.streak || 0;
+    
+    if (lastLoginDate) {
+      lastLoginDate.setHours(0, 0, 0, 0); // Reset to start of day
+      
+      // Calculate day difference
+      const dayDifference = Math.floor((today.getTime() - lastLoginDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (dayDifference === 0) {
+        // Case 2: Same day - do nothing
+        return { streak: newStreak, error: null };
+      } else if (dayDifference === 1) {
+        // Case 1: Consecutive day - increment streak
+        newStreak = newStreak + 1;
+      } else if (dayDifference > 1) {
+        // Case 3: Missed days - reset to 1
+        newStreak = 1;
+      }
+    } else {
+      // First time login or no lastLoginDate - set streak to 1
+      newStreak = 1;
+    }
+    
+    // Update user data with new streak and lastLoginDate
+    await set(userRef, {
+      ...userData,
+      streak: newStreak,
+      lastLoginDate: today.toISOString(),
+    });
+    
+    return { streak: newStreak, error: null };
+  } catch (error: any) {
+    return { streak: 0, error: getErrorMessage(error.code) };
+  }
 };
 
 // Helper function to get user-friendly error messages
