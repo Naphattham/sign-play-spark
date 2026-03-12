@@ -222,6 +222,18 @@ const Index = () => {
     }
   };
 
+  const handleVariantChange = (variant: "adult" | "friend") => {
+    setSelectedVariant(variant);
+    setIsLive(false);
+    setIsDetecting(false);
+    setTutorialStep("initial");
+    setIsPhraseCompleted(false);
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current);
+      successTimerRef.current = null;
+    }
+  };
+
   const handleCollectPoints = () => {
     if (!isPhraseCompleted) return;
 
@@ -238,9 +250,19 @@ const Index = () => {
       setActivePhrase(phrases[currentIndex + 1]);
       setSelectedVariant("adult"); // Reset variant when moving to next phrase
       setIsPhraseCompleted(false); // Reset for next phrase
+      setIsLive(false);
+      setIsDetecting(false);
+      setTutorialStep("initial");
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current);
+        successTimerRef.current = null;
+      }
     } else {
       // Close modal
       setGameOpen(false);
+      setIsLive(false);
+      setIsDetecting(false);
+      setTutorialStep("initial");
     }
   };
 
@@ -482,7 +504,7 @@ const Index = () => {
                         {activePhrase?.id === "g1" && (
                           <div className="flex gap-1.5 lg:gap-2 max-w-md mx-auto w-full">
                             <button
-                              onClick={() => setSelectedVariant("adult")}
+                              onClick={() => handleVariantChange("adult")}
                               className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
                                   ? "bg-yellow-400 text-slate-900"
                                   : "bg-white text-slate-900 hover:bg-slate-50"
@@ -491,7 +513,7 @@ const Index = () => {
                               สวัสดีผู้ใหญ่
                             </button>
                             <button
-                              onClick={() => setSelectedVariant("friend")}
+                              onClick={() => handleVariantChange("friend")}
                               className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
                                   ? "bg-yellow-400 text-slate-900"
                                   : "bg-white text-slate-900 hover:bg-slate-50"
@@ -504,7 +526,7 @@ const Index = () => {
                         {activePhrase?.id === "g4" && (
                           <div className="flex gap-1.5 lg:gap-2 max-w-md mx-auto w-full">
                             <button
-                              onClick={() => setSelectedVariant("adult")}
+                              onClick={() => handleVariantChange("adult")}
                               className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
                                   ? "bg-yellow-400 text-slate-900"
                                   : "bg-white text-slate-900 hover:bg-slate-50"
@@ -513,7 +535,7 @@ const Index = () => {
                               กินแล้ว
                             </button>
                             <button
-                              onClick={() => setSelectedVariant("friend")}
+                              onClick={() => handleVariantChange("friend")}
                               className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
                                   ? "bg-yellow-400 text-slate-900"
                                   : "bg-white text-slate-900 hover:bg-slate-50"

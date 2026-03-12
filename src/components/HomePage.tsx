@@ -2,6 +2,7 @@ import { Category, getPhrasesByCategory } from "@/lib/categories";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { getAvatarUrl } from "@/lib/avatar";
 import { useMemo } from "react";
+import { auth } from "@/lib/firebase";
 
 interface HomePageProps {
   onCategorySelect: (category: Category) => void;
@@ -82,7 +83,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, comp
                 Master Signer • LVL 12
               </span>
               <h2 className="text-4xl md:text-5xl font-black text-foreground mt-4 leading-none uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
-                Welcome Back,<br />Questor!
+                Welcome Back,<br />{auth.currentUser?.displayName || 'Questor'}!
               </h2>
               <div className="flex items-center gap-3 mt-6 justify-center md:justify-start">
                 <div className="bg-background border-2 border-foreground px-4 py-2 rounded-lg font-black flex items-center gap-2 shadow-brutal-sm">
