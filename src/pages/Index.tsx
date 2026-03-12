@@ -18,6 +18,7 @@ import emotionalImg from "@/asset/image/emotional.png";
 import qaImg from "@/asset/image/qa.png";
 import illnessImg from "@/asset/image/illness.png";
 import trophyImg from "@/asset/image/Trophy.png";
+import guideHumanImg from "@/asset/image/guide_human.png";
 
 type View = "home" | "game" | "leaderboard" | "profile" | "playing";
 
@@ -51,6 +52,7 @@ const Index = () => {
   const [gameOpen, setGameOpen] = useState(false);
   const [isPhraseCompleted, setIsPhraseCompleted] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<"adult" | "friend">("adult");
+  const [tutorialStep, setTutorialStep] = useState<"initial" | "scanning" | "too_close" | "success">("initial");
 
   // Ensure loading animation plays completely (minimum 3.5 seconds) only on first visit
   useEffect(() => {
@@ -76,7 +78,7 @@ const Index = () => {
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       clearTimeout(authTimeout); // Clear timeout when auth state is received
-      
+
       const wasAuthenticated = isAuthenticated;
       const nowAuthenticated = !!user;
 
@@ -154,6 +156,7 @@ const Index = () => {
       stream.getTracks().forEach(track => track.stop());
       setCameraPermissionGranted(true);
       setShowCameraPermission(false);
+      setTutorialStep("initial");
     } catch (err) {
       console.error("Camera permission denied:", err);
       setCameraPermissionGranted(false);
@@ -164,13 +167,13 @@ const Index = () => {
 
   const handleCollectPoints = () => {
     if (!isPhraseCompleted) return;
-    
+
     // Collect points logic here
     console.log("Points collected!");
-    
+
     // Add to completed phrases
     setCompletedPhrases(prev => new Set([...prev, activePhrase.id]));
-    
+
     // Move to next phrase or close modal
     const phrases = getPhrasesByCategory(category);
     const currentIndex = phrases.findIndex(p => p.id === activePhrase.id);
@@ -266,10 +269,12 @@ const Index = () => {
               </>
             )}
           </div>
-          <button onClick={handleLogout} className="brutal-btn-secondary flex items-center gap-2 text-sm font-body">
-            <LogOut size={16} />
-            Logout
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={handleLogout} className="brutal-btn-secondary flex items-center gap-2 text-sm font-body">
+              <LogOut size={16} />
+              Logout
+            </button>
+          </div>
         </header>
 
         {/* Content */}
@@ -364,7 +369,7 @@ const Index = () => {
               <div className="bg-white dark:bg-slate-900 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col max-w-7xl w-full h-[90vh] pointer-events-auto animate-modal-in">
                 {/* Header Section */}
                 <header className="flex items-center justify-end p-4 lg:p-6 border-b-[3px] border-foreground bg-yellow-400">
-                  
+
                   <div className="flex items-center gap-3 lg:gap-4">
                     <div className="hidden md:flex items-center px-3 lg:px-4 py-1.5 lg:py-2 bg-pink-400 border-[3px] border-foreground rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                       <span className="text-white font-black text-xs lg:text-sm">
@@ -386,11 +391,11 @@ const Index = () => {
                     {/* Current Word Display (Center) */}
                     <div className="flex items-center justify-center pb-2">
                       <h2 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
-                        {activePhrase?.id === "g1" 
+                        {activePhrase?.id === "g1"
                           ? (selectedVariant === "adult" ? "สวัสดีผู้ใหญ่" : "สวัสดีเพื่อน")
                           : activePhrase?.id === "g4"
-                          ? (selectedVariant === "adult" ? "กินแล้ว" : "ยังไม่ได้กิน")
-                          : (activePhrase?.text ?? "Hello")
+                            ? (selectedVariant === "adult" ? "กินแล้ว" : "ยังไม่ได้กิน")
+                            : (activePhrase?.text ?? "Hello")
                         }
                       </h2>
                     </div>
@@ -409,23 +414,21 @@ const Index = () => {
                         {/* Video Controls - Show for "สวัสดี" phrase (g1) and "กินข้าวหรือยัง" phrase (g4) */}
                         {activePhrase?.id === "g1" && (
                           <div className="flex gap-1.5 lg:gap-2 max-w-md mx-auto w-full">
-                            <button 
+                            <button
                               onClick={() => setSelectedVariant("adult")}
-                              className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${
-                                selectedVariant === "adult" 
-                                  ? "bg-yellow-400 text-slate-900" 
+                              className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
+                                  ? "bg-yellow-400 text-slate-900"
                                   : "bg-white text-slate-900 hover:bg-slate-50"
-                              }`}
+                                }`}
                             >
                               สวัสดีผู้ใหญ่
                             </button>
-                            <button 
+                            <button
                               onClick={() => setSelectedVariant("friend")}
-                              className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${
-                                selectedVariant === "friend" 
-                                  ? "bg-yellow-400 text-slate-900" 
+                              className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
+                                  ? "bg-yellow-400 text-slate-900"
                                   : "bg-white text-slate-900 hover:bg-slate-50"
-                              }`}
+                                }`}
                             >
                               สวัสดีเพื่อน
                             </button>
@@ -433,23 +436,21 @@ const Index = () => {
                         )}
                         {activePhrase?.id === "g4" && (
                           <div className="flex gap-1.5 lg:gap-2 max-w-md mx-auto w-full">
-                            <button 
+                            <button
                               onClick={() => setSelectedVariant("adult")}
-                              className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${
-                                selectedVariant === "adult" 
-                                  ? "bg-yellow-400 text-slate-900" 
+                              className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
+                                  ? "bg-yellow-400 text-slate-900"
                                   : "bg-white text-slate-900 hover:bg-slate-50"
-                              }`}
+                                }`}
                             >
                               กินแล้ว
                             </button>
-                            <button 
+                            <button
                               onClick={() => setSelectedVariant("friend")}
-                              className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${
-                                selectedVariant === "friend" 
-                                  ? "bg-yellow-400 text-slate-900" 
+                              className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
+                                  ? "bg-yellow-400 text-slate-900"
                                   : "bg-white text-slate-900 hover:bg-slate-50"
-                              }`}
+                                }`}
                             >
                               ยังไม่ได้กิน
                             </button>
@@ -461,6 +462,26 @@ const Index = () => {
                       <div className="flex flex-col gap-1.5 lg:gap-2">
                         <div className="relative aspect-square w-full max-w-md mx-auto bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
                           <WebcamView onNextLevel={() => setIsPhraseCompleted(true)} cameraEnabled={cameraPermissionGranted} />
+
+                          {/* Tracking Overlays */}
+                          {(tutorialStep === "scanning" || tutorialStep === "too_close") && (
+                            <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center z-20 transition-all">
+                              <img src={guideHumanImg} alt="Guide" className="w-full h-full object-cover opacity-80" />
+                              <div className={`absolute bottom-6 bg-white/95 border-[3px] border-foreground rounded-full px-4 py-2 font-black text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${tutorialStep === "too_close" ? "text-red-500 animate-pulse border-red-500 scale-105 transition-transform" : "animate-bounce"}`}>
+                                {tutorialStep === "too_close" ? "ขยับถอยห่างไปอีกหน่อย" : "ถอยหลังออกไปให้มีระยะห่างจากกล้อง"}
+                              </div>
+                            </div>
+                          )}
+
+                          {tutorialStep === "success" && (
+                            <div className="absolute inset-0 bg-green-500/80 flex flex-col items-center justify-center backdrop-blur-sm z-30 animate-in fade-in zoom-in duration-300">
+                              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 border-[4px] border-foreground shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                                <span className="text-4xl flex items-center justify-center w-full h-full pt-1">✓</span>
+                              </div>
+                              <h3 className="text-white font-black text-2xl drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">Success!</h3>
+                              <p className="text-white font-bold drop-shadow-[1px_1px_0px_rgba(0,0,0,1)] mt-2">คุณอยู่ในตำแหน่งที่เหมาะสมแล้ว</p>
+                            </div>
+                          )}
 
                           {/* Recognition Overlay */}
                           <div className="absolute inset-0 border-4 border-dashed border-[#ec5b13]/50 m-3 rounded-lg pointer-events-none"></div>
@@ -475,8 +496,8 @@ const Index = () => {
                           {/* Live Indicator Badge */}
                           <div className="absolute bottom-3 left-3 z-10">
                             <div className={`px-2 py-1 border-[3px] border-foreground rounded-full font-black text-xs flex items-center gap-1.5 ${isLive
-                                ? 'bg-red-500 text-white animate-pulse'
-                                : 'bg-gray-400 text-white'
+                              ? 'bg-red-500 text-white animate-pulse'
+                              : 'bg-gray-400 text-white'
                               }`}>
                               <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-white animate-pulse' : 'bg-white/50'
                                 }`}></span>
@@ -490,16 +511,28 @@ const Index = () => {
                           onClick={() => {
                             if (!cameraPermissionGranted) {
                               setShowCameraPermission(true);
+                            } else if (!isLive) {
+                              setTutorialStep("scanning");
+                              // Simulate distance checking process
+                              setTimeout(() => {
+                                setTutorialStep("too_close");
+                                setTimeout(() => {
+                                  setTutorialStep("success");
+                                  setTimeout(() => {
+                                    setIsLive(true);
+                                    setTutorialStep("initial");
+                                  }, 2000);
+                                }, 3000); // 3 seconds of showing "too close"
+                              }, 2000); // 2 seconds of initial scanning
                             } else {
-                              setIsLive(!isLive);
+                              setIsLive(false);
                             }
                           }}
-                          className={`w-full max-w-md mx-auto h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-sm ${
-                            !cameraPermissionGranted
+                          className={`w-full max-w-md mx-auto h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-sm ${!cameraPermissionGranted
                               ? 'bg-blue-500 hover:bg-blue-600 text-white'
                               : isLive
-                              ? 'bg-red-500 hover:bg-red-600 text-white'
-                              : 'bg-green-500 hover:bg-green-600 text-white'
+                                ? 'bg-red-500 hover:bg-red-600 text-white'
+                                : 'bg-green-500 hover:bg-green-600 text-white'
                             }`}
                         >
                           {!cameraPermissionGranted ? '📹 อนุญาตการเข้าถึงกล้อง' : isLive ? 'STOP' : 'START'}
@@ -518,11 +551,10 @@ const Index = () => {
                       <button
                         onClick={handleCollectPoints}
                         disabled={!isPhraseCompleted}
-                        className={`group flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl px-6 py-2.5 font-black text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-tight ${
-                          isPhraseCompleted 
-                            ? 'bg-[#ec5b13] hover:bg-[#ec5b13]/90 text-white hover:translate-x-1 hover:-translate-y-1 cursor-pointer' 
+                        className={`group flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl px-6 py-2.5 font-black text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-tight ${isPhraseCompleted
+                            ? 'bg-[#ec5b13] hover:bg-[#ec5b13]/90 text-white hover:translate-x-1 hover:-translate-y-1 cursor-pointer'
                             : 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-60'
-                        }`}
+                          }`}
                       >
                         {isPhraseCompleted ? '✓' : '🔒'} COLLECT POINTS
                         {isPhraseCompleted && <span className="group-hover:translate-x-1 transition-transform">→</span>}
