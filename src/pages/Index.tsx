@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { GameSidebar } from "@/components/GameSidebar";
 import { VideoCard } from "@/components/VideoCard";
 import { WebcamView } from "@/components/WebcamView";
@@ -10,6 +10,7 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { HomePage } from "@/components/HomePage";
 import { Category, Phrase, getPhrasesByCategory } from "@/lib/categories";
 import { LogOut, X, Camera, Home, User } from "lucide-react";
+import { useDistanceDetection, DistanceStatus } from "@/hooks/useDistanceDetection";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { signOutUser, updateStreakOnLogin, getUserData } from "@/lib/auth";
@@ -53,6 +54,33 @@ const Index = () => {
   const [isPhraseCompleted, setIsPhraseCompleted] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<"adult" | "friend">("adult");
   const [tutorialStep, setTutorialStep] = useState<"initial" | "scanning" | "too_close" | "success">("initial");
+  const [webcamVideo, setWebcamVideo] = useState<HTMLVideoElement | null>(null);
+  const [isDetecting, setIsDetecting] = useState(false);
+
+  // Real distance detection using MediaPipe Face Detection
+  const distanceStatus = useDistanceDetection({
+    enabled: isDetecting,
+    videoElement: webcamVideo,
+    tooCloseThreshold: 0.45,
+    onStatusChange: useCallback((status: DistanceStatus) => {
+      if (!isDetecting) return;
+
+      if (status === "too_close") {
+        setTutorialStep("too_close");
+      } else if (status === "good") {
+        setTutorialStep("success");
+        // After 1.5s of success, go live
+        setTimeout(() => {
+          setIsLive(true);
+          setTutorialStep("initial");
+          setIsDetecting(false);
+        }, 1500);
+      } else {
+        // no_face — keep scanning
+        setTutorialStep("scanning");
+      }
+    }, [isDetecting]),
+  });
 
   // Ensure loading animation plays completely (minimum 3.5 seconds) only on first visit
   useEffect(() => {
@@ -361,7 +389,12 @@ const Index = () => {
             {/* Backdrop with blur */}
             <div
               className="fixed inset-0 z-50 bg-foreground/30 backdrop-blur-sm animate-backdrop-in"
-              onClick={() => setGameOpen(false)}
+              onClick={() => {
+                setGameOpen(false);
+                setIsLive(false);
+                setIsDetecting(false);
+                setTutorialStep("initial");
+              }}
             />
 
             {/* Modal content */}
@@ -377,7 +410,12 @@ const Index = () => {
                       </span>
                     </div>
                     <button
-                      onClick={() => setGameOpen(false)}
+                      onClick={() => {
+                        setGameOpen(false);
+                        setIsLive(false);
+                        setIsDetecting(false);
+                        setTutorialStep("initial");
+                      }}
                       className="flex items-center justify-center w-10 h-10 bg-white border-[3px] border-foreground rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 transition-transform"
                     >
                       <X size={20} className="text-slate-900" />
@@ -461,7 +499,7 @@ const Index = () => {
                       {/* Live Cam Section */}
                       <div className="flex flex-col gap-1.5 lg:gap-2">
                         <div className="relative aspect-square w-full max-w-md mx-auto bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-                          <WebcamView onNextLevel={() => setIsPhraseCompleted(true)} cameraEnabled={cameraPermissionGranted} />
+                          <WebcamView onNextLevel={() => setIsPhraseCompleted(true)} cameraEnabled={cameraPermissionGranted} onVideoReady={(video) => setWebcamVideo(video)} />
 
                           {/* Tracking Overlays */}
                           {(tutorialStep === "scanning" || tutorialStep === "too_close") && (
@@ -511,31 +549,24 @@ const Index = () => {
                           onClick={() => {
                             if (!cameraPermissionGranted) {
                               setShowCameraPermission(true);
-                            } else if (!isLive) {
+                            } else if (!isDetecting && !isLive) {
+                              // Start real distance detection
                               setTutorialStep("scanning");
-                              // Simulate distance checking process
-                              setTimeout(() => {
-                                setTutorialStep("too_close");
-                                setTimeout(() => {
-                                  setTutorialStep("success");
-                                  setTimeout(() => {
-                                    setIsLive(true);
-                                    setTutorialStep("initial");
-                                  }, 2000);
-                                }, 3000); // 3 seconds of showing "too close"
-                              }, 2000); // 2 seconds of initial scanning
+                              setIsDetecting(true);
                             } else {
                               setIsLive(false);
+                              setIsDetecting(false);
+                              setTutorialStep("initial");
                             }
                           }}
                           className={`w-full max-w-md mx-auto h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-sm ${!cameraPermissionGranted
                               ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                              : isLive
+                              : (isDetecting || isLive)
                                 ? 'bg-red-500 hover:bg-red-600 text-white'
                                 : 'bg-green-500 hover:bg-green-600 text-white'
                             }`}
                         >
-                          {!cameraPermissionGranted ? '📹 อนุญาตการเข้าถึงกล้อง' : isLive ? 'STOP' : 'START'}
+                          {!cameraPermissionGranted ? '📹 อนุญาตการเข้าถึงกล้อง' : (isDetecting || isLive) ? 'STOP' : 'START'}
                         </button>
                       </div>
                     </div>
