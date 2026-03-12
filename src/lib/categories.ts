@@ -5,6 +5,8 @@ export interface Phrase {
   text: string;
   category: Category;
   videoUrl?: string;
+  emoji?: string;
+  english?: string;
 }
 
 export const categories: { id: Category; label: string; icon: string; color: string }[] = [
@@ -16,31 +18,31 @@ export const categories: { id: Category; label: string; icon: string; color: str
 
 export const phrases: Phrase[] = [
   // General
-  { id: "g1", text: "สวัสดี (ผู้ใหญ่ | เพื่อน)", category: "general" },
-  { id: "g2", text: "ลาก่อน", category: "general" },
-  { id: "g3", text: "กินข้าวแล้วหรือยัง?", category: "general" },
-  { id: "g4", text: "กินแล้ว | ยังไม่ได้กิน", category: "general" },
-  { id: "g5", text: "สบายดีไหม?", category: "general" },
-  { id: "g6", text: "สบายดี", category: "general" },
+  { id: "g1", text: "สวัสดี (ผู้ใหญ่ | เพื่อน)", category: "general", emoji: "👋", english: "Hello" },
+  { id: "g2", text: "ลาก่อน", category: "general", emoji: "👋", english: "Goodbye" },
+  { id: "g3", text: "กินข้าวแล้วหรือยัง?", category: "general", emoji: "🍚", english: "Have you eaten?" },
+  { id: "g4", text: "กินแล้ว | ยังไม่ได้กิน", category: "general", emoji: "✅", english: "Already ate | Not yet" },
+  { id: "g5", text: "สบายดีไหม?", category: "general", emoji: "😊", english: "How are you?" },
+  { id: "g6", text: "สบายดี", category: "general", emoji: "👍", english: "I'm fine" },
   // Emotions
-  { id: "e1", text: "โกรธ", category: "emotions" },
-  { id: "e2", text: "กลัว", category: "emotions" },
-  { id: "e3", text: "รัก", category: "emotions" },
-  { id: "e4", text: "ไม่สบายใจ", category: "emotions" },
-  { id: "e5", text: "เหนื่อย", category: "emotions" },
+  { id: "e1", text: "โกรธ", category: "emotions", emoji: "😡", english: "Angry" },
+  { id: "e2", text: "กลัว", category: "emotions", emoji: "😨", english: "Scared" },
+  { id: "e3", text: "รัก", category: "emotions", emoji: "❤️", english: "Love" },
+  { id: "e4", text: "ไม่สบายใจ", category: "emotions", emoji: "🙁", english: "Uncomfortable" },
+  { id: "e5", text: "เหนื่อย", category: "emotions", emoji: "😩", english: "Tired" },
   // Q&A
-  { id: "q1", text: "อะไร?", category: "qa" },
-  { id: "q2", text: "ทำไม?", category: "qa" },
-  { id: "q3", text: "เท่าไหร่?", category: "qa" },
-  { id: "q4", text: "ใช่", category: "qa" },
-  { id: "q5", text: "ไม่", category: "qa" },
+  { id: "q1", text: "อะไร?", category: "qa", emoji: "❓", english: "What?" },
+  { id: "q2", text: "ทำไม?", category: "qa", emoji: "🤔", english: "Why?" },
+  { id: "q3", text: "เท่าไหร่?", category: "qa", emoji: "💰", english: "How much?" },
+  { id: "q4", text: "ใช่", category: "qa", emoji: "✅", english: "Yes" },
+  { id: "q5", text: "ไม่", category: "qa", emoji: "❌", english: "No" },
 
   // Illness
-  { id: "i1", text: "เป็นหวัด", category: "illness" },
-  { id: "i2", text: "เจ็บคอ", category: "illness" },
-  { id: "i3", text: "ปวดท้อง", category: "illness" },
-  { id: "i4", text: "ปวดหัว", category: "illness" },
-  { id: "i5", text: "เป็นไข้", category: "illness" },
+  { id: "i1", text: "เป็นหวัด", category: "illness", emoji: "🤧", english: "Cold" },
+  { id: "i2", text: "เจ็บคอ", category: "illness", emoji: "😷", english: "Sore throat" },
+  { id: "i3", text: "ปวดท้อง", category: "illness", emoji: "🤰", english: "Stomachache" },
+  { id: "i4", text: "ปวดหัว", category: "illness", emoji: "🤕", english: "Headache" },
+  { id: "i5", text: "เป็นไข้", category: "illness", emoji: "🌡️", english: "Fever" },
 ];
 
 export const getPhrasesByCategory = (category: Category) =>

@@ -121,7 +121,7 @@ export function CategoryBrowsePage() {
 
   return (
     <>
-      <div className="min-h-screen text-sq-black bg-sq-cream">
+      <div className="min-h-screen text-sq-black bg-sq-cream flex flex-col">
         {/* Custom Styles */}
         <style>
           {`
@@ -179,7 +179,7 @@ export function CategoryBrowsePage() {
         </nav>
 
         {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-6 py-8 md:py-12">
+        <main className="max-w-7xl mx-auto px-6 py-8 md:py-12 flex-1">
           <div className="text-center mb-12 relative">
             <button 
               onClick={() => navigate(-1)}
@@ -236,7 +236,7 @@ export function CategoryBrowsePage() {
         </main>
 
         {/* Footer */}
-        <footer className="bg-sq-pink py-12 px-8 border-t-4 border-sq-black mt-16">
+        <footer className="bg-sq-pink py-12 px-8 border-t-4 border-sq-black mt-auto">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="flex items-center gap-3">
               <span className="brand-font text-2xl tracking-tight text-sq-cream">SignMate</span>

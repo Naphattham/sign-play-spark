@@ -1,4 +1,5 @@
 import { Menu, X, User, Home } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Category, categories } from "@/lib/categories";
 import generalImg from "@/asset/image/general.png";
 import emotionalImg from "@/asset/image/emotional.png";
@@ -39,6 +40,15 @@ export function GameSidebar({
   isOpen,
   onToggle,
 }: GameSidebarProps) {
+  const navigate = useNavigate();
+
+  const handlePlayGame = () => {
+    navigate("/game-setup");
+    if (isOpen) {
+      onToggle(); // Close sidebar on mobile
+    }
+  };
+
   return (
     <>
       {/* Mobile toggle */}
@@ -70,7 +80,7 @@ export function GameSidebar({
         <nav className="flex-1 p-4 space-y-2">
           <button
             onClick={onHome}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body mb-4 ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${
               showHome
                 ? "bg-secondary text-secondary-foreground shadow-brutal-sm"
                 : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
@@ -105,6 +115,16 @@ export function GameSidebar({
           })}
 
           <div className="pt-4 border-t-[2px] border-primary-foreground/20 mt-4">
+            {/* Play Game Button */}
+            <button
+              onClick={handlePlayGame}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body bg-blue-500 text-white hover:bg-blue-600 mb-3"
+              style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}
+            >
+              <span className="material-symbols-outlined text-[18px]">sports_esports</span>
+              Play Game
+            </button>
+
             <button
               onClick={onLeaderboard}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${

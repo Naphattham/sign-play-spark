@@ -5,9 +5,10 @@ import type { Category } from "@/lib/categories";
 interface VideoCardProps {
   phrase: string;
   category: Category;
+  variant?: "adult" | "friend";
 }
 
-export function VideoCard({ phrase, category }: VideoCardProps) {
+export function VideoCard({ phrase, category, variant }: VideoCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -19,7 +20,12 @@ export function VideoCard({ phrase, category }: VideoCardProps) {
     // Handle phrases with multiple options (e.g., "สวัสดี (ผู้ใหญ่ | เพื่อน)")
     if (category === "general") {
       if (phrase.includes("สวัสดี") && phrase.includes("|")) {
-        videoFileName = "สวัสดี (ผู้ใหญ่)";
+        // Use variant to determine which video to show
+        if (variant === "friend") {
+          videoFileName = "สวัสดี (เพื่อน)";
+        } else {
+          videoFileName = "สวัสดี (ผู้ใหญ่)";
+        }
       } else if (phrase.includes("กินแล้ว") && phrase.includes("|")) {
         videoFileName = "กินแล้ว";
       }
@@ -84,39 +90,16 @@ export function VideoCard({ phrase, category }: VideoCardProps) {
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("timeupdate", handleTimeUpdate);
     };
-  }, [phrase, category]);
+  }, [phrase, category, variant]);
 
   return (
-    <div className="brutal-card-lg overflow-hidden h-full flex flex-col">
-      <div className="bg-secondary border-b-[3px] border-foreground px-4 py-2">
-        <h3 className="font-display text-lg text-secondary-foreground">📹 Tutorial Video</h3>
-      </div>
-
-      <div className="flex-1 bg-muted flex items-center justify-center relative overflow-hidden">
-        <div className="w-full aspect-square max-w-full">
-          <video
-            ref={videoRef}
-            src={getVideoUrl()}
-            loop
-            muted
-            className="w-full h-full object-cover"
-            playsInline
-          />
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 p-3 bg-card">
-        <button
-          onClick={togglePlay}
-          className="brutal-btn-primary flex items-center gap-2 text-sm flex-1 justify-center"
-        >
-          {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-          {isPlaying ? "Pause" : "Play"}
-        </button>
-        <button onClick={reset} className="brutal-btn-secondary p-2">
-          <RotateCcw size={16} />
-        </button>
-      </div>
-    </div>
+    <video
+      ref={videoRef}
+      src={getVideoUrl()}
+      loop
+      muted
+      className="w-full h-full object-cover"
+      playsInline
+    />
   );
 }

@@ -92,7 +92,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
 
   return (
     <>
-      <div className="min-h-screen text-sq-black bg-sq-cream">
+      <div className="min-h-screen text-sq-black bg-sq-cream flex flex-col">
       {/* Custom Styles */}
       <style>
         {`
@@ -119,6 +119,32 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
           .sq-button-hover:active {
             transform: translate(2px, 2px);
             box-shadow: 2px 2px 0px #1A1A1A;
+          }
+
+          .video-container video {
+            transition: opacity 0.3s ease-in-out;
+          }
+
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+            }
+            to {
+              opacity: 1;
+            }
+          }
+
+          .video-fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+          }
+
+          .hero-visual-section {
+            will-change: auto;
+          }
+
+          .video-display-box {
+            min-height: 0;
+            contain: layout;
           }
         `}
       </style>
@@ -152,7 +178,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 py-8 md:py-12 flex flex-col md:flex-row items-center gap-8">
+      <main className="max-w-6xl mx-auto px-6 py-8 md:py-12 flex-1 flex flex-col md:flex-row items-center gap-8">
         {/* Hero Text Section */}
         <div className="flex-1 space-y-6">
           <div className="inline-block bg-sq-pink text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest sq-border">
@@ -189,11 +215,11 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
         </div>
 
         {/* Hero Visual Section */}
-        <div className="flex-1 relative">
+        <div className="flex-1 relative hero-visual-section">
           <div className="absolute -top-8 -left-8 w-24 h-24 bg-sq-pink/20 rounded-full blur-3xl -z-10"></div>
           <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-sq-yellow/30 rounded-full blur-3xl -z-10"></div>
           
-          <div className="bg-white p-5 rounded-[2rem] sq-border-lg w-full max-w-md mx-auto relative overflow-hidden">
+          <div className="bg-white p-5 rounded-[2rem] sq-border-lg w-full max-w-md mx-auto relative overflow-hidden video-display-box">
             {/* UI Header */}
             {/* <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-2">
@@ -240,16 +266,18 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
             </div>
 
             {/* Camera Feed / Video Display */}
-            <div className="bg-[#222] rounded-2xl p-2 aspect-square flex flex-col items-center justify-center border-3 border-sq-black overflow-hidden">
-              <video 
-                key={selectedVideo}
-                src={selectedVideo}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full h-full object-cover rounded-xl"
-              />
+            <div className="bg-[#222] rounded-2xl p-2 aspect-square flex flex-col items-center justify-center border-3 border-sq-black overflow-hidden video-container">
+              <div className="w-full h-full relative">
+                <video 
+                  key={selectedVideo}
+                  src={selectedVideo}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover rounded-xl video-fade-in absolute inset-0"
+                />
+              </div>
             </div>
 
             <div className="mt-3 flex justify-between items-center">
@@ -276,33 +304,8 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
         </div>
       </main>
 
-      {/* Feature Section */}
-      {/* <section className="bg-sq-pink border-y-4 border-sq-black py-16">
-        <div className="max-w-7xl mx-auto px-8">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-3xl sq-border flex flex-col items-center text-center">
-              <div className="w-20 h-20 bg-sq-yellow rounded-full sq-border flex items-center justify-center text-4xl mb-6">👁️</div>
-              <h3 className="brand-font text-2xl mb-4">AI Vision Recognition</h3>
-              <p className="font-bold text-sq-black/60">Our camera AI gives you instant feedback on your hand gestures and signs.</p>
-            </div>
-
-            <div className="bg-white p-8 rounded-3xl sq-border flex flex-col items-center text-center mt-0 md:mt-8">
-              <div className="w-20 h-20 bg-sq-pink rounded-full sq-border flex items-center justify-center text-4xl mb-6 text-white">🎮</div>
-              <h3 className="brand-font text-2xl mb-4">Gamified Path</h3>
-              <p className="font-bold text-sq-black/60">Unlock new levels, earn badges, and climb the leaderboard while learning.</p>
-            </div>
-
-            <div className="bg-white p-8 rounded-3xl sq-border flex flex-col items-center text-center">
-              <div className="w-20 h-20 bg-sq-yellow rounded-full sq-border flex items-center justify-center text-4xl mb-6">🤟</div>
-              <h3 className="brand-font text-2xl mb-4">Real Life Phrases</h3>
-              <p className="font-bold text-sq-black/60">Focus on the most common phrases used in everyday ASL conversations.</p>
-            </div>
-          </div>
-        </div>
-      </section> */}
-
       {/* Footer */}
-      <footer className="bg-sq-pink py-12 px-8 border-t-4 border-sq-black">
+      <footer className="bg-sq-pink py-12 px-8 border-t-4 border-sq-black mt-auto">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-3">
             <span className="brand-font text-2xl tracking-tight text-sq-cream">SignMate</span>
