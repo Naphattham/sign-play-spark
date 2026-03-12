@@ -29,12 +29,24 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     const tryPlay = () => {
       audio.play().catch(() => {
         const resume = () => {
-          audio.play().catch(() => {});
-          document.removeEventListener("click", resume);
-          document.removeEventListener("keydown", resume);
+          if (audio.paused) {
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  ["click", "touchstart", "keydown", "mousedown"].forEach((evt) =>
+                    document.removeEventListener(evt, resume, true)
+                  );
+                })
+                .catch(() => {
+                  // If it still fails, keep listeners active
+                });
+            }
+          }
         };
-        document.addEventListener("click", resume);
-        document.addEventListener("keydown", resume);
+        ["click", "touchstart", "keydown", "mousedown"].forEach((evt) =>
+          document.addEventListener(evt, resume, true)
+        );
       });
     };
 
@@ -49,6 +61,10 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.muted = isMuted;
+      // Also attempt to play if unmuted but currently paused
+      if (!isMuted && audioRef.current.paused) {
+        audioRef.current.play().catch(() => {});
+      }
     }
   }, [isMuted]);
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { GameSidebar } from "@/components/GameSidebar";
 import { VideoCard } from "@/components/VideoCard";
 import { WebcamView } from "@/components/WebcamView";
@@ -56,31 +56,60 @@ const Index = () => {
   const [tutorialStep, setTutorialStep] = useState<"initial" | "scanning" | "too_close" | "success">("initial");
   const [webcamVideo, setWebcamVideo] = useState<HTMLVideoElement | null>(null);
   const [isDetecting, setIsDetecting] = useState(false);
+  const [scanningLocked, setScanningLocked] = useState(false);
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const MIN_SCANNING_DURATION = 3000; // Minimum 3 seconds of scanning before allowing success
 
   // Real distance detection using MediaPipe Face Detection
   const distanceStatus = useDistanceDetection({
     enabled: isDetecting,
     videoElement: webcamVideo,
     tooCloseThreshold: 0.45,
-    onStatusChange: useCallback((status: DistanceStatus) => {
-      if (!isDetecting) return;
+  });
 
-      if (status === "too_close") {
-        setTutorialStep("too_close");
-      } else if (status === "good") {
+  // Lock scanning for MIN_SCANNING_DURATION when detection starts
+  useEffect(() => {
+    if (isDetecting) {
+      setScanningLocked(true);
+      const timer = setTimeout(() => {
+        setScanningLocked(false);
+      }, MIN_SCANNING_DURATION);
+      return () => clearTimeout(timer);
+    }
+  }, [isDetecting]);
+
+  // React to distanceStatus changes to update tutorialStep
+  useEffect(() => {
+    if (!isDetecting) return;
+
+    // Clear any pending success timer if status changes away from good
+    if (distanceStatus !== "good" && successTimerRef.current) {
+      clearTimeout(successTimerRef.current);
+      successTimerRef.current = null;
+    }
+
+    if (distanceStatus === "too_close") {
+      setTutorialStep("too_close");
+    } else if (distanceStatus === "good") {
+      if (scanningLocked) {
+        // Still in minimum scanning period, keep showing scanning
+        setTutorialStep("scanning");
+      } else {
+        // Min duration passed and distance is good → success!
         setTutorialStep("success");
-        // After 1.5s of success, go live
-        setTimeout(() => {
+        // After 2.5s of success, go live
+        successTimerRef.current = setTimeout(() => {
           setIsLive(true);
           setTutorialStep("initial");
           setIsDetecting(false);
-        }, 1500);
-      } else {
-        // no_face — keep scanning
-        setTutorialStep("scanning");
+          successTimerRef.current = null;
+        }, 2500);
       }
-    }, [isDetecting]),
-  });
+    } else {
+      // no_face — keep scanning
+      setTutorialStep("scanning");
+    }
+  }, [isDetecting, distanceStatus, scanningLocked]);
 
   // Ensure loading animation plays completely (minimum 3.5 seconds) only on first visit
   useEffect(() => {
@@ -557,6 +586,10 @@ const Index = () => {
                               setIsLive(false);
                               setIsDetecting(false);
                               setTutorialStep("initial");
+                              if (successTimerRef.current) {
+                                clearTimeout(successTimerRef.current);
+                                successTimerRef.current = null;
+                              }
                             }
                           }}
                           className={`w-full max-w-md mx-auto h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-sm ${!cameraPermissionGranted
