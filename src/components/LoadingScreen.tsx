@@ -19,9 +19,14 @@ export function LoadingScreen({ message = "กำลังโหลด..." }: Lo
         </div>
 
         {/* Loading Text */}
-        <h2 className="brand-font text-3xl text-sq-pink">
-          SignMate
-        </h2>
+        <div className="brand-font inline-block text-left">
+          <div className="text-sign text-sq-pink">
+            Sign
+          </div>
+          <div className="text-mate text-sq-pink">
+            Mate
+          </div>
+        </div>
 
         {/* Power Bar / Progress Bar */}
         <div className="w-full">
@@ -93,6 +98,24 @@ export function LoadingScreen({ message = "กำลังโหลด..." }: Lo
           .shine-effect {
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
             animation: shine 3s ease-in-out infinite;
+          }
+
+          .text-sign {
+            font-size: 80px; 
+            line-height: 0.8; 
+            font-weight: 600;
+            position: relative; 
+            z-index: 2;
+          }
+
+          .text-mate {
+            font-size: 80px; 
+            line-height: 0.8;
+            font-weight: 600;
+            margin-top: -2px; 
+            margin-left: 115px; 
+            position: relative;
+            z-index: 1;
           }
         `}
       </style>

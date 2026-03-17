@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["'Lilita One'", "cursive"],
-        body: ["'DM Sans'", "sans-serif"],
+        display: ["'Prompt'", "sans-serif"],
+        body: ["'Prompt'", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

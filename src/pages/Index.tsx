@@ -45,7 +45,9 @@ const Index = () => {
   const [view, setView] = useState<View>("home");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
-  const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
+  const [cameraPermissionGranted, setCameraPermissionGranted] = useState(() => {
+    return localStorage.getItem('cameraPermissionGranted') === 'true';
+  });
   const [showCameraPermission, setShowCameraPermission] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [userStreak, setUserStreak] = useState(0);
@@ -159,8 +161,9 @@ const Index = () => {
           setIsAuthTransitioning(false);
 
           // Show camera permission modal after login
-          if (nowAuthenticated && !cameraPermissionGranted) {
+          if (nowAuthenticated && !cameraPermissionGranted && !localStorage.getItem('hasShownCameraModal')) {
             setShowCameraPermission(true);
+            localStorage.setItem('hasShownCameraModal', 'true');
           }
         }, 3500); // Show loading for 3.5 seconds
       } else {
@@ -168,8 +171,9 @@ const Index = () => {
         setIsCheckingAuth(false);
 
         // Show camera permission modal after login
-        if (nowAuthenticated && !cameraPermissionGranted) {
+        if (nowAuthenticated && !cameraPermissionGranted && !localStorage.getItem('hasShownCameraModal')) {
           setShowCameraPermission(true);
+          localStorage.setItem('hasShownCameraModal', 'true');
         }
       }
     });
@@ -212,11 +216,13 @@ const Index = () => {
       // Stop the stream immediately, we just want permission
       stream.getTracks().forEach(track => track.stop());
       setCameraPermissionGranted(true);
+      localStorage.setItem('cameraPermissionGranted', 'true');
       setShowCameraPermission(false);
       setTutorialStep("initial");
     } catch (err) {
       console.error("Camera permission denied:", err);
       setCameraPermissionGranted(false);
+      localStorage.removeItem('cameraPermissionGranted');
       setShowCameraPermission(false);
       alert("ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตสิทธิ์กล้องในการตั้งค่าเบราว์เซอร์");
     }
@@ -277,6 +283,8 @@ const Index = () => {
       setSidebarOpen(false);
       setGameOpen(false);
       setCameraPermissionGranted(false);
+      localStorage.removeItem('hasShownCameraModal');
+      localStorage.removeItem('cameraPermissionGranted');
     } catch (error) {
       console.error("Logout error:", error);
     } finally {

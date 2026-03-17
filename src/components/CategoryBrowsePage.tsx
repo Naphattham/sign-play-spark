@@ -4,6 +4,7 @@ import { X, Check } from "lucide-react";
 import { categories, getPhrasesByCategory, type Category } from "@/lib/categories";
 import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "@/lib/auth";
 import logoSignMate from "@/asset/image/LOGO_SignMate.png";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 export function CategoryBrowsePage() {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export function CategoryBrowsePage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isLoginTransitioning, setIsLoginTransitioning] = useState(false);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,8 +57,11 @@ export function CategoryBrowsePage() {
 
       // Success
       setShowLoginModal(false);
-      setLoading(false);
-      // Firebase auth state will handle the transition
+      setIsLoginTransitioning(true);
+      setTimeout(() => {
+        setLoading(false);
+        navigate("/");
+      }, 3500);
     } catch (err) {
       setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
       setLoading(false);
@@ -78,8 +83,11 @@ export function CategoryBrowsePage() {
 
       // Success
       setShowLoginModal(false);
-      setLoading(false);
-      // Firebase auth state will handle the transition
+      setIsLoginTransitioning(true);
+      setTimeout(() => {
+        setLoading(false);
+        navigate("/");
+      }, 3500);
     } catch (err) {
       setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
       setLoading(false);
@@ -119,20 +127,24 @@ export function CategoryBrowsePage() {
     illness: "bg-red-400",
   };
 
+  if (isLoginTransitioning) {
+    return <LoadingScreen message="กำลังเข้าสู่ระบบ..." />;
+  }
+
   return (
     <>
       <div className="min-h-screen text-sq-black bg-sq-cream flex flex-col">
         {/* Custom Styles */}
         <style>
           {`
-            @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@400;700&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@100;200;300;400;500&display=swap');
             
             body {
-              font-family: 'Quicksand', sans-serif;
+              font-family: 'Prompt', sans-serif;
             }
 
             h1, h2, h3, .brand-font {
-              font-family: 'Fredoka One', cursive;
+              font-family: 'Prompt', sans-serif;
             }
 
             .sq-border {

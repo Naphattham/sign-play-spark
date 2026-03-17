@@ -96,14 +96,14 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
       {/* Custom Styles */}
       <style>
         {`
-          @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@400;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@100;200;300;400;500&display=swap');
           
           body {
-            font-family: 'Quicksand', sans-serif;
+            font-family: 'Prompt', sans-serif;
           }
 
           h1, h2, h3, .brand-font {
-            font-family: 'Fredoka One', cursive;
+            font-family: 'Prompt', sans-serif;
           }
 
           .sq-border {
@@ -178,14 +178,14 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 py-8 md:py-12 flex-1 flex flex-col md:flex-row items-center gap-8">
+      <main className="max-w-6xl mx-auto px-6 py-8 md:py-12 flex-1 flex flex-col md:flex-row items-center gap-24">
         {/* Hero Text Section */}
         <div className="flex-1 space-y-6">
           <div className="inline-block bg-sq-pink text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest sq-border">
             เรียนรู้ภาษามือแบบอินเทอร์แอคทีฟ
           </div>
           <h1 className="text-4xl md:text-6xl leading-tight">
-            เชี่ยวชาญ<span className="text-sq-pink">ภาษามือ</span> <br /> ผ่านการเล่นเกม!
+            <span className="whitespace-nowrap">เชี่ยวชาญ<span className="text-sq-pink">ภาษามือ</span></span> <br /> ผ่านการเล่นเกม!
           </h1>
           <p className="text-lg md:text-xl font-medium text-sq-black/70 max-w-xl">
             วิธีเรียนรู้ภาษามือไทยที่สนุก ฟรี และมีประสิทธิภาพ พัฒนาทักษะของคุณด้วยการตอบรับแบบเรียลไทม์และมินิเกมที่น่าสนใจ
