@@ -12,10 +12,11 @@ import { Category, Phrase, getPhrasesByCategory } from "@/lib/categories";
 import { LogOut, X, Camera, Home, User } from "lucide-react";
 import { useDistanceDetection, DistanceStatus } from "@/hooks/useDistanceDetection";
 import { useMediaPipeHolistic } from "@/hooks/useMediaPipeHolistic";
-import { auth } from "@/lib/firebase";
+// 🚨 อัปเดต Import database และฟังก์ชันจาก firebase/database
+import { auth, database } from "@/lib/firebase";
+import { ref as dbRef, get } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 import { signOutUser, updateStreakOnLogin, getUserData } from "@/lib/auth";
-// 🚨 เพิ่มการ Import ฟังก์ชัน warmUpModel ตรงนี้ 🚨
 import { warmUpModel } from "@/lib/signLanguageAPI";
 
 import generalImg from "@/asset/image/general.png";
@@ -32,6 +33,30 @@ const categoryIconMap: Record<string, string> = {
   emotions: emotionalImg,
   qa: qaImg,
   illness: illnessImg,
+};
+
+// 🚨 ฟังก์ชันแอบโหลดรูปภาพผู้เล่นทุกคนเก็บไว้ใน Cache ของเบราว์เซอร์ 🚨
+const preloadAllAvatars = async () => {
+  try {
+    console.log("🖼️ แอบโหลดรูปภาพโปรไฟล์ล่วงหน้า...");
+    const usersRef = dbRef(database, 'users');
+    const snapshot = await get(usersRef);
+
+    if (snapshot.exists()) {
+      const users = snapshot.val();
+      // วนลูปดูผู้ใช้ทุกคน
+      Object.values(users).forEach((user: any) => {
+        if (user.photoURL) {
+          // สั่งสร้าง Image Object (ตัวเบราว์เซอร์จะไปโหลดรูปนี้มาเก็บใน Cache ทันที)
+          const img = new Image();
+          img.src = user.photoURL; 
+        }
+      });
+      console.log("✅ โหลดรูปล่วงหน้าเสร็จสิ้น พร้อมโชว์ทันที!");
+    }
+  } catch (error) {
+    console.error("Error preloading avatars:", error);
+  }
 };
 
 const Index = () => {
@@ -80,6 +105,7 @@ const Index = () => {
     canvasElement: webcamCanvas,
     enabled: isLive && gameOpen,
     targetPhrase: activePhrase,
+    variant: (activePhrase?.id === "g1" || activePhrase?.id === "g4") ? selectedVariant : undefined,
     onPhraseMatch: (prediction, confidence) => {
       console.log(`✅ Phrase matched! ${prediction} (${(confidence * 100).toFixed(1)}%)`);
       handlePhraseCompletion();
@@ -163,8 +189,16 @@ const Index = () => {
 
       // Update streak when user logs in
       if (nowAuthenticated && user) {
-        // 🚨 สั่งให้ไปปลุก AI Model (Warm up) เตรียมพร้อมไว้ตั้งแต่ตอนเข้าสู่ระบบเสร็จ 🚨
+        // 🚨 สั่งให้ไปปลุก AI Model (Warm up) เตรียมพร้อมไว้ตั้งแต่ตอนเข้าสู่ระบบเสร็จ
         warmUpModel();
+        
+        // 🚨 สั่งโหลดรูปโปรไฟล์เพื่อนๆ ทุกคนล่วงหน้า! (Prefetch)
+        preloadAllAvatars();
+        
+        // จำ URL รูปโปรไฟล์ไว้ตั้งแต่ตอนล็อคอิน
+        if (user.photoURL) {
+          localStorage.setItem("cached_avatar", user.photoURL);
+        }
         
         try {
           const streakResult = await updateStreakOnLogin(user.uid);
@@ -316,6 +350,9 @@ const Index = () => {
 
     try {
       await signOutUser();
+      // ลบแคชรูปโปรไฟล์ออกตอนล็อคเอาท์ด้วย
+      localStorage.removeItem("cached_avatar");
+      
       // Wait for visual feedback (3.5 seconds to match loading animation)
       await new Promise(resolve => setTimeout(resolve, 3500));
       setView("home");

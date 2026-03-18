@@ -9,6 +9,10 @@ export interface Phrase {
   english?: string;
   modelClass?: string; // Maps to model prediction class
   modelClasses?: string[]; // For phrases with multiple variants
+  variantModelMapping?: {
+    adult?: string | string[];
+    friend?: string | string[];
+  }; // Maps variant to specific model classes
 }
 
 export const categories: { id: Category; label: string; icon: string; color: string }[] = [
@@ -26,7 +30,11 @@ export const phrases: Phrase[] = [
     category: "general", 
     emoji: "👋", 
     english: "Hello",
-    modelClasses: ["hello_adult", "hello_friend"]
+    modelClasses: ["hello_adult", "hello_friend"],
+    variantModelMapping: {
+      adult: "hello_adult",
+      friend: "hello_friend"
+    }
   },
   { 
     id: "g2", 
@@ -209,7 +217,22 @@ export const getPhraseByModelClass = (modelClass: string): Phrase | undefined =>
 };
 
 // Helper function to check if a model prediction matches a phrase
-export const checkPhraseMatch = (phrase: Phrase, modelClass: string): boolean => {
+export const checkPhraseMatch = (
+  phrase: Phrase, 
+  modelClass: string, 
+  variant?: "adult" | "friend"
+): boolean => {
+  // If phrase has variant mapping and a variant is specified, use it
+  if (phrase.variantModelMapping && variant && phrase.variantModelMapping[variant]) {
+    const variantClasses = phrase.variantModelMapping[variant];
+    if (typeof variantClasses === 'string') {
+      return variantClasses === modelClass;
+    } else if (Array.isArray(variantClasses)) {
+      return variantClasses.includes(modelClass);
+    }
+  }
+  
+  // Fallback to original behavior
   if (phrase.modelClass === modelClass) return true;
   if (phrase.modelClasses?.includes(modelClass)) return true;
   return false;

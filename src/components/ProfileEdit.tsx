@@ -9,6 +9,9 @@ import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage
 import { updateProfile } from "firebase/auth";
 import { getAvatarUrl } from "@/lib/avatar";
 
+// 🚨 1. Import Library สำหรับบีบอัดรูปภาพ
+import imageCompression from "browser-image-compression";
+
 interface ProfileEditProps {
   onBack: () => void;
 }
@@ -17,7 +20,15 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
   const { toast } = useToast();
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
-  const [photoURL, setPhotoURL] = useState<string | null>(null);
+  
+  // 🚨 ดึงข้อมูลรูปภาพตั้งแต่วินาทีแรกที่โหลด Component ไม่ต้องรอ useEffect 🚨
+  const [photoURL, setPhotoURL] = useState<string | null>(() => {
+    // 1. ลองดึงจาก Auth ก่อน (ถ้ามี)
+    if (auth.currentUser?.photoURL) return auth.currentUser.photoURL;
+    // 2. ถ้าดึง Auth ไม่ทัน ให้ดึงจาก LocalStorage ที่เราแอบจำไว้
+    return localStorage.getItem("cached_avatar");
+  });
+
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -34,7 +45,8 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
 
     // Set initial data immediately from auth.currentUser (no await, instant!)
     setUsername(user.displayName || "");
-    setPhotoURL(user.photoURL || null);
+    // อัปเดต photoURL อีกรอบเผื่อกรณี LocalStorage ว่าง
+    if (user.photoURL && !photoURL) setPhotoURL(user.photoURL);
 
     console.log("Initial user data loaded:", {
       displayName: user.displayName,
@@ -47,15 +59,15 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
       try {
         const userRef = dbRef(database, `users/${user.uid}`);
         const snapshot = await get(userRef);
-        
+
         if (snapshot.exists()) {
           const userData = snapshot.val();
           console.log("Database data loaded:", userData);
-          
+
           // Update with database values if available
           if (userData.bio !== undefined) setBio(userData.bio);
           if (userData.points !== undefined) setPoints(userData.points);
-          if (userData.photoURL) setPhotoURL(userData.photoURL);
+          if (userData.photoURL && !photoURL) setPhotoURL(userData.photoURL);
         }
       } catch (error) {
         console.error("Error loading database data:", error);
@@ -63,7 +75,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
     };
 
     loadDatabaseData();
-  }, []);
+  }, [photoURL]);
 
   const createCroppedImage = async (
     imageSrc: string,
@@ -104,7 +116,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
         } else {
           reject(new Error("Failed to create blob"));
         }
-      }, "image/jpeg");
+      }, "image/jpeg", 1.0); // ใช้ Quality 1.0 ตรงนี้เพราะเดี๋ยวเราไปบีบอัดต่อ
     });
   };
 
@@ -160,12 +172,31 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
     try {
       let uploadedPhotoURL = user.photoURL;
 
-      // If there's a new cropped image, upload it
+      // ถ้ามีการอัปโหลดและ Crop รูปใหม่
       if (imageSrc && croppedArea && photoURL?.startsWith("blob:")) {
         const croppedBlob = await createCroppedImage(imageSrc, croppedArea);
+        
+        // 🚨 2. บีบอัดรูปภาพก่อนอัปโหลด 🚨
+        const compressionOptions = {
+          maxSizeMB: 0.2, // ลดขนาดให้ไม่เกิน 200 KB
+          maxWidthOrHeight: 400, // ลดความละเอียดกว้าง/ยาวสูงสุดแค่ 400px
+          useWebWorker: true,
+        };
+        
+        // แปลง Blob ที่ผ่านการบีบอัดแล้ว
+        const compressedBlob = await imageCompression(croppedBlob as File, compressionOptions);
+
         const fileName = `profile-photos/${user.uid}/${Date.now()}.jpg`;
         const imageRef = storageRef(storage, fileName);
-        await uploadBytes(imageRef, croppedBlob);
+
+        // 🚨 3. ตั้งค่า Cache ให้เบราว์เซอร์จำรูปนี้ไว้ 1 ปี 🚨
+        const metadata = {
+          cacheControl: 'public,max-age=31536000',
+          contentType: 'image/jpeg',
+        };
+
+        // อัปโหลดไฟล์ที่โดนบีบอัดพร้อมยัด Metadata เข้าไป
+        await uploadBytes(imageRef, compressedBlob, metadata);
         uploadedPhotoURL = await getDownloadURL(imageRef);
       }
 
@@ -188,6 +219,9 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
       if (uploadedPhotoURL && uploadedPhotoURL !== user.photoURL) {
         setPhotoURL(uploadedPhotoURL);
         setImageError(false); // Reset error state
+        
+        // 🚨 แอบจำ URL รูปใหม่ไว้ในเครื่อง เวลากดเข้ามาคราวหน้าจะได้โหลดทันที 🚨
+        localStorage.setItem("cached_avatar", uploadedPhotoURL);
       }
 
       // Clear the temporary blob URL
@@ -231,10 +265,10 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
           {/* Avatar and User Info */}
           <div className="flex flex-col items-center gap-3">
             <div className="w-24 h-24 rounded-full border-[3px] border-foreground bg-secondary flex items-center justify-center text-3xl font-display text-secondary-foreground overflow-hidden" style={{ boxShadow: "3px 3px 0px 0px hsl(0 0% 0%)" }}>
-              <img 
-                src={photoURL && !imageError ? photoURL : getAvatarUrl(null, username || auth.currentUser?.email || "user")} 
-                alt="Avatar" 
-                className="w-full h-full object-cover"
+              <img
+                src={photoURL && !imageError ? photoURL : getAvatarUrl(null, username || auth.currentUser?.email || "user")}
+                alt="Avatar"
+                className="w-full h-full object-cover bg-slate-200" // เพิ่ม bg-slate-200 เป็นสีพื้นหลังรอตอนโหลด
                 referrerPolicy="no-referrer"
                 onError={(e) => {
                   const img = e.target as HTMLImageElement;
@@ -322,8 +356,8 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
             </div>
           </div>
 
-          <button 
-            onClick={handleSaveProfile} 
+          <button
+            onClick={handleSaveProfile}
             disabled={isSaving}
             className="w-full brutal-btn-primary py-3 font-body flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >

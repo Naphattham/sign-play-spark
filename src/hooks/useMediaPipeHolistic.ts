@@ -8,8 +8,7 @@ import { predictSign, PredictionResponse } from '@/lib/signLanguageAPI';
 import { Phrase, checkPhraseMatch } from '@/lib/categories';
 
 // ----------------------------------------------------------------------
-// 🚨 ดึง MediaPipe จาก Window (ที่โหลดมาจาก Script ใน index.html)
-// วิธีนี้แก้ปัญหา Vite bundle พังและทำให้มั่นใจว่ามี Constructor และ Connections แน่นอน
+// 🚨 ดึง MediaPipe จาก Window
 // ----------------------------------------------------------------------
 const mpHolistic = (window as any);
 const HolisticConstructor = mpHolistic.Holistic;
@@ -17,12 +16,11 @@ const POSE_CONNECTIONS = mpHolistic.POSE_CONNECTIONS;
 const HAND_CONNECTIONS = mpHolistic.HAND_CONNECTIONS;
 const FACEMESH_TESSELATION = mpHolistic.FACEMESH_TESSELATION;
 
-// ดึงฟังก์ชันวาดรูปจาก Window ด้วย
 const drawConnectors = mpHolistic.drawConnectors;
 const drawLandmarks = mpHolistic.drawLandmarks;
 
 const SEQUENCE_LENGTH = 40;
-const PREDICTION_INTERVAL = 2; // Predict every N frames
+const PREDICTION_INTERVAL = 2; // Predict every 2 frames
 
 // Face keypoints to extract (eyebrows and mouth)
 const EYEBROW_IDX = [55, 65, 52, 53, 46, 285, 295, 282, 283, 276];
@@ -38,6 +36,7 @@ interface UseMediaPipeHolisticProps {
   canvasElement: HTMLCanvasElement | null;
   enabled: boolean;
   targetPhrase?: Phrase;
+  variant?: "adult" | "friend";
   onPhraseMatch?: (prediction: string, confidence: number) => void;
   onPrediction?: (prediction: PredictionResponse) => void;
 }
@@ -57,6 +56,7 @@ export function useMediaPipeHolistic({
   canvasElement,
   enabled,
   targetPhrase,
+  variant,
   onPhraseMatch,
   onPrediction,
 }: UseMediaPipeHolisticProps): MediaPipeHolisticState {
@@ -177,7 +177,7 @@ export function useMediaPipeHolistic({
       const prediction = await predictSign(bufferToPredict);
 
       if (prediction.success) {
-        const isMatched = targetPhrase && prediction.confidence >= 0.5 && checkPhraseMatch(targetPhrase, prediction.prediction);
+        const isMatched = targetPhrase && prediction.confidence >= 0.5 && checkPhraseMatch(targetPhrase, prediction.prediction, variant);
 
         setState((prev) => ({
           ...prev,
@@ -206,29 +206,35 @@ export function useMediaPipeHolistic({
   const onResultsRef = useRef((results: any) => {});
   useEffect(() => {
     onResultsRef.current = (results: any) => {
-      if (!enabled) return;
-
-      drawLandmarksOnCanvas(results);
+      // 🚨 1. Background Buffering: แอบเก็บข้อมูลลงถังตลอดเวลา แม้จะยังไม่กด START ก็ตาม
       const keypoints = extractKeypoints(results);
       keypointsBufferRef.current.push(keypoints);
 
+      // 🚨 2. Sliding Window: ถ้าเกิน 40 ใบ ให้เตะใบเก่าสุดทิ้ง (รักษาความสดใหม่ของ 40 เฟรมล่าสุด)
       if (keypointsBufferRef.current.length > SEQUENCE_LENGTH) {
         keypointsBufferRef.current.shift();
       }
 
+      // อัปเดตสถานะถังข้อมูลให้ UI ทราบ
       setState((prev) => ({ ...prev, bufferLength: keypointsBufferRef.current.length, error: null }));
 
-      frameCountRef.current++;
-      
-      if (keypointsBufferRef.current.length === SEQUENCE_LENGTH && frameCountRef.current % PREDICTION_INTERVAL === 0 && !isPredictingRef.current) {
-        makePrediction([...keypointsBufferRef.current]);
+      // 🚨 3. เมื่อกด START (enabled = true) ถึงจะเริ่มวาดหน้าจอและส่งทายผล
+      if (enabled) {
+        drawLandmarksOnCanvas(results);
+        
+        frameCountRef.current++;
+        // ถังครบ 40 ใบปุ๊บ ส่งทายผลทันที ทุกๆ 2 เฟรม (รวดเร็วมากเพราะไม่ต้องรอเติมถังใหม่)
+        if (keypointsBufferRef.current.length === SEQUENCE_LENGTH && frameCountRef.current % PREDICTION_INTERVAL === 0 && !isPredictingRef.current) {
+          makePrediction([...keypointsBufferRef.current]);
+        }
       }
     };
   }, [enabled, drawLandmarksOnCanvas, extractKeypoints, makePrediction]);
 
   // 5. เตรียมความพร้อมและรัน MediaPipe
   useEffect(() => {
-    if (!enabled || !videoElement || !canvasElement) {
+    // 🚨 ถอดคำว่า !enabled ออกจากเงื่อนไขนี้ เพื่อให้ MediaPipe เตรียมตัวรอตั้งแต่กล้องเปิด
+    if (!videoElement || !canvasElement) {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
       keypointsBufferRef.current = [];
       isSendingRef.current = false;
@@ -238,7 +244,7 @@ export function useMediaPipeHolistic({
 
     const initHolistic = async () => {
       if (!HolisticConstructor) {
-        console.error("MediaPipe Holistic Constructor not found! Please check if scripts in index.html are loaded properly.");
+        console.error("MediaPipe Holistic Constructor not found!");
         return;
       }
 
@@ -263,6 +269,7 @@ export function useMediaPipeHolistic({
         if (videoElement.readyState >= 2 && videoElement.videoWidth > 0 && !isSendingRef.current) {
           isSendingRef.current = true;
           try {
+            // ไม่ต้องเคลียร์ canvas ตรงนี้ ปล่อยให้ระบบวาดตอน enabled ทำงาน
             canvasElement.width = videoElement.videoWidth;
             canvasElement.height = videoElement.videoHeight;
             await holistic.send({ image: videoElement });
@@ -284,7 +291,6 @@ export function useMediaPipeHolistic({
       }
     };
 
-    // ใส่ setTimeout เล็กน้อยเพื่อให้แน่ใจว่า window load script เสร็จแล้ว
     setTimeout(() => {
         initHolistic();
     }, 100);
@@ -296,7 +302,7 @@ export function useMediaPipeHolistic({
         holisticRef.current = null;
       }
     };
-  }, [enabled, videoElement, canvasElement]);
+  }, [videoElement, canvasElement]); // 🚨 ลบ enabled ออกจาก Dependencies เพื่อไม่ให้มัน Reset ถังข้อมูลตอนกด START
 
   return state;
 }

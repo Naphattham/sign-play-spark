@@ -15,6 +15,7 @@ interface UseSignLanguageRecognitionProps {
   videoElement: HTMLVideoElement | null;
   enabled: boolean;
   targetPhrase?: Phrase;
+  variant?: "adult" | "friend";
   onPhraseMatch?: (prediction: string, confidence: number) => void;
   onPrediction?: (prediction: PredictionResponse) => void;
 }
@@ -33,6 +34,7 @@ export function useSignLanguageRecognition({
   videoElement,
   enabled,
   targetPhrase,
+  variant,
   onPhraseMatch,
   onPrediction,
 }: UseSignLanguageRecognitionProps): SignLanguageRecognitionState {
@@ -126,7 +128,7 @@ export function useSignLanguageRecognition({
         const isMatched =
           targetPhrase &&
           prediction.confidence >= 0.5 &&
-          checkPhraseMatch(targetPhrase, prediction.prediction);
+          checkPhraseMatch(targetPhrase, prediction.prediction, variant);
 
         setState((prev) => ({
           ...prev,

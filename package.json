@@ -46,6 +46,7 @@
     "@radix-ui/react-tooltip": "^1.2.7",
     "@tanstack/react-query": "^5.83.0",
     "@tensorflow/tfjs": "^4.22.0",
+    "browser-image-compression": "^2.0.2",
     "browserslist": "^4.28.1",
     "caniuse-lite": "^1.0.30001777",
     "class-variance-authority": "^0.7.1",
