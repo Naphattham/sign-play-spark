@@ -4,15 +4,22 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Holistic, Results } from '@mediapipe/holistic';
-import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
-import { 
-  POSE_CONNECTIONS, 
-  HAND_CONNECTIONS,
-  FACEMESH_TESSELATION 
-} from '@mediapipe/holistic';
 import { predictSign, PredictionResponse } from '@/lib/signLanguageAPI';
 import { Phrase, checkPhraseMatch } from '@/lib/categories';
+
+// ----------------------------------------------------------------------
+// 🚨 ดึง MediaPipe จาก Window (ที่โหลดมาจาก Script ใน index.html)
+// วิธีนี้แก้ปัญหา Vite bundle พังและทำให้มั่นใจว่ามี Constructor และ Connections แน่นอน
+// ----------------------------------------------------------------------
+const mpHolistic = (window as any);
+const HolisticConstructor = mpHolistic.Holistic;
+const POSE_CONNECTIONS = mpHolistic.POSE_CONNECTIONS;
+const HAND_CONNECTIONS = mpHolistic.HAND_CONNECTIONS;
+const FACEMESH_TESSELATION = mpHolistic.FACEMESH_TESSELATION;
+
+// ดึงฟังก์ชันวาดรูปจาก Window ด้วย
+const drawConnectors = mpHolistic.drawConnectors;
+const drawLandmarks = mpHolistic.drawLandmarks;
 
 const SEQUENCE_LENGTH = 40;
 const PREDICTION_INTERVAL = 2; // Predict every N frames
@@ -63,20 +70,18 @@ export function useMediaPipeHolistic({
     error: null,
   });
 
-  const holisticRef = useRef<Holistic | null>(null);
+  const holisticRef = useRef<any>(null);
   const keypointsBufferRef = useRef<number[][]>([]);
   const frameCountRef = useRef(0);
   const requestRef = useRef<number | null>(null);
   
-  // ตัวล็อกสำคัญเพื่อป้องกัน RuntimeError: Aborted
-  const isSendingRef = useRef(false); // ป้องกันส่งเฟรมซ้อนให้ MediaPipe
-  const isPredictingRef = useRef(false); // ป้องกันส่ง API ซ้อนไป Cloud
+  const isSendingRef = useRef(false);
+  const isPredictingRef = useRef(false);
 
   // 1. ฟังก์ชันสกัดจุดพิกัด (Extract Keypoints)
-  const extractKeypoints = useCallback((results: Results): number[] => {
+  const extractKeypoints = useCallback((results: any): number[] => {
     const keypoints: number[] = [];
 
-    // Pose landmarks (25 points x 4 values = 100)
     if (results.poseLandmarks) {
       for (let i = 0; i < POSE_POINTS; i++) {
         const lm = results.poseLandmarks[i];
@@ -87,7 +92,6 @@ export function useMediaPipeHolistic({
       keypoints.push(...Array(POSE_POINTS * 4).fill(0));
     }
 
-    // Face landmarks (30 selected points x 3 values = 90)
     if (results.faceLandmarks) {
       for (const idx of FACE_SELECTED) {
         const lm = results.faceLandmarks[idx];
@@ -98,7 +102,6 @@ export function useMediaPipeHolistic({
       keypoints.push(...Array(FACE_POINTS * 3).fill(0));
     }
 
-    // Left hand landmarks (21 points x 3 values = 63)
     if (results.leftHandLandmarks) {
       for (let i = 0; i < HAND_POINTS; i++) {
         const lm = results.leftHandLandmarks[i];
@@ -109,7 +112,6 @@ export function useMediaPipeHolistic({
       keypoints.push(...Array(HAND_POINTS * 3).fill(0));
     }
 
-    // Right hand landmarks (21 points x 3 values = 63)
     if (results.rightHandLandmarks) {
       for (let i = 0; i < HAND_POINTS; i++) {
         const lm = results.rightHandLandmarks[i];
@@ -123,43 +125,48 @@ export function useMediaPipeHolistic({
     return keypoints;
   }, []);
 
-  // 2. ฟังก์ชันวาดจุดบนจอ (เห็นผลทันทีแบบ Real-time)
-  const drawLandmarksOnCanvas = useCallback((results: Results) => {
-    if (!canvasElement) return;
+  // 2. ฟังก์ชันวาดจุดบนจอ
+  const drawLandmarksOnCanvas = useCallback((results: any) => {
+    if (!canvasElement || !drawConnectors || !drawLandmarks) return;
     const ctx = canvasElement.getContext('2d');
     if (!ctx) return;
 
     ctx.save();
     ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
-    // วาดท่าทางร่างกาย
     if (results.poseLandmarks) {
-      drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, { color: '#00FF00', lineWidth: 4 });
-      drawLandmarks(ctx, results.poseLandmarks, { color: '#FF0000', lineWidth: 2, radius: 6 });
+      if (POSE_CONNECTIONS) {
+        drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, { color: '#00FF00', lineWidth: 4 });
+      }
+      drawLandmarks(ctx, results.poseLandmarks, { color: '#FF0000', lineWidth: 2, radius: 4 });
     }
 
-    // วาดจุดบนใบหน้า
     if (results.faceLandmarks) {
-      drawConnectors(ctx, results.faceLandmarks, FACEMESH_TESSELATION, { color: '#C0C0C070', lineWidth: 1 });
-      const selectedFacePoints = FACE_SELECTED.map(idx => results.faceLandmarks[idx]);
-      drawLandmarks(ctx, selectedFacePoints, { color: '#FFD700', lineWidth: 1, radius: 3 });
+      if (FACEMESH_TESSELATION) {
+        drawConnectors(ctx, results.faceLandmarks, FACEMESH_TESSELATION, { color: '#C0C0C070', lineWidth: 1 });
+      }
+      const selectedFacePoints = FACE_SELECTED.map(idx => results.faceLandmarks[idx]).filter(Boolean);
+      drawLandmarks(ctx, selectedFacePoints, { color: '#FFD700', lineWidth: 1, radius: 2 });
     }
 
-    // วาดมือซ้าย-ขวา
     if (results.leftHandLandmarks) {
-      drawConnectors(ctx, results.leftHandLandmarks, HAND_CONNECTIONS, { color: '#CC0000', lineWidth: 5 });
-      drawLandmarks(ctx, results.leftHandLandmarks, { color: '#00FF00', lineWidth: 2, radius: 5 });
+      if (HAND_CONNECTIONS) {
+        drawConnectors(ctx, results.leftHandLandmarks, HAND_CONNECTIONS, { color: '#CC0000', lineWidth: 5 });
+      }
+      drawLandmarks(ctx, results.leftHandLandmarks, { color: '#00FF00', lineWidth: 2, radius: 4 });
     }
 
     if (results.rightHandLandmarks) {
-      drawConnectors(ctx, results.rightHandLandmarks, HAND_CONNECTIONS, { color: '#00CC00', lineWidth: 5 });
-      drawLandmarks(ctx, results.rightHandLandmarks, { color: '#FF0000', lineWidth: 2, radius: 5 });
+      if (HAND_CONNECTIONS) {
+        drawConnectors(ctx, results.rightHandLandmarks, HAND_CONNECTIONS, { color: '#00CC00', lineWidth: 5 });
+      }
+      drawLandmarks(ctx, results.rightHandLandmarks, { color: '#FF0000', lineWidth: 2, radius: 4 });
     }
 
     ctx.restore();
   }, [canvasElement]);
 
-  // 3. ฟังก์ชันส่งข้อมูลไปทำนายบน Cloud (แยกการทำงานออกมาเพื่อไม่ให้ขวางการวาดจอ)
+  // 3. ฟังก์ชันส่งข้อมูลไปทำนายบน Cloud
   const makePrediction = useCallback(async (bufferToPredict: number[][]) => {
     if (isPredictingRef.current) return;
 
@@ -196,9 +203,9 @@ export function useMediaPipeHolistic({
   }, [targetPhrase, onPhraseMatch, onPrediction]);
 
   // 4. เมื่อ MediaPipe ประมวลผลเสร็จ (onResults)
-  const onResultsRef = useRef((results: Results) => {});
+  const onResultsRef = useRef((results: any) => {});
   useEffect(() => {
-    onResultsRef.current = (results: Results) => {
+    onResultsRef.current = (results: any) => {
       if (!enabled) return;
 
       drawLandmarksOnCanvas(results);
@@ -212,7 +219,7 @@ export function useMediaPipeHolistic({
       setState((prev) => ({ ...prev, bufferLength: keypointsBufferRef.current.length, error: null }));
 
       frameCountRef.current++;
-      // ดึงเฟรมส่ง Predict โดยก็อปปี้ Array ป้องกันค่าเปลี่ยนระหว่างส่ง
+      
       if (keypointsBufferRef.current.length === SEQUENCE_LENGTH && frameCountRef.current % PREDICTION_INTERVAL === 0 && !isPredictingRef.current) {
         makePrediction([...keypointsBufferRef.current]);
       }
@@ -230,27 +237,31 @@ export function useMediaPipeHolistic({
     }
 
     const initHolistic = async () => {
-      const holistic = new Holistic({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1675471629/${file}`,
+      if (!HolisticConstructor) {
+        console.error("MediaPipe Holistic Constructor not found! Please check if scripts in index.html are loaded properly.");
+        return;
+      }
+
+      const holistic = new HolisticConstructor({
+        locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1675471629/${file}`,
       });
 
       holistic.setOptions({
-        modelComplexity: 1,
+        modelComplexity: 0, 
         smoothLandmarks: true,
         enableSegmentation: false,
         smoothSegmentation: false,
-        refineFaceLandmarks: true,
+        refineFaceLandmarks: false,
         minDetectionConfidence: 0.5,
         minTrackingConfidence: 0.5,
       });
 
-      holistic.onResults((res) => onResultsRef.current(res));
+      holistic.onResults((res: any) => onResultsRef.current(res));
       holisticRef.current = holistic;
 
-      // ลูปดึงภาพด้วย requestAnimationFrame (ดีกว่า setInterval มาก)
       const detectFrame = async () => {
         if (videoElement.readyState >= 2 && videoElement.videoWidth > 0 && !isSendingRef.current) {
-          isSendingRef.current = true; // ล็อก! ไม่ให้เฟรมอื่นแทรก
+          isSendingRef.current = true;
           try {
             canvasElement.width = videoElement.videoWidth;
             canvasElement.height = videoElement.videoHeight;
@@ -258,7 +269,7 @@ export function useMediaPipeHolistic({
           } catch (error) {
             console.error('MediaPipe send error:', error);
           } finally {
-            isSendingRef.current = false; // ปลดล็อก! พร้อมรับเฟรมถัดไป
+            isSendingRef.current = false;
           }
         }
         requestRef.current = requestAnimationFrame(detectFrame);
@@ -267,13 +278,16 @@ export function useMediaPipeHolistic({
       videoElement.addEventListener('loadedmetadata', () => {
          requestRef.current = requestAnimationFrame(detectFrame);
       });
-      // เผื่อวิดีโอโหลดเสร็จแล้ว
+      
       if (videoElement.readyState >= 2) {
          requestRef.current = requestAnimationFrame(detectFrame);
       }
     };
 
-    initHolistic();
+    // ใส่ setTimeout เล็กน้อยเพื่อให้แน่ใจว่า window load script เสร็จแล้ว
+    setTimeout(() => {
+        initHolistic();
+    }, 100);
 
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);

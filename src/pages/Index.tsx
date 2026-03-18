@@ -201,6 +201,16 @@ const Index = () => {
     };
   }, [isAuthenticated, isCheckingAuth, cameraPermissionGranted]);
 
+  // 🚨 [เพิ่มส่วนนี้] ล้างหน้าจอ Canvas ทิ้งเมื่อกดปุ่ม STOP หรือปิดระบบ 🚨
+  useEffect(() => {
+    if (!isLive && !isDetecting && webcamCanvas) {
+      const ctx = webcamCanvas.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, webcamCanvas.width, webcamCanvas.height);
+      }
+    }
+  }, [isLive, isDetecting, webcamCanvas]);
+
   const handleCategoryChange = (cat: Category) => {
     setCategory(cat);
     setActivePhrase(getPhrasesByCategory(cat)[0]);
@@ -629,28 +639,6 @@ const Index = () => {
                               LIVE
                             </div>
                           </div>
-
-                          {/* Sign Recognition Status */}
-                          {isLive && (
-                            <div className="absolute top-3 left-3 z-10">
-                              <div className="bg-black/80 text-white border-[3px] border-foreground rounded-lg px-3 py-2 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-xs">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="text-yellow-400">⚡</span>
-                                  <span>Buffer: {signRecognition.bufferLength}/40</span>
-                                </div>
-                                {signRecognition.currentPrediction && (
-                                  <div className="border-t border-white/20 pt-1 mt-1">
-                                    <div className="text-green-400 font-black">
-                                      {signRecognition.currentPrediction}
-                                    </div>
-                                    <div className="text-white/70 text-[10px]">
-                                      {(signRecognition.currentConfidence * 100).toFixed(1)}%
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
 
                           {/* Sign Recognition Status */}
                           {isLive && (
