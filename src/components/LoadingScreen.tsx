@@ -11,7 +11,7 @@ export function LoadingScreen({ message = "กำลังโหลด..." }: Lo
           <div className="absolute inset-0 bg-sq-pink/20 rounded-full blur-3xl animate-pulse"></div>
           <div className="relative bg-sq-pink p-8 rounded-3xl sq-border-lg animate-bounce">
             <img 
-              src="/src/asset/image/LOGO_SignMate.png"
+              src="/LOGO_SignMate.png"
               alt="SignMate Logo"
               className="w-20 h-20 object-contain"
             />

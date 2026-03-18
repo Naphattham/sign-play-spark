@@ -16,7 +16,7 @@ export function VideoCard({ phrase, category, variant }: VideoCardProps) {
   // Build video path based on category and phrase
   const getVideoUrl = () => {
     let videoFileName = phrase;
-    
+
     // Handle phrases with multiple options (e.g., "สวัสดี (ผู้ใหญ่ | เพื่อน)")
     if (category === "general") {
       if (phrase.includes("สวัสดี") && phrase.includes("|")) {
@@ -30,18 +30,18 @@ export function VideoCard({ phrase, category, variant }: VideoCardProps) {
         videoFileName = "กินแล้ว";
       }
       // Handle other phrases with question marks
-      if (phrase === "กินข้าวแล้วหรือยัง?") {
+      if (phrase === "กินข้าวแล้วหรือยัง?" || phrase === "กินข้าวหรือยัง?") {
         videoFileName = "กินข้าวแล้วหรือยัง";
       } else if (phrase === "สบายดีไหม?") {
         videoFileName = "สบายดีไหม";
       }
     }
-    
+
     // Remove question marks from Q&A category video filenames
     if (category === "qa") {
       videoFileName = videoFileName.replace("?", "");
     }
-    
+
     return `/videos/${category}/${videoFileName}.mp4`;
   };
 

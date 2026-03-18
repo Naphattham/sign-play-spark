@@ -1,12 +1,15 @@
-import { Menu, X, User, Home } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Menu, X, User, Home, ChevronRight } from "lucide-react";
+import { auth, database } from "@/lib/firebase";
+import { ref as dbRef, get } from "firebase/database";
+import { getAvatarUrl } from "@/lib/avatar";
+
 import { Category, categories } from "@/lib/categories";
 import generalImg from "@/asset/image/general.png";
 import emotionalImg from "@/asset/image/emotional.png";
 import qaImg from "@/asset/image/qa.png";
 import illnessImg from "@/asset/image/illness.png";
 import trophyImg from "@/asset/image/Trophy.png";
-import logoImg from "@/asset/image/LOGO_SignMate.png";
 
 const iconMap: Record<string, string> = {
   Hand: generalImg,
@@ -18,9 +21,13 @@ const iconMap: Record<string, string> = {
 interface GameSidebarProps {
   activeCategory: Category;
   onCategoryChange: (cat: Category) => void;
+  onPlayGame: () => void;
+  onQuest: () => void;
   onLeaderboard: () => void;
   onProfile: () => void;
   onHome: () => void;
+  showPlayGame: boolean;
+  showQuest: boolean;
   showLeaderboard: boolean;
   showHome: boolean;
   showProfile: boolean;
@@ -31,19 +38,54 @@ interface GameSidebarProps {
 export function GameSidebar({
   activeCategory,
   onCategoryChange,
+  onPlayGame,
+  onQuest,
   onLeaderboard,
   onProfile,
   onHome,
+  showPlayGame,
+  showQuest,
   showLeaderboard,
   showHome,
   showProfile,
   isOpen,
   onToggle,
 }: GameSidebarProps) {
-  const navigate = useNavigate();
+
+  const [username, setUsername] = useState("User");
+  const [photoURL, setPhotoURL] = useState<string | null>(() => {
+    if (auth.currentUser?.photoURL) return auth.currentUser.photoURL;
+    return localStorage.getItem("cached_avatar");
+  });
+  const [points, setPoints] = useState(0);
+
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    setUsername(user.displayName || "User");
+    if (user.photoURL && !photoURL) setPhotoURL(user.photoURL);
+
+    const loadDatabaseData = async () => {
+      try {
+        const userRef = dbRef(database, `users/${user.uid}`);
+        const snapshot = await get(userRef);
+
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          if (userData.points !== undefined) setPoints(userData.points);
+          if (userData.photoURL && !photoURL) setPhotoURL(userData.photoURL);
+        }
+      } catch (error) {
+        console.error("Error loading database data:", error);
+      }
+    };
+
+    loadDatabaseData();
+  }, [photoURL]);
 
   const handlePlayGame = () => {
-    navigate("/game-setup");
+    onPlayGame();
     if (isOpen) {
       onToggle(); // Close sidebar on mobile
     }
@@ -71,83 +113,113 @@ export function GameSidebar({
       >
         <div className="p-6 border-b-[3px] border-foreground">
           <h1 className="text-2xl font-display text-primary-foreground tracking-wide flex items-center gap-2">
-            <img src={logoImg} alt="SignMate" className="w-7 h-7 object-contain" />
+            <img src="/LOGO_SignMate.png" alt="SignMate" className="w-7 h-7 object-contain" />
             SignMate
           </h1>
           <p className="text-primary-foreground/80 text-sm mt-1 font-body">Learn. Sign. Level Up!</p>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
-          <button
-            onClick={onHome}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${
-              showHome
-                ? "bg-secondary text-secondary-foreground shadow-brutal-sm"
-                : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
-            }`}
-            style={showHome ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
-          >
-            <Home size={18} />
-            Home
-          </button>
-
-          <p className="text-primary-foreground/60 text-xs font-semibold uppercase tracking-wider mb-3 font-body">
-            Categories
-          </p>
-          {categories.map((cat) => {
-            const iconSrc = iconMap[cat.icon];
-            const isActive = activeCategory === cat.id && !showLeaderboard && !showHome && !showProfile;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => onCategoryChange(cat.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${
-                  isActive
-                    ? "bg-secondary text-secondary-foreground shadow-brutal-sm translate-x-0"
-                    : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
-                }`}
-                style={isActive ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
-              >
-                <img src={iconSrc} alt={cat.label} className="w-[18px] h-[18px] object-contain" />
-                {cat.label}
-              </button>
-            );
-          })}
-
-          <div className="pt-4 border-t-[2px] border-primary-foreground/20 mt-4">
-            {/* Play Game Button */}
+        <nav className="flex-1 p-4 flex flex-col overflow-y-auto">
+          <div className="space-y-2 mb-4">
             <button
-              onClick={handlePlayGame}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body bg-blue-500 text-white hover:bg-blue-600 mb-3"
-              style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}
-            >
-              <span className="material-symbols-outlined text-[18px]">sports_esports</span>
-              Play Game
-            </button>
-
-            <button
-              onClick={onLeaderboard}
+              onClick={onHome}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${
-                showLeaderboard
-                  ? "bg-secondary text-secondary-foreground"
+                showHome
+                  ? "bg-secondary text-secondary-foreground shadow-brutal-sm"
                   : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
               }`}
-              style={showLeaderboard ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
+              style={showHome ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
             >
-              <img src={trophyImg} alt="Leaderboard" className="w-[18px] h-[18px] object-contain" />
-              Leaderboard
+              <Home size={18} />
+              Home
             </button>
+
+            <p className="text-primary-foreground/60 text-xs font-semibold uppercase tracking-wider mb-3 font-body">
+              Lessons
+            </p>
+            {categories.map((cat) => {
+              const iconSrc = iconMap[cat.icon];
+              const isActive = activeCategory === cat.id && !showLeaderboard && !showQuest && !showHome && !showProfile && !showPlayGame;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => onCategoryChange(cat.id)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${
+                    isActive
+                      ? "bg-secondary text-secondary-foreground shadow-brutal-sm translate-x-0"
+                      : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
+                  }`}
+                  style={isActive ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
+                >
+                  <img src={iconSrc} alt={cat.label} className="w-[18px] h-[18px] object-contain" />
+                  {cat.label}
+                </button>
+              );
+            })}
+
+            <div className="pt-4 border-t-[2px] border-primary-foreground/20 mt-4 space-y-3">
+              <button
+                onClick={onQuest}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${
+                  showQuest
+                    ? "bg-secondary text-secondary-foreground"
+                    : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
+                }`}
+                style={showQuest ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
+              >
+                <span className="material-symbols-outlined text-[18px]">scrollable_header</span>
+                Quest
+              </button>
+
+              <button
+                onClick={onLeaderboard}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${
+                  showLeaderboard
+                    ? "bg-secondary text-secondary-foreground"
+                    : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
+                }`}
+                style={showLeaderboard ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
+              >
+                <img src={trophyImg} alt="Leaderboard" className="w-[18px] h-[18px] object-contain" />
+                Leaderboard
+              </button>
+            </div>
           </div>
+
+          <button
+            onClick={handlePlayGame}
+            className={`w-full mt-auto flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${
+              showPlayGame
+                ? "bg-secondary text-secondary-foreground"
+                : "bg-purple-400 text-white hover:bg-purple-500"
+            }`}
+            style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}
+          >
+            <span className="material-symbols-outlined text-[18px]">sports_esports</span>
+            Play Game
+          </button>
         </nav>
 
         <div className="p-4 border-t-[3px] border-foreground">
-          <button
+          <div 
             onClick={onProfile}
-            className="w-full brutal-btn-secondary flex items-center justify-center gap-2 text-sm"
+            className="bg-secondary rounded-lg border-[2px] border-foreground shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] px-3 py-2.5 flex items-center gap-2.5 cursor-pointer hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] transition-all"
           >
-            <User size={16} />
-            Profile
-          </button>
+            <img 
+              alt={username} 
+              className="w-9 h-9 rounded-full border-[2px] border-foreground object-cover bg-slate-200 shrink-0" 
+              src={photoURL || getAvatarUrl(null, username || auth.currentUser?.email || "user")}
+              onError={(e) => {
+                const img = e.target as HTMLImageElement;
+                img.src = getAvatarUrl(null, username || auth.currentUser?.email || "user");
+              }}
+            />
+            <div className="flex-1 overflow-hidden text-left">
+              <p className="font-display text-secondary-foreground leading-tight text-[13px] truncate">{username}</p>
+              <p className="text-[11px] font-bold text-secondary-foreground opacity-80 mt-0.5">{points.toLocaleString()} pts</p>
+            </div>
+            <ChevronRight size={18} className="text-secondary-foreground shrink-0 opacity-80" />
+          </div>
         </div>
       </aside>
     </>

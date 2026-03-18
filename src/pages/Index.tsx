@@ -8,11 +8,12 @@ import { ProfileEdit } from "@/components/ProfileEdit";
 import { LandingPage } from "@/components/LandingPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { HomePage } from "@/components/HomePage";
-import { Category, Phrase, getPhrasesByCategory } from "@/lib/categories";
+import { QuestView } from "@/components/QuestView";
+import { GameSetupPage } from "@/components/GameSetupPage";
+import { Category, Phrase, getPhrasesByCategory, categories } from "@/lib/categories";
 import { LogOut, X, Camera, Home, User } from "lucide-react";
 import { useDistanceDetection, DistanceStatus } from "@/hooks/useDistanceDetection";
 import { useMediaPipeHolistic } from "@/hooks/useMediaPipeHolistic";
-// 🚨 อัปเดต Import database และฟังก์ชันจาก firebase/database
 import { auth, database } from "@/lib/firebase";
 import { ref as dbRef, get } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
@@ -26,7 +27,7 @@ import illnessImg from "@/asset/image/illness.png";
 import trophyImg from "@/asset/image/Trophy.png";
 import guideHumanImg from "@/asset/image/guide_human.png";
 
-type View = "home" | "game" | "leaderboard" | "profile" | "playing";
+type View = "home" | "game" | "leaderboard" | "quest" | "profile" | "playing" | "gamesetup";
 
 const categoryIconMap: Record<string, string> = {
   general: generalImg,
@@ -35,7 +36,6 @@ const categoryIconMap: Record<string, string> = {
   illness: illnessImg,
 };
 
-// 🚨 ฟังก์ชันแอบโหลดรูปภาพผู้เล่นทุกคนเก็บไว้ใน Cache ของเบราว์เซอร์ 🚨
 const preloadAllAvatars = async () => {
   try {
     console.log("🖼️ แอบโหลดรูปภาพโปรไฟล์ล่วงหน้า...");
@@ -44,10 +44,8 @@ const preloadAllAvatars = async () => {
 
     if (snapshot.exists()) {
       const users = snapshot.val();
-      // วนลูปดูผู้ใช้ทุกคน
       Object.values(users).forEach((user: any) => {
         if (user.photoURL) {
-          // สั่งสร้าง Image Object (ตัวเบราว์เซอร์จะไปโหลดรูปนี้มาเก็บใน Cache ทันที)
           const img = new Image();
           img.src = user.photoURL; 
         }
@@ -63,7 +61,6 @@ const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isAuthTransitioning, setIsAuthTransitioning] = useState(false);
-  // Only show loading on first visit, not on navigation back
   const [showInitialLoading, setShowInitialLoading] = useState(() => {
     const hasLoaded = sessionStorage.getItem('hasInitialLoaded');
     return !hasLoaded;
@@ -84,38 +81,66 @@ const Index = () => {
   const [gameOpen, setGameOpen] = useState(false);
   const [isPhraseCompleted, setIsPhraseCompleted] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<"adult" | "friend">("adult");
+  const [byeStep, setByeStep] = useState<1 | 2>(1);
+  const [eatStep, setEatStep] = useState<1 | 2 | 3>(1);
   const [tutorialStep, setTutorialStep] = useState<"initial" | "scanning" | "too_close" | "success">("initial");
   const [webcamVideo, setWebcamVideo] = useState<HTMLVideoElement | null>(null);
   const [webcamCanvas, setWebcamCanvas] = useState<HTMLCanvasElement | null>(null);
   const [isDetecting, setIsDetecting] = useState(false);
   const [scanningLocked, setScanningLocked] = useState(false);
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const MIN_SCANNING_DURATION = 3000; // Minimum 3 seconds of scanning before allowing success
+  
+  // 🚨 1. ปรับลดเวลาที่บังคับสแกนจาก 3 วิ เหลือ 1.5 วินาที
+  const MIN_SCANNING_DURATION = 1500; 
 
   // Real distance detection using MediaPipe Face Detection
   const distanceStatus = useDistanceDetection({
     enabled: isDetecting,
     videoElement: webcamVideo,
-    tooCloseThreshold: 0.45,
+    // 🚨 2. ปรับให้ไม่ต้องถอยไกลเกินไป (ลดค่าลงจาก 0.45)
+    tooCloseThreshold: 0.40,
   });
 
-  // Sign language recognition with MediaPipe Holistic
+  const byeTargetClass = activePhrase?.id === "g2" ? (byeStep === 1 ? "bye_me" : "bye_go") : undefined;
+  const eatTargetClass = activePhrase?.id === "g3" ? (eatStep === 1 ? "rice" : eatStep === 2 ? "eat" : "yet") : undefined;
+
+  const effectivePhrase: Phrase | undefined = activePhrase?.id === "g2"
+    ? { ...activePhrase, modelClass: byeTargetClass, modelClasses: undefined }
+    : activePhrase?.id === "g3"
+      ? { ...activePhrase, modelClass: eatTargetClass, modelClasses: undefined }
+      : activePhrase;
+
   const signRecognition = useMediaPipeHolistic({
     videoElement: webcamVideo,
     canvasElement: webcamCanvas,
     enabled: isLive && gameOpen,
-    targetPhrase: activePhrase,
+    targetPhrase: effectivePhrase,
     variant: (activePhrase?.id === "g1" || activePhrase?.id === "g4") ? selectedVariant : undefined,
     onPhraseMatch: (prediction, confidence) => {
       console.log(`✅ Phrase matched! ${prediction} (${(confidence * 100).toFixed(1)}%)`);
-      handlePhraseCompletion();
+      if (activePhrase?.id === "g2") {
+        if (byeStep === 1 && prediction === "bye_me" && confidence >= 0.8) {
+          setByeStep(2);
+        } else if (byeStep === 2 && prediction === "bye_go" && confidence >= 0.8) {
+          handlePhraseCompletion();
+        }
+      } else if (activePhrase?.id === "g3") {
+        if (eatStep === 1 && prediction === "rice" && confidence >= 0.8) {
+          setEatStep(2);
+        } else if (eatStep === 2 && prediction === "eat" && confidence >= 0.8) {
+          setEatStep(3);
+        } else if (eatStep === 3 && prediction === "yet" && confidence >= 0.8) {
+          handlePhraseCompletion();
+        }
+      } else {
+        handlePhraseCompletion();
+      }
     },
     onPrediction: (prediction) => {
       console.log(`🔍 Prediction: ${prediction.prediction} (${(prediction.confidence * 100).toFixed(1)}%)`);
     },
   });
 
-  // Lock scanning for MIN_SCANNING_DURATION when detection starts
   useEffect(() => {
     if (isDetecting) {
       setScanningLocked(true);
@@ -126,76 +151,67 @@ const Index = () => {
     }
   }, [isDetecting]);
 
-  // React to distanceStatus changes to update tutorialStep
+  // 🚨 3. โค้ดพระเอก: ปรับ Logic การแสดงหน้า Success ให้เสถียร ไม่เคลียร์ทิ้งมั่วซั่ว
   useEffect(() => {
     if (!isDetecting) return;
 
-    // Clear any pending success timer if status changes away from good
-    if (distanceStatus !== "good" && successTimerRef.current) {
-      clearTimeout(successTimerRef.current);
-      successTimerRef.current = null;
-    }
-
     if (distanceStatus === "too_close") {
       setTutorialStep("too_close");
+      // ถ้าเข้ามาใกล้เกินไป ค่อยยกเลิกเวลา Success
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current);
+        successTimerRef.current = null;
+      }
     } else if (distanceStatus === "good") {
       if (scanningLocked) {
-        // Still in minimum scanning period, keep showing scanning
         setTutorialStep("scanning");
       } else {
-        // Min duration passed and distance is good → success!
         setTutorialStep("success");
-        // After 2.5s of success, go live
-        successTimerRef.current = setTimeout(() => {
-          setIsLive(true);
-          setTutorialStep("initial");
-          setIsDetecting(false);
-          successTimerRef.current = null;
-        }, 2500);
+        // ถ้าเวลายังไม่เดิน ค่อยให้เริ่มเดิน (ป้องกันมันทับซ้อนกัน)
+        if (!successTimerRef.current) {
+          successTimerRef.current = setTimeout(() => {
+            setIsLive(true);
+            setTutorialStep("initial");
+            setIsDetecting(false);
+            successTimerRef.current = null;
+          }, 3000); // แสดงหน้า Success แค่ 3 วิพอแล้วเริ่มเกมเลย
+        }
       }
     } else {
-      // no_face — keep scanning
-      setTutorialStep("scanning");
+      // กรณี "no_face"
+      // ถ้าเรากำลังขึ้นจอ Success อยู่ แล้วหน้าหลุดไปแว๊บเดียว ไม่ต้องเปลี่ยนกลับไปสแกน (ปล่อยเนียนไป)
+      if (!successTimerRef.current) {
+        setTutorialStep("scanning");
+      }
     }
   }, [isDetecting, distanceStatus, scanningLocked]);
 
-  // Ensure loading animation plays completely (minimum 3.5 seconds) only on first visit
   useEffect(() => {
     if (showInitialLoading) {
       const timer = setTimeout(() => {
         setShowInitialLoading(false);
         sessionStorage.setItem('hasInitialLoaded', 'true');
       }, 3500);
-
       return () => clearTimeout(timer);
     }
   }, [showInitialLoading]);
 
-  // Monitor authentication state
   useEffect(() => {
-    // Set timeout to prevent infinite loading
     const authTimeout = setTimeout(() => {
       if (isCheckingAuth) {
-        console.warn("Auth check timeout, setting isCheckingAuth to false");
         setIsCheckingAuth(false);
       }
-    }, 5000); // 5 second timeout
+    }, 5000);
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      clearTimeout(authTimeout); // Clear timeout when auth state is received
-
+      clearTimeout(authTimeout);
       const wasAuthenticated = isAuthenticated;
       const nowAuthenticated = !!user;
 
-      // Update streak when user logs in
       if (nowAuthenticated && user) {
-        // 🚨 สั่งให้ไปปลุก AI Model (Warm up) เตรียมพร้อมไว้ตั้งแต่ตอนเข้าสู่ระบบเสร็จ
         warmUpModel();
-        
-        // 🚨 สั่งโหลดรูปโปรไฟล์เพื่อนๆ ทุกคนล่วงหน้า! (Prefetch)
         preloadAllAvatars();
         
-        // จำ URL รูปโปรไฟล์ไว้ตั้งแต่ตอนล็อคอิน
         if (user.photoURL) {
           localStorage.setItem("cached_avatar", user.photoURL);
         }
@@ -210,24 +226,19 @@ const Index = () => {
         }
       }
 
-      // Show loading animation when auth state changes (login/logout)
       if (wasAuthenticated !== nowAuthenticated && !isCheckingAuth) {
         setIsAuthTransitioning(true);
         setTimeout(() => {
           setIsAuthenticated(nowAuthenticated);
           setIsAuthTransitioning(false);
-
-          // Show camera permission modal after login
           if (nowAuthenticated && !cameraPermissionGranted && !localStorage.getItem('hasShownCameraModal')) {
             setShowCameraPermission(true);
             localStorage.setItem('hasShownCameraModal', 'true');
           }
-        }, 3500); // Show loading for 3.5 seconds
+        }, 3500); 
       } else {
         setIsAuthenticated(nowAuthenticated);
         setIsCheckingAuth(false);
-
-        // Show camera permission modal after login
         if (nowAuthenticated && !cameraPermissionGranted && !localStorage.getItem('hasShownCameraModal')) {
           setShowCameraPermission(true);
           localStorage.setItem('hasShownCameraModal', 'true');
@@ -241,7 +252,6 @@ const Index = () => {
     };
   }, [isAuthenticated, isCheckingAuth, cameraPermissionGranted]);
 
-  // ล้างหน้าจอ Canvas ทิ้งเมื่อกดปุ่ม STOP หรือปิดระบบ
   useEffect(() => {
     if (!isLive && !isDetecting && webcamCanvas) {
       const ctx = webcamCanvas.getContext('2d');
@@ -254,18 +264,18 @@ const Index = () => {
   const handleCategoryChange = (cat: Category) => {
     setCategory(cat);
     setActivePhrase(getPhrasesByCategory(cat)[0]);
-    setSelectedVariant("adult"); // Reset variant when changing category
+    setSelectedVariant("adult"); 
     setView("game");
     setSidebarOpen(false);
-    // Save last accessed category
     localStorage.setItem('lastCategory', cat);
   };
 
   const handlePhraseSelect = (phrase: Phrase) => {
     setActivePhrase(phrase);
     setGameOpen(true);
-    setSelectedVariant("adult"); // Reset variant when changing phrase
-    // Save last accessed category and phrase
+    setSelectedVariant("adult"); 
+    setByeStep(1); 
+    setEatStep(1); 
     localStorage.setItem('lastCategory', phrase.category);
     localStorage.setItem('lastPhraseId', phrase.id);
   };
@@ -280,7 +290,6 @@ const Index = () => {
           frameRate: { ideal: 30 }
         }
       });
-      // Stop the stream immediately, we just want permission
       stream.getTracks().forEach(track => track.stop());
       setCameraPermissionGranted(true);
       localStorage.setItem('cameraPermissionGranted', 'true');
@@ -301,6 +310,8 @@ const Index = () => {
     setIsDetecting(false);
     setTutorialStep("initial");
     setIsPhraseCompleted(false);
+    setByeStep(1);
+    setEatStep(1);
     if (successTimerRef.current) {
       clearTimeout(successTimerRef.current);
       successTimerRef.current = null;
@@ -309,26 +320,22 @@ const Index = () => {
 
   const handlePhraseCompletion = () => {
     setIsPhraseCompleted(true);
-    // You can add any additional logic here, like playing a success sound
     console.log("🎉 Phrase completed!");
   };
 
   const handleCollectPoints = () => {
     if (!isPhraseCompleted) return;
-
-    // Collect points logic here
     console.log("Points collected!");
-
-    // Add to completed phrases
     setCompletedPhrases(prev => new Set([...prev, activePhrase.id]));
 
-    // Move to next phrase or close modal
     const phrases = getPhrasesByCategory(category);
     const currentIndex = phrases.findIndex(p => p.id === activePhrase.id);
     if (currentIndex < phrases.length - 1) {
       setActivePhrase(phrases[currentIndex + 1]);
-      setSelectedVariant("adult"); // Reset variant when moving to next phrase
-      setIsPhraseCompleted(false); // Reset for next phrase
+      setSelectedVariant("adult"); 
+      setIsPhraseCompleted(false); 
+      setByeStep(1); 
+      setEatStep(1); 
       setIsLive(false);
       setIsDetecting(false);
       setTutorialStep("initial");
@@ -337,7 +344,6 @@ const Index = () => {
         successTimerRef.current = null;
       }
     } else {
-      // Close modal
       setGameOpen(false);
       setIsLive(false);
       setIsDetecting(false);
@@ -347,13 +353,9 @@ const Index = () => {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-
     try {
       await signOutUser();
-      // ลบแคชรูปโปรไฟล์ออกตอนล็อคเอาท์ด้วย
       localStorage.removeItem("cached_avatar");
-      
-      // Wait for visual feedback (3.5 seconds to match loading animation)
       await new Promise(resolve => setTimeout(resolve, 3500));
       setView("home");
       setSidebarOpen(false);
@@ -368,7 +370,6 @@ const Index = () => {
     }
   };
 
-  // Show loading while initial loading or checking auth state or transitioning
   if (showInitialLoading || isCheckingAuth) {
     return <LoadingScreen message="กำลังตรวจสอบ..." />;
   }
@@ -381,7 +382,6 @@ const Index = () => {
     return <LoadingScreen message="กำลังออกจากระบบ..." />;
   }
 
-  // Show Landing Page if not authenticated
   if (!isAuthenticated) {
     return <LandingPage onLoginSuccess={() => { }} />;
   }
@@ -391,9 +391,13 @@ const Index = () => {
       <GameSidebar
         activeCategory={category}
         onCategoryChange={handleCategoryChange}
+        onPlayGame={() => { setView("gamesetup"); setSidebarOpen(false); }}
+        onQuest={() => { setView("quest"); setSidebarOpen(false); }}
         onLeaderboard={() => { setView("leaderboard"); setSidebarOpen(false); }}
         onProfile={() => { setView("profile"); setSidebarOpen(false); }}
         onHome={() => { setView("home"); setSidebarOpen(false); }}
+        showPlayGame={view === "gamesetup"}
+        showQuest={view === "quest"}
         showLeaderboard={view === "leaderboard"}
         showHome={view === "home"}
         showProfile={view === "profile"}
@@ -402,7 +406,6 @@ const Index = () => {
       />
 
       <main className="flex-1 min-h-screen">
-        {/* Top bar */}
         <header className="border-b-[3px] border-foreground bg-card px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3 pl-12 lg:pl-0">
             {view === "home" && (
@@ -417,17 +420,29 @@ const Index = () => {
                 <h2 className="font-display text-xl text-foreground">Leaderboard</h2>
               </>
             )}
+            {view === "quest" && (
+              <>
+                <span className="material-symbols-outlined text-foreground text-[20px]">scrollable_header</span>
+                <h2 className="font-display text-xl text-foreground">Quest</h2>
+              </>
+            )}
             {view === "profile" && (
               <>
                 <User size={20} className="text-foreground" />
                 <h2 className="font-display text-xl text-foreground">Profile</h2>
               </>
             )}
+            {view === "gamesetup" && (
+              <>
+                <span className="material-symbols-outlined text-foreground text-[20px]">sports_esports</span>
+                <h2 className="font-display text-xl text-foreground">Play Game</h2>
+              </>
+            )}
             {view === "game" && (
               <>
                 <img src={categoryIconMap[category]} alt={category} className="w-5 h-5 object-contain" />
                 <h2 className="font-display text-xl text-foreground">
-                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                  {categories.find(c => c.id === category)?.label || category}
                 </h2>
               </>
             )}
@@ -440,7 +455,6 @@ const Index = () => {
           </div>
         </header>
 
-        {/* Content */}
         <div className="h-[calc(100vh-4.5rem)] flex flex-col">
           {view === "home" && (
             <div className="p-4 lg:p-6 h-full">
@@ -448,12 +462,11 @@ const Index = () => {
                 onCategorySelect={(cat) => {
                   setCategory(cat);
                   setActivePhrase(getPhrasesByCategory(cat)[0]);
-                  setSelectedVariant("adult"); // Reset variant when selecting category
+                  setSelectedVariant("adult"); 
                   setView("game");
                   localStorage.setItem('lastCategory', cat);
                 }}
                 onResumeLesson={() => {
-                  // Resume to last accessed phrase
                   const lastPhraseId = localStorage.getItem('lastPhraseId');
                   const lastCat = (localStorage.getItem('lastCategory') as Category) || 'general';
                   const phrases = getPhrasesByCategory(lastCat);
@@ -461,9 +474,9 @@ const Index = () => {
 
                   setCategory(lastCat);
                   setActivePhrase(lastPhrase);
-                  setSelectedVariant("adult"); // Reset variant when resuming
+                  setSelectedVariant("adult"); 
                   setView("game");
-                  setGameOpen(true); // เปิด modal
+                  setGameOpen(true); 
                 }}
                 onLeaderboard={() => setView("leaderboard")}
                 completedPhrases={completedPhrases}
@@ -476,6 +489,16 @@ const Index = () => {
               <LeaderboardView />
             </div>
           )}
+          {view === "quest" && (
+            <div className="h-full overflow-y-auto">
+              <QuestView streak={userStreak} />
+            </div>
+          )}
+          {view === "gamesetup" && (
+            <div className="h-full flex flex-col w-full">
+              <GameSetupPage />
+            </div>
+          )}
           {view === "profile" && (
             <div className="p-4 lg:p-6 h-full">
               <ProfileEdit onBack={() => setView("home")} />
@@ -483,7 +506,6 @@ const Index = () => {
           )}
           {view === "game" && (
             <div className="flex-1 overflow-y-auto p-8 lg:p-12 relative pb-32">
-              {/* Content Header */}
               <div className="flex justify-between items-end mb-8">
                 <div>
                   <h2 className="text-4xl font-black mb-2">Phrases</h2>
@@ -493,7 +515,6 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* Phrase Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                 {getPhrasesByCategory(category).map((phrase) => (
                   <div
@@ -518,10 +539,8 @@ const Index = () => {
           )}
         </div>
 
-        {/* Playing Game Modal */}
         {gameOpen && (
           <>
-            {/* Backdrop with blur */}
             <div
               className="fixed inset-0 z-50 bg-foreground/30 backdrop-blur-sm animate-backdrop-in"
               onClick={() => {
@@ -532,12 +551,9 @@ const Index = () => {
               }}
             />
 
-            {/* Modal content */}
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
               <div className="bg-white dark:bg-slate-900 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col max-w-7xl w-full h-[90vh] pointer-events-auto animate-modal-in">
-                {/* Header Section */}
                 <header className="flex items-center justify-end p-4 lg:p-6 border-b-[3px] border-foreground bg-yellow-400">
-
                   <div className="flex items-center gap-3 lg:gap-4">
                     <div className="hidden md:flex items-center px-3 lg:px-4 py-1.5 lg:py-2 bg-pink-400 border-[3px] border-foreground rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                       <span className="text-white font-black text-xs lg:text-sm">
@@ -559,21 +575,75 @@ const Index = () => {
                 </header>
 
                 <div className="flex flex-1 flex-col overflow-hidden">
-                  {/* Main Workspace Area */}
                   <main className="flex-1 p-3 lg:p-4 xl:p-6 bg-[#f8f6f6] dark:bg-[#221610] overflow-y-auto flex flex-col justify-between">
-                    {/* Current Word Display (Center) */}
                     <div className="flex items-center justify-center pb-2">
-                      <h2 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
-                        {activePhrase?.id === "g1"
-                          ? (selectedVariant === "adult" ? "สวัสดีผู้ใหญ่" : "สวัสดีเพื่อน")
-                          : activePhrase?.id === "g4"
-                            ? (selectedVariant === "adult" ? "กินแล้ว" : "ยังไม่ได้กิน")
-                            : (activePhrase?.text ?? "Hello")
-                        }
-                      </h2>
+                      {activePhrase?.id === "g2" ? (
+                        <h2 className="text-2xl lg:text-3xl font-black uppercase tracking-tight flex items-center gap-2">
+                          <span className="text-slate-900 dark:text-white">ลาก่อน</span>
+                          <span className="text-slate-900 dark:text-white mx-1">|</span>
+                          <span
+                            className={`transition-colors duration-300 ${
+                              byeStep === 1
+                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                                : "text-slate-400"
+                            }`}
+                          >
+                            ฉัน
+                          </span>
+                          <span
+                            className={`transition-colors duration-300 ${
+                              byeStep === 2
+                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                                : "text-slate-400"
+                            }`}
+                          >
+                            ไป
+                          </span>
+                        </h2>
+                      ) : activePhrase?.id === "g3" ? (
+                        <h2 className="text-2xl lg:text-3xl font-black uppercase tracking-tight flex items-center gap-2">
+                          <span className="text-slate-900 dark:text-white">กินข้าวหรือยัง?</span>
+                          <span className="text-slate-900 dark:text-white mx-1">|</span>
+                          <span
+                            className={`transition-colors duration-300 ${
+                              eatStep === 1
+                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                                : "text-slate-400"
+                            }`}
+                          >
+                            ข้าว
+                          </span>
+                          <span
+                            className={`transition-colors duration-300 ${
+                              eatStep === 2
+                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                                : "text-slate-400"
+                            }`}
+                          >
+                            กิน
+                          </span>
+                          <span
+                            className={`transition-colors duration-300 ${
+                              eatStep === 3
+                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                                : "text-slate-400"
+                            }`}
+                          >
+                            หรือยัง?
+                          </span>
+                        </h2>
+                      ) : (
+                        <h2 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                          {activePhrase?.id === "g1"
+                            ? (selectedVariant === "adult" ? "สวัสดีผู้ใหญ่" : "สวัสดีเพื่อน")
+                            : activePhrase?.id === "g4"
+                              ? (selectedVariant === "adult" ? "กินแล้ว" : "ยังไม่ได้กิน")
+                              : (activePhrase?.text ?? "Hello")
+                          }
+                        </h2>
+                      )}
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-3 items-start max-w-3xl mx-auto">
-                      {/* Tutorial Video Section */}
                       <div className="flex flex-col gap-1.5 lg:gap-2">
                         <div className="relative aspect-square w-full max-w-md mx-auto bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
                           <VideoCard phrase={activePhrase?.text ?? "Hello"} category={activePhrase?.category ?? "general"} variant={(activePhrase?.id === "g1" || activePhrase?.id === "g4") ? selectedVariant : undefined} />
@@ -584,7 +654,6 @@ const Index = () => {
                           </div>
                         </div>
 
-                        {/* Video Controls - Show for "สวัสดี" phrase (g1) and "กินข้าวหรือยัง" phrase (g4) */}
                         {activePhrase?.id === "g1" && (
                           <div className="flex gap-1.5 lg:gap-2 max-w-md mx-auto w-full">
                             <button
@@ -631,7 +700,6 @@ const Index = () => {
                         )}
                       </div>
 
-                      {/* Live Cam Section */}
                       <div className="flex flex-col gap-1.5 lg:gap-2">
                         <div className="relative aspect-square w-full max-w-md mx-auto bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
                           <WebcamView 
@@ -641,7 +709,6 @@ const Index = () => {
                             onCanvasReady={(canvas) => setWebcamCanvas(canvas)}
                           />
 
-                          {/* Tracking Overlays */}
                           {(tutorialStep === "scanning" || tutorialStep === "too_close") && (
                             <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center z-20 transition-all">
                               <img src={guideHumanImg} alt="Guide" className="w-full h-full object-cover opacity-80" />
@@ -661,17 +728,14 @@ const Index = () => {
                             </div>
                           )}
 
-                          {/* Recognition Overlay */}
                           <div className="absolute inset-0 border-4 border-dashed border-[#ec5b13]/50 m-3 rounded-lg pointer-events-none"></div>
 
-                          {/* Points Badge */}
                           <div className="absolute top-3 right-3 animate-bounce z-10">
                             <div className="bg-pink-500 text-white border-[3px] border-foreground rounded-xl px-2 lg:px-3 py-1 font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1 text-xs">
                               + {activePhrase?.id === "g1" || activePhrase?.id === "g4" ? "5" : "10"} PTS
                             </div>
                           </div>
 
-                          {/* Live Indicator Badge */}
                           <div className="absolute bottom-3 left-3 z-10">
                             <div className={`px-2 py-1 border-[3px] border-foreground rounded-full font-black text-xs flex items-center gap-1.5 ${isLive
                               ? 'bg-red-500 text-white animate-pulse'
@@ -683,10 +747,8 @@ const Index = () => {
                             </div>
                           </div>
 
-                          {/* Sign Recognition Status */}
                           {isLive && (
                             <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
-                              {/* Buffer Status */}
                               <div className="bg-white/95 backdrop-blur-sm border-[2px] border-foreground rounded-lg px-2 py-1 font-bold text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                                 <div className="flex items-center gap-1.5">
                                   <div className="w-16 h-1.5 bg-slate-200 border border-foreground rounded-full overflow-hidden">
@@ -699,7 +761,6 @@ const Index = () => {
                                 </div>
                               </div>
 
-                              {/* Current Prediction */}
                               {signRecognition.currentPrediction && signRecognition.currentConfidence >= 0.5 && (
                                 <div className={`bg-white/95 backdrop-blur-sm border-[2px] ${signRecognition.isMatched ? 'border-green-500 bg-green-50/95' : 'border-foreground'} rounded-lg px-2 py-1 font-bold text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] max-w-[180px]`}>
                                   <div className="flex items-center gap-1">
@@ -714,7 +775,6 @@ const Index = () => {
                                 </div>
                               )}
 
-                              {/* Error Message */}
                               {signRecognition.error && (
                                 <div className="bg-red-500/95 backdrop-blur-sm border-[2px] border-foreground rounded-lg px-2 py-1 font-bold text-xs text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] max-w-[180px]">
                                   ⚠️ Error
@@ -724,19 +784,19 @@ const Index = () => {
                           )}
                         </div>
 
-                        {/* Control Button */}
                         <button
                           onClick={() => {
                             if (!cameraPermissionGranted) {
                               setShowCameraPermission(true);
                             } else if (!isDetecting && !isLive) {
-                              // Start real distance detection
                               setTutorialStep("scanning");
                               setIsDetecting(true);
                             } else {
                               setIsLive(false);
                               setIsDetecting(false);
                               setTutorialStep("initial");
+                              setByeStep(1); 
+                              setEatStep(1); 
                               if (successTimerRef.current) {
                                 clearTimeout(successTimerRef.current);
                                 successTimerRef.current = null;
@@ -755,7 +815,6 @@ const Index = () => {
                       </div>
                     </div>
 
-                    {/* Bottom Footer Controls */}
                     <footer className="mt-3 flex items-center justify-between border-t-[3px] border-slate-200 dark:border-slate-800 pt-3">
                       <div className="flex flex-col items-start gap-1">
                         <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Current Progress</span>
@@ -785,12 +844,11 @@ const Index = () => {
 
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
 
-      {/* Camera Permission Modal */}
       {showCameraPermission && (
         <>
           <div
             className="fixed inset-0 z-50 bg-foreground/50 backdrop-blur-sm"
-            onClick={() => { }} // Prevent closing by clicking backdrop
+            onClick={() => { }} 
           />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="brutal-card-lg max-w-md w-full bg-background">

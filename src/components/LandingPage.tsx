@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Check } from "lucide-react";
 import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "@/lib/auth";
-import logoSignMate from "@/asset/image/LOGO_SignMate.png";
 import generalImg from "@/asset/image/general.png";
 
 interface LandingPageProps {
@@ -153,7 +152,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
       <nav className="w-full py-6 px-8 flex justify-between items-center border-b-4 border-sq-black bg-white">
         <div className="flex items-center gap-3">
           <div className="bg-sq-pink p-2 rounded-xl sq-border">
-            <img src={logoSignMate} alt="SignMate Logo" className="w-8 h-8 object-contain" />
+            <img src="/LOGO_SignMate.png" alt="SignMate Logo" className="w-8 h-8 object-contain" />
           </div>
           <div>
             <span className="brand-font text-3xl tracking-tight text-sq-pink">SignMate</span>

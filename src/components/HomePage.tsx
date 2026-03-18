@@ -47,7 +47,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, comp
   // Build video URL (same logic as VideoCard)
   const getVideoUrl = () => {
     let videoFileName = nextPhrase.text;
-    
+
     // Handle phrases with multiple options
     if (lastCategory === "general") {
       if (nextPhrase.text.includes("สวัสดี") && nextPhrase.text.includes("|")) {
@@ -56,18 +56,18 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, comp
         videoFileName = "กินแล้ว";
       }
       // Handle phrases with question marks
-      if (nextPhrase.text === "กินข้าวแล้วหรือยัง?") {
+      if (nextPhrase.text === "กินข้าวหรือยัง?") {
         videoFileName = "กินข้าวแล้วหรือยัง";
       } else if (nextPhrase.text === "สบายดีไหม?") {
         videoFileName = "สบายดีไหม";
       }
     }
-    
+
     // Remove question marks from Q&A category video filenames
     if (lastCategory === "qa") {
       videoFileName = videoFileName.replace("?", "");
     }
-    
+
     return `/videos/${lastCategory}/${videoFileName}.mp4`;
   };
 
@@ -93,7 +93,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, comp
               </div>
             </div>
             <div className="relative z-10">
-              <button 
+              <button
                 onClick={() => onCategorySelect("general")}
                 className="brutal-btn-primary px-8 py-4 rounded-xl font-black text-xl uppercase tracking-tighter"
               >
@@ -110,7 +110,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, comp
           <section>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-2xl font-black uppercase italic tracking-tighter">Current Quest</h3>
-              <button 
+              <button
                 onClick={() => onCategorySelect(lastCategory)}
                 className="text-sm font-bold underline decoration-primary decoration-2 underline-offset-4"
               >
@@ -144,7 +144,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, comp
                   <div className="h-full bg-primary border-r-2 border-foreground" style={{ width: `${progressPercent}%` }}></div>
                 </div>
                 <div className="flex justify-end">
-                  <button 
+                  <button
                     onClick={onResumeLesson}
                     className="brutal-btn-primary px-6 py-2 rounded-lg font-black uppercase text-sm"
                   >
@@ -201,7 +201,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, comp
                 ))}
               </div>
             )}
-            <button 
+            <button
               onClick={onLeaderboard}
               className="w-full mt-6 brutal-btn-secondary py-2 font-black uppercase text-xs tracking-widest"
             >
@@ -242,7 +242,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, comp
 
       {/* Mobile Nav Shortcut (Visible on Small Screens) */}
       <div className="lg:hidden fixed bottom-6 right-6 z-50">
-        <button 
+        <button
           onClick={() => onCategorySelect("general")}
           className="brutal-btn-primary size-16 rounded-full flex items-center justify-center"
         >

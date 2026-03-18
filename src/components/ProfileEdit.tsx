@@ -20,7 +20,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
   const { toast } = useToast();
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
-  
+
   // 🚨 ดึงข้อมูลรูปภาพตั้งแต่วินาทีแรกที่โหลด Component ไม่ต้องรอ useEffect 🚨
   const [photoURL, setPhotoURL] = useState<string | null>(() => {
     // 1. ลองดึงจาก Auth ก่อน (ถ้ามี)
@@ -175,14 +175,15 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
       // ถ้ามีการอัปโหลดและ Crop รูปใหม่
       if (imageSrc && croppedArea && photoURL?.startsWith("blob:")) {
         const croppedBlob = await createCroppedImage(imageSrc, croppedArea);
-        
-        // 🚨 2. บีบอัดรูปภาพก่อนอัปโหลด 🚨
+
+        // 🚨 2. บีบอัดรูปภาพให้เล็กสุดๆ ก่อนอัปโหลด (ประมาณไม่เกิน 50KB) 🚨
         const compressionOptions = {
-          maxSizeMB: 0.2, // ลดขนาดให้ไม่เกิน 200 KB
-          maxWidthOrHeight: 400, // ลดความละเอียดกว้าง/ยาวสูงสุดแค่ 400px
+          maxSizeMB: 0.05,        // 🚨 ลดขนาดให้ไม่เกิน 0.05 MB (50 KB)
+          maxWidthOrHeight: 200,  // 🚨 ลดความละเอียดกว้าง/ยาวสูงสุดแค่ 200px
           useWebWorker: true,
+          initialQuality: 0.6,    // 🚨 ลดคุณภาพเริ่มต้นลงเหลือ 60%
         };
-        
+
         // แปลง Blob ที่ผ่านการบีบอัดแล้ว
         const compressedBlob = await imageCompression(croppedBlob as File, compressionOptions);
 
@@ -219,7 +220,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
       if (uploadedPhotoURL && uploadedPhotoURL !== user.photoURL) {
         setPhotoURL(uploadedPhotoURL);
         setImageError(false); // Reset error state
-        
+
         // 🚨 แอบจำ URL รูปใหม่ไว้ในเครื่อง เวลากดเข้ามาคราวหน้าจะได้โหลดทันที 🚨
         localStorage.setItem("cached_avatar", uploadedPhotoURL);
       }

@@ -1,203 +1,105 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import { useLeaderboard } from "@/hooks/useLeaderboard";
-import { LoadingScreen } from "@/components/LoadingScreen";
-
-export type Difficulty = "easy" | "medium" | "hard";
-
-interface GameSetupPageProps {
-  onStartGame?: (difficulty: Difficulty) => void;
-}
-
-export function GameSetupPage({ onStartGame }: GameSetupPageProps) {
-  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadingMessage, setLoadingMessage] = useState("กำลังโหลด...");
-  const navigate = useNavigate();
-  const { leaderboardData } = useLeaderboard();
-  const topThree = leaderboardData.slice(0, 3);
-
-  // Show loading animation when entering the page
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2500);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleStartGame = async () => {
-    setLoadingMessage("กำลังเริ่มเกม...");
-    setIsLoading(true);
-    
-    // Show loading animation for 2.5 seconds
-    await new Promise(resolve => setTimeout(resolve, 2500));
-    
-    if (onStartGame) {
-      onStartGame(difficulty);
-    }
-    // Navigate to game with difficulty state
-    navigate("/", { state: { startGame: true, difficulty } });
-  };
-
-  const handleBackToHome = async () => {
-    setLoadingMessage("กำลังกลับหน้าหลัก...");
-    setIsLoading(true);
-    
-    // Show loading animation for 2.5 seconds
-    await new Promise(resolve => setTimeout(resolve, 2500));
-    
-    navigate("/");
-  };
-
-  if (isLoading) {
-    return <LoadingScreen message={loadingMessage} />;
-  }
-
+export function GameSetupPage() {
   return (
-    <div className="min-h-screen bg-sq-cream flex flex-col py-10">
-      <div className="px-4 mb-8">
-        <button
-          onClick={handleBackToHome}
-          className="flex items-center gap-2 bg-sq-yellow bold-border px-6 py-3 rounded-xl comic-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:scale-95 transition-all font-bold"
-        >
-          <ArrowLeft size={20} />
-          <span className="font-black uppercase text-sm font-body">Back to Home</span>
-        </button>
+    <main className="flex-1 overflow-y-auto p-8 lg:p-12">
+      <div className="max-w-7xl mx-auto space-y-12">
+        <div className="mb-8">
+          <h1 className="text-6xl font-black uppercase tracking-tighter">Play Game</h1>
+          <div className="h-3 w-32 bg-primary mt-2"></div>
+        </div>
+        
+        {/* Suggested Game Hero Section */}
+        <section className="w-full">
+          <div className="neo-brutalism bg-[#ffea00] rounded-2xl overflow-hidden flex flex-col md:flex-row min-h-[250px]">
+            <div className="p-6 lg:p-8 flex-1 flex flex-col justify-center gap-4">
+              <div className="inline-block bg-black text-white px-3 py-1 text-xs font-black uppercase w-fit">Suggested for You</div>
+              <h2 className="text-3xl lg:text-5xl font-black uppercase tracking-tighter leading-none">Daily Sign <br/>Challenge</h2>
+              <p className="text-base lg:text-lg font-bold max-w-lg opacity-90">Test your reflexes and recall in today's specially curated practice set. Reach a streak of 10 to earn double XP!</p>
+              <div className="flex gap-3">
+                <button className="neo-brutalism bg-primary text-white px-6 py-3 font-black uppercase hover:translate-x-[-3px] hover:translate-y-[-3px] transition-transform active:translate-x-0 active:translate-y-0 text-sm">
+                  Start Challenge
+                </button>
+                <button className="neo-brutalism bg-white text-black px-6 py-3 font-black uppercase hover:translate-x-[-3px] hover:translate-y-[-3px] transition-transform active:translate-x-0 active:translate-y-0 text-sm">
+                  View Details
+                </button>
+              </div>
+            </div>
+            <div className="md:w-1/3 bg-primary border-l-4 border-black flex items-center justify-center p-8 relative overflow-hidden">
+              <span className="material-symbols-outlined text-[8rem] text-white/40 absolute -right-6 -bottom-6 rotate-12">bolt</span>
+              <span className="material-symbols-outlined text-7xl text-white relative z-10">rocket_launch</span>
+            </div>
+          </div>
+        </section>
+
+        {/* All Games Section */}
+        <section className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-3xl font-black uppercase tracking-tight">All Games</h3>
+              <div className="h-2 w-20 bg-primary mt-1"></div>
+            </div>
+            <button className="font-black uppercase text-sm border-b-4 border-black pb-1">View Full Library</button>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Game Card 1 */}
+            <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-xl p-4 flex flex-col gap-4 group">
+              <div className="aspect-square w-full neo-brutalism-sm bg-[#ffea00] flex items-center justify-center rounded-lg overflow-hidden relative">
+                <span className="material-symbols-outlined text-6xl text-black">style</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-black uppercase mb-1">Sign Flashcards</h3>
+                <p className="text-xs font-medium opacity-80 line-clamp-2">Master the basics with visual memory aids and repetitive learning.</p>
+              </div>
+              <button className="neo-brutalism bg-primary text-white py-2 text-sm font-black uppercase hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform">
+                Play Now
+              </button>
+            </div>
+            
+            {/* Game Card 2 */}
+            <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-xl p-4 flex flex-col gap-4 group">
+              <div className="aspect-square w-full neo-brutalism-sm bg-[#ff79c6] flex items-center justify-center rounded-lg overflow-hidden">
+                <span className="material-symbols-outlined text-6xl text-black">extension</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-black uppercase mb-1">Memory Match</h3>
+                <p className="text-xs font-medium opacity-80 line-clamp-2">Pair signs with their correct meanings. Fast-paced recall training.</p>
+              </div>
+              <button className="neo-brutalism bg-primary text-white py-2 text-sm font-black uppercase hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform">
+                Play Now
+              </button>
+            </div>
+            
+            {/* Game Card 3 */}
+            <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-xl p-4 flex flex-col gap-4 group">
+              <div className="aspect-square w-full neo-brutalism-sm bg-[#50fa7b] flex items-center justify-center rounded-lg overflow-hidden">
+                <span className="material-symbols-outlined text-6xl text-black">spellcheck</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-black uppercase mb-1">Sign Scramble</h3>
+                <p className="text-xs font-medium opacity-80 line-clamp-2">Unscramble letters to match the signing shown in the video clips.</p>
+              </div>
+              <button className="neo-brutalism bg-primary text-white py-2 text-sm font-black uppercase hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform">
+                Play Now
+              </button>
+            </div>
+            
+            {/* Game Card 4 */}
+            <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-xl p-4 flex flex-col gap-4 group">
+              <div className="aspect-square w-full neo-brutalism-sm bg-[#bd93f9] flex items-center justify-center rounded-lg overflow-hidden">
+                <span className="material-symbols-outlined text-6xl text-black">timer</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-black uppercase mb-1">Speed Signer</h3>
+                <p className="text-xs font-medium opacity-80 line-clamp-2">Timed challenge for experts. How many signs can you get in 60s?</p>
+              </div>
+              <button className="neo-brutalism bg-primary text-white py-2 text-sm font-black uppercase hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform">
+                Play Now
+              </button>
+            </div>
+          </div>
+        </section>
       </div>
-
-      <main className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full px-4">
-        {/* Mascot Section */}
-        <div className="relative mb-8">
-          <div className="w-48 h-48 md:w-64 md:h-64 bg-sq-pink bold-border rounded-full flex items-center justify-center comic-shadow overflow-hidden">
-            <img 
-              alt="Playful cartoon mascot character with goggles" 
-              className="w-4/5 h-4/5 object-contain" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAco_XHyH79xcKW_q-GVXU9f82MZSK36uzGKp7idCisiuhvHM8eRTQtERw7v-TPImgWM1WS82ckYYjDKnSwpFk_IIkO-ZGCnOqi9Xj2Dr-TH0iXcNmM-TcL6WvzcaA4xEn7z6OmpHfKAjeNgAPh8SbbFddoX4YAtICC3sKV-V8usPICqcXuhhi0t1hnkUgyAprtasjMnzPVJjcWDmKbb9KJySVdbp5j2P_Mm4D1E-Kx8ex01nqc3DaeJwMfckyu0K8OZEUoC75umM"
-            />
-          </div>
-          <div className="absolute -top-4 -right-4 bg-sq-yellow bold-border px-4 py-2 rounded-lg comic-shadow-sm rotate-12">
-            <p className="font-black text-xs uppercase font-body">Let's Go!</p>
-          </div>
-        </div>
-
-        {/* Title Section */}
-        <div className="text-center mb-10">
-          <h2 
-            className="text-5xl md:text-7xl font-black uppercase italic text-slate-900 dark:text-white mb-2 font-display"
-            style={{ WebkitTextStroke: "2px black" }}
-          >
-            New Quest
-          </h2>
-          <p className="text-lg font-bold opacity-70 font-body">Master the signs, unlock the world.</p>
-        </div>
-
-        {/* Difficulty Selection */}
-        <div className="w-full max-w-md mb-12">
-          <p className="text-center font-black uppercase text-sm mb-4 tracking-widest font-body">Select Difficulty</p>
-          <div className="grid grid-cols-3 gap-4">
-            <label className="cursor-pointer group">
-              <input 
-                checked={difficulty === "easy"}
-                className="peer hidden" 
-                name="difficulty" 
-                type="radio" 
-                value="easy"
-                onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-              />
-              <div className="bg-white dark:bg-slate-800 bold-border p-4 text-center rounded-xl comic-shadow-sm peer-checked:bg-green-400 peer-checked:translate-y-1 peer-checked:shadow-none transition-all group-hover:-translate-y-1">
-                <span className="block font-black uppercase text-sm font-body">Easy</span>
-              </div>
-            </label>
-            <label className="cursor-pointer group">
-              <input 
-                checked={difficulty === "medium"}
-                className="peer hidden" 
-                name="difficulty" 
-                type="radio" 
-                value="medium"
-                onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-              />
-              <div className="bg-white dark:bg-slate-800 bold-border p-4 text-center rounded-xl comic-shadow-sm peer-checked:bg-sq-yellow peer-checked:translate-y-1 peer-checked:shadow-none transition-all group-hover:-translate-y-1">
-                <span className="block font-black uppercase text-sm font-body">Med</span>
-              </div>
-            </label>
-            <label className="cursor-pointer group">
-              <input 
-                checked={difficulty === "hard"}
-                className="peer hidden" 
-                name="difficulty" 
-                type="radio" 
-                value="hard"
-                onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-              />
-              <div className="bg-white dark:bg-slate-800 bold-border p-4 text-center rounded-xl comic-shadow-sm peer-checked:bg-red-400 peer-checked:translate-y-1 peer-checked:shadow-none transition-all group-hover:-translate-y-1">
-                <span className="block font-black uppercase text-sm font-body">Hard</span>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        {/* Main Action */}
-        <div className="w-full max-w-md mb-16">
-          <button 
-            className="w-full bg-sq-yellow bold-border py-6 rounded-2xl comic-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:scale-95 transition-all"
-            onClick={handleStartGame}
-          >
-            <span className="text-4xl font-black uppercase italic tracking-tighter font-display">Start Game</span>
-          </button>
-        </div>
-
-        {/* High Scores Component */}
-        <div className="w-full max-w-lg bg-white dark:bg-slate-800 bold-border rounded-2xl comic-shadow p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="material-symbols-outlined text-sq-yellow fill-1">trophy</span>
-            <h3 className="font-black uppercase text-xl italic font-display">Top Scores</h3>
-          </div>
-          <div className="space-y-4">
-            {topThree.length > 0 ? (
-              topThree.map((entry, index) => (
-                <div key={index} className="flex items-center justify-between border-b-2 border-black/10 pb-2">
-                  <div className="flex items-center gap-3">
-                    <span className="font-black text-sq-pink font-body">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <span className="font-bold font-body">{entry.username}</span>
-                  </div>
-                  <span className="font-black text-primary font-body">
-                    {entry.points.toLocaleString()}
-                  </span>
-                </div>
-              ))
-            ) : (
-              <>
-                <div className="flex items-center justify-between border-b-2 border-black/10 pb-2">
-                  <div className="flex items-center gap-3">
-                    <span className="font-black text-sq-pink font-body">01</span>
-                    <span className="font-bold font-body">Alex_Quest</span>
-                  </div>
-                  <span className="font-black text-primary font-body">12,450</span>
-                </div>
-                <div className="flex items-center justify-between border-b-2 border-black/10 pb-2">
-                  <div className="flex items-center gap-3">
-                    <span className="font-black text-sq-pink font-body">02</span>
-                    <span className="font-bold font-body">Sami_Signs</span>
-                  </div>
-                  <span className="font-black text-primary font-body">11,200</span>
-                </div>
-                <div className="flex items-center justify-between border-b-2 border-black/10 pb-2">
-                  <div className="flex items-center gap-3">
-                    <span className="font-black text-sq-pink font-body">03</span>
-                    <span className="font-bold font-body">Jordan_Play</span>
-                  </div>
-                  <span className="font-black text-primary font-body">9,800</span>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </main>
-    </div>
+    </main>
   );
 }
+

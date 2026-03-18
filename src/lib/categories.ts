@@ -46,11 +46,11 @@ export const phrases: Phrase[] = [
   },
   { 
     id: "g3", 
-    text: "กินข้าวแล้วหรือยัง?", 
+    text: "กินข้าวหรือยัง?", 
     category: "general", 
     emoji: "🍚", 
     english: "Have you eaten?",
-    modelClass: "rice"
+    modelClasses: ["rice", "eat", "yet"]
   },
   { 
     id: "g4", 

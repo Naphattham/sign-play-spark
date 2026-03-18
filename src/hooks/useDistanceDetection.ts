@@ -24,6 +24,9 @@ export function useDistanceDetection({
   const detectorRef = useRef<FaceDetector | null>(null);
   const animFrameRef = useRef<number>(0);
   const lastStatusRef = useRef<DistanceStatus>("no_face");
+  
+  // 🚨 เพิ่มตัวแปรนับจำนวนเฟรมที่หาหน้าไม่เจอ เพื่อป้องกันอาการสแกนเนอร์กระพริบ
+  const noFaceFramesRef = useRef<number>(0);
 
   // Initialize face detector
   useEffect(() => {
@@ -85,9 +88,19 @@ export function useDistanceDetection({
 
       let newStatus: DistanceStatus;
 
+      // 🚨 ตรวจสอบการหลุดโฟกัสแบบให้โอกาส (Grace period)
       if (!result.detections || result.detections.length === 0) {
-        newStatus = "no_face";
+        noFaceFramesRef.current++;
+        // ถ้าหน้าหายไปเกิน 10 เฟรมติดกัน ค่อยบอกว่าหาไม่เจอจริงๆ
+        if (noFaceFramesRef.current > 10) {
+          newStatus = "no_face";
+        } else {
+          // ถ้าแค่กระพริบหลุด ให้ใช้ค่าสถานะเดิมไปก่อน
+          newStatus = lastStatusRef.current; 
+        }
       } else {
+        noFaceFramesRef.current = 0; // เจอหน้าแล้ว รีเซ็ตตัวนับ
+
         // Get the largest face detected
         const detection = result.detections.reduce((largest, det) => {
           const w = det.boundingBox?.width ?? 0;

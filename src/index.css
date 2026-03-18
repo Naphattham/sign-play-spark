@@ -142,6 +142,16 @@
   .comic-shadow-sm {
     box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.8);
   }
+
+  .neo-brutalism {
+    @apply border-[3px] border-foreground;
+    box-shadow: var(--shadow-brutal);
+  }
+
+  .neo-brutalism-sm {
+    @apply border-[3px] border-foreground;
+    box-shadow: var(--shadow-brutal-sm);
+  }
 }
 
 /* Hardware acceleration for smooth video rendering */
