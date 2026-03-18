@@ -98,7 +98,7 @@ def get_model():
     if _model_instance is None:
         tf = get_tf()
         model_path = os.path.join(MODEL_DIR, "final_model.keras")
-        # ลองโหลดแบบปกติ เพราะเวอร์ชันตรงกันแล้ว
+        print("📂 Loading TensorFlow Model...")
         _model_instance = tf.keras.models.load_model(model_path)
     return _model_instance
 
@@ -217,7 +217,6 @@ def process_frame(req: https_fn.Request) -> https_fn.Response:
         cv2 = get_cv2()
         np = get_np()
         
-        # ใส่ silent=True และ force=True เพื่อบังคับให้อ่าน JSON แก้ Error 415
         data = req.get_json(silent=True, force=True)
         if not data or "frame" not in data:
             return https_fn.Response(
@@ -254,7 +253,7 @@ def process_frame(req: https_fn.Request) -> https_fn.Response:
         )
 
 # ============================================================
-# CLOUD FUNCTION: Predict Sign (รับข้อมูลพิกัดจาก Frontend)
+# CLOUD FUNCTION: Predict Sign 
 # ============================================================
 @https_fn.on_request(
     cors=options.CorsOptions(cors_origins="*", cors_methods=["POST", "OPTIONS"]),
@@ -267,7 +266,6 @@ def predict_sign(req: https_fn.Request) -> https_fn.Response:
     try:
         np = get_np()
         
-        # ใส่ silent=True และ force=True เพื่อบังคับให้อ่าน JSON แก้ Error 415
         data = req.get_json(silent=True, force=True)
         if not data or "keypoints_buffer" not in data:
             return https_fn.Response(
@@ -308,17 +306,22 @@ def predict_sign(req: https_fn.Request) -> https_fn.Response:
         )
 
 # ============================================================
-# CLOUD FUNCTION: Get Model Info
+# CLOUD FUNCTION: Get Model Info (WARM-UP ENDPOINT)
 # ============================================================
 @https_fn.on_request(
     cors=options.CorsOptions(cors_origins="*", cors_methods=["GET", "OPTIONS"]),
-    memory=options.MemoryOption.GB_2
+    memory=options.MemoryOption.GB_4  # 🚨 เพิ่ม RAM เป็น 4GB เพราะฟังก์ชันนี้ต้องโหลด Model แล้ว
 )
 def get_model_info(req: https_fn.Request) -> https_fn.Response:
     if req.method == "OPTIONS":
         return https_fn.Response(status=204)
 
     classes = get_classes()
+    
+    # 🚨 บังคับโหลด TensorFlow Model ขึ้นมาบน RAM ทันที
+    # ทำให้ตอนผู้ใช้กด Predict ครั้งแรก จะไม่มีอาการค้าง (Cold Start)
+    get_model()
+
     return https_fn.Response(
         json.dumps({
             "classes": classes,

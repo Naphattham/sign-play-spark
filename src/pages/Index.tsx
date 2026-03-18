@@ -15,6 +15,9 @@ import { useMediaPipeHolistic } from "@/hooks/useMediaPipeHolistic";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { signOutUser, updateStreakOnLogin, getUserData } from "@/lib/auth";
+// 🚨 เพิ่มการ Import ฟังก์ชัน warmUpModel ตรงนี้ 🚨
+import { warmUpModel } from "@/lib/signLanguageAPI";
+
 import generalImg from "@/asset/image/general.png";
 import emotionalImg from "@/asset/image/emotional.png";
 import qaImg from "@/asset/image/qa.png";
@@ -160,6 +163,9 @@ const Index = () => {
 
       // Update streak when user logs in
       if (nowAuthenticated && user) {
+        // 🚨 สั่งให้ไปปลุก AI Model (Warm up) เตรียมพร้อมไว้ตั้งแต่ตอนเข้าสู่ระบบเสร็จ 🚨
+        warmUpModel();
+        
         try {
           const streakResult = await updateStreakOnLogin(user.uid);
           if (streakResult.streak !== undefined) {
@@ -201,7 +207,7 @@ const Index = () => {
     };
   }, [isAuthenticated, isCheckingAuth, cameraPermissionGranted]);
 
-  // 🚨 [เพิ่มส่วนนี้] ล้างหน้าจอ Canvas ทิ้งเมื่อกดปุ่ม STOP หรือปิดระบบ 🚨
+  // ล้างหน้าจอ Canvas ทิ้งเมื่อกดปุ่ม STOP หรือปิดระบบ
   useEffect(() => {
     if (!isLive && !isDetecting && webcamCanvas) {
       const ctx = webcamCanvas.getContext('2d');

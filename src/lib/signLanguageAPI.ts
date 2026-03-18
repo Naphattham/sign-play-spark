@@ -153,3 +153,19 @@ export function videoFrameToDataUrl(video: HTMLVideoElement): string {
   ctx.drawImage(video, 0, 0);
   return canvas.toDataURL('image/jpeg', 0.8);
 }
+
+/**
+ * 🚨 [ฟังก์ชันใหม่] 🚨
+ * ใช้สำหรับปลุก Cloud Functions และโหลด Model เตรียมไว้ล่วงหน้า
+ * (แนะนำให้เรียกใช้ตอนผู้ใช้ Login สำเร็จ)
+ */
+export async function warmUpModel(): Promise<void> {
+  console.log("🔥 Warming up AI model in background...");
+  try {
+    // การเรียก getModelInfo ตอนนี้จะสั่งให้ Backend โหลด TF Model ด้วย
+    await getModelInfo();
+    console.log("✅ AI model is warmed up and ready!");
+  } catch (error) {
+    console.warn("⚠️ Warm up failed, but will retry when playing.", error);
+  }
+}
