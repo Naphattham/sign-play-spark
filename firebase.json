@@ -31,7 +31,33 @@
         "firebase-debug.*.log",
         "*.local"
       ],
-      "runtime": "python313"
+      "runtime": "python311"
     }
-  ]
+  ],
+  "emulators": {
+    "functions": {
+      "port": 5001,
+      "host": "127.0.0.1"
+    },
+    "database": {
+      "port": 9000,
+      "host": "127.0.0.1"
+    },
+    "hosting": {
+      "port": 5000,
+      "host": "127.0.0.1"
+    },
+    "storage": {
+      "port": 9199,
+      "host": "127.0.0.1"
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    },
+    "logging": {
+      "host": "127.0.0.1",
+      "port": 4500
+    }
+  }
 }

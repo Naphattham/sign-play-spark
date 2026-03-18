@@ -1,1 +1,6 @@
-firebase_functions~=0.5.0
+firebase-functions>=0.1.0
+firebase-admin>=6.2.0
+tensorflow==2.15.0
+mediapipe>=0.10.0
+opencv-python-headless
+numpy<2.0.0

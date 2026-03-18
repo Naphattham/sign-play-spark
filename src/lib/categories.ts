@@ -7,6 +7,8 @@ export interface Phrase {
   videoUrl?: string;
   emoji?: string;
   english?: string;
+  modelClass?: string; // Maps to model prediction class
+  modelClasses?: string[]; // For phrases with multiple variants
 }
 
 export const categories: { id: Category; label: string; icon: string; color: string }[] = [
@@ -17,36 +19,201 @@ export const categories: { id: Category; label: string; icon: string; color: str
 ];
 
 export const phrases: Phrase[] = [
-  // General
-  { id: "g1", text: "สวัสดี (ผู้ใหญ่ | เพื่อน)", category: "general", emoji: "👋", english: "Hello" },
-  { id: "g2", text: "ลาก่อน", category: "general", emoji: "👋", english: "Goodbye" },
-  { id: "g3", text: "กินข้าวแล้วหรือยัง?", category: "general", emoji: "🍚", english: "Have you eaten?" },
-  { id: "g4", text: "กินแล้ว | ยังไม่ได้กิน", category: "general", emoji: "✅", english: "Already ate | Not yet" },
-  { id: "g5", text: "สบายดีไหม?", category: "general", emoji: "😊", english: "How are you?" },
-  { id: "g6", text: "สบายดี", category: "general", emoji: "👍", english: "I'm fine" },
-  // Emotions
-  { id: "e1", text: "โกรธ", category: "emotions", emoji: "😡", english: "Angry" },
-  { id: "e2", text: "กลัว", category: "emotions", emoji: "😨", english: "Scared" },
-  { id: "e3", text: "รัก", category: "emotions", emoji: "❤️", english: "Love" },
-  { id: "e4", text: "ไม่สบายใจ", category: "emotions", emoji: "🙁", english: "Uncomfortable" },
-  { id: "e5", text: "เหนื่อย", category: "emotions", emoji: "😩", english: "Tired" },
-  // Q&A
-  { id: "q1", text: "อะไร?", category: "qa", emoji: "❓", english: "What?" },
-  { id: "q2", text: "ทำไม?", category: "qa", emoji: "🤔", english: "Why?" },
-  { id: "q3", text: "เท่าไหร่?", category: "qa", emoji: "💰", english: "How much?" },
-  { id: "q4", text: "ใช่", category: "qa", emoji: "✅", english: "Yes" },
-  { id: "q5", text: "ไม่", category: "qa", emoji: "❌", english: "No" },
+  // General (บทสนทนาทั่วไป)
+  { 
+    id: "g1", 
+    text: "สวัสดี (ผู้ใหญ่ | เพื่อน)", 
+    category: "general", 
+    emoji: "👋", 
+    english: "Hello",
+    modelClasses: ["hello_adult", "hello_friend"]
+  },
+  { 
+    id: "g2", 
+    text: "ลาก่อน", 
+    category: "general", 
+    emoji: "👋", 
+    english: "Goodbye",
+    modelClasses: ["bye_go", "bye_me"]
+  },
+  { 
+    id: "g3", 
+    text: "กินข้าวแล้วหรือยัง?", 
+    category: "general", 
+    emoji: "🍚", 
+    english: "Have you eaten?",
+    modelClass: "rice"
+  },
+  { 
+    id: "g4", 
+    text: "กินแล้ว | ยังไม่ได้กิน", 
+    category: "general", 
+    emoji: "✅", 
+    english: "Already ate | Not yet",
+    modelClasses: ["already", "yet", "eat"]
+  },
+  { 
+    id: "g5", 
+    text: "สบายดีไหม?", 
+    category: "general", 
+    emoji: "😊", 
+    english: "How are you?",
+    modelClass: "how_are_you"
+  },
+  { 
+    id: "g6", 
+    text: "สบายดี", 
+    category: "general", 
+    emoji: "👍", 
+    english: "I'm fine",
+    modelClass: "fine"
+  },
+  
+  // Emotions (อารมณ์)
+  { 
+    id: "e1", 
+    text: "โกรธ", 
+    category: "emotions", 
+    emoji: "😡", 
+    english: "Angry",
+    modelClass: "angry"
+  },
+  { 
+    id: "e2", 
+    text: "กลัว", 
+    category: "emotions", 
+    emoji: "😨", 
+    english: "Scared",
+    modelClass: "fear"
+  },
+  { 
+    id: "e3", 
+    text: "รัก", 
+    category: "emotions", 
+    emoji: "❤️", 
+    english: "Love",
+    modelClass: "love"
+  },
+  { 
+    id: "e4", 
+    text: "ไม่สบายใจ", 
+    category: "emotions", 
+    emoji: "🙁", 
+    english: "Uncomfortable",
+    modelClass: "unhappy"
+  },
+  { 
+    id: "e5", 
+    text: "เหนื่อย", 
+    category: "emotions", 
+    emoji: "😩", 
+    english: "Tired",
+    modelClass: "tired"
+  },
+  
+  // Q&A (คำถาม-คำตอบ)
+  { 
+    id: "q1", 
+    text: "อะไร?", 
+    category: "qa", 
+    emoji: "❓", 
+    english: "What?",
+    modelClass: "what"
+  },
+  { 
+    id: "q2", 
+    text: "ทำไม?", 
+    category: "qa", 
+    emoji: "🤔", 
+    english: "Why?",
+    modelClass: "why"
+  },
+  { 
+    id: "q3", 
+    text: "เท่าไหร่?", 
+    category: "qa", 
+    emoji: "💰", 
+    english: "How much?",
+    modelClass: "how_much"
+  },
+  { 
+    id: "q4", 
+    text: "ใช่", 
+    category: "qa", 
+    emoji: "✅", 
+    english: "Yes",
+    modelClass: "yes"
+  },
+  { 
+    id: "q5", 
+    text: "ไม่", 
+    category: "qa", 
+    emoji: "❌", 
+    english: "No",
+    modelClass: "no"
+  },
 
-  // Illness
-  { id: "i1", text: "เป็นหวัด", category: "illness", emoji: "🤧", english: "Cold" },
-  { id: "i2", text: "เจ็บคอ", category: "illness", emoji: "😷", english: "Sore throat" },
-  { id: "i3", text: "ปวดท้อง", category: "illness", emoji: "🤰", english: "Stomachache" },
-  { id: "i4", text: "ปวดหัว", category: "illness", emoji: "🤕", english: "Headache" },
-  { id: "i5", text: "เป็นไข้", category: "illness", emoji: "🌡️", english: "Fever" },
+  // Illness (อาการเจ็บป่วย)
+  { 
+    id: "i1", 
+    text: "เป็นหวัด", 
+    category: "illness", 
+    emoji: "🤧", 
+    english: "Cold",
+    modelClass: "cold"
+  },
+  { 
+    id: "i2", 
+    text: "เจ็บคอ", 
+    category: "illness", 
+    emoji: "😷", 
+    english: "Sore throat",
+    modelClass: "sore_throat"
+  },
+  { 
+    id: "i3", 
+    text: "ปวดท้อง", 
+    category: "illness", 
+    emoji: "🤰", 
+    english: "Stomachache",
+    modelClass: "stomachache"
+  },
+  { 
+    id: "i4", 
+    text: "ปวดหัว", 
+    category: "illness", 
+    emoji: "🤕", 
+    english: "Headache",
+    modelClass: "headache"
+  },
+  { 
+    id: "i5", 
+    text: "เป็นไข้", 
+    category: "illness", 
+    emoji: "🌡️", 
+    english: "Fever",
+    modelClass: "fever"
+  },
 ];
 
 export const getPhrasesByCategory = (category: Category) =>
   phrases.filter((p) => p.category === category);
+
+// Helper function to find phrase by model class prediction
+export const getPhraseByModelClass = (modelClass: string): Phrase | undefined => {
+  return phrases.find(
+    (p) =>
+      p.modelClass === modelClass ||
+      p.modelClasses?.includes(modelClass)
+  );
+};
+
+// Helper function to check if a model prediction matches a phrase
+export const checkPhraseMatch = (phrase: Phrase, modelClass: string): boolean => {
+  if (phrase.modelClass === modelClass) return true;
+  if (phrase.modelClasses?.includes(modelClass)) return true;
+  return false;
+};
 
 export const leaderboardData = [
   { rank: 1, username: "SignMaster99", points: 12450 },

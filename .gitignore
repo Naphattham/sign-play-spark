@@ -6,11 +6,28 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+firebase-debug.log*
 
+# Dependencies & Build
 node_modules
 dist
 dist-ssr
 *.local
+
+# =========================
+# Python & Virtual Env (เพิ่มใหม่)
+# =========================
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =========================
+# Firebase (เพิ่มใหม่)
+# =========================
+.firebase/
 
 # Environment variables
 .env

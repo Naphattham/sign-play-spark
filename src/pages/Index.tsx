@@ -11,6 +11,7 @@ import { HomePage } from "@/components/HomePage";
 import { Category, Phrase, getPhrasesByCategory } from "@/lib/categories";
 import { LogOut, X, Camera, Home, User } from "lucide-react";
 import { useDistanceDetection, DistanceStatus } from "@/hooks/useDistanceDetection";
+import { useMediaPipeHolistic } from "@/hooks/useMediaPipeHolistic";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { signOutUser, updateStreakOnLogin, getUserData } from "@/lib/auth";
@@ -57,6 +58,7 @@ const Index = () => {
   const [selectedVariant, setSelectedVariant] = useState<"adult" | "friend">("adult");
   const [tutorialStep, setTutorialStep] = useState<"initial" | "scanning" | "too_close" | "success">("initial");
   const [webcamVideo, setWebcamVideo] = useState<HTMLVideoElement | null>(null);
+  const [webcamCanvas, setWebcamCanvas] = useState<HTMLCanvasElement | null>(null);
   const [isDetecting, setIsDetecting] = useState(false);
   const [scanningLocked, setScanningLocked] = useState(false);
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -67,6 +69,21 @@ const Index = () => {
     enabled: isDetecting,
     videoElement: webcamVideo,
     tooCloseThreshold: 0.45,
+  });
+
+  // Sign language recognition with MediaPipe Holistic
+  const signRecognition = useMediaPipeHolistic({
+    videoElement: webcamVideo,
+    canvasElement: webcamCanvas,
+    enabled: isLive && gameOpen,
+    targetPhrase: activePhrase,
+    onPhraseMatch: (prediction, confidence) => {
+      console.log(`✅ Phrase matched! ${prediction} (${(confidence * 100).toFixed(1)}%)`);
+      handlePhraseCompletion();
+    },
+    onPrediction: (prediction) => {
+      console.log(`🔍 Prediction: ${prediction.prediction} (${(prediction.confidence * 100).toFixed(1)}%)`);
+    },
   });
 
   // Lock scanning for MIN_SCANNING_DURATION when detection starts
@@ -238,6 +255,12 @@ const Index = () => {
       clearTimeout(successTimerRef.current);
       successTimerRef.current = null;
     }
+  };
+
+  const handlePhraseCompletion = () => {
+    setIsPhraseCompleted(true);
+    // You can add any additional logic here, like playing a success sound
+    console.log("🎉 Phrase completed!");
   };
 
   const handleCollectPoints = () => {
@@ -558,7 +581,12 @@ const Index = () => {
                       {/* Live Cam Section */}
                       <div className="flex flex-col gap-1.5 lg:gap-2">
                         <div className="relative aspect-square w-full max-w-md mx-auto bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-                          <WebcamView onNextLevel={() => setIsPhraseCompleted(true)} cameraEnabled={cameraPermissionGranted} onVideoReady={(video) => setWebcamVideo(video)} />
+                          <WebcamView 
+                            onNextLevel={() => setIsPhraseCompleted(true)} 
+                            cameraEnabled={cameraPermissionGranted} 
+                            onVideoReady={(video) => setWebcamVideo(video)} 
+                            onCanvasReady={(canvas) => setWebcamCanvas(canvas)}
+                          />
 
                           {/* Tracking Overlays */}
                           {(tutorialStep === "scanning" || tutorialStep === "too_close") && (
@@ -601,6 +629,68 @@ const Index = () => {
                               LIVE
                             </div>
                           </div>
+
+                          {/* Sign Recognition Status */}
+                          {isLive && (
+                            <div className="absolute top-3 left-3 z-10">
+                              <div className="bg-black/80 text-white border-[3px] border-foreground rounded-lg px-3 py-2 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-xs">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="text-yellow-400">⚡</span>
+                                  <span>Buffer: {signRecognition.bufferLength}/40</span>
+                                </div>
+                                {signRecognition.currentPrediction && (
+                                  <div className="border-t border-white/20 pt-1 mt-1">
+                                    <div className="text-green-400 font-black">
+                                      {signRecognition.currentPrediction}
+                                    </div>
+                                    <div className="text-white/70 text-[10px]">
+                                      {(signRecognition.currentConfidence * 100).toFixed(1)}%
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Sign Recognition Status */}
+                          {isLive && (
+                            <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
+                              {/* Buffer Status */}
+                              <div className="bg-white/95 backdrop-blur-sm border-[2px] border-foreground rounded-lg px-2 py-1 font-bold text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                                <div className="flex items-center gap-1.5">
+                                  <div className="w-16 h-1.5 bg-slate-200 border border-foreground rounded-full overflow-hidden">
+                                    <div 
+                                      className="h-full bg-green-500 transition-all duration-300"
+                                      style={{ width: `${(signRecognition.bufferLength / 40) * 100}%` }}
+                                    ></div>
+                                  </div>
+                                  <span className="text-[10px] text-slate-600">{signRecognition.bufferLength}/40</span>
+                                </div>
+                              </div>
+
+                              {/* Current Prediction */}
+                              {signRecognition.currentPrediction && signRecognition.currentConfidence >= 0.5 && (
+                                <div className={`bg-white/95 backdrop-blur-sm border-[2px] ${signRecognition.isMatched ? 'border-green-500 bg-green-50/95' : 'border-foreground'} rounded-lg px-2 py-1 font-bold text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] max-w-[180px]`}>
+                                  <div className="flex items-center gap-1">
+                                    {signRecognition.isMatched && <span className="text-green-500">✓</span>}
+                                    <span className={`${signRecognition.isMatched ? 'text-green-700' : 'text-slate-700'} truncate`}>
+                                      {signRecognition.currentPrediction}
+                                    </span>
+                                    <span className={`${signRecognition.isMatched ? 'text-green-600' : 'text-slate-500'} text-[10px] ml-auto`}>
+                                      {(signRecognition.currentConfidence * 100).toFixed(0)}%
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Error Message */}
+                              {signRecognition.error && (
+                                <div className="bg-red-500/95 backdrop-blur-sm border-[2px] border-foreground rounded-lg px-2 py-1 font-bold text-xs text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] max-w-[180px]">
+                                  ⚠️ Error
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
 
                         {/* Control Button */}
