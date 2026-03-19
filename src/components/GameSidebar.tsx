@@ -75,12 +75,15 @@ export function GameSidebar({
 
     const userRef = dbRef(database, `users/${user.uid}`);
     
-    // Set up real-time listener for user data (points, photoURL)
+    // Set up real-time listener for user data (points, photoURL, username)
     const unsubscribe = onValue(userRef, (snapshot) => {
       if (snapshot.exists()) {
         const userData = snapshot.val();
         if (userData.points !== undefined) setPoints(userData.points);
         if (userData.photoURL && !photoURL) setPhotoURL(userData.photoURL);
+        if (userData.username || userData.displayName) {
+          setUsername(userData.username || userData.displayName);
+        }
       }
     }, (error) => {
       console.error("Error loading database data:", error);
@@ -203,7 +206,7 @@ export function GameSidebar({
               }}
             />
             <div className="flex-1 overflow-hidden text-left">
-              <p className="font-display text-secondary-foreground leading-tight text-[13px] truncate">{username}</p>
+              <p className="font-display text-secondary-foreground leading-tight text-[13px] truncate">{username?.split(" ")[0]}</p>
               <p className="text-[11px] font-bold text-secondary-foreground opacity-80 mt-0.5">{points.toLocaleString()} pts</p>
             </div>
             <ChevronRight size={18} className="text-secondary-foreground shrink-0 opacity-80" />

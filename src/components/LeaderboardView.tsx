@@ -81,12 +81,12 @@ export function LeaderboardView() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Podium for Top 3 */}
-      <div className="flex items-end justify-center gap-4 px-4">
+      <div className="flex items-end justify-center gap-2 sm:gap-4 px-2 sm:px-4">
         {/* 2nd Place */}
         <div className="flex flex-col items-center animate-slide-up" style={{ animationDelay: "100ms" }}>
           <div className="flex flex-col items-center gap-2 mb-2">
-            <div className="text-4xl">🥈</div>
-            <div className="w-16 h-16 rounded-full border-[3px] border-foreground bg-muted overflow-hidden">
+            <div className="text-2xl sm:text-4xl">🥈</div>
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-[2px] sm:border-[3px] border-foreground bg-muted overflow-hidden">
               <img 
                 src={topThree.find(e => e.rank === 2)?.photoURL || getAvatarUrl(null, topThree.find(e => e.rank === 2)?.username || "user")}
                 alt={topThree.find(e => e.rank === 2)?.username}
@@ -99,23 +99,23 @@ export function LeaderboardView() {
                 }}
               />
             </div>
-            <p className="font-black text-sm text-center line-clamp-1 w-20 break-words">
+            <p className="font-black text-xs sm:text-sm text-center line-clamp-1 w-16 sm:w-20 break-words">
               {topThree.find(e => e.rank === 2)?.username}
             </p>
-            <p className="text-xs font-bold text-primary">
+            <p className="text-[10px] sm:text-xs font-bold text-primary">
               {topThree.find(e => e.rank === 2)?.points.toLocaleString()} PTS
             </p>
           </div>
-          <div className="w-32 h-24 brutal-card bg-muted flex items-center justify-center">
-            <span className="font-black text-4xl opacity-20">2</span>
+          <div className="w-20 sm:w-28 md:w-32 h-16 sm:h-20 md:h-24 brutal-card bg-muted flex items-center justify-center">
+            <span className="font-black text-2xl sm:text-3xl md:text-4xl opacity-20">2</span>
           </div>
         </div>
 
         {/* 1st Place */}
         <div className="flex flex-col items-center animate-slide-up" style={{ animationDelay: "0ms" }}>
           <div className="flex flex-col items-center gap-2 mb-2">
-            <div className="text-4xl">👑</div>
-            <div className="w-20 h-20 rounded-full border-[3px] border-foreground bg-accent overflow-hidden shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+            <div className="text-2xl sm:text-4xl">👑</div>
+            <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full border-[2px] sm:border-[3px] border-foreground bg-accent overflow-hidden shadow-[2px_2px_0px_rgba(0,0,0,1)]">
               <img 
                 src={topThree.find(e => e.rank === 1)?.photoURL || getAvatarUrl(null, topThree.find(e => e.rank === 1)?.username || "user")}
                 alt={topThree.find(e => e.rank === 1)?.username}
@@ -128,23 +128,23 @@ export function LeaderboardView() {
                 }}
               />
             </div>
-            <p className="font-black text-sm text-center line-clamp-1 w-24 break-words">
+            <p className="font-black text-xs sm:text-sm text-center line-clamp-1 w-18 sm:w-24 break-words">
               {topThree.find(e => e.rank === 1)?.username}
             </p>
-            <p className="text-xs font-bold text-primary">
+            <p className="text-[10px] sm:text-xs font-bold text-primary">
               {topThree.find(e => e.rank === 1)?.points.toLocaleString()} PTS
             </p>
           </div>
-          <div className="w-36 h-32 brutal-card bg-secondary flex items-center justify-center">
-            <span className="font-black text-5xl opacity-20 text-secondary-foreground">1</span>
+          <div className="w-24 sm:w-32 md:w-36 h-20 sm:h-28 md:h-32 brutal-card bg-secondary flex items-center justify-center">
+            <span className="font-black text-3xl sm:text-4xl md:text-5xl opacity-20 text-secondary-foreground">1</span>
           </div>
         </div>
 
         {/* 3rd Place */}
         <div className="flex flex-col items-center animate-slide-up" style={{ animationDelay: "200ms" }}>
           <div className="flex flex-col items-center gap-2 mb-2">
-            <div className="text-4xl">🥉</div>
-            <div className="w-16 h-16 rounded-full border-[3px] border-foreground bg-muted overflow-hidden">
+            <div className="text-2xl sm:text-4xl">🥉</div>
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-[2px] sm:border-[3px] border-foreground bg-muted overflow-hidden">
               <img 
                 src={topThree.find(e => e.rank === 3)?.photoURL || getAvatarUrl(null, topThree.find(e => e.rank === 3)?.username || "user")}
                 alt={topThree.find(e => e.rank === 3)?.username}
@@ -157,15 +157,15 @@ export function LeaderboardView() {
                 }}
               />
             </div>
-            <p className="font-black text-sm text-center line-clamp-1 w-20 break-words">
+            <p className="font-black text-xs sm:text-sm text-center line-clamp-1 w-16 sm:w-20 break-words">
               {topThree.find(e => e.rank === 3)?.username}
             </p>
-            <p className="text-xs font-bold text-primary">
+            <p className="text-[10px] sm:text-xs font-bold text-primary">
               {topThree.find(e => e.rank === 3)?.points.toLocaleString()} PTS
             </p>
           </div>
-          <div className="w-32 h-20 brutal-card bg-muted flex items-center justify-center">
-            <span className="font-black text-4xl opacity-20">3</span>
+          <div className="w-20 sm:w-28 md:w-32 h-14 sm:h-18 md:h-20 brutal-card bg-muted flex items-center justify-center">
+            <span className="font-black text-2xl sm:text-3xl md:text-4xl opacity-20">3</span>
           </div>
         </div>
       </div>
@@ -177,11 +177,11 @@ export function LeaderboardView() {
             {rest.map((entry, i) => (
               <div
                 key={entry.rank}
-                className="flex items-center gap-4 px-6 py-3 font-body transition-all animate-slide-up bg-card hover:bg-muted/50"
+                className="flex items-center gap-2 sm:gap-4 px-3 sm:px-6 py-2.5 sm:py-3 font-body transition-all animate-slide-up bg-card hover:bg-muted/50"
                 style={{ animationDelay: `${(i + 3) * 50}ms` }}
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full border-[2px] border-foreground bg-muted overflow-hidden" style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-[2px] border-foreground bg-muted overflow-hidden" style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}>
                     <img 
                       src={entry.photoURL || getAvatarUrl(null, entry.username)}
                       alt={entry.username}
@@ -197,8 +197,8 @@ export function LeaderboardView() {
                     {rankIcon(entry.rank)}
                   </div>
                 </div>
-                <span className="flex-1 font-semibold truncate">{entry.username}</span>
-                <span className="font-display text-primary text-lg">{entry.points.toLocaleString()}</span>
+                <span className="flex-1 font-semibold truncate text-sm sm:text-base">{entry.username}</span>
+                <span className="font-display text-primary text-sm sm:text-lg">{entry.points.toLocaleString()}</span>
                 <span className="text-xs text-muted-foreground">pts</span>
               </div>
             ))}

@@ -336,11 +336,15 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
 
           {/* Fields */}
           <div>
-            <label className="block text-sm font-semibold font-body mb-1">Display Name</label>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-sm font-semibold font-body">Display Name</label>
+              <span className="text-xs text-muted-foreground font-body">{username.length}/30</span>
+            </div>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              maxLength={30}
               className="brutal-input w-full font-body"
             />
           </div>

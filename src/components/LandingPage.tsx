@@ -149,14 +149,14 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
       </style>
 
       {/* Navigation */}
-      <nav className="w-full py-6 px-8 flex justify-between items-center border-b-4 border-sq-black bg-white">
+      <nav className="w-full py-3 px-4 sm:py-4 sm:px-6 md:py-6 md:px-8 flex justify-between items-center border-b-4 border-sq-black bg-white">
         <div className="flex items-center gap-3">
           <div className="bg-sq-pink p-2 rounded-xl sq-border">
             <img src="/LOGO_SignMate.png" alt="SignMate Logo" className="w-8 h-8 object-contain" />
           </div>
           <div>
-            <span className="brand-font text-3xl tracking-tight text-sq-pink">SignMate</span>
-            <p className="text-xs font-bold uppercase tracking-wider text-sq-pink/70">Learn. Sign. Level Up!</p>
+            <span className="brand-font text-xl sm:text-2xl md:text-3xl tracking-tight text-sq-pink">SignMate</span>
+            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-sq-pink/70">Learn. Sign. Level Up!</p>
           </div>
         </div>
         <div className="flex items-center gap-6">
@@ -164,7 +164,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
           <a className="font-bold hover:text-sq-pink transition-colors" href="#">Courses</a> */}
           <button 
             onClick={() => setShowLoginModal(true)}
-            className="bg-sq-yellow px-6 py-2 rounded-xl sq-border sq-button-hover flex items-center gap-2 font-bold"
+            className="bg-sq-yellow px-3 py-1.5 sm:px-6 sm:py-2 rounded-xl sq-border sq-button-hover flex items-center gap-1.5 sm:gap-2 font-bold text-sm sm:text-base"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" viewBox="0 0 24 24">
               <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
@@ -177,28 +177,28 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 py-8 md:py-12 flex-1 flex flex-col md:flex-row items-center gap-24">
+      <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 md:py-8 lg:py-12 flex-1 flex flex-col md:flex-row items-center gap-8 sm:gap-12 md:gap-16 lg:gap-24">
         {/* Hero Text Section */}
         <div className="flex-1 space-y-6">
           <div className="inline-block bg-sq-pink text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest sq-border">
             เรียนรู้ภาษามือแบบอินเทอร์แอคทีฟ
           </div>
-          <h1 className="text-4xl md:text-6xl leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight">
             <span className="whitespace-nowrap">เชี่ยวชาญ<span className="text-sq-pink">ภาษามือ</span></span> <br /> ผ่านการเล่นเกม!
           </h1>
-          <p className="text-lg md:text-xl font-medium text-sq-black/70 max-w-xl">
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl font-medium text-sq-black/70 max-w-xl">
             วิธีเรียนรู้ภาษามือไทยที่สนุก ฟรี และมีประสิทธิภาพ พัฒนาทักษะของคุณด้วยการตอบรับแบบเรียลไทม์และมินิเกมที่น่าสนใจ
           </p>
-          <div className="flex flex-wrap gap-4 pt-4">
+          <div className="flex flex-wrap gap-3 sm:gap-4 pt-2 sm:pt-4">
             <button 
               onClick={() => setShowLoginModal(true)}
-              className="bg-sq-yellow text-xl px-8 py-4 rounded-2xl sq-border-lg sq-button-hover font-bold brand-font hover:bg-sq-dark-yellow transition-all"
+              className="bg-sq-yellow text-base sm:text-lg md:text-xl px-5 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-2xl sq-border-lg sq-button-hover font-bold brand-font hover:bg-sq-dark-yellow transition-all"
             >
               เริ่มเกม
             </button>
             <button 
               onClick={() => navigate("/categories")}
-              className="bg-white text-lg px-8 py-4 rounded-2xl sq-border sq-button-hover font-bold flex items-center gap-3"
+              className="bg-white text-sm sm:text-base md:text-lg px-5 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-2xl sq-border sq-button-hover font-bold flex items-center gap-2 sm:gap-3"
             >
               สำรวจบทเรียน
             </button>
@@ -209,7 +209,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
               <div className="w-10 h-10 rounded-full border-3 border-sq-black bg-green-400 flex items-center justify-center text-white font-bold text-sm">AS</div>
               <div className="w-10 h-10 rounded-full border-3 border-sq-black bg-sq-pink flex items-center justify-center text-white font-bold text-sm">MK</div>
             </div>
-            <p className="font-bold text-sq-black/60 text-sm">มีผู้เรียนลงทะเบียน 0 คนในสัปดาห์นี้!</p>
+            <p className="font-bold text-sq-black/60 text-xs sm:text-sm">มีผู้เรียนลงทะเบียน 0 คนในสัปดาห์นี้!</p>
           </div>
         </div>
 
@@ -218,7 +218,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
           <div className="absolute -top-8 -left-8 w-24 h-24 bg-sq-pink/20 rounded-full blur-3xl -z-10"></div>
           <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-sq-yellow/30 rounded-full blur-3xl -z-10"></div>
           
-          <div className="bg-white p-5 rounded-[2rem] sq-border-lg w-full max-w-md mx-auto relative overflow-hidden video-display-box">
+          <div className="bg-white p-3 sm:p-4 md:p-5 rounded-[1.5rem] sm:rounded-[2rem] sq-border-lg w-full max-w-sm sm:max-w-md mx-auto relative overflow-hidden video-display-box">
             {/* UI Header */}
             {/* <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-2">
@@ -293,7 +293,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
           </div>
 
           {/* Floating Achievement Tag */}
-          <div className="absolute -bottom-5 -left-5 bg-sq-pink text-white p-3 rounded-xl sq-border rotate-[-5deg] flex items-center gap-2">
+          <div className="absolute -bottom-5 -left-5 bg-sq-pink text-white p-2 sm:p-3 rounded-xl sq-border rotate-[-5deg] flex items-center gap-1.5 sm:gap-2 hidden sm:flex">
             <div className="bg-white/20 p-1.5 rounded-lg text-lg">🏆</div>
             <div>
               <p className="text-[10px] font-bold uppercase">Daily Streak</p>
@@ -304,18 +304,18 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
       </main>
 
       {/* Footer */}
-      <footer className="bg-sq-pink py-12 px-8 border-t-4 border-sq-black mt-auto">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+      <footer className="bg-sq-pink py-6 px-4 sm:py-8 sm:px-6 md:py-12 md:px-8 border-t-4 border-sq-black mt-auto">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 md:gap-8">
           <div className="flex items-center gap-3">
             <span className="brand-font text-2xl tracking-tight text-sq-cream">SignMate</span>
           </div>
-          <div className="flex gap-8 font-bold text-sq-black/60">
+          <div className="flex gap-4 sm:gap-6 md:gap-8 font-bold text-sq-black/60 text-sm sm:text-base">
             <a className="hover:text-sq-cream transition-colors" href="#">Privacy</a>
             <a className="hover:text-sq-cream transition-colors" href="#">Terms</a>
             <a className="hover:text-sq-cream transition-colors" href="#">Support</a>
             <a className="hover:text-sq-cream transition-colors" href="#">About</a>
           </div>
-          <p className="font-bold text-sq-black/40">© 2026 SignMate Interactive. All rights reserved.</p>
+          <p className="font-bold text-sq-black/40 text-xs sm:text-sm text-center">© 2026 SignMate Interactive. All rights reserved.</p>
         </div>
       </footer>
 

@@ -73,44 +73,44 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div className="container mx-auto px-3 py-4 md:px-4 md:py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8">
         {/* Left Column: Main Content */}
         <div className="lg:col-span-8 space-y-8">
           {/* Hero Section */}
-          <section className="brutal-card bg-accent p-8 rounded-xl relative overflow-hidden flex flex-col md:flex-row items-center gap-6">
+          <section className="brutal-card bg-accent p-4 sm:p-6 md:p-8 rounded-xl relative overflow-hidden flex flex-col md:flex-row items-center gap-4 md:gap-6">
             <div className="relative z-10 text-center md:text-left flex-1">
-              <span className="bg-foreground text-background px-3 py-1 rounded font-black text-xs uppercase tracking-widest">
+              <span className="bg-foreground text-background px-2 py-0.5 sm:px-3 sm:py-1 rounded font-black text-[10px] sm:text-xs uppercase tracking-widest">
                 Master Signer • LVL 12
               </span>
-              <h2 className="text-4xl md:text-5xl font-black text-foreground mt-4 leading-none uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
-                Welcome Back,<br />{auth.currentUser?.displayName || 'Questor'}!
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground mt-2 sm:mt-4 leading-none uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+                Welcome Back,<br />{auth.currentUser?.displayName?.split(" ")[0] || 'Questor'}!
               </h2>
-              <div className="flex items-center gap-3 mt-6 justify-center md:justify-start">
-                <div className="bg-background border-2 border-foreground px-4 py-2 rounded-lg font-black flex items-center gap-2 shadow-brutal-sm">
-                  <span className="text-2xl">🔥</span>
-                  <span className="text-foreground">{streak} DAY STREAK!</span>
+              <div className="flex items-center gap-2 sm:gap-3 mt-3 sm:mt-6 justify-center md:justify-start">
+                <div className="bg-background border-2 border-foreground px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg font-black flex items-center gap-1.5 sm:gap-2 shadow-brutal-sm">
+                  <span className="text-lg sm:text-2xl">🔥</span>
+                  <span className="text-foreground text-xs sm:text-base">{streak} DAY STREAK!</span>
                 </div>
               </div>
             </div>
             <div className="relative z-10">
               <button
                 onClick={onLessons}
-                className="brutal-btn-primary px-8 py-4 rounded-xl font-black text-xl uppercase tracking-tighter"
+                className="brutal-btn-primary px-4 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-xl font-black text-sm sm:text-base md:text-xl uppercase tracking-tighter"
               >
                 Keep Learning
               </button>
             </div>
             {/* Abstract patterns in background */}
-            <div className="absolute -right-10 -bottom-10 opacity-20 transform rotate-12">
-              <span className="text-[200px]">👋</span>
+            <div className="absolute -right-10 -bottom-10 opacity-20 transform rotate-12 hidden sm:block">
+              <span className="text-[120px] md:text-[200px]">👋</span>
             </div>
           </section>
 
           {/* Continue Learning */}
           <section>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-2xl font-black uppercase italic tracking-tighter">Current Quest</h3>
+            <div className="flex items-center justify-between mb-3 md:mb-4">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-black uppercase italic tracking-tighter">Current Quest</h3>
               <button
                 onClick={() => onCategorySelect(lastCategory)}
                 className="text-sm font-bold underline decoration-primary decoration-2 underline-offset-4"
@@ -118,8 +118,8 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
                 View All
               </button>
             </div>
-            <div className="brutal-card bg-card p-6 rounded-xl flex flex-col md:flex-row gap-6 items-center">
-              <div className="w-full md:w-48 aspect-video md:aspect-square bg-muted rounded-lg border-2 border-foreground overflow-hidden">
+            <div className="brutal-card bg-card p-3 sm:p-4 md:p-6 rounded-xl flex flex-col md:flex-row gap-3 sm:gap-4 md:gap-6 items-center">
+              <div className="w-full md:w-40 lg:w-48 aspect-video md:aspect-square bg-muted rounded-lg border-2 border-foreground overflow-hidden">
                 <video
                   className="w-full h-full object-cover"
                   src={getVideoUrl()}
@@ -129,25 +129,25 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
                   playsInline
                 />
               </div>
-              <div className="flex-1 space-y-3 w-full">
+              <div className="flex-1 space-y-2 sm:space-y-3 w-full">
                 <div className="flex justify-between items-end">
                   <div>
-                    <p className="text-primary font-black text-xs uppercase tracking-widest mb-1">
+                    <p className="text-primary font-black text-[10px] sm:text-xs uppercase tracking-widest mb-0.5 sm:mb-1">
                       Last Learned
                     </p>
-                    <h4 className="text-2xl font-black">{nextPhrase.text}</h4>
+                    <h4 className="text-lg sm:text-xl md:text-2xl font-black">{nextPhrase.text}</h4>
                   </div>
-                  <span className="font-black text-xl">
-                    {completedCount}/{totalCount} <span className="text-sm text-muted-foreground font-bold uppercase italic">Signs</span>
+                  <span className="font-black text-base sm:text-lg md:text-xl">
+                    {completedCount}/{totalCount} <span className="text-xs sm:text-sm text-muted-foreground font-bold uppercase italic">Signs</span>
                   </span>
                 </div>
-                <div className="w-full h-6 bg-muted border-2 border-foreground rounded-full overflow-hidden">
+                <div className="w-full h-4 sm:h-5 md:h-6 bg-muted border-2 border-foreground rounded-full overflow-hidden">
                   <div className="h-full bg-primary border-r-2 border-foreground" style={{ width: `${progressPercent}%` }}></div>
                 </div>
                 <div className="flex justify-end">
                   <button
                     onClick={onResumeLesson}
-                    className="brutal-btn-primary px-6 py-2 rounded-lg font-black uppercase text-sm"
+                    className="brutal-btn-primary px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-2 rounded-lg font-black uppercase text-xs sm:text-sm"
                   >
                     Click to Resume
                   </button>
@@ -158,12 +158,12 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
         </div>
 
         {/* Right Column: Sidebar */}
-        <div className="lg:col-span-4 space-y-8">
+        <div className="lg:col-span-4 space-y-4 md:space-y-8">
           {/* Top Challengers */}
-          <section className="brutal-card bg-card p-6 rounded-xl">
-            <div className="flex items-center gap-2 mb-6">
-              <span className="text-3xl">🏆</span>
-              <h3 className="text-xl font-black uppercase italic tracking-tighter">Top Challengers</h3>
+          <section className="brutal-card bg-card p-3 sm:p-4 md:p-6 rounded-xl">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4 md:mb-6">
+              <span className="text-2xl sm:text-3xl">🏆</span>
+              <h3 className="text-base sm:text-lg md:text-xl font-black uppercase italic tracking-tighter">Top Challengers</h3>
             </div>
             {loading ? (
               <div className="text-center py-8">
@@ -194,7 +194,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
                       />
                     </div>
                     <div className="flex-1">
-                      <p className="font-black uppercase text-sm leading-none">{entry.username}</p>
+                      <p className="font-black uppercase text-sm leading-none">{entry.username?.split(" ")[0]}</p>
                       <p className="text-xs font-bold text-muted-foreground mt-1">{entry.points.toLocaleString()} Pts</p>
                     </div>
                     {index === 0 && <span className="text-accent text-2xl">🏅</span>}
@@ -204,15 +204,15 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
             )}
             <button
               onClick={onLeaderboard}
-              className="w-full mt-6 brutal-btn-secondary py-2 font-black uppercase text-xs tracking-widest"
+              className="w-full mt-3 sm:mt-4 md:mt-6 brutal-btn-secondary py-1.5 sm:py-2 font-black uppercase text-[10px] sm:text-xs tracking-widest"
             >
               View Full Board
             </button>
           </section>
 
           {/* Daily Goals */}
-          <section className="brutal-card bg-foreground text-background p-6 rounded-xl">
-            <h3 className="text-xl font-black uppercase italic tracking-tighter mb-4 text-accent">
+          <section className="brutal-card bg-foreground text-background p-3 sm:p-4 md:p-6 rounded-xl">
+            <h3 className="text-base sm:text-lg md:text-xl font-black uppercase italic tracking-tighter mb-2 sm:mb-3 md:mb-4 text-accent">
               Daily Goals
             </h3>
             <div className="space-y-4">
@@ -239,16 +239,6 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
             </div>
           </section>
         </div>
-      </div>
-
-      {/* Mobile Nav Shortcut (Visible on Small Screens) */}
-      <div className="lg:hidden fixed bottom-6 right-6 z-50">
-        <button
-          onClick={() => onCategorySelect("general")}
-          className="brutal-btn-primary size-16 rounded-full flex items-center justify-center"
-        >
-          <span className="text-4xl font-black">▶</span>
-        </button>
       </div>
     </div>
   );

@@ -412,12 +412,12 @@ const Index = () => {
       />
 
       <main className="flex-1 min-h-screen">
-        <header className="border-b-[3px] border-foreground bg-card px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3 pl-12 lg:pl-0">
+        <header className="border-b-[3px] border-foreground bg-card px-3 py-2 sm:px-4 sm:py-2.5 md:px-6 md:py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3 pl-12 lg:pl-0">
             {view === "home" && (
               <>
                 <Home size={20} className="text-foreground" />
-                <h2 className="font-display text-xl text-foreground">Home</h2>
+                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground">Home</h2>
               </>
             )}
             {view === "lessons" && (
@@ -460,14 +460,16 @@ const Index = () => {
             )}
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={handleLogout} className="brutal-btn-secondary flex items-center gap-2 text-sm font-body">
-              <LogOut size={16} />
-              Logout
+            <button onClick={handleLogout} className="brutal-btn-secondary flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-body">
+              <LogOut size={14} className="sm:hidden" />
+              <LogOut size={16} className="hidden sm:block" />
+              <span className="hidden sm:inline">Logout</span>
+              <span className="sm:hidden">Out</span>
             </button>
           </div>
         </header>
 
-        <div className="h-[calc(100vh-4.5rem)] flex flex-col">
+        <div className="h-[calc(100vh-3rem)] sm:h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4.5rem)] flex flex-col">
           {view === "home" && (
             <div className="p-4 lg:p-6 h-full">
               <HomePage
@@ -533,36 +535,37 @@ const Index = () => {
             </div>
           )}
           {view === "game" && (
-            <div className="flex-1 overflow-y-auto p-8 lg:p-12 relative pb-32">
-              <div className="relative flex items-center justify-center mb-10 mt-2">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-5 md:p-8 lg:p-12 relative pb-20 sm:pb-32">
+              <div className="relative flex items-center justify-center mb-6 sm:mb-8 md:mb-10 mt-1 sm:mt-2">
                 <button
                   onClick={() => setView("lessons")}
-                  className="absolute left-0 flex items-center gap-2 text-foreground font-black brutal-btn-secondary w-fit px-4 py-2 hover:-translate-x-1 transition-transform z-10"
+                  className="absolute left-0 flex items-center gap-1.5 sm:gap-2 text-foreground font-black brutal-btn-secondary w-fit px-2.5 py-1.5 sm:px-4 sm:py-2 hover:-translate-x-1 transition-transform z-10 text-xs sm:text-sm"
                 >
-                  <ArrowLeft size={20} />
+                  <ArrowLeft size={16} className="sm:hidden" />
+                  <ArrowLeft size={20} className="hidden sm:block" />
                   กลับ
                 </button>
-                <p className="text-slate-800 dark:text-white font-black uppercase tracking-widest text-2xl lg:text-3xl text-center drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+                <p className="text-slate-800 dark:text-white font-black uppercase tracking-widest text-base sm:text-xl md:text-2xl lg:text-3xl text-center drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)] pl-16 sm:pl-0">
                   UNIT {category === "general" ? "1" : category === "emotions" ? "2" : category === "qa" ? "3" : "4"}: {category.toUpperCase()}
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3 sm:gap-x-6 sm:gap-y-4 md:gap-x-8 md:gap-y-6">
                 {getPhrasesByCategory(category).map((phrase) => (
                   <div
                     key={phrase.id}
                     onClick={() => handlePhraseSelect(phrase)}
-                    className="relative bg-white brutal-card flex items-center p-4 pr-12 cursor-pointer hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
+                    className="relative bg-white brutal-card flex items-center p-2.5 pr-8 sm:p-3 sm:pr-10 md:p-4 md:pr-12 cursor-pointer hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
                   >
-                    <div className="absolute -top-3 -right-3 bg-[#f94fa4] text-white font-black text-sm px-3 py-1 rounded-full border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10">
+                    <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-[#f94fa4] text-white font-black text-[10px] sm:text-xs md:text-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10">
                       +10 pts
                     </div>
-                    <div className="w-16 h-16 bg-accent/20 brutal-card flex items-center justify-center text-3xl mr-6 shrink-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-accent/20 brutal-card flex items-center justify-center text-xl sm:text-2xl md:text-3xl mr-3 sm:mr-4 md:mr-6 shrink-0">
                       {phrase.emoji || "✋"}
                     </div>
                     <div>
-                      <h3 className="font-black text-2xl mb-1">{phrase.text}</h3>
-                      <p className="text-gray-500 font-bold text-sm">{phrase.english || phrase.text}</p>
+                      <h3 className="font-black text-base sm:text-lg md:text-2xl mb-0.5 sm:mb-1">{phrase.text}</h3>
+                      <p className="text-gray-500 font-bold text-[11px] sm:text-xs md:text-sm">{phrase.english || phrase.text}</p>
                     </div>
                   </div>
                 ))}
@@ -584,8 +587,8 @@ const Index = () => {
             />
 
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-              <div className="bg-white dark:bg-slate-900 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col max-w-7xl w-full h-[90vh] pointer-events-auto animate-modal-in">
-                <header className="flex items-center justify-end p-4 lg:p-6 border-b-[3px] border-foreground bg-yellow-400">
+              <div className="bg-white dark:bg-slate-900 border-[2px] sm:border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col max-w-7xl w-full h-[95vh] sm:h-[90vh] pointer-events-auto animate-modal-in">
+                <header className="flex items-center justify-end p-2 sm:p-3 md:p-4 lg:p-6 border-b-[3px] border-foreground bg-yellow-400">
                   <div className="flex items-center gap-3 lg:gap-4">
                     <div className="hidden md:flex items-center px-3 lg:px-4 py-1.5 lg:py-2 bg-pink-400 border-[3px] border-foreground rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                       <span className="text-white font-black text-xs lg:text-sm">
@@ -607,10 +610,10 @@ const Index = () => {
                 </header>
 
                 <div className="flex flex-1 flex-col overflow-hidden">
-                  <main className="flex-1 p-3 lg:p-4 xl:p-6 bg-[#f8f6f6] dark:bg-[#221610] overflow-y-auto flex flex-col justify-between">
+                  <main className="flex-1 p-2 sm:p-3 lg:p-4 xl:p-6 bg-[#f8f6f6] dark:bg-[#221610] overflow-y-auto flex flex-col justify-between">
                     <div className="flex items-center justify-center pb-2">
                       {activePhrase?.id === "g2" ? (
-                        <h2 className="text-2xl lg:text-3xl font-black uppercase tracking-tight flex items-center gap-2">
+                        <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
                           <span className="text-slate-900 dark:text-white">ลาก่อน</span>
                           <span className="text-slate-900 dark:text-white mx-1">|</span>
                           <span
@@ -631,7 +634,7 @@ const Index = () => {
                           </span>
                         </h2>
                       ) : activePhrase?.id === "g3" ? (
-                        <h2 className="text-2xl lg:text-3xl font-black uppercase tracking-tight flex items-center gap-2">
+                        <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
                           <span className="text-slate-900 dark:text-white">กินข้าวหรือยัง?</span>
                           <span className="text-slate-900 dark:text-white mx-1">|</span>
                           <span
@@ -660,7 +663,7 @@ const Index = () => {
                           </span>
                         </h2>
                       ) : (
-                        <h2 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                        <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
                           {activePhrase?.id === "g1"
                             ? (selectedVariant === "adult" ? "สวัสดีผู้ใหญ่" : "สวัสดีเพื่อน")
                             : activePhrase?.id === "g4"
@@ -670,8 +673,8 @@ const Index = () => {
                         </h2>
                       )}
                     </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-3 items-start max-w-3xl mx-auto">
-                      <div className="flex flex-col gap-1.5 lg:gap-2">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5 sm:gap-2 lg:gap-3 items-start max-w-3xl mx-auto">
+                      <div className="flex flex-col gap-1 sm:gap-1.5 lg:gap-2">
                         <div className="relative aspect-square w-full max-w-md mx-auto bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
                           <VideoCard phrase={activePhrase?.text ?? "Hello"} category={activePhrase?.category ?? "general"} variant={(activePhrase?.id === "g1" || activePhrase?.id === "g4") ? selectedVariant : undefined} />
                           <div className="absolute inset-0 bg-black/10 flex items-center justify-center pointer-events-none">
@@ -727,7 +730,7 @@ const Index = () => {
                         )}
                       </div>
 
-                      <div className="flex flex-col gap-1.5 lg:gap-2">
+                      <div className="flex flex-col gap-1 sm:gap-1.5 lg:gap-2">
                         <div className="relative aspect-square w-full max-w-md mx-auto bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
                           <WebcamView
                             onNextLevel={() => setIsPhraseCompleted(true)}
@@ -842,17 +845,17 @@ const Index = () => {
                       </div>
                     </div>
 
-                    <footer className="mt-3 flex items-center justify-between border-t-[3px] border-slate-200 dark:border-slate-800 pt-3">
-                      <div className="flex flex-col items-start gap-1">
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Current Progress</span>
-                        <div className="w-36 h-4 bg-slate-200 border-[3px] border-foreground rounded-full overflow-hidden">
-                          <div className="w-[65%] h-full bg-pink-400 border-r-[3px] border-foreground transition-all duration-500"></div>
+                    <footer className="mt-2 sm:mt-3 flex flex-col sm:flex-row items-center justify-between border-t-[3px] border-slate-200 dark:border-slate-800 pt-2 sm:pt-3 gap-2 sm:gap-0">
+                      <div className="flex flex-col items-center sm:items-start gap-1">
+                        <span className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest">Current Progress</span>
+                        <div className="w-28 sm:w-36 h-3 sm:h-4 bg-slate-200 border-[2px] sm:border-[3px] border-foreground rounded-full overflow-hidden">
+                          <div className="w-[65%] h-full bg-pink-400 border-r-[2px] sm:border-r-[3px] border-foreground transition-all duration-500"></div>
                         </div>
                       </div>
                       <button
                         onClick={handleCollectPoints}
                         disabled={!isPhraseCompleted}
-                        className={`group flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl px-6 py-2.5 font-black text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-tight ${isPhraseCompleted
+                        className={`group flex items-center justify-center gap-1.5 sm:gap-2 border-[2px] sm:border-[3px] border-foreground rounded-xl px-3 py-1.5 sm:px-6 sm:py-2.5 font-black text-xs sm:text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-tight ${isPhraseCompleted
                           ? 'bg-[#ec5b13] hover:bg-[#ec5b13]/90 text-white hover:translate-x-1 hover:-translate-y-1 cursor-pointer'
                           : 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-60'
                           }`}
