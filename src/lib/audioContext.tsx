@@ -21,7 +21,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const audio = new Audio("/sounds/soundbackground.mp3");
     audio.loop = true;
-    audio.volume = 0.35;
+    audio.volume = 0.2;
     audio.muted = false;
     audioRef.current = audio;
 

@@ -251,13 +251,13 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
   };
 
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="w-full">
       <button onClick={onBack} className="brutal-btn-secondary flex items-center gap-2 text-sm mb-6">
         <ArrowLeft size={16} />
         Back to Home
       </button>
 
-      <div className="brutal-card-lg overflow-hidden">
+      <div className="max-w-lg mx-auto brutal-card-lg overflow-hidden">
         <div className="bg-accent border-b-[3px] border-foreground px-5 py-3">
           <h2 className="font-display text-xl text-accent-foreground">Edit Profile</h2>
         </div>

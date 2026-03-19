@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X, User, Home, ChevronRight } from "lucide-react";
 import { auth, database } from "@/lib/firebase";
-import { ref as dbRef, get } from "firebase/database";
+import { ref as dbRef, get, onValue } from "firebase/database";
 import { getAvatarUrl } from "@/lib/avatar";
 
 import { Category, categories } from "@/lib/categories";
@@ -10,6 +10,9 @@ import emotionalImg from "@/asset/image/emotional.png";
 import qaImg from "@/asset/image/qa.png";
 import illnessImg from "@/asset/image/illness.png";
 import trophyImg from "@/asset/image/Trophy.png";
+import questImg from "@/asset/image/quest.png";
+import challengeImg from "@/asset/image/challenge.png";
+import playImg from "@/asset/image/Play.png";
 
 const iconMap: Record<string, string> = {
   Hand: generalImg,
@@ -25,8 +28,10 @@ interface GameSidebarProps {
   onQuest: () => void;
   onLeaderboard: () => void;
   onProfile: () => void;
+  onLessons: () => void;
   onHome: () => void;
   showPlayGame: boolean;
+  showLessons: boolean;
   showQuest: boolean;
   showLeaderboard: boolean;
   showHome: boolean;
@@ -42,8 +47,10 @@ export function GameSidebar({
   onQuest,
   onLeaderboard,
   onProfile,
+  onLessons,
   onHome,
   showPlayGame,
+  showLessons,
   showQuest,
   showLeaderboard,
   showHome,
@@ -66,22 +73,20 @@ export function GameSidebar({
     setUsername(user.displayName || "User");
     if (user.photoURL && !photoURL) setPhotoURL(user.photoURL);
 
-    const loadDatabaseData = async () => {
-      try {
-        const userRef = dbRef(database, `users/${user.uid}`);
-        const snapshot = await get(userRef);
-
-        if (snapshot.exists()) {
-          const userData = snapshot.val();
-          if (userData.points !== undefined) setPoints(userData.points);
-          if (userData.photoURL && !photoURL) setPhotoURL(userData.photoURL);
-        }
-      } catch (error) {
-        console.error("Error loading database data:", error);
+    const userRef = dbRef(database, `users/${user.uid}`);
+    
+    // Set up real-time listener for user data (points, photoURL)
+    const unsubscribe = onValue(userRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        if (userData.points !== undefined) setPoints(userData.points);
+        if (userData.photoURL && !photoURL) setPhotoURL(userData.photoURL);
       }
-    };
+    }, (error) => {
+      console.error("Error loading database data:", error);
+    });
 
-    loadDatabaseData();
+    return () => unsubscribe();
   }, [photoURL]);
 
   const handlePlayGame = () => {
@@ -134,30 +139,19 @@ export function GameSidebar({
               Home
             </button>
 
-            <p className="text-primary-foreground/60 text-xs font-semibold uppercase tracking-wider mb-3 font-body">
-              Lessons
-            </p>
-            {categories.map((cat) => {
-              const iconSrc = iconMap[cat.icon];
-              const isActive = activeCategory === cat.id && !showLeaderboard && !showQuest && !showHome && !showProfile && !showPlayGame;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => onCategoryChange(cat.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${
-                    isActive
-                      ? "bg-secondary text-secondary-foreground shadow-brutal-sm translate-x-0"
-                      : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
-                  }`}
-                  style={isActive ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
-                >
-                  <img src={iconSrc} alt={cat.label} className="w-[18px] h-[18px] object-contain" />
-                  {cat.label}
-                </button>
-              );
-            })}
+              <button
+              onClick={handlePlayGame}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${
+                showPlayGame
+                  ? "bg-secondary text-secondary-foreground"
+                  : "bg-purple-400 text-white hover:bg-purple-500"
+              }`}
+              style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}
+            >
+              <img src={challengeImg} alt="Challenge" className="w-[18px] h-[18px] object-contain" />
+              Challenge
+            </button>
 
-            <div className="pt-4 border-t-[2px] border-primary-foreground/20 mt-4 space-y-3">
               <button
                 onClick={onQuest}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${
@@ -167,7 +161,7 @@ export function GameSidebar({
                 }`}
                 style={showQuest ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
               >
-                <span className="material-symbols-outlined text-[18px]">scrollable_header</span>
+                <img src={questImg} alt="Quest" className="w-[18px] h-[18px] object-contain" />
                 Quest
               </button>
 
@@ -183,20 +177,14 @@ export function GameSidebar({
                 <img src={trophyImg} alt="Leaderboard" className="w-[18px] h-[18px] object-contain" />
                 Leaderboard
               </button>
-            </div>
+
           </div>
 
           <button
-            onClick={handlePlayGame}
-            className={`w-full mt-auto flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${
-              showPlayGame
-                ? "bg-secondary text-secondary-foreground"
-                : "bg-purple-400 text-white hover:bg-purple-500"
-            }`}
-            style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}
+            onClick={onLessons}
+            className="w-full mt-auto transition-transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            <span className="material-symbols-outlined text-[18px]">sports_esports</span>
-            Play Game
+            <img src={playImg} alt="Play" className="w-full h-auto" />
           </button>
         </nav>
 

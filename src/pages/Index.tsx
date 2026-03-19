@@ -8,10 +8,11 @@ import { ProfileEdit } from "@/components/ProfileEdit";
 import { LandingPage } from "@/components/LandingPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { HomePage } from "@/components/HomePage";
+import { LessonsPage } from "@/components/LessonsPage";
 import { QuestView } from "@/components/QuestView";
 import { GameSetupPage } from "@/components/GameSetupPage";
 import { Category, Phrase, getPhrasesByCategory, categories } from "@/lib/categories";
-import { LogOut, X, Camera, Home, User } from "lucide-react";
+import { LogOut, X, Camera, Home, User, ArrowLeft } from "lucide-react";
 import { useDistanceDetection, DistanceStatus } from "@/hooks/useDistanceDetection";
 import { useMediaPipeHolistic } from "@/hooks/useMediaPipeHolistic";
 import { auth, database } from "@/lib/firebase";
@@ -26,8 +27,10 @@ import qaImg from "@/asset/image/qa.png";
 import illnessImg from "@/asset/image/illness.png";
 import trophyImg from "@/asset/image/Trophy.png";
 import guideHumanImg from "@/asset/image/guide_human.png";
+import questImg from "@/asset/image/quest.png";
+import challengeImg from "@/asset/image/challenge.png";
 
-type View = "home" | "game" | "leaderboard" | "quest" | "profile" | "playing" | "gamesetup";
+type View = "home" | "lessons" | "game" | "leaderboard" | "quest" | "profile" | "playing" | "gamesetup";
 
 const categoryIconMap: Record<string, string> = {
   general: generalImg,
@@ -47,7 +50,7 @@ const preloadAllAvatars = async () => {
       Object.values(users).forEach((user: any) => {
         if (user.photoURL) {
           const img = new Image();
-          img.src = user.photoURL; 
+          img.src = user.photoURL;
         }
       });
       console.log("✅ โหลดรูปล่วงหน้าเสร็จสิ้น พร้อมโชว์ทันที!");
@@ -89,9 +92,9 @@ const Index = () => {
   const [isDetecting, setIsDetecting] = useState(false);
   const [scanningLocked, setScanningLocked] = useState(false);
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  
+
   // 🚨 1. ปรับลดเวลาที่บังคับสแกนจาก 3 วิ เหลือ 1.5 วินาที
-  const MIN_SCANNING_DURATION = 1500; 
+  const MIN_SCANNING_DURATION = 1500;
 
   // Real distance detection using MediaPipe Face Detection
   const distanceStatus = useDistanceDetection({
@@ -211,11 +214,11 @@ const Index = () => {
       if (nowAuthenticated && user) {
         warmUpModel();
         preloadAllAvatars();
-        
+
         if (user.photoURL) {
           localStorage.setItem("cached_avatar", user.photoURL);
         }
-        
+
         try {
           const streakResult = await updateStreakOnLogin(user.uid);
           if (streakResult.streak !== undefined) {
@@ -235,7 +238,7 @@ const Index = () => {
             setShowCameraPermission(true);
             localStorage.setItem('hasShownCameraModal', 'true');
           }
-        }, 3500); 
+        }, 3500);
       } else {
         setIsAuthenticated(nowAuthenticated);
         setIsCheckingAuth(false);
@@ -264,7 +267,7 @@ const Index = () => {
   const handleCategoryChange = (cat: Category) => {
     setCategory(cat);
     setActivePhrase(getPhrasesByCategory(cat)[0]);
-    setSelectedVariant("adult"); 
+    setSelectedVariant("adult");
     setView("game");
     setSidebarOpen(false);
     localStorage.setItem('lastCategory', cat);
@@ -273,9 +276,9 @@ const Index = () => {
   const handlePhraseSelect = (phrase: Phrase) => {
     setActivePhrase(phrase);
     setGameOpen(true);
-    setSelectedVariant("adult"); 
-    setByeStep(1); 
-    setEatStep(1); 
+    setSelectedVariant("adult");
+    setByeStep(1);
+    setEatStep(1);
     localStorage.setItem('lastCategory', phrase.category);
     localStorage.setItem('lastPhraseId', phrase.id);
   };
@@ -332,10 +335,10 @@ const Index = () => {
     const currentIndex = phrases.findIndex(p => p.id === activePhrase.id);
     if (currentIndex < phrases.length - 1) {
       setActivePhrase(phrases[currentIndex + 1]);
-      setSelectedVariant("adult"); 
-      setIsPhraseCompleted(false); 
-      setByeStep(1); 
-      setEatStep(1); 
+      setSelectedVariant("adult");
+      setIsPhraseCompleted(false);
+      setByeStep(1);
+      setEatStep(1);
       setIsLive(false);
       setIsDetecting(false);
       setTutorialStep("initial");
@@ -392,11 +395,13 @@ const Index = () => {
         activeCategory={category}
         onCategoryChange={handleCategoryChange}
         onPlayGame={() => { setView("gamesetup"); setSidebarOpen(false); }}
+        onLessons={() => { setView("lessons"); setSidebarOpen(false); }}
         onQuest={() => { setView("quest"); setSidebarOpen(false); }}
         onLeaderboard={() => { setView("leaderboard"); setSidebarOpen(false); }}
         onProfile={() => { setView("profile"); setSidebarOpen(false); }}
         onHome={() => { setView("home"); setSidebarOpen(false); }}
         showPlayGame={view === "gamesetup"}
+        showLessons={view === "lessons" || view === "game"}
         showQuest={view === "quest"}
         showLeaderboard={view === "leaderboard"}
         showHome={view === "home"}
@@ -414,6 +419,12 @@ const Index = () => {
                 <h2 className="font-display text-xl text-foreground">Home</h2>
               </>
             )}
+            {view === "lessons" && (
+              <>
+                <img src={generalImg} alt="Lessons" className="w-5 h-5 object-contain" />
+                <h2 className="font-display text-xl text-foreground">Lessons</h2>
+              </>
+            )}
             {view === "leaderboard" && (
               <>
                 <img src={trophyImg} alt="Leaderboard" className="w-5 h-5 object-contain" />
@@ -422,7 +433,7 @@ const Index = () => {
             )}
             {view === "quest" && (
               <>
-                <span className="material-symbols-outlined text-foreground text-[20px]">scrollable_header</span>
+                <img src={questImg} alt="Quest" className="w-[20px] h-[20px] object-contain" />
                 <h2 className="font-display text-xl text-foreground">Quest</h2>
               </>
             )}
@@ -434,8 +445,8 @@ const Index = () => {
             )}
             {view === "gamesetup" && (
               <>
-                <span className="material-symbols-outlined text-foreground text-[20px]">sports_esports</span>
-                <h2 className="font-display text-xl text-foreground">Play Game</h2>
+                <img src={challengeImg} alt="Play Game" className="w-[20px] h-[20px] object-contain" />
+                <h2 className="font-display text-xl text-foreground">Challenge</h2>
               </>
             )}
             {view === "game" && (
@@ -462,7 +473,7 @@ const Index = () => {
                 onCategorySelect={(cat) => {
                   setCategory(cat);
                   setActivePhrase(getPhrasesByCategory(cat)[0]);
-                  setSelectedVariant("adult"); 
+                  setSelectedVariant("adult");
                   setView("game");
                   localStorage.setItem('lastCategory', cat);
                 }}
@@ -474,11 +485,27 @@ const Index = () => {
 
                   setCategory(lastCat);
                   setActivePhrase(lastPhrase);
-                  setSelectedVariant("adult"); 
+                  setSelectedVariant("adult");
                   setView("game");
-                  setGameOpen(true); 
+                  setGameOpen(true);
                 }}
                 onLeaderboard={() => setView("leaderboard")}
+                onLessons={() => setView("lessons")}
+                completedPhrases={completedPhrases}
+                streak={userStreak}
+              />
+            </div>
+          )}
+          {view === "lessons" && (
+            <div className="p-4 lg:p-6 h-full">
+              <LessonsPage
+                onCategorySelect={(cat) => {
+                  setCategory(cat);
+                  setActivePhrase(getPhrasesByCategory(cat)[0]);
+                  setSelectedVariant("adult");
+                  setView("game");
+                  localStorage.setItem('lastCategory', cat);
+                }}
                 completedPhrases={completedPhrases}
                 streak={userStreak}
               />
@@ -506,13 +533,17 @@ const Index = () => {
           )}
           {view === "game" && (
             <div className="flex-1 overflow-y-auto p-8 lg:p-12 relative pb-32">
-              <div className="flex justify-between items-end mb-8">
-                <div>
-                  <h2 className="text-4xl font-black mb-2">Phrases</h2>
-                  <p className="text-gray-500 font-bold uppercase tracking-widest text-sm">
-                    UNIT {category === "general" ? "1" : category === "emotions" ? "2" : category === "qa" ? "3" : "4"}: {category.toUpperCase()}
-                  </p>
-                </div>
+              <div className="relative flex items-center justify-center mb-10 mt-2">
+                <button
+                  onClick={() => setView("lessons")}
+                  className="absolute left-0 flex items-center gap-2 text-foreground font-black brutal-btn-secondary w-fit px-4 py-2 hover:-translate-x-1 transition-transform z-10"
+                >
+                  <ArrowLeft size={20} />
+                  กลับ
+                </button>
+                <p className="text-slate-800 dark:text-white font-black uppercase tracking-widest text-2xl lg:text-3xl text-center drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+                  UNIT {category === "general" ? "1" : category === "emotions" ? "2" : category === "qa" ? "3" : "4"}: {category.toUpperCase()}
+                </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -582,20 +613,18 @@ const Index = () => {
                           <span className="text-slate-900 dark:text-white">ลาก่อน</span>
                           <span className="text-slate-900 dark:text-white mx-1">|</span>
                           <span
-                            className={`transition-colors duration-300 ${
-                              byeStep === 1
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
-                            }`}
+                            className={`transition-colors duration-300 ${byeStep === 1
+                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                              : "text-slate-400"
+                              }`}
                           >
                             ฉัน
                           </span>
                           <span
-                            className={`transition-colors duration-300 ${
-                              byeStep === 2
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
-                            }`}
+                            className={`transition-colors duration-300 ${byeStep === 2
+                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                              : "text-slate-400"
+                              }`}
                           >
                             ไป
                           </span>
@@ -605,29 +634,26 @@ const Index = () => {
                           <span className="text-slate-900 dark:text-white">กินข้าวหรือยัง?</span>
                           <span className="text-slate-900 dark:text-white mx-1">|</span>
                           <span
-                            className={`transition-colors duration-300 ${
-                              eatStep === 1
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
-                            }`}
+                            className={`transition-colors duration-300 ${eatStep === 1
+                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                              : "text-slate-400"
+                              }`}
                           >
                             ข้าว
                           </span>
                           <span
-                            className={`transition-colors duration-300 ${
-                              eatStep === 2
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
-                            }`}
+                            className={`transition-colors duration-300 ${eatStep === 2
+                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                              : "text-slate-400"
+                              }`}
                           >
                             กิน
                           </span>
                           <span
-                            className={`transition-colors duration-300 ${
-                              eatStep === 3
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
-                            }`}
+                            className={`transition-colors duration-300 ${eatStep === 3
+                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                              : "text-slate-400"
+                              }`}
                           >
                             หรือยัง?
                           </span>
@@ -659,8 +685,8 @@ const Index = () => {
                             <button
                               onClick={() => handleVariantChange("adult")}
                               className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
-                                  ? "bg-yellow-400 text-slate-900"
-                                  : "bg-white text-slate-900 hover:bg-slate-50"
+                                ? "bg-yellow-400 text-slate-900"
+                                : "bg-white text-slate-900 hover:bg-slate-50"
                                 }`}
                             >
                               สวัสดีผู้ใหญ่
@@ -668,8 +694,8 @@ const Index = () => {
                             <button
                               onClick={() => handleVariantChange("friend")}
                               className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
-                                  ? "bg-yellow-400 text-slate-900"
-                                  : "bg-white text-slate-900 hover:bg-slate-50"
+                                ? "bg-yellow-400 text-slate-900"
+                                : "bg-white text-slate-900 hover:bg-slate-50"
                                 }`}
                             >
                               สวัสดีเพื่อน
@@ -681,8 +707,8 @@ const Index = () => {
                             <button
                               onClick={() => handleVariantChange("adult")}
                               className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
-                                  ? "bg-yellow-400 text-slate-900"
-                                  : "bg-white text-slate-900 hover:bg-slate-50"
+                                ? "bg-yellow-400 text-slate-900"
+                                : "bg-white text-slate-900 hover:bg-slate-50"
                                 }`}
                             >
                               กินแล้ว
@@ -690,8 +716,8 @@ const Index = () => {
                             <button
                               onClick={() => handleVariantChange("friend")}
                               className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
-                                  ? "bg-yellow-400 text-slate-900"
-                                  : "bg-white text-slate-900 hover:bg-slate-50"
+                                ? "bg-yellow-400 text-slate-900"
+                                : "bg-white text-slate-900 hover:bg-slate-50"
                                 }`}
                             >
                               ยังไม่ได้กิน
@@ -702,10 +728,10 @@ const Index = () => {
 
                       <div className="flex flex-col gap-1.5 lg:gap-2">
                         <div className="relative aspect-square w-full max-w-md mx-auto bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-                          <WebcamView 
-                            onNextLevel={() => setIsPhraseCompleted(true)} 
-                            cameraEnabled={cameraPermissionGranted} 
-                            onVideoReady={(video) => setWebcamVideo(video)} 
+                          <WebcamView
+                            onNextLevel={() => setIsPhraseCompleted(true)}
+                            cameraEnabled={cameraPermissionGranted}
+                            onVideoReady={(video) => setWebcamVideo(video)}
                             onCanvasReady={(canvas) => setWebcamCanvas(canvas)}
                           />
 
@@ -752,7 +778,7 @@ const Index = () => {
                               <div className="bg-white/95 backdrop-blur-sm border-[2px] border-foreground rounded-lg px-2 py-1 font-bold text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                                 <div className="flex items-center gap-1.5">
                                   <div className="w-16 h-1.5 bg-slate-200 border border-foreground rounded-full overflow-hidden">
-                                    <div 
+                                    <div
                                       className="h-full bg-green-500 transition-all duration-300"
                                       style={{ width: `${(signRecognition.bufferLength / 40) * 100}%` }}
                                     ></div>
@@ -795,8 +821,8 @@ const Index = () => {
                               setIsLive(false);
                               setIsDetecting(false);
                               setTutorialStep("initial");
-                              setByeStep(1); 
-                              setEatStep(1); 
+                              setByeStep(1);
+                              setEatStep(1);
                               if (successTimerRef.current) {
                                 clearTimeout(successTimerRef.current);
                                 successTimerRef.current = null;
@@ -804,10 +830,10 @@ const Index = () => {
                             }
                           }}
                           className={`w-full max-w-md mx-auto h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-sm ${!cameraPermissionGranted
-                              ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                              : (isDetecting || isLive)
-                                ? 'bg-red-500 hover:bg-red-600 text-white'
-                                : 'bg-green-500 hover:bg-green-600 text-white'
+                            ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                            : (isDetecting || isLive)
+                              ? 'bg-red-500 hover:bg-red-600 text-white'
+                              : 'bg-green-500 hover:bg-green-600 text-white'
                             }`}
                         >
                           {!cameraPermissionGranted ? '📹 อนุญาตการเข้าถึงกล้อง' : (isDetecting || isLive) ? 'STOP' : 'START'}
@@ -826,8 +852,8 @@ const Index = () => {
                         onClick={handleCollectPoints}
                         disabled={!isPhraseCompleted}
                         className={`group flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl px-6 py-2.5 font-black text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-tight ${isPhraseCompleted
-                            ? 'bg-[#ec5b13] hover:bg-[#ec5b13]/90 text-white hover:translate-x-1 hover:-translate-y-1 cursor-pointer'
-                            : 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-60'
+                          ? 'bg-[#ec5b13] hover:bg-[#ec5b13]/90 text-white hover:translate-x-1 hover:-translate-y-1 cursor-pointer'
+                          : 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-60'
                           }`}
                       >
                         {isPhraseCompleted ? '✓' : '🔒'} COLLECT POINTS
@@ -848,7 +874,7 @@ const Index = () => {
         <>
           <div
             className="fixed inset-0 z-50 bg-foreground/50 backdrop-blur-sm"
-            onClick={() => { }} 
+            onClick={() => { }}
           />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="brutal-card-lg max-w-md w-full bg-background">

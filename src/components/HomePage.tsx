@@ -8,11 +8,12 @@ interface HomePageProps {
   onCategorySelect: (category: Category) => void;
   onResumeLesson: () => void;
   onLeaderboard: () => void;
+  onLessons: () => void;
   completedPhrases: Set<string>;
   streak: number;
 }
 
-export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, completedPhrases, streak }: HomePageProps) {
+export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLessons, completedPhrases, streak }: HomePageProps) {
   const { leaderboardData, loading } = useLeaderboard();
   const topThree = leaderboardData.slice(0, 3);
 
@@ -94,7 +95,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, comp
             </div>
             <div className="relative z-10">
               <button
-                onClick={() => onCategorySelect("general")}
+                onClick={onLessons}
                 className="brutal-btn-primary px-8 py-4 rounded-xl font-black text-xl uppercase tracking-tighter"
               >
                 Keep Learning
