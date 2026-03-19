@@ -107,12 +107,17 @@ const Index = () => {
 
   const byeTargetClass = activePhrase?.id === "g2" ? (byeStep === 1 ? "bye_me" : "bye_go") : undefined;
   const eatTargetClass = activePhrase?.id === "g3" ? (eatStep === 1 ? "rice" : eatStep === 2 ? "eat" : "yet") : undefined;
+  const g4TargetClass = activePhrase?.id === "g4" 
+    ? (selectedVariant === "adult" ? (eatStep === 1 ? "eat" : "already") : (eatStep === 1 ? "eat" : "yet")) 
+    : undefined;
 
   const effectivePhrase: Phrase | undefined = activePhrase?.id === "g2"
     ? { ...activePhrase, modelClass: byeTargetClass, modelClasses: undefined }
     : activePhrase?.id === "g3"
       ? { ...activePhrase, modelClass: eatTargetClass, modelClasses: undefined }
-      : activePhrase;
+      : activePhrase?.id === "g4"
+        ? { ...activePhrase, modelClass: g4TargetClass, modelClasses: undefined }
+        : activePhrase;
 
   const signRecognition = useMediaPipeHolistic({
     videoElement: webcamVideo,
@@ -135,6 +140,20 @@ const Index = () => {
           setEatStep(3);
         } else if (eatStep === 3 && prediction === "yet" && confidence >= 0.8) {
           handlePhraseCompletion();
+        }
+      } else if (activePhrase?.id === "g4") {
+        if (selectedVariant === "adult") {
+          if (eatStep === 1 && prediction === "eat" && confidence >= 0.8) {
+            setEatStep(2);
+          } else if (eatStep === 2 && prediction === "already" && confidence >= 0.8) {
+            handlePhraseCompletion();
+          }
+        } else {
+          if (eatStep === 1 && prediction === "eat" && confidence >= 0.8) {
+            setEatStep(2);
+          } else if (eatStep === 2 && prediction === "yet" && confidence >= 0.8) {
+            handlePhraseCompletion();
+          }
         }
       } else {
         handlePhraseCompletion();
@@ -617,7 +636,7 @@ const Index = () => {
                           <span className="text-slate-900 dark:text-white">ลาก่อน</span>
                           <span className="text-slate-900 dark:text-white mx-1">|</span>
                           <span
-                            className={`transition-colors duration-300 ${byeStep === 1
+                            className={`transition-colors duration-300 ${(isLive || isDetecting) && byeStep === 1
                               ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
                               : "text-slate-400"
                               }`}
@@ -625,7 +644,7 @@ const Index = () => {
                             ฉัน
                           </span>
                           <span
-                            className={`transition-colors duration-300 ${byeStep === 2
+                            className={`transition-colors duration-300 ${(isLive || isDetecting) && byeStep === 2
                               ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
                               : "text-slate-400"
                               }`}
@@ -638,7 +657,7 @@ const Index = () => {
                           <span className="text-slate-900 dark:text-white">กินข้าวหรือยัง?</span>
                           <span className="text-slate-900 dark:text-white mx-1">|</span>
                           <span
-                            className={`transition-colors duration-300 ${eatStep === 1
+                            className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 1
                               ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
                               : "text-slate-400"
                               }`}
@@ -646,7 +665,7 @@ const Index = () => {
                             ข้าว
                           </span>
                           <span
-                            className={`transition-colors duration-300 ${eatStep === 2
+                            className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 2
                               ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
                               : "text-slate-400"
                               }`}
@@ -654,7 +673,7 @@ const Index = () => {
                             กิน
                           </span>
                           <span
-                            className={`transition-colors duration-300 ${eatStep === 3
+                            className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 3
                               ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
                               : "text-slate-400"
                               }`}
@@ -662,13 +681,34 @@ const Index = () => {
                             หรือยัง?
                           </span>
                         </h2>
+                      ) : activePhrase?.id === "g4" ? (
+                        <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
+                          <span className="text-slate-900 dark:text-white">
+                            {selectedVariant === "adult" ? "กินแล้ว" : "ยังไม่ได้กิน"}
+                          </span>
+                          <span className="text-slate-900 dark:text-white mx-1">|</span>
+                          <span
+                            className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 1
+                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                              : "text-slate-400"
+                              }`}
+                          >
+                            กิน
+                          </span>
+                          <span
+                            className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 2
+                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                              : "text-slate-400"
+                              }`}
+                          >
+                            {selectedVariant === "adult" ? "แล้ว" : "ยัง"}
+                          </span>
+                        </h2>
                       ) : (
                         <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
                           {activePhrase?.id === "g1"
                             ? (selectedVariant === "adult" ? "สวัสดีผู้ใหญ่" : "สวัสดีเพื่อน")
-                            : activePhrase?.id === "g4"
-                              ? (selectedVariant === "adult" ? "กินแล้ว" : "ยังไม่ได้กิน")
-                              : (activePhrase?.text ?? "Hello")
+                            : (activePhrase?.text ?? "Hello")
                           }
                         </h2>
                       )}
@@ -676,7 +716,14 @@ const Index = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5 sm:gap-2 lg:gap-3 items-start max-w-3xl mx-auto">
                       <div className="flex flex-col gap-1 sm:gap-1.5 lg:gap-2">
                         <div className="relative aspect-square w-full max-w-md mx-auto bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-                          <VideoCard phrase={activePhrase?.text ?? "Hello"} category={activePhrase?.category ?? "general"} variant={(activePhrase?.id === "g1" || activePhrase?.id === "g4") ? selectedVariant : undefined} />
+                          <VideoCard 
+                            phrase={activePhrase?.text ?? "Hello"} 
+                            category={activePhrase?.category ?? "general"} 
+                            variant={(activePhrase?.id === "g1" || activePhrase?.id === "g4") ? selectedVariant : undefined} 
+                            byeStep={activePhrase?.id === "g2" ? byeStep : undefined}
+                            eatStep={(activePhrase?.id === "g3" || activePhrase?.id === "g4") ? eatStep : undefined}
+                            isLive={isLive || isDetecting}
+                          />
                           <div className="absolute inset-0 bg-black/10 flex items-center justify-center pointer-events-none">
                             <div className="bg-white/90 px-2 py-1 border-[3px] border-foreground rounded-full font-black text-xs absolute top-3 left-3">
                               TUTORIAL

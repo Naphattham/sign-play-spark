@@ -6,9 +6,12 @@ interface VideoCardProps {
   phrase: string;
   category: Category;
   variant?: "adult" | "friend";
+  byeStep?: 1 | 2;
+  eatStep?: 1 | 2 | 3;
+  isLive?: boolean;
 }
 
-export function VideoCard({ phrase, category, variant }: VideoCardProps) {
+export function VideoCard({ phrase, category, variant, byeStep, eatStep, isLive }: VideoCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -27,11 +30,49 @@ export function VideoCard({ phrase, category, variant }: VideoCardProps) {
           videoFileName = "สวัสดี (ผู้ใหญ่)";
         }
       } else if (phrase.includes("กินแล้ว") && phrase.includes("|")) {
-        videoFileName = "กินแล้ว";
+        if (isLive) {
+          if (variant === "friend") {
+            if (eatStep === 1) {
+              videoFileName = "กิน";
+            } else if (eatStep === 2) {
+              videoFileName = "ยัง";
+            }
+          } else {
+            if (eatStep === 1) {
+              videoFileName = "กิน";
+            } else if (eatStep === 2) {
+              videoFileName = "แล้ว";
+            }
+          }
+        } else {
+          if (variant === "friend") {
+            videoFileName = "ยังไม่ได้กิน";
+          } else {
+            videoFileName = "กินแล้ว";
+          }
+        }
+      } else if (phrase === "ลาก่อน") {
+        if (isLive) {
+          if (byeStep === 1) {
+            videoFileName = "ฉัน";
+          } else if (byeStep === 2) {
+            videoFileName = "ไป";
+          }
+        }
       }
       // Handle other phrases with question marks
       if (phrase === "กินข้าวแล้วหรือยัง?" || phrase === "กินข้าวหรือยัง?") {
-        videoFileName = "กินข้าวแล้วหรือยัง";
+        if (isLive) {
+          if (eatStep === 1) {
+            videoFileName = "ข้าว";
+          } else if (eatStep === 2) {
+            videoFileName = "กิน";
+          } else if (eatStep === 3) {
+            videoFileName = "หรือยัง";
+          }
+        } else {
+          videoFileName = "กินข้าวแล้วหรือยัง";
+        }
       } else if (phrase === "สบายดีไหม?") {
         videoFileName = "สบายดีไหม";
       }
@@ -90,7 +131,7 @@ export function VideoCard({ phrase, category, variant }: VideoCardProps) {
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("timeupdate", handleTimeUpdate);
     };
-  }, [phrase, category, variant]);
+  }, [phrase, category, variant, byeStep, eatStep, isLive]);
 
   return (
     <video

@@ -11,22 +11,35 @@ export function QuestView({ streak }: QuestViewProps) {
   const [claimed, setClaimed] = useState(false);
   const [claimingWelcome, setClaimingWelcome] = useState(false);
   const [welcomeClaimed, setWelcomeClaimed] = useState(false);
+  
+  // 🚨 State สำหรับเช็คว่าโหลดข้อมูลเสร็จหรือยัง (pre loading)
+  const [dataLoading, setDataLoading] = useState(true);
 
   // ตรวจสอบว่าเคยกดรับรางวัลแล้วหรือยัง
   useEffect(() => {
     const checkClaimed = async () => {
       const user = auth.currentUser;
-      if (!user) return;
-      const userRef = ref(database, `users/${user.uid}`);
-      const snapshot = await get(userRef);
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        if (data.streak3Claimed) {
-          setClaimed(true);
+      if (!user) {
+        setDataLoading(false);
+        return;
+      }
+      
+      try {
+        const userRef = ref(database, `users/${user.uid}`);
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          if (data.streak3Claimed) {
+            setClaimed(true);
+          }
+          if (data.welcomeBonusClaimed) {
+            setWelcomeClaimed(true);
+          }
         }
-        if (data.welcomeBonusClaimed) {
-          setWelcomeClaimed(true);
-        }
+      } catch (error) {
+        console.error("Error fetching quest data:", error);
+      } finally {
+        setDataLoading(false);
       }
     };
     checkClaimed();
@@ -86,6 +99,18 @@ export function QuestView({ streak }: QuestViewProps) {
 
   const isQuestComplete = streak >= 3;
   const progress = Math.min(streak, 3);
+
+  // 🚨 เช็ค Loading ควบเงื่อนไขรอข้อมูล
+  if (dataLoading) {
+    return (
+      <div className="max-w-4xl mx-auto flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground font-bold font-body">กำลังโหลดภารกิจ...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-12 bg-background">
