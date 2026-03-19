@@ -29,6 +29,7 @@ import trophyImg from "@/asset/image/Trophy.png";
 import guideHumanImg from "@/asset/image/guide_human.png";
 import questImg from "@/asset/image/quest.png";
 import challengeImg from "@/asset/image/challenge.png";
+import lessonImg from "@/asset/image/lesson.png";
 
 type View = "home" | "lessons" | "game" | "leaderboard" | "quest" | "profile" | "playing" | "gamesetup";
 
@@ -421,7 +422,7 @@ const Index = () => {
             )}
             {view === "lessons" && (
               <>
-                <img src={generalImg} alt="Lessons" className="w-5 h-5 object-contain" />
+                <img src={lessonImg} alt="Lessons" className="w-[20px] h-[20px] object-contain" />
                 <h2 className="font-display text-xl text-foreground">Lessons</h2>
               </>
             )}

@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Trophy, Medal, Award } from "lucide-react";
 import { getAvatarUrl } from "@/lib/avatar";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
@@ -10,14 +11,53 @@ const rankIcon = (rank: number) => {
 };
 
 export function LeaderboardView() {
-  const { leaderboardData, loading } = useLeaderboard();
+  const { leaderboardData, loading: dataLoading } = useLeaderboard();
+  
+  // 🚨 State ใหม่สำหรับเช็คว่าโหลดรูปเสร็จหรือยัง
+  const [imagesPreloaded, setImagesPreloaded] = useState(false);
 
-  if (loading) {
+  useEffect(() => {
+    // ถ้าข้อมูล Firebase ยังมาไม่ถึง ให้รอไปก่อน
+    if (dataLoading) return;
+
+    // ถ้าไม่มีข้อมูลผู้เล่นเลย ก็ไม่ต้องรอโหลดรูป
+    if (leaderboardData.length === 0) {
+      setImagesPreloaded(true);
+      return;
+    }
+
+    // 🚨 เริ่มกระบวนการ Preload รูปภาพทั้งหมด
+    let loadedCount = 0;
+    
+    // ดึง URL ทั้งหมดออกมา (ถ้ารูปโปรไฟล์ไม่มี ให้ดึงรูป Default Avatar แทน)
+    const urlsToLoad = leaderboardData.map(
+      (entry) => entry.photoURL || getAvatarUrl(null, entry.username || "user")
+    );
+    const totalUrls = urlsToLoad.length;
+
+    urlsToLoad.forEach((url) => {
+      const img = new Image();
+      img.src = url;
+
+      // นับจำนวนรูปที่โหลดเสร็จ (ไม่ว่าจะสำเร็จหรือ Error ก็ให้นับ เพื่อไม่ให้หน้าจอค้าง)
+      img.onload = () => {
+        loadedCount++;
+        if (loadedCount === totalUrls) setImagesPreloaded(true);
+      };
+      img.onerror = () => {
+        loadedCount++;
+        if (loadedCount === totalUrls) setImagesPreloaded(true);
+      };
+    });
+  }, [leaderboardData, dataLoading]);
+
+  // 🚨 เช็ค Loading ควบ 2 เงื่อนไข (รอข้อมูล + รอกระบวนการ Preload รูปเสร็จ)
+  if (dataLoading || !imagesPreloaded) {
     return (
       <div className="max-w-4xl mx-auto flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">กำลังโหลดอันดับ...</p>
+          <p className="text-muted-foreground font-bold font-body">กำลังโหลดอันดับผู้เล่น...</p>
         </div>
       </div>
     );
@@ -32,7 +72,7 @@ export function LeaderboardView() {
         <div className="text-center brutal-card p-8">
           <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
           <h3 className="font-display text-xl mb-2">ยังไม่มีข้อมูลผู้เล่น</h3>
-          <p className="text-muted-foreground">เริ่มเล่นเกมเพื่อติดอันดับกันเถอะ!</p>
+          <p className="text-muted-foreground font-body">เริ่มเล่นเกมเพื่อติดอันดับกันเถอะ!</p>
         </div>
       </div>
     );
@@ -55,12 +95,11 @@ export function LeaderboardView() {
                 onError={(e) => {
                   const img = e.target as HTMLImageElement;
                   const username = topThree.find(e => e.rank === 2)?.username || "user";
-                  console.log("Failed to load image for rank 2:", img.src);
                   img.src = getAvatarUrl(null, username);
                 }}
               />
             </div>
-            <p className="font-black text-sm text-center line-clamp-1">
+            <p className="font-black text-sm text-center line-clamp-1 w-20 break-words">
               {topThree.find(e => e.rank === 2)?.username}
             </p>
             <p className="text-xs font-bold text-primary">
@@ -76,7 +115,7 @@ export function LeaderboardView() {
         <div className="flex flex-col items-center animate-slide-up" style={{ animationDelay: "0ms" }}>
           <div className="flex flex-col items-center gap-2 mb-2">
             <div className="text-4xl">👑</div>
-            <div className="w-20 h-20 rounded-full border-[3px] border-foreground bg-accent overflow-hidden">
+            <div className="w-20 h-20 rounded-full border-[3px] border-foreground bg-accent overflow-hidden shadow-[2px_2px_0px_rgba(0,0,0,1)]">
               <img 
                 src={topThree.find(e => e.rank === 1)?.photoURL || getAvatarUrl(null, topThree.find(e => e.rank === 1)?.username || "user")}
                 alt={topThree.find(e => e.rank === 1)?.username}
@@ -85,12 +124,11 @@ export function LeaderboardView() {
                 onError={(e) => {
                   const img = e.target as HTMLImageElement;
                   const username = topThree.find(e => e.rank === 1)?.username || "user";
-                  console.log("Failed to load image for rank 1:", img.src);
                   img.src = getAvatarUrl(null, username);
                 }}
               />
             </div>
-            <p className="font-black text-sm text-center line-clamp-1">
+            <p className="font-black text-sm text-center line-clamp-1 w-24 break-words">
               {topThree.find(e => e.rank === 1)?.username}
             </p>
             <p className="text-xs font-bold text-primary">
@@ -115,12 +153,11 @@ export function LeaderboardView() {
                 onError={(e) => {
                   const img = e.target as HTMLImageElement;
                   const username = topThree.find(e => e.rank === 3)?.username || "user";
-                  console.log("Failed to load image for rank 3:", img.src);
                   img.src = getAvatarUrl(null, username);
                 }}
               />
             </div>
-            <p className="font-black text-sm text-center line-clamp-1">
+            <p className="font-black text-sm text-center line-clamp-1 w-20 break-words">
               {topThree.find(e => e.rank === 3)?.username}
             </p>
             <p className="text-xs font-bold text-primary">
@@ -140,7 +177,7 @@ export function LeaderboardView() {
             {rest.map((entry, i) => (
               <div
                 key={entry.rank}
-                className="flex items-center gap-4 px-6 py-3 font-body transition-all animate-slide-up bg-card"
+                className="flex items-center gap-4 px-6 py-3 font-body transition-all animate-slide-up bg-card hover:bg-muted/50"
                 style={{ animationDelay: `${(i + 3) * 50}ms` }}
               >
                 <div className="flex items-center gap-3">
@@ -152,7 +189,6 @@ export function LeaderboardView() {
                       referrerPolicy="no-referrer"
                       onError={(e) => {
                         const img = e.target as HTMLImageElement;
-                        console.log(`Failed to load image for ${entry.username}:`, img.src);
                         img.src = getAvatarUrl(null, entry.username);
                       }}
                     />
@@ -161,7 +197,7 @@ export function LeaderboardView() {
                     {rankIcon(entry.rank)}
                   </div>
                 </div>
-                <span className="flex-1 font-semibold">{entry.username}</span>
+                <span className="flex-1 font-semibold truncate">{entry.username}</span>
                 <span className="font-display text-primary text-lg">{entry.points.toLocaleString()}</span>
                 <span className="text-xs text-muted-foreground">pts</span>
               </div>
