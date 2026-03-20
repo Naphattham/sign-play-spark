@@ -219,23 +219,34 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
               Daily Goals
             </h3>
             <div className="space-y-4">
+              {/* Goal 1: เข้าสู่ระบบ 1 ครั้ง/วัน — always done since user is logged in */}
               <div className="flex items-start gap-3">
-                <div className="size-6 border-2 border-background rounded-md flex items-center justify-center bg-primary mt-1">
+                <div className="size-6 border-2 border-background rounded-md flex items-center justify-center bg-primary mt-1 flex-shrink-0">
                   <span className="text-sm font-black text-background">✓</span>
                 </div>
-                <div>
-                  <p className="font-bold text-sm uppercase">Learn 5 new signs</p>
-                  <div className="w-32 h-2 bg-background/20 rounded-full mt-2 border border-background/30">
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="font-bold text-sm">เข้าสู่ระบบ 1 ครั้ง/วัน</p>
+                    <p className="text-[10px] text-background/60 font-semibold">สำเร็จแล้ว!</p>
+                  </div>
+                  <div className="w-full h-2 bg-background/20 rounded-full mt-2 border border-background/30">
                     <div className="w-full h-full bg-primary rounded-full"></div>
                   </div>
                 </div>
               </div>
+
+              {/* Goal 2: ฝึกซ้อม 30 นาที */}
               <div className="flex items-start gap-3">
-                <div className="size-6 border-2 border-background rounded-md flex items-center justify-center bg-background/20 mt-1"></div>
-                <div>
-                  <p className="font-bold text-sm uppercase">Practice for 15 mins</p>
-                  <div className="w-32 h-2 bg-background/20 rounded-full mt-2 border border-background/30">
-                    <div className="w-[40%] h-full bg-accent rounded-full"></div>
+                <div className="size-6 border-2 border-background rounded-md flex items-center justify-center bg-background/20 mt-1 flex-shrink-0">
+                  {/* <span className="text-xs font-black text-background/50">○</span> */}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="font-bold text-sm">ฝึกซ้อม 30 นาที</p>
+                    <p className="text-[10px] text-background/60 font-semibold">0 / 30 นาที</p>
+                  </div>
+                  <div className="w-full h-2 bg-background/20 rounded-full mt-2 border border-background/30">
+                    <div className="w-0 h-full bg-accent rounded-full"></div>
                   </div>
                 </div>
               </div>
