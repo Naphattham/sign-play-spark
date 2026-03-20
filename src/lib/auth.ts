@@ -7,8 +7,61 @@ import {
   User,
   updateProfile,
 } from "firebase/auth";
-import { ref, set, get } from "firebase/database";
+import { ref, set, get, update } from "firebase/database";
 import { auth, database } from "./firebase";
+
+// Add points to a user's total points
+export const addUserPoints = async (uid: string, pointsToAdd: number) => {
+  try {
+    const userRef = ref(database, `users/${uid}`);
+    const snapshot = await get(userRef);
+    if (!snapshot.exists()) return { error: "User not found" };
+    const userData = snapshot.val();
+    const newPoints = (userData.points || 0) + pointsToAdd;
+    await update(userRef, { points: newPoints });
+    console.log(`💰 Added ${pointsToAdd} points. Total: ${newPoints}`);
+    return { points: newPoints, error: null };
+  } catch (error: any) {
+    console.error("Error adding points:", error);
+    return { points: 0, error: error.message };
+  }
+};
+
+// Increment user level by 1
+export const incrementUserLevel = async (uid: string) => {
+  try {
+    const userRef = ref(database, `users/${uid}`);
+    const snapshot = await get(userRef);
+    if (!snapshot.exists()) return { error: "User not found" };
+    const userData = snapshot.val();
+    const newLevel = (userData.level || 1) + 1;
+    await update(userRef, { level: newLevel });
+    console.log(`⬆️ Level up! Now level ${newLevel}`);
+    return { level: newLevel, error: null };
+  } catch (error: any) {
+    console.error("Error incrementing level:", error);
+    return { level: 0, error: error.message };
+  }
+};
+
+// Add a completed phrase to user's record in DB
+export const addCompletedPhrase = async (uid: string, phraseId: string) => {
+  try {
+    const userRef = ref(database, `users/${uid}`);
+    const snapshot = await get(userRef);
+    if (!snapshot.exists()) return { error: "User not found" };
+    const userData = snapshot.val();
+    const completedPhrases: string[] = userData.completedPhrases || [];
+    if (!completedPhrases.includes(phraseId)) {
+      completedPhrases.push(phraseId);
+      await update(userRef, { completedPhrases });
+    }
+    return { completedPhrases, error: null };
+  } catch (error: any) {
+    console.error("Error adding completed phrase:", error);
+    return { completedPhrases: [], error: error.message };
+  }
+};
 
 // Sign up with email and password
 export const signUpWithEmail = async (

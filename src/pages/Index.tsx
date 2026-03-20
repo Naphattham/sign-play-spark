@@ -18,8 +18,18 @@ import { useMediaPipeHolistic } from "@/hooks/useMediaPipeHolistic";
 import { auth, database } from "@/lib/firebase";
 import { ref as dbRef, get } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
-import { signOutUser, updateStreakOnLogin, getUserData } from "@/lib/auth";
+import { signOutUser, updateStreakOnLogin, getUserData, addUserPoints, incrementUserLevel, addCompletedPhrase } from "@/lib/auth";
 import { warmUpModel } from "@/lib/signLanguageAPI";
+
+// Helper: calculate score from confidence percentage
+const getScoreFromConfidence = (confidence: number): number => {
+  if (confidence >= 0.80) return 100;
+  if (confidence >= 0.65) return 70;
+  if (confidence >= 0.50) return 40;
+  return 0;
+};
+
+type ButtonState = "start" | "stop" | "collect" | "tryagain";
 
 import generalImg from "@/asset/image/general.png";
 import emotionalImg from "@/asset/image/emotional.png";
@@ -30,6 +40,8 @@ import guideHumanImg from "@/asset/image/guide_human.png";
 import questImg from "@/asset/image/quest.png";
 import challengeImg from "@/asset/image/challenge.png";
 import lessonImg from "@/asset/image/lesson.png";
+import arrowLeftImg from "@/asset/image/arrow_left.png";
+import arrowRightImg from "@/asset/image/arrow_right.png";
 
 type View = "home" | "lessons" | "game" | "leaderboard" | "quest" | "profile" | "playing" | "gamesetup";
 
@@ -71,7 +83,7 @@ const Index = () => {
   });
   const [category, setCategory] = useState<Category>("general");
   const [activePhrase, setActivePhrase] = useState<Phrase>(getPhrasesByCategory("general")[0]);
-  const [completedPhrases, setCompletedPhrases] = useState<Set<string>>(new Set(["g1", "g2", "e1"]));
+  const [completedPhrases, setCompletedPhrases] = useState<Set<string>>(new Set());
   const [view, setView] = useState<View>("home");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
@@ -94,6 +106,11 @@ const Index = () => {
   const [scanningLocked, setScanningLocked] = useState(false);
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // New states for confidence scoring & button flow
+  const [bestConfidence, setBestConfidence] = useState(0);
+  const [buttonState, setButtonState] = useState<ButtonState>("start");
+  const [collectedPhrases, setCollectedPhrases] = useState<Set<string>>(new Set());
+
   // 🚨 1. ปรับลดเวลาที่บังคับสแกนจาก 3 วิ เหลือ 1.5 วินาที
   const MIN_SCANNING_DURATION = 1500;
 
@@ -107,9 +124,24 @@ const Index = () => {
 
   const byeTargetClass = activePhrase?.id === "g2" ? (byeStep === 1 ? "bye_me" : "bye_go") : undefined;
   const eatTargetClass = activePhrase?.id === "g3" ? (eatStep === 1 ? "rice" : eatStep === 2 ? "eat" : "yet") : undefined;
-  const g4TargetClass = activePhrase?.id === "g4" 
-    ? (selectedVariant === "adult" ? (eatStep === 1 ? "eat" : "already") : (eatStep === 1 ? "eat" : "yet")) 
+  const g4TargetClass = activePhrase?.id === "g4"
+    ? (selectedVariant === "adult" ? (eatStep === 1 ? "eat" : "already") : (eatStep === 1 ? "eat" : "yet"))
     : undefined;
+
+  let targetDisplayWord = activePhrase?.text ?? "Hello";
+  if (activePhrase?.id === "g1") {
+    targetDisplayWord = selectedVariant === "adult" ? "สวัสดีผู้ใหญ่" : "สวัสดีเพื่อน";
+  } else if (activePhrase?.id === "g2") {
+    targetDisplayWord = byeStep === 1 ? "ฉัน" : "ไป";
+  } else if (activePhrase?.id === "g3") {
+    targetDisplayWord = eatStep === 1 ? "ข้าว" : eatStep === 2 ? "กิน" : "หรือยัง?";
+  } else if (activePhrase?.id === "g4") {
+    if (selectedVariant === "adult") {
+      targetDisplayWord = eatStep === 1 ? "กิน" : "แล้ว";
+    } else {
+      targetDisplayWord = eatStep === 1 ? "กิน" : "ยัง";
+    }
+  }
 
   const effectivePhrase: Phrase | undefined = activePhrase?.id === "g2"
     ? { ...activePhrase, modelClass: byeTargetClass, modelClasses: undefined }
@@ -119,6 +151,11 @@ const Index = () => {
         ? { ...activePhrase, modelClass: g4TargetClass, modelClasses: undefined }
         : activePhrase;
 
+  const currentCategoryPhrases = getPhrasesByCategory(category);
+  const currentPhraseIndex = currentCategoryPhrases.findIndex(p => p.id === activePhrase?.id);
+  const isFirstPhrase = currentPhraseIndex <= 0;
+  const isLastPhrase = currentPhraseIndex >= currentCategoryPhrases.length - 1;
+
   const signRecognition = useMediaPipeHolistic({
     videoElement: webcamVideo,
     canvasElement: webcamCanvas,
@@ -127,40 +164,46 @@ const Index = () => {
     variant: (activePhrase?.id === "g1" || activePhrase?.id === "g4") ? selectedVariant : undefined,
     onPhraseMatch: (prediction, confidence) => {
       console.log(`✅ Phrase matched! ${prediction} (${(confidence * 100).toFixed(1)}%)`);
+      // Track best confidence
+      setBestConfidence(prev => Math.max(prev, confidence));
       if (activePhrase?.id === "g2") {
-        if (byeStep === 1 && prediction === "bye_me" && confidence >= 0.8) {
+        if (byeStep === 1 && prediction === "bye_me" && confidence >= 0.5) {
           setByeStep(2);
-        } else if (byeStep === 2 && prediction === "bye_go" && confidence >= 0.8) {
-          handlePhraseCompletion();
+        } else if (byeStep === 2 && prediction === "bye_go" && confidence >= 0.5) {
+          handlePhraseCompletion(confidence);
         }
       } else if (activePhrase?.id === "g3") {
-        if (eatStep === 1 && prediction === "rice" && confidence >= 0.8) {
+        if (eatStep === 1 && prediction === "rice" && confidence >= 0.5) {
           setEatStep(2);
-        } else if (eatStep === 2 && prediction === "eat" && confidence >= 0.8) {
+        } else if (eatStep === 2 && prediction === "eat" && confidence >= 0.5) {
           setEatStep(3);
-        } else if (eatStep === 3 && prediction === "yet" && confidence >= 0.8) {
-          handlePhraseCompletion();
+        } else if (eatStep === 3 && prediction === "yet" && confidence >= 0.5) {
+          handlePhraseCompletion(confidence);
         }
       } else if (activePhrase?.id === "g4") {
         if (selectedVariant === "adult") {
-          if (eatStep === 1 && prediction === "eat" && confidence >= 0.8) {
+          if (eatStep === 1 && prediction === "eat" && confidence >= 0.5) {
             setEatStep(2);
-          } else if (eatStep === 2 && prediction === "already" && confidence >= 0.8) {
-            handlePhraseCompletion();
+          } else if (eatStep === 2 && prediction === "already" && confidence >= 0.5) {
+            handlePhraseCompletion(confidence);
           }
         } else {
-          if (eatStep === 1 && prediction === "eat" && confidence >= 0.8) {
+          if (eatStep === 1 && prediction === "eat" && confidence >= 0.5) {
             setEatStep(2);
-          } else if (eatStep === 2 && prediction === "yet" && confidence >= 0.8) {
-            handlePhraseCompletion();
+          } else if (eatStep === 2 && prediction === "yet" && confidence >= 0.5) {
+            handlePhraseCompletion(confidence);
           }
         }
       } else {
-        handlePhraseCompletion();
+        handlePhraseCompletion(confidence);
       }
     },
     onPrediction: (prediction) => {
       console.log(`🔍 Prediction: ${prediction.prediction} (${(prediction.confidence * 100).toFixed(1)}%)`);
+      // Update best confidence if it matches target
+      if (signRecognition.isMatched) {
+        setBestConfidence(prev => Math.max(prev, prediction.confidence));
+      }
     },
   });
 
@@ -243,6 +286,13 @@ const Index = () => {
           const streakResult = await updateStreakOnLogin(user.uid);
           if (streakResult.streak !== undefined) {
             setUserStreak(streakResult.streak);
+          }
+
+          // Load completed phrases from Firebase
+          const userData = await getUserData(user.uid);
+          if (userData.data?.completedPhrases && Array.isArray(userData.data.completedPhrases)) {
+            setCompletedPhrases(new Set(userData.data.completedPhrases));
+            setCollectedPhrases(new Set(userData.data.completedPhrases));
           }
         } catch (error) {
           console.error("Error updating streak:", error);
@@ -333,6 +383,8 @@ const Index = () => {
     setIsDetecting(false);
     setTutorialStep("initial");
     setIsPhraseCompleted(false);
+    setBestConfidence(0);
+    setButtonState("start");
     setByeStep(1);
     setEatStep(1);
     if (successTimerRef.current) {
@@ -341,36 +393,100 @@ const Index = () => {
     }
   };
 
-  const handlePhraseCompletion = () => {
+  const handlePhraseCompletion = (confidence?: number) => {
+    const finalConfidence = confidence ?? bestConfidence;
+    setBestConfidence(prev => Math.max(prev, finalConfidence));
     setIsPhraseCompleted(true);
-    console.log("🎉 Phrase completed!");
+    // If already collected, show stop; otherwise show collect
+    if (collectedPhrases.has(activePhrase.id)) {
+      setButtonState("stop");
+    } else {
+      setButtonState("collect");
+    }
+    console.log(`🎉 Phrase completed! Best confidence: ${(Math.max(bestConfidence, finalConfidence) * 100).toFixed(1)}%`);
   };
 
-  const handleCollectPoints = () => {
-    if (!isPhraseCompleted) return;
-    console.log("Points collected!");
-    setCompletedPhrases(prev => new Set([...prev, activePhrase.id]));
+  const handleCollectPoints = async () => {
+    const score = getScoreFromConfidence(bestConfidence);
+    if (score <= 0) return;
 
-    const phrases = getPhrasesByCategory(category);
-    const currentIndex = phrases.findIndex(p => p.id === activePhrase.id);
-    if (currentIndex < phrases.length - 1) {
-      setActivePhrase(phrases[currentIndex + 1]);
-      setSelectedVariant("adult");
-      setIsPhraseCompleted(false);
-      setByeStep(1);
-      setEatStep(1);
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+      // Add points to user via API
+      await addUserPoints(user.uid, score);
+      // Mark phrase as completed in DB
+      await addCompletedPhrase(user.uid, activePhrase.id);
+      // Update local state
+      setCompletedPhrases(prev => new Set([...prev, activePhrase.id]));
+      setCollectedPhrases(prev => new Set([...prev, activePhrase.id]));
+
+      // Check if entire category is now completed
+      const categoryPhrases = getPhrasesByCategory(category);
+      const newCompleted = new Set([...completedPhrases, activePhrase.id]);
+      const allCategoryDone = categoryPhrases.every(p => newCompleted.has(p.id));
+      if (allCategoryDone) {
+        console.log(`🏆 Category "${category}" completed! Level up!`);
+        await incrementUserLevel(user.uid);
+      }
+
+      // Show try again
+      setButtonState("tryagain");
+      console.log(`💰 Collected ${score} points for phrase ${activePhrase.id}`);
+    } catch (error) {
+      console.error("Error collecting points:", error);
+    }
+  };
+
+  const handleTryAgain = () => {
+    setIsLive(false);
+    setIsDetecting(false);
+    setTutorialStep("initial");
+    setIsPhraseCompleted(false);
+    setBestConfidence(0);
+    setButtonState("start");
+    setByeStep(1);
+    setEatStep(1);
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current);
+      successTimerRef.current = null;
+    }
+  };
+
+
+
+  const handlePrevPhrase = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!isFirstPhrase) {
+      handlePhraseSelect(currentCategoryPhrases[currentPhraseIndex - 1]);
       setIsLive(false);
       setIsDetecting(false);
       setTutorialStep("initial");
+      setIsPhraseCompleted(false);
+      setBestConfidence(0);
+      setButtonState("start");
       if (successTimerRef.current) {
         clearTimeout(successTimerRef.current);
         successTimerRef.current = null;
       }
-    } else {
-      setGameOpen(false);
+    }
+  };
+
+  const handleNextPhrase = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!isLastPhrase) {
+      handlePhraseSelect(currentCategoryPhrases[currentPhraseIndex + 1]);
       setIsLive(false);
       setIsDetecting(false);
       setTutorialStep("initial");
+      setIsPhraseCompleted(false);
+      setBestConfidence(0);
+      setButtonState("start");
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current);
+        successTimerRef.current = null;
+      }
     }
   };
 
@@ -570,15 +686,23 @@ const Index = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3 sm:gap-x-6 sm:gap-y-4 md:gap-x-8 md:gap-y-6">
-                {getPhrasesByCategory(category).map((phrase) => (
+                {getPhrasesByCategory(category).map((phrase) => {
+                  const isCompleted = completedPhrases.has(phrase.id);
+                  return (
                   <div
                     key={phrase.id}
                     onClick={() => handlePhraseSelect(phrase)}
-                    className="relative bg-white brutal-card flex items-center p-2.5 pr-8 sm:p-3 sm:pr-10 md:p-4 md:pr-12 cursor-pointer hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
+                    className={`relative brutal-card flex items-center p-2.5 pr-8 sm:p-3 sm:pr-10 md:p-4 md:pr-12 cursor-pointer hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all ${isCompleted ? 'bg-green-50' : 'bg-white'}`}
                   >
-                    <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-[#f94fa4] text-white font-black text-[10px] sm:text-xs md:text-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10">
-                      +10 pts
-                    </div>
+                    {isCompleted ? (
+                      <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-green-500 text-white font-black text-[10px] sm:text-xs md:text-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10 flex items-center gap-1">
+                        <span>✅</span> <span className="hidden sm:inline">ผ่านแล้ว</span>
+                      </div>
+                    ) : (
+                      <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-[#f94fa4] text-white font-black text-[10px] sm:text-xs md:text-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10">
+                        +{phrase.id === "g1" || phrase.id === "g4" ? "200" : "100"} pts
+                      </div>
+                    )}
                     <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-accent/20 brutal-card flex items-center justify-center text-xl sm:text-2xl md:text-3xl mr-3 sm:mr-4 md:mr-6 shrink-0">
                       {phrase.emoji || "✋"}
                     </div>
@@ -587,7 +711,7 @@ const Index = () => {
                       <p className="text-gray-500 font-bold text-[11px] sm:text-xs md:text-sm">{phrase.english || phrase.text}</p>
                     </div>
                   </div>
-                ))}
+                )})}
               </div>
             </div>
           )}
@@ -602,6 +726,8 @@ const Index = () => {
                 setIsLive(false);
                 setIsDetecting(false);
                 setTutorialStep("initial");
+                setBestConfidence(0);
+                setButtonState("start");
               }}
             />
 
@@ -620,6 +746,8 @@ const Index = () => {
                         setIsLive(false);
                         setIsDetecting(false);
                         setTutorialStep("initial");
+                        setBestConfidence(0);
+                        setButtonState("start");
                       }}
                       className="flex items-center justify-center w-10 h-10 bg-white border-[3px] border-foreground rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 transition-transform"
                     >
@@ -628,9 +756,25 @@ const Index = () => {
                   </div>
                 </header>
 
-                <div className="flex flex-1 flex-col overflow-hidden">
-                  <main className="flex-1 p-2 sm:p-3 lg:p-4 xl:p-6 bg-[#f8f6f6] dark:bg-[#221610] overflow-y-auto flex flex-col justify-between">
-                    <div className="flex items-center justify-center pb-2">
+                <div className="flex flex-1 flex-col overflow-hidden relative">
+                  <button
+                    onClick={handlePrevPhrase}
+                    disabled={isFirstPhrase}
+                    className={`absolute left-0 sm:left-2 md:left-4 lg:left-6 top-1/2 -translate-y-1/2 z-50 w-14 sm:w-16 md:w-20 lg:w-24 hover:-translate-x-2 transition-transform cursor-pointer ${isFirstPhrase ? 'opacity-30 pointer-events-none' : ''}`}
+                  >
+                    <img src={arrowLeftImg} alt="Previous" className="w-full h-full object-contain drop-shadow-[2px_2px_0px_rgba(0,0,0,0.2)]" />
+                  </button>
+
+                  <button
+                    onClick={handleNextPhrase}
+                    disabled={isLastPhrase}
+                    className={`absolute right-0 sm:right-2 md:right-4 lg:right-6 top-1/2 -translate-y-1/2 z-50 w-14 sm:w-16 md:w-20 lg:w-24 hover:translate-x-2 transition-transform cursor-pointer ${isLastPhrase ? 'opacity-30 pointer-events-none' : ''}`}
+                  >
+                    <img src={arrowRightImg} alt="Next" className="w-full h-full object-contain drop-shadow-[2px_2px_0px_rgba(0,0,0,0.2)]" />
+                  </button>
+
+                  <main className="flex-1 p-1 sm:p-2 lg:p-3 xl:p-4 px-10 sm:px-12 md:px-4 bg-[#f8f6f6] dark:bg-[#221610] overflow-hidden flex flex-col justify-between">
+                    <div className="flex items-center justify-center pb-1">
                       {activePhrase?.id === "g2" ? (
                         <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
                           <span className="text-slate-900 dark:text-white">ลาก่อน</span>
@@ -713,13 +857,13 @@ const Index = () => {
                         </h2>
                       )}
                     </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5 sm:gap-2 lg:gap-3 items-start max-w-3xl mx-auto">
-                      <div className="flex flex-col gap-1 sm:gap-1.5 lg:gap-2">
-                        <div className="relative aspect-square w-full max-w-md mx-auto bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-                          <VideoCard 
-                            phrase={activePhrase?.text ?? "Hello"} 
-                            category={activePhrase?.category ?? "general"} 
-                            variant={(activePhrase?.id === "g1" || activePhrase?.id === "g4") ? selectedVariant : undefined} 
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5 sm:gap-2 lg:gap-3 items-start max-w-[740px] mx-auto w-full">
+                      <div className="flex flex-col gap-1 sm:gap-1.5 lg:gap-2 w-full items-center lg:items-end">
+                        <div className="relative aspect-square w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mr-0 bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+                          <VideoCard
+                            phrase={activePhrase?.text ?? "Hello"}
+                            category={activePhrase?.category ?? "general"}
+                            variant={(activePhrase?.id === "g1" || activePhrase?.id === "g4") ? selectedVariant : undefined}
                             byeStep={activePhrase?.id === "g2" ? byeStep : undefined}
                             eatStep={(activePhrase?.id === "g3" || activePhrase?.id === "g4") ? eatStep : undefined}
                             isLive={isLive || isDetecting}
@@ -732,10 +876,10 @@ const Index = () => {
                         </div>
 
                         {activePhrase?.id === "g1" && (
-                          <div className="flex gap-1.5 lg:gap-2 max-w-md mx-auto w-full">
+                          <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
                             <button
                               onClick={() => handleVariantChange("adult")}
-                              className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
+                              className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
                                 ? "bg-yellow-400 text-slate-900"
                                 : "bg-white text-slate-900 hover:bg-slate-50"
                                 }`}
@@ -744,7 +888,7 @@ const Index = () => {
                             </button>
                             <button
                               onClick={() => handleVariantChange("friend")}
-                              className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
+                              className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
                                 ? "bg-yellow-400 text-slate-900"
                                 : "bg-white text-slate-900 hover:bg-slate-50"
                                 }`}
@@ -754,10 +898,10 @@ const Index = () => {
                           </div>
                         )}
                         {activePhrase?.id === "g4" && (
-                          <div className="flex gap-1.5 lg:gap-2 max-w-md mx-auto w-full">
+                          <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
                             <button
                               onClick={() => handleVariantChange("adult")}
-                              className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
+                              className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
                                 ? "bg-yellow-400 text-slate-900"
                                 : "bg-white text-slate-900 hover:bg-slate-50"
                                 }`}
@@ -766,7 +910,7 @@ const Index = () => {
                             </button>
                             <button
                               onClick={() => handleVariantChange("friend")}
-                              className={`flex-1 h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
+                              className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
                                 ? "bg-yellow-400 text-slate-900"
                                 : "bg-white text-slate-900 hover:bg-slate-50"
                                 }`}
@@ -777,8 +921,8 @@ const Index = () => {
                         )}
                       </div>
 
-                      <div className="flex flex-col gap-1 sm:gap-1.5 lg:gap-2">
-                        <div className="relative aspect-square w-full max-w-md mx-auto bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+                      <div className="flex flex-col gap-1 sm:gap-1.5 lg:gap-2 w-full items-center lg:items-start">
+                        <div className="relative aspect-square w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
                           <WebcamView
                             onNextLevel={() => setIsPhraseCompleted(true)}
                             cameraEnabled={cameraPermissionGranted}
@@ -809,7 +953,10 @@ const Index = () => {
 
                           <div className="absolute top-3 right-3 animate-bounce z-10">
                             <div className="bg-pink-500 text-white border-[3px] border-foreground rounded-xl px-2 lg:px-3 py-1 font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1 text-xs">
-                              + {activePhrase?.id === "g1" || activePhrase?.id === "g4" ? "5" : "10"} PTS
+                              {(() => {
+                                const score = getScoreFromConfidence(bestConfidence);
+                                return score > 0 ? `+ ${score} PTS` : '+ ? PTS';
+                              })()}
                             </div>
                           </div>
 
@@ -825,91 +972,183 @@ const Index = () => {
                           </div>
 
                           {isLive && (
-                            <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
-                              <div className="bg-white/95 backdrop-blur-sm border-[2px] border-foreground rounded-lg px-2 py-1 font-bold text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                                <div className="flex items-center gap-1.5">
-                                  <div className="w-16 h-1.5 bg-slate-200 border border-foreground rounded-full overflow-hidden">
-                                    <div
-                                      className="h-full bg-green-500 transition-all duration-300"
-                                      style={{ width: `${(signRecognition.bufferLength / 40) * 100}%` }}
-                                    ></div>
-                                  </div>
-                                  <span className="text-[10px] text-slate-600">{signRecognition.bufferLength}/40</span>
+                            <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+
+                              {/* กล่องแสดงคำทำนาย (ค้างไว้ตลอดตราบใดที่มีข้อมูล) - ปรับขนาดให้เล็กลง */}
+                              <div className={`bg-white/95 backdrop-blur-sm border-[2px] ${signRecognition.isMatched ? 'border-green-500 bg-green-50/95' : 'border-foreground'} rounded-md px-2 py-1 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] min-w-[110px] transition-colors duration-300`}>
+
+                                {/* คำที่ทาย + เปอร์เซ็นต์ */}
+                                <div className="flex items-end justify-between gap-2">
+                                  <span className={`text-sm leading-none ${signRecognition.isMatched ? 'text-green-700' : 'text-slate-800'} truncate max-w-[90px]`}>
+                                    {targetDisplayWord}
+                                  </span>
+                                  <span className={`text-xs leading-none ${signRecognition.isMatched ? 'text-green-600' : 'text-primary'}`}>
+                                    {signRecognition.isMatched ? (signRecognition.currentConfidence * 100).toFixed(0) : "0"}%
+                                  </span>
                                 </div>
                               </div>
 
-                              {signRecognition.currentPrediction && signRecognition.currentConfidence >= 0.5 && (
-                                <div className={`bg-white/95 backdrop-blur-sm border-[2px] ${signRecognition.isMatched ? 'border-green-500 bg-green-50/95' : 'border-foreground'} rounded-lg px-2 py-1 font-bold text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] max-w-[180px]`}>
+                              {/* กล่องแจ้งเตือน Error */}
+                              {signRecognition.error && (
+                                <div className="bg-red-500/95 backdrop-blur-sm border-[2px] border-foreground rounded-lg px-3 py-2 font-bold text-xs text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] max-w-[180px]">
                                   <div className="flex items-center gap-1">
-                                    {signRecognition.isMatched && <span className="text-green-500">✓</span>}
-                                    <span className={`${signRecognition.isMatched ? 'text-green-700' : 'text-slate-700'} truncate`}>
-                                      {signRecognition.currentPrediction}
-                                    </span>
-                                    <span className={`${signRecognition.isMatched ? 'text-green-600' : 'text-slate-500'} text-[10px] ml-auto`}>
-                                      {(signRecognition.currentConfidence * 100).toFixed(0)}%
-                                    </span>
+                                    <span className="material-symbols-outlined text-[14px]">warning</span>
+                                    <span>ไม่พบกล้อง / เกิดข้อผิดพลาด</span>
                                   </div>
                                 </div>
                               )}
 
-                              {signRecognition.error && (
-                                <div className="bg-red-500/95 backdrop-blur-sm border-[2px] border-foreground rounded-lg px-2 py-1 font-bold text-xs text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] max-w-[180px]">
-                                  ⚠️ Error
-                                </div>
-                              )}
                             </div>
                           )}
                         </div>
 
-                        <button
-                          onClick={() => {
-                            if (!cameraPermissionGranted) {
-                              setShowCameraPermission(true);
-                            } else if (!isDetecting && !isLive) {
-                              setTutorialStep("scanning");
-                              setIsDetecting(true);
-                            } else {
-                              setIsLive(false);
-                              setIsDetecting(false);
-                              setTutorialStep("initial");
-                              setByeStep(1);
-                              setEatStep(1);
-                              if (successTimerRef.current) {
-                                clearTimeout(successTimerRef.current);
-                                successTimerRef.current = null;
-                              }
-                            }
-                          }}
-                          className={`w-full max-w-md mx-auto h-10 lg:h-12 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-sm ${!cameraPermissionGranted
-                            ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                            : (isDetecting || isLive)
-                              ? 'bg-red-500 hover:bg-red-600 text-white'
-                              : 'bg-green-500 hover:bg-green-600 text-white'
-                            }`}
-                        >
-                          {!cameraPermissionGranted ? '📹 อนุญาตการเข้าถึงกล้อง' : (isDetecting || isLive) ? 'STOP' : 'START'}
-                        </button>
+                        {/* Multi-state button: Start → Stop → Collect Point → Try Again */}
+                        {(() => {
+                          // Camera permission button
+                          if (!cameraPermissionGranted) {
+                            return (
+                              <button
+                                onClick={() => setShowCameraPermission(true)}
+                                className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-blue-500 hover:bg-blue-600 text-white"
+                              >
+                                📹 อนุญาตการเข้าถึงกล้อง
+                              </button>
+                            );
+                          }
+
+                          const currentScore = getScoreFromConfidence(bestConfidence);
+                          const isLocked = bestConfidence < 0.5;
+                          const alreadyCollected = collectedPhrases.has(activePhrase?.id);
+
+                          // Try Again state
+                          if (buttonState === "tryagain") {
+                            return (
+                              <button
+                                onClick={handleTryAgain}
+                                className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-purple-500 hover:bg-purple-600 text-white"
+                              >
+                                🔄 TRY AGAIN
+                              </button>
+                            );
+                          }
+
+                          // Collect Point state (only if not already collected)
+                          if (buttonState === "collect" && isPhraseCompleted && !alreadyCollected) {
+                            return (
+                              <button
+                                onClick={() => { if (!isLocked) handleCollectPoints(); }}
+                                disabled={isLocked}
+                                className={`w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm ${
+                                  isLocked
+                                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                    : 'bg-yellow-400 hover:bg-yellow-500 text-slate-900 hover:translate-y-0.5'
+                                }`}
+                              >
+                                {isLocked
+                                  ? `🔒 ต้องถึง 50% (ตอนนี้ ${(bestConfidence * 100).toFixed(0)}%)`
+                                  : `⭐ COLLECT ${currentScore} POINTS`
+                                }
+                              </button>
+                            );
+                          }
+
+                          // Stop state (during detection/live, or if already collected)
+                          if (buttonState === "stop" || isDetecting || isLive) {
+                            return (
+                              <button
+                                onClick={() => {
+                                  setIsLive(false);
+                                  setIsDetecting(false);
+                                  setTutorialStep("initial");
+                                  setIsPhraseCompleted(false);
+                                  setBestConfidence(0);
+                                  setButtonState("start");
+                                  setByeStep(1);
+                                  setEatStep(1);
+                                  if (successTimerRef.current) {
+                                    clearTimeout(successTimerRef.current);
+                                    successTimerRef.current = null;
+                                  }
+                                }}
+                                className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-red-500 hover:bg-red-600 text-white"
+                              >
+                                ⏹ STOP
+                              </button>
+                            );
+                          }
+
+                          // Default: Start state
+                          return (
+                            <button
+                              onClick={() => {
+                                setTutorialStep("scanning");
+                                setIsDetecting(true);
+                                setBestConfidence(0);
+                                setButtonState("stop");
+                              }}
+                              className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-green-500 hover:bg-green-600 text-white"
+                            >
+                              ▶ START
+                            </button>
+                          );
+                        })()}
                       </div>
                     </div>
 
-                    <footer className="mt-2 sm:mt-3 flex flex-col sm:flex-row items-center justify-between border-t-[3px] border-slate-200 dark:border-slate-800 pt-2 sm:pt-3 gap-2 sm:gap-0">
-                      <div className="flex flex-col items-center sm:items-start gap-1">
-                        <span className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest">Current Progress</span>
-                        <div className="w-28 sm:w-36 h-3 sm:h-4 bg-slate-200 border-[2px] sm:border-[3px] border-foreground rounded-full overflow-hidden">
-                          <div className="w-[65%] h-full bg-pink-400 border-r-[2px] sm:border-r-[3px] border-foreground transition-all duration-500"></div>
-                        </div>
+                    <footer className="mt-1 sm:mt-2 pt-1 sm:pt-2 border-t-[2px] border-slate-200 dark:border-slate-800 w-full">
+                      <div className="flex justify-center gap-2 sm:gap-4 pb-2 pt-3 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                        {currentCategoryPhrases.map((phrase) => {
+                          const isActive = phrase.id === activePhrase?.id;
+                          const isCompleted = completedPhrases.has(phrase.id);
+                          return (
+                            <div
+                              key={phrase.id}
+                              onClick={() => {
+                                handlePhraseSelect(phrase);
+                                setIsLive(false);
+                                setIsDetecting(false);
+                                setTutorialStep("initial");
+                                setIsPhraseCompleted(false);
+                                setBestConfidence(0);
+                                setButtonState("start");
+                                if (successTimerRef.current) {
+                                  clearTimeout(successTimerRef.current);
+                                  successTimerRef.current = null;
+                                }
+                              }}
+                              className={`relative border-[2px] border-foreground rounded-lg flex items-center py-1 px-2 sm:py-2 sm:px-3 cursor-pointer flex-none w-[120px] sm:w-[140px] md:w-[160px] min-h-[48px] sm:min-h-[56px] transition-all ${isActive
+                                ? 'shadow-[0px_0px_0px_3px_rgba(253,224,71,1)] scale-[1.02] z-10'
+                                : 'opacity-70 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:opacity-100 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]'
+                                } ${isCompleted ? 'bg-green-50' : 'bg-white'}`}
+                            >
+                              {isCompleted ? (
+                                <div className="absolute -top-2 -right-2 bg-green-500 text-white font-black text-[7px] sm:text-[9px] px-1.5 py-0.5 rounded-full border-[1.5px] border-foreground z-10 flex items-center gap-1">
+                                  <span>✅</span> <span className="hidden sm:inline">ผ่านแล้ว</span>
+                                </div>
+                              ) : (
+                                <div className="absolute -top-2 -right-2 bg-[#f94fa4] text-white font-black text-[7px] sm:text-[9px] px-1.5 py-0.5 rounded-full border-[1.5px] border-foreground z-10">
+                                  +{phrase.id === "g1" || phrase.id === "g4" ? "200" : "100"} pts
+                                </div>
+                              )}
+
+                              {/* ไอคอน */}
+                              <div className={`w-7 h-7 sm:w-9 sm:h-9 border-[1.5px] border-foreground rounded-md flex items-center justify-center text-sm sm:text-base shrink-0 mr-2 sm:mr-3 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] bg-pink-300`}>
+                                {phrase.emoji || '✋'}
+                              </div>
+
+                              {/* ข้อความ */}
+                              <div className="flex flex-col flex-1 overflow-hidden justify-center">
+                                <h3 className="font-black text-[9px] sm:text-[11px] md:text-[12px] text-slate-800 truncate leading-tight mb-0.5">
+                                  {phrase.text}
+                                </h3>
+                                <p className="text-gray-500 font-bold text-[7px] sm:text-[8px] md:text-[9px] truncate">
+                                  {phrase.english || phrase.text}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                      <button
-                        onClick={handleCollectPoints}
-                        disabled={!isPhraseCompleted}
-                        className={`group flex items-center justify-center gap-1.5 sm:gap-2 border-[2px] sm:border-[3px] border-foreground rounded-xl px-3 py-1.5 sm:px-6 sm:py-2.5 font-black text-xs sm:text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-tight ${isPhraseCompleted
-                          ? 'bg-[#ec5b13] hover:bg-[#ec5b13]/90 text-white hover:translate-x-1 hover:-translate-y-1 cursor-pointer'
-                          : 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-60'
-                          }`}
-                      >
-                        {isPhraseCompleted ? '✓' : '🔒'} COLLECT POINTS
-                        {isPhraseCompleted && <span className="group-hover:translate-x-1 transition-transform">→</span>}
-                      </button>
                     </footer>
                   </main>
                 </div>

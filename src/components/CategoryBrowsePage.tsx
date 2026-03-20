@@ -104,7 +104,7 @@ export function CategoryBrowsePage() {
         videoFileName = "กินแล้ว";
       }
       // Handle phrases with question marks
-      if (phrase === "กินข้าวแล้วหรือยัง?") {
+      if (phrase === "กินข้าวหรือยัง?") {
         videoFileName = "กินข้าวแล้วหรือยัง";
       } else if (phrase === "สบายดีไหม?") {
         videoFileName = "สบายดีไหม";
