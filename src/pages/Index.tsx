@@ -96,6 +96,7 @@ const Index = () => {
   const [showCameraPermission, setShowCameraPermission] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [userStreak, setUserStreak] = useState(0);
+  const [userLevel, setUserLevel] = useState(1);
   const [isLive, setIsLive] = useState(false);
   const [gameOpen, setGameOpen] = useState(false);
   const [isPhraseCompleted, setIsPhraseCompleted] = useState(false);
@@ -355,6 +356,10 @@ const Index = () => {
           if (userData.data?.completedPhrases && Array.isArray(userData.data.completedPhrases)) {
             setCompletedPhrases(new Set(userData.data.completedPhrases));
             setCollectedPhrases(new Set(userData.data.completedPhrases));
+          }
+          // Load user level
+          if (userData.data?.level) {
+            setUserLevel(userData.data.level);
           }
           // Load per-phrase cumulative points
           if (userData.data?.phrasePoints && typeof userData.data.phrasePoints === "object") {
@@ -775,6 +780,7 @@ const Index = () => {
                 onLessons={() => setView("lessons")}
                 completedPhrases={completedPhrases}
                 streak={userStreak}
+                level={userLevel}
               />
             </div>
           )}

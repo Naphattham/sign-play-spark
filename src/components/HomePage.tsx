@@ -11,9 +11,10 @@ interface HomePageProps {
   onLessons: () => void;
   completedPhrases: Set<string>;
   streak: number;
+  level: number;
 }
 
-export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLessons, completedPhrases, streak }: HomePageProps) {
+export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLessons, completedPhrases, streak, level }: HomePageProps) {
   const { leaderboardData, loading } = useLeaderboard();
   const topThree = leaderboardData.slice(0, 3);
 
@@ -83,7 +84,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
           <section className="brutal-card bg-accent p-4 sm:p-6 md:p-8 rounded-xl relative overflow-hidden flex flex-col md:flex-row items-center gap-4 md:gap-6">
             <div className="relative z-10 text-center md:text-left flex-1">
               <span className="bg-foreground text-background px-2 py-0.5 sm:px-3 sm:py-1 rounded font-black text-[10px] sm:text-xs uppercase tracking-widest">
-                Master Signer • LVL 12
+                Master Signer • LVL {level}
               </span>
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground mt-2 sm:mt-4 leading-none uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
                 Welcome Back,<br />{auth.currentUser?.displayName?.split(" ")[0] || 'Questor'}!
