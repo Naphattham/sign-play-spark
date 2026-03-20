@@ -27,9 +27,9 @@ const toastVariants = cva(
   {
     variants: {
       variant: {
-        default: "border bg-background text-foreground",
-        destructive: "destructive group border-destructive bg-destructive text-destructive-foreground",
-        success: "border-yellow-500 bg-yellow-500 text-yellow-950 border-[3px]",
+        default: "border-[3px] border-slate-900 bg-slate-900 text-white",
+        destructive: "destructive group border-[3px] border-red-500 bg-red-500 text-white",
+        success: "border-[3px] border-yellow-500 bg-yellow-500 text-white",
       },
     },
     defaultVariants: {
@@ -70,9 +70,9 @@ const Toast = React.forwardRef<
     >
       <div className="flex-1">{props.children}</div>
       {variant === "success" && (
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-yellow-950/20 overflow-hidden">
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30 overflow-hidden">
           <div 
-            className="h-full bg-yellow-950 transition-all duration-100 ease-linear"
+            className="h-full bg-white transition-all duration-100 ease-linear"
             style={{ width: `${progress}%` }}
           />
         </div>

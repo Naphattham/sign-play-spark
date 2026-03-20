@@ -7,7 +7,7 @@ import {
   User,
   updateProfile,
 } from "firebase/auth";
-import { ref, set, get, update } from "firebase/database";
+import { ref, set, get, update, increment } from "firebase/database";
 import { auth, database } from "./firebase";
 
 // Add points to a user's total points
@@ -41,6 +41,38 @@ export const incrementUserLevel = async (uid: string) => {
   } catch (error: any) {
     console.error("Error incrementing level:", error);
     return { level: 0, error: error.message };
+  }
+};
+
+// Update cumulative per-phrase points (capped at 100 per phrase)
+// Returns the actual delta added
+export const updatePhrasePoints = async (
+  uid: string,
+  phraseKey: string,
+  newTierScore: number // the score tier attempted (40 / 70 / 100)
+): Promise<{ delta: number; totalForPhrase: number; error: string | null }> => {
+  try {
+    const userRef = ref(database, `users/${uid}`);
+    const snapshot = await get(userRef);
+    if (!snapshot.exists()) return { delta: 0, totalForPhrase: 0, error: "User not found" };
+
+    const userData = snapshot.val();
+    const phrasePoints: Record<string, number> = userData.phrasePoints || {};
+    const current = phrasePoints[phraseKey] || 0;
+
+    // Delta = how many more points they earn on top of current
+    const delta = Math.max(0, newTierScore - current);
+    if (delta <= 0) return { delta: 0, totalForPhrase: current, error: null };
+
+    const newTotal = Math.min(100, current + delta); // cap at 100
+    phrasePoints[phraseKey] = newTotal;
+
+    await update(userRef, { phrasePoints });
+    console.log(`📊 Phrase "${phraseKey}": ${current} → ${newTotal} (+${delta})`);
+    return { delta, totalForPhrase: newTotal, error: null };
+  } catch (error: any) {
+    console.error("Error updating phrase points:", error);
+    return { delta: 0, totalForPhrase: 0, error: error.message };
   }
 };
 
@@ -96,6 +128,11 @@ export const signUpWithEmail = async (
       streak: 1,
       lastLoginDate: today.toISOString(),
       completedPhrases: [],
+    });
+
+    // Update global stat
+    await update(ref(database, 'stats'), {
+      totalUsers: increment(1)
     });
 
     return { user, error: null };
@@ -173,6 +210,11 @@ export const signInWithGoogle = async () => {
       };
       console.log("Creating new user in database:", userData);
       await set(userRef, userData);
+
+      // Update global stat
+      await update(ref(database, 'stats'), {
+        totalUsers: increment(1)
+      });
     } else {
       // Existing user - update photoURL from Google if it has changed
       const existingData = snapshot.val();

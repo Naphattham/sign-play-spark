@@ -75,6 +75,12 @@ export function VideoCard({ phrase, category, variant, byeStep, eatStep, isLive 
         }
       } else if (phrase === "สบายดีไหม?") {
         videoFileName = "สบายดีไหม";
+      } else if (phrase.includes("สบายดี") && phrase.includes("|")) {
+        if (variant === "friend") {
+          videoFileName = "ไม่สบายใจ";
+        } else {
+          videoFileName = "สบายดี";
+        }
       }
     }
 

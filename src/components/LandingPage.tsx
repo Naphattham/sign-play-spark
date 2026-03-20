@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Check } from "lucide-react";
 import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "@/lib/auth";
+import { database } from "@/lib/firebase";
+import { ref as dbRef, get } from "firebase/database";
 import generalImg from "@/asset/image/general.png";
 
 interface LandingPageProps {
@@ -19,6 +21,24 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState("/videos/general/สวัสดี (ผู้ใหญ่)main.mp4");
+  const [totalUsers, setTotalUsers] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchTotalUsers = async () => {
+      try {
+        const statsRef = dbRef(database, 'stats/totalUsers');
+        const snapshot = await get(statsRef);
+        if (snapshot.exists()) {
+          setTotalUsers(snapshot.val());
+        } else {
+          setTotalUsers(0);
+        }
+      } catch (error) {
+        console.error("Error fetching total users:", error);
+      }
+    };
+    fetchTotalUsers();
+  }, []);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,7 +229,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
               <div className="w-10 h-10 rounded-full border-3 border-sq-black bg-green-400 flex items-center justify-center text-white font-bold text-sm">AS</div>
               <div className="w-10 h-10 rounded-full border-3 border-sq-black bg-sq-pink flex items-center justify-center text-white font-bold text-sm">MK</div>
             </div>
-            <p className="font-bold text-sq-black/60 text-xs sm:text-sm">มีผู้เรียนลงทะเบียน 0 คนในสัปดาห์นี้!</p>
+            <p className="font-bold text-sq-black/60 text-xs sm:text-sm">มีผู้เรียนลงทะเบียนทั้งหมด {totalUsers} คนในระบบ!</p>
           </div>
         </div>
 

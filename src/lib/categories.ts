@@ -70,11 +70,15 @@ export const phrases: Phrase[] = [
   },
   { 
     id: "g6", 
-    text: "สบายดี", 
+    text: "สบายดี | ไม่สบายใจ", 
     category: "general", 
     emoji: "👍", 
-    english: "I'm fine",
-    modelClass: "fine"
+    english: "I'm fine | Unhappy",
+    modelClasses: ["fine", "unhappy"],
+    variantModelMapping: {
+      adult: "fine",
+      friend: "unhappy"
+    }
   },
   
   // Emotions (อารมณ์)
@@ -102,14 +106,7 @@ export const phrases: Phrase[] = [
     english: "Love",
     modelClass: "love"
   },
-  { 
-    id: "e4", 
-    text: "ไม่สบายใจ", 
-    category: "emotions", 
-    emoji: "🙁", 
-    english: "Uncomfortable",
-    modelClass: "unhappy"
-  },
+
   { 
     id: "e5", 
     text: "เหนื่อย", 
@@ -236,6 +233,15 @@ export const checkPhraseMatch = (
   if (phrase.modelClass === modelClass) return true;
   if (phrase.modelClasses?.includes(modelClass)) return true;
   return false;
+};
+
+// Helper function to check if a phrase is fully completed 
+// (for phrases with multiple sub-parts like g1 and g4, verifies both are collected)
+export const isPhraseCompletedCheck = (phraseId: string, completedPhrases: Set<string>): boolean => {
+  if (phraseId === "g1" || phraseId === "g4" || phraseId === "g6") {
+    return completedPhrases.has(`${phraseId}_adult`) && completedPhrases.has(`${phraseId}_friend`);
+  }
+  return completedPhrases.has(phraseId);
 };
 
 export const leaderboardData = [

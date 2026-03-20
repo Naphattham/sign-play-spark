@@ -1,4 +1,4 @@
-import { Category, getPhrasesByCategory } from "@/lib/categories";
+import { Category, getPhrasesByCategory, isPhraseCompletedCheck } from "@/lib/categories";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { getAvatarUrl } from "@/lib/avatar";
 import { useMemo } from "react";
@@ -21,7 +21,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
   const lastCategory = (localStorage.getItem('lastCategory') as Category) || 'general';
   const lastPhraseId = localStorage.getItem('lastPhraseId');
   const categoryPhrases = getPhrasesByCategory(lastCategory);
-  const completedCount = categoryPhrases.filter(p => completedPhrases.has(p.id)).length;
+  const completedCount = categoryPhrases.filter(p => isPhraseCompletedCheck(p.id, completedPhrases)).length;
   const totalCount = categoryPhrases.length;
   const progressPercent = Math.round((completedCount / totalCount) * 100);
 
@@ -43,7 +43,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
 
   // Get last accessed phrase or first uncompleted phrase for thumbnail
   const lastPhrase = categoryPhrases.find(p => p.id === lastPhraseId);
-  const nextPhrase = lastPhrase || categoryPhrases.find(p => !completedPhrases.has(p.id)) || categoryPhrases[0];
+  const nextPhrase = lastPhrase || categoryPhrases.find(p => !isPhraseCompletedCheck(p.id, completedPhrases)) || categoryPhrases[0];
 
   // Build video URL (same logic as VideoCard)
   const getVideoUrl = () => {
@@ -55,6 +55,8 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
         videoFileName = "สวัสดี (ผู้ใหญ่)";
       } else if (nextPhrase.text.includes("กินแล้ว") && nextPhrase.text.includes("|")) {
         videoFileName = "กินแล้ว";
+      } else if (nextPhrase.text.includes("สบายดี") && nextPhrase.text.includes("|")) {
+        videoFileName = "สบายดี";
       }
       // Handle phrases with question marks
       if (nextPhrase.text === "กินข้าวหรือยัง?") {

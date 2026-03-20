@@ -74,7 +74,7 @@ export function GameSidebar({
     if (user.photoURL && !photoURL) setPhotoURL(user.photoURL);
 
     const userRef = dbRef(database, `users/${user.uid}`);
-    
+
     // Set up real-time listener for user data (points, photoURL, username)
     const unsubscribe = onValue(userRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -115,9 +115,8 @@ export function GameSidebar({
       )}
 
       <aside
-        className={`fixed lg:static z-40 top-0 left-0 h-screen w-64 bg-primary border-r-[3px] border-foreground flex flex-col transition-transform duration-200 ${
-          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        }`}
+        className={`fixed lg:static z-40 top-0 left-0 h-screen w-64 bg-primary border-r-[3px] border-foreground flex flex-col transition-transform duration-200 ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }`}
       >
         <div className="p-6 border-b-[3px] border-foreground">
           <h1 className="text-2xl font-display text-primary-foreground tracking-wide flex items-center gap-2">
@@ -131,56 +130,51 @@ export function GameSidebar({
           <div className="space-y-2 mb-4">
             <button
               onClick={onHome}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${
-                showHome
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${showHome
                   ? "bg-secondary text-secondary-foreground shadow-brutal-sm"
                   : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
-              }`}
+                }`}
               style={showHome ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
             >
               <Home size={18} />
               Home
             </button>
 
-              <button
+            <button
               onClick={handlePlayGame}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${
-                showPlayGame
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${showPlayGame
                   ? "bg-secondary text-secondary-foreground"
-                  : "bg-purple-400 text-white hover:bg-purple-500"
-              }`}
-              style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}
+                  : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
+                }`}
+              style={showPlayGame ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
             >
               <img src={challengeImg} alt="Challenge" className="w-[18px] h-[18px] object-contain" />
               Challenge
             </button>
 
-              <button
-                onClick={onQuest}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${
-                  showQuest
-                    ? "bg-secondary text-secondary-foreground"
-                    : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
+            <button
+              onClick={onQuest}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${showQuest
+                  ? "bg-secondary text-secondary-foreground"
+                  : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
                 }`}
-                style={showQuest ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
-              >
-                <img src={questImg} alt="Quest" className="w-[18px] h-[18px] object-contain" />
-                Quest
-              </button>
+              style={showQuest ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
+            >
+              <img src={questImg} alt="Quest" className="w-[18px] h-[18px] object-contain" />
+              Quest
+            </button>
 
-              <button
-                onClick={onLeaderboard}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${
-                  showLeaderboard
-                    ? "bg-secondary text-secondary-foreground"
-                    : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
+            <button
+              onClick={onLeaderboard}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${showLeaderboard
+                  ? "bg-secondary text-secondary-foreground"
+                  : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
                 }`}
-                style={showLeaderboard ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
-              >
-                <img src={trophyImg} alt="Leaderboard" className="w-[18px] h-[18px] object-contain" />
-                Leaderboard
-              </button>
-
+              style={showLeaderboard ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
+            >
+              <img src={trophyImg} alt="Leaderboard" className="w-[18px] h-[18px] object-contain" />
+              Leaderboard
+            </button>
           </div>
 
           <button
@@ -192,13 +186,13 @@ export function GameSidebar({
         </nav>
 
         <div className="p-4 border-t-[3px] border-foreground">
-          <div 
+          <div
             onClick={onProfile}
             className="bg-secondary rounded-lg border-[2px] border-foreground shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] px-3 py-2.5 flex items-center gap-2.5 cursor-pointer hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] transition-all"
           >
-            <img 
-              alt={username} 
-              className="w-9 h-9 rounded-full border-[2px] border-foreground object-cover bg-slate-200 shrink-0" 
+            <img
+              alt={username}
+              className="w-9 h-9 rounded-full border-[2px] border-foreground object-cover bg-slate-200 shrink-0"
               src={photoURL || getAvatarUrl(null, username || auth.currentUser?.email || "user")}
               onError={(e) => {
                 const img = e.target as HTMLImageElement;

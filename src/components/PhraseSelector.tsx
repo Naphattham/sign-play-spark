@@ -1,4 +1,4 @@
-import { Category, getPhrasesByCategory, Phrase } from "@/lib/categories";
+import { Category, Phrase, getPhrasesByCategory, isPhraseCompletedCheck } from "@/lib/categories";
 import { CheckCircle } from "lucide-react";
 
 interface PhraseSelectorProps {
@@ -10,7 +10,7 @@ interface PhraseSelectorProps {
 
 export function PhraseSelector({ category, activePhrase, onSelect, completedPhrases }: PhraseSelectorProps) {
   const categoryPhrases = getPhrasesByCategory(category);
-  const completed = categoryPhrases.filter((p) => completedPhrases.has(p.id)).length;
+  const completed = categoryPhrases.filter((p) => isPhraseCompletedCheck(p.id, completedPhrases)).length;
 
   return (
     <div className="brutal-card-lg overflow-hidden h-full flex flex-col">
@@ -24,7 +24,7 @@ export function PhraseSelector({ category, activePhrase, onSelect, completedPhra
       <div className="flex-1 p-3 grid grid-cols-2 gap-6 overflow-y-auto">
         {categoryPhrases.map((phrase) => {
           const isActive = activePhrase?.id === phrase.id;
-          const isDone = completedPhrases.has(phrase.id);
+          const isDone = isPhraseCompletedCheck(phrase.id, completedPhrases);
           const isUnlocked = true; // เปิดให้เล่นได้หมด หรือใส่ logic ตามต้องการ
           
           return (

@@ -31,6 +31,31 @@ function GlobalSoundButton() {
   );
 }
 
+const PRELOAD_VIDEOS = [
+  "g1_adult.mp4",
+  "g1_friend.mp4",
+  "g2.mp4",
+  "g3.mp4",
+  "g4_adult.mp4",
+  "g4_friend.mp4",
+];
+
+function GlobalVideoPreloader({ videoFiles }: { videoFiles: string[] }) {
+  return (
+    <div style={{ display: "none" }} aria-hidden="true">
+      {videoFiles.map((fileName, index) => (
+        <video
+          key={index}
+          src={fileName.startsWith("/") ? fileName : `/videos/${fileName}`}
+          preload="auto"
+          muted
+          playsInline
+        />
+      ))}
+    </div>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AudioProvider>
@@ -38,6 +63,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <GlobalVideoPreloader videoFiles={PRELOAD_VIDEOS} />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/categories" element={<CategoryBrowsePage />} />

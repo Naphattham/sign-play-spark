@@ -102,6 +102,8 @@ export function CategoryBrowsePage() {
         videoFileName = "สวัสดี (ผู้ใหญ่)";
       } else if (phrase.includes("กินแล้ว") && phrase.includes("|")) {
         videoFileName = "กินแล้ว";
+      } else if (phrase.includes("สบายดี") && phrase.includes("|")) {
+        videoFileName = "สบายดี";
       }
       // Handle phrases with question marks
       if (phrase === "กินข้าวหรือยัง?") {

@@ -11,14 +11,15 @@ import { HomePage } from "@/components/HomePage";
 import { LessonsPage } from "@/components/LessonsPage";
 import { QuestView } from "@/components/QuestView";
 import { GameSetupPage } from "@/components/GameSetupPage";
-import { Category, Phrase, getPhrasesByCategory, categories } from "@/lib/categories";
+import { Category, Phrase, getPhrasesByCategory, categories, isPhraseCompletedCheck } from "@/lib/categories";
 import { LogOut, X, Camera, Home, User, ArrowLeft } from "lucide-react";
 import { useDistanceDetection, DistanceStatus } from "@/hooks/useDistanceDetection";
 import { useMediaPipeHolistic } from "@/hooks/useMediaPipeHolistic";
 import { auth, database } from "@/lib/firebase";
-import { ref as dbRef, get } from "firebase/database";
+import { ref as dbRef, get, update } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
-import { signOutUser, updateStreakOnLogin, getUserData, addUserPoints, incrementUserLevel, addCompletedPhrase } from "@/lib/auth";
+import { signOutUser, updateStreakOnLogin, getUserData, addUserPoints, incrementUserLevel, addCompletedPhrase, updatePhrasePoints } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
 import { warmUpModel } from "@/lib/signLanguageAPI";
 
 // Helper: calculate score from confidence percentage
@@ -42,6 +43,8 @@ import challengeImg from "@/asset/image/challenge.png";
 import lessonImg from "@/asset/image/lesson.png";
 import arrowLeftImg from "@/asset/image/arrow_left.png";
 import arrowRightImg from "@/asset/image/arrow_right.png";
+import collectPointsImg from "@/asset/image/CollectPoints.png";
+import hintImg from "@/asset/image/Hint.png";
 
 type View = "home" | "lessons" | "game" | "leaderboard" | "quest" | "profile" | "playing" | "gamesetup";
 
@@ -105,11 +108,21 @@ const Index = () => {
   const [isDetecting, setIsDetecting] = useState(false);
   const [scanningLocked, setScanningLocked] = useState(false);
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Guard: ป้องกัน Auto-Collect double-fire
+  const isCollectingRef = useRef(false);
+  // Track ว่า Session เริ่มไปแล้วหรือยัง (One-Time Start)
+  const sessionStartedRef = useRef(false);
+
+  const { toast } = useToast();
+  const [showHintModal, setShowHintModal] = useState(false);
+  const [isHintActive, setIsHintActive] = useState(false);
 
   // New states for confidence scoring & button flow
   const [bestConfidence, setBestConfidence] = useState(0);
   const [buttonState, setButtonState] = useState<ButtonState>("start");
   const [collectedPhrases, setCollectedPhrases] = useState<Set<string>>(new Set());
+  // คะแนนสะสมต่อคำ (0-100) key = phraseKey
+  const [phrasePoints, setPhrasePoints] = useState<Record<string, number>>({});
 
   // 🚨 1. ปรับลดเวลาที่บังคับสแกนจาก 3 วิ เหลือ 1.5 วินาที
   const MIN_SCANNING_DURATION = 1500;
@@ -141,7 +154,13 @@ const Index = () => {
     } else {
       targetDisplayWord = eatStep === 1 ? "กิน" : "ยัง";
     }
+  } else if (activePhrase?.id === "g6") {
+    targetDisplayWord = selectedVariant === "adult" ? "สบายดี" : "ไม่สบายใจ";
   }
+
+  const g6TargetClass = activePhrase?.id === "g6"
+    ? (selectedVariant === "adult" ? "fine" : "unhappy")
+    : undefined;
 
   const effectivePhrase: Phrase | undefined = activePhrase?.id === "g2"
     ? { ...activePhrase, modelClass: byeTargetClass, modelClasses: undefined }
@@ -149,7 +168,9 @@ const Index = () => {
       ? { ...activePhrase, modelClass: eatTargetClass, modelClasses: undefined }
       : activePhrase?.id === "g4"
         ? { ...activePhrase, modelClass: g4TargetClass, modelClasses: undefined }
-        : activePhrase;
+        : activePhrase?.id === "g6"
+          ? { ...activePhrase, modelClass: g6TargetClass, modelClasses: undefined }
+          : activePhrase;
 
   const currentCategoryPhrases = getPhrasesByCategory(category);
   const currentPhraseIndex = currentCategoryPhrases.findIndex(p => p.id === activePhrase?.id);
@@ -161,7 +182,7 @@ const Index = () => {
     canvasElement: webcamCanvas,
     enabled: isLive && gameOpen,
     targetPhrase: effectivePhrase,
-    variant: (activePhrase?.id === "g1" || activePhrase?.id === "g4") ? selectedVariant : undefined,
+    variant: (activePhrase?.id === "g1" || activePhrase?.id === "g4" || activePhrase?.id === "g6") ? selectedVariant : undefined,
     onPhraseMatch: (prediction, confidence) => {
       console.log(`✅ Phrase matched! ${prediction} (${(confidence * 100).toFixed(1)}%)`);
       // Track best confidence
@@ -206,6 +227,47 @@ const Index = () => {
       }
     },
   });
+
+  // 🚨 ตรวจจับการเปลี่ยนแปลงสิทธิ์กล้อง (เช่น ผู้ใช้กด Reset หรือ Block บน Browser ระหว่างใช้งาน)
+  useEffect(() => {
+    let permissionStatus: PermissionStatus | null = null;
+    const checkPermission = async () => {
+      try {
+        permissionStatus = await navigator.permissions.query({ name: 'camera' as PermissionName });
+        
+        const updatePermissionState = () => {
+          if (permissionStatus?.state === 'denied' || permissionStatus?.state === 'prompt') {
+            setCameraPermissionGranted(false);
+            localStorage.removeItem('cameraPermissionGranted');
+            setIsLive(false);
+            setIsDetecting(false);
+            setButtonState("start");
+            setTutorialStep("initial");
+            sessionStartedRef.current = false;
+          } else if (permissionStatus?.state === 'granted') {
+            setCameraPermissionGranted(true);
+            localStorage.setItem('cameraPermissionGranted', 'true');
+          }
+        };
+
+        // ตรวจสอบทันทีตอนโหลด
+        updatePermissionState();
+
+        // ตั้ง listener รับการเปลี่ยนแปลงสิทธิ์
+        permissionStatus.onchange = updatePermissionState;
+      } catch (error) {
+        console.warn("Permission API not supported", error);
+      }
+    };
+    
+    checkPermission();
+    
+    return () => {
+      if (permissionStatus) {
+        permissionStatus.onchange = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (isDetecting) {
@@ -294,6 +356,10 @@ const Index = () => {
             setCompletedPhrases(new Set(userData.data.completedPhrases));
             setCollectedPhrases(new Set(userData.data.completedPhrases));
           }
+          // Load per-phrase cumulative points
+          if (userData.data?.phrasePoints && typeof userData.data.phrasePoints === "object") {
+            setPhrasePoints(userData.data.phrasePoints as Record<string, number>);
+          }
         } catch (error) {
           console.error("Error updating streak:", error);
         }
@@ -333,6 +399,23 @@ const Index = () => {
       }
     }
   }, [isLive, isDetecting, webcamCanvas]);
+
+  // 🚨 Track daily practice time (Quest: Practice 30 mins)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const interval = setInterval(() => {
+      const today = new Date().toISOString().split('T')[0];
+      const storedDate = localStorage.getItem('dailyPracticeDate');
+      let seconds = parseInt(localStorage.getItem('dailyPracticeSeconds') || '0', 10);
+      if (storedDate !== today) {
+        seconds = 0;
+        localStorage.setItem('dailyPracticeDate', today);
+      }
+      seconds += 1;
+      localStorage.setItem('dailyPracticeSeconds', seconds.toString());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   const handleCategoryChange = (cat: Category) => {
     setCategory(cat);
@@ -379,97 +462,167 @@ const Index = () => {
 
   const handleVariantChange = (variant: "adult" | "friend") => {
     setSelectedVariant(variant);
-    setIsLive(false);
-    setIsDetecting(false);
-    setTutorialStep("initial");
+    // 🔑 One-Time Start: ไม่ปิดกล้อง — รีเซ็ตแค่ confidence และ phrase state
     setIsPhraseCompleted(false);
-    setBestConfidence(0);
-    setButtonState("start");
+    setBestConfidence(0);  // รีเซ็ต confidence เป็น 0% เสมอเมื่อเปลี่ยน variant
+    isCollectingRef.current = false;
     setByeStep(1);
     setEatStep(1);
-    if (successTimerRef.current) {
-      clearTimeout(successTimerRef.current);
-      successTimerRef.current = null;
+    // ถ้ากล้อง live อยู่แล้ว ให้ยังคง live อยู่ต่อ (เปลี่ยนแค่ variant)
+    if (isLive || isDetecting) {
+      setButtonState("stop");
     }
+    // ถ้ายังไม่เริ่ม ก็ยังคงเป็น start
   };
 
   const handlePhraseCompletion = (confidence?: number) => {
     const finalConfidence = confidence ?? bestConfidence;
-    setBestConfidence(prev => Math.max(prev, finalConfidence));
+    const newBest = Math.max(bestConfidence, finalConfidence);
+    setBestConfidence(newBest);
     setIsPhraseCompleted(true);
-    // If already collected, show stop; otherwise show collect
-    if (collectedPhrases.has(activePhrase.id)) {
-      setButtonState("stop");
-    } else {
-      setButtonState("collect");
-    }
-    console.log(`🎉 Phrase completed! Best confidence: ${(Math.max(bestConfidence, finalConfidence) * 100).toFixed(1)}%`);
+
+    console.log(`🎉 Phrase matched! Best confidence: ${(newBest * 100).toFixed(1)}%`);
+
+    // ไม่ Auto-Collect — ให้ผู้ใช้กดเองทุกครั้ง
+    setButtonState("collect");
   };
 
   const handleCollectPoints = async () => {
-    const score = getScoreFromConfidence(bestConfidence);
-    if (score <= 0) return;
+    const tierScore = getScoreFromConfidence(bestConfidence); // 40 / 70 / 100
+    if (tierScore <= 0) return;
 
     const user = auth.currentUser;
     if (!user) return;
 
-    try {
-      // Add points to user via API
-      await addUserPoints(user.uid, score);
-      // Mark phrase as completed in DB
-      await addCompletedPhrase(user.uid, activePhrase.id);
-      // Update local state
-      setCompletedPhrases(prev => new Set([...prev, activePhrase.id]));
-      setCollectedPhrases(prev => new Set([...prev, activePhrase.id]));
+    if (isCollectingRef.current) return; // ป้องกัน double-click
+    isCollectingRef.current = true;
 
-      // Check if entire category is now completed
-      const categoryPhrases = getPhrasesByCategory(category);
-      const newCompleted = new Set([...completedPhrases, activePhrase.id]);
-      const allCategoryDone = categoryPhrases.every(p => newCompleted.has(p.id));
-      if (allCategoryDone) {
-        console.log(`🏆 Category "${category}" completed! Level up!`);
-        await incrementUserLevel(user.uid);
+    const phraseKey = (activePhrase.id === "g1" || activePhrase.id === "g4" || activePhrase.id === "g6")
+      ? `${activePhrase.id}_${selectedVariant}`
+      : activePhrase.id;
+
+    const currentEarned = phrasePoints[phraseKey] || 0;
+    const delta = tierScore - currentEarned; // คะแนนที่จะได้เพิ่ม (0 ถ้าไม่มีเพิ่ม)
+
+    if (delta <= 0) {
+      // ไม่มีคะแนนใหม่ให้เพิ่ม — แสดง Try Again
+      isCollectingRef.current = false;
+      setButtonState("tryagain");
+      return;
+    }
+
+    try {
+      // บันทึก delta เข้า phrasePoints ใน Firebase
+      const result = await updatePhrasePoints(user.uid, phraseKey, tierScore);
+      if (result.error) throw new Error(result.error);
+
+      const newTotal = result.totalForPhrase; // 0-100
+
+      // เพิ่ม delta เข้า total points ของ user
+      await addUserPoints(user.uid, result.delta);
+
+      // อัปเดต local state
+      setPhrasePoints(prev => ({ ...prev, [phraseKey]: newTotal }));
+      setCollectedPhrases(prev => new Set([...prev, phraseKey])); // mark ว่าเคย collect แล้ว
+
+      // ถ้าถึง 100 คะแนน → ถือว่าทำเสร็จเต็ม
+      if (newTotal >= 100) {
+        await addCompletedPhrase(user.uid, phraseKey);
+        setCompletedPhrases(prev => new Set([...prev, phraseKey]));
+
+        // ตรวจว่าท้าย category สำเร็จทั้งหมด → Level Up
+        const categoryPhrases = getPhrasesByCategory(category);
+        const newCompleted = new Set([...completedPhrases, phraseKey]);
+        const allCategoryDone = categoryPhrases.every(p => isPhraseCompletedCheck(p.id, newCompleted));
+        if (allCategoryDone) {
+          console.log(`🏆 Category "${category}" completed! Level up!`);
+          await incrementUserLevel(user.uid);
+        }
       }
 
-      // Show try again
+      console.log(`💰 +${result.delta} pts (tier ${tierScore}) for "${phraseKey}" → total ${newTotal}/100`);
+      // แสดง Try Again เสมอ (ทำซ้ำได้จนแตะ 100 คะแนน)
       setButtonState("tryagain");
-      console.log(`💰 Collected ${score} points for phrase ${activePhrase.id}`);
     } catch (error) {
       console.error("Error collecting points:", error);
+    } finally {
+      isCollectingRef.current = false;
     }
   };
 
   const handleTryAgain = () => {
-    setIsLive(false);
-    setIsDetecting(false);
-    setTutorialStep("initial");
+    // 🔑 One-Time Start: ไม่ปิดกล้อง — รีเซ็ตแค่ state ของ phrase เท่านั้น
     setIsPhraseCompleted(false);
-    setBestConfidence(0);
-    setButtonState("start");
+    setBestConfidence(0);  // รีเซ็ต confidence เป็น 0%
+    isCollectingRef.current = false;
     setByeStep(1);
     setEatStep(1);
-    if (successTimerRef.current) {
-      clearTimeout(successTimerRef.current);
-      successTimerRef.current = null;
+    // กล้องยังคงทำงานอยู่ (isLive = true, isDetecting = true stay)
+    // แค่เปลี่ยนปุ่มให้กลับไปเป็น "stop" (กำลัง live อยู่)
+    setButtonState("stop");
+  };
+
+  const handleConfirmHint = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+      const userRef = dbRef(database, `users/${user.uid}`);
+      const snapshot = await get(userRef);
+      if (snapshot.exists()) {
+        const currentPoints = snapshot.val().points || 0;
+
+        if (currentPoints >= 25) {
+          await update(userRef, { points: currentPoints - 25 });
+
+          toast({
+            title: "Success",
+            description: "ใช้ Hint สำเร็จ!",
+            variant: "success",
+          });
+          setIsHintActive(true);
+          setShowHintModal(false);
+        } else {
+          toast({
+            title: "Error",
+            description: "คะแนนไม่พอ! คุณต้องมีอย่างน้อย 25 pts",
+            variant: "destructive",
+          });
+          setShowHintModal(false);
+        }
+      }
+    } catch (error) {
+      console.error("Error using hint:", error);
+      toast({
+        title: "Error",
+        description: "เกิดข้อผิดพลาดในการใช้ Hint",
+        variant: "destructive",
+      });
     }
   };
 
 
+
+  // Helper: รีเซ็ต phrase state โดยไม่ปิดกล้อง
+  const resetPhraseState = () => {
+    setIsPhraseCompleted(false);
+    setBestConfidence(0);  // รีเซ็ต confidence เป็น 0% เสมอเมื่อเปลี่ยนคำ
+    isCollectingRef.current = false;
+    setByeStep(1);
+    setEatStep(1);
+    // ถ้าเคย start กล้องแล้ว ให้ยังคง detect ต่อ (One-Time Start)
+    if (sessionStartedRef.current) {
+      setButtonState("stop"); // แสดง Stop เพราะกำลัง live
+    } else {
+      setButtonState("start");
+    }
+  };
 
   const handlePrevPhrase = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     if (!isFirstPhrase) {
       handlePhraseSelect(currentCategoryPhrases[currentPhraseIndex - 1]);
-      setIsLive(false);
-      setIsDetecting(false);
-      setTutorialStep("initial");
-      setIsPhraseCompleted(false);
-      setBestConfidence(0);
-      setButtonState("start");
-      if (successTimerRef.current) {
-        clearTimeout(successTimerRef.current);
-        successTimerRef.current = null;
-      }
+      resetPhraseState();
     }
   };
 
@@ -477,16 +630,7 @@ const Index = () => {
     if (e) e.stopPropagation();
     if (!isLastPhrase) {
       handlePhraseSelect(currentCategoryPhrases[currentPhraseIndex + 1]);
-      setIsLive(false);
-      setIsDetecting(false);
-      setTutorialStep("initial");
-      setIsPhraseCompleted(false);
-      setBestConfidence(0);
-      setButtonState("start");
-      if (successTimerRef.current) {
-        clearTimeout(successTimerRef.current);
-        successTimerRef.current = null;
-      }
+      resetPhraseState();
     }
   };
 
@@ -687,31 +831,32 @@ const Index = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3 sm:gap-x-6 sm:gap-y-4 md:gap-x-8 md:gap-y-6">
                 {getPhrasesByCategory(category).map((phrase) => {
-                  const isCompleted = completedPhrases.has(phrase.id);
+                  const isCompleted = isPhraseCompletedCheck(phrase.id, completedPhrases);
                   return (
-                  <div
-                    key={phrase.id}
-                    onClick={() => handlePhraseSelect(phrase)}
-                    className={`relative brutal-card flex items-center p-2.5 pr-8 sm:p-3 sm:pr-10 md:p-4 md:pr-12 cursor-pointer hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all ${isCompleted ? 'bg-green-50' : 'bg-white'}`}
-                  >
-                    {isCompleted ? (
-                      <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-green-500 text-white font-black text-[10px] sm:text-xs md:text-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10 flex items-center gap-1">
-                        <span>✅</span> <span className="hidden sm:inline">ผ่านแล้ว</span>
+                    <div
+                      key={phrase.id}
+                      onClick={() => handlePhraseSelect(phrase)}
+                      className={`relative brutal-card flex items-center p-2.5 pr-8 sm:p-3 sm:pr-10 md:p-4 md:pr-12 cursor-pointer hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all ${isCompleted ? 'bg-green-50' : 'bg-white'}`}
+                    >
+                      {isCompleted ? (
+                        <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-green-500 text-white font-black text-[10px] sm:text-xs md:text-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10 flex items-center gap-1">
+                          <span>✅</span> <span className="hidden sm:inline">ผ่านแล้ว</span>
+                        </div>
+                      ) : (
+                        <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-[#f94fa4] text-white font-black text-[10px] sm:text-xs md:text-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10">
+                          +{phrase.id === "g1" || phrase.id === "g4" || phrase.id === "g6" ? "200" : "100"} pts
+                        </div>
+                      )}
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-accent/20 brutal-card flex items-center justify-center text-xl sm:text-2xl md:text-3xl mr-3 sm:mr-4 md:mr-6 shrink-0">
+                        {phrase.emoji || "✋"}
                       </div>
-                    ) : (
-                      <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-[#f94fa4] text-white font-black text-[10px] sm:text-xs md:text-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10">
-                        +{phrase.id === "g1" || phrase.id === "g4" ? "200" : "100"} pts
+                      <div>
+                        <h3 className="font-black text-base sm:text-lg md:text-2xl mb-0.5 sm:mb-1">{phrase.text}</h3>
+                        <p className="text-gray-500 font-bold text-[11px] sm:text-xs md:text-sm">{phrase.english || phrase.text}</p>
                       </div>
-                    )}
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-accent/20 brutal-card flex items-center justify-center text-xl sm:text-2xl md:text-3xl mr-3 sm:mr-4 md:mr-6 shrink-0">
-                      {phrase.emoji || "✋"}
                     </div>
-                    <div>
-                      <h3 className="font-black text-base sm:text-lg md:text-2xl mb-0.5 sm:mb-1">{phrase.text}</h3>
-                      <p className="text-gray-500 font-bold text-[11px] sm:text-xs md:text-sm">{phrase.english || phrase.text}</p>
-                    </div>
-                  </div>
-                )})}
+                  )
+                })}
               </div>
             </div>
           )}
@@ -722,12 +867,20 @@ const Index = () => {
             <div
               className="fixed inset-0 z-50 bg-foreground/30 backdrop-blur-sm animate-backdrop-in"
               onClick={() => {
+                // 🔑 ปิด Modal = Reset ทุกอย่าง (รวมถึง session)
                 setGameOpen(false);
                 setIsLive(false);
                 setIsDetecting(false);
                 setTutorialStep("initial");
                 setBestConfidence(0);
                 setButtonState("start");
+                setIsPhraseCompleted(false);
+                isCollectingRef.current = false;
+                sessionStartedRef.current = false;
+                if (successTimerRef.current) {
+                  clearTimeout(successTimerRef.current);
+                  successTimerRef.current = null;
+                }
               }}
             />
 
@@ -742,12 +895,20 @@ const Index = () => {
                     </div>
                     <button
                       onClick={() => {
+                        // 🔑 ปิด Modal = Reset ทุกอย่าง (รวมถึง session)
                         setGameOpen(false);
                         setIsLive(false);
                         setIsDetecting(false);
                         setTutorialStep("initial");
                         setBestConfidence(0);
                         setButtonState("start");
+                        setIsPhraseCompleted(false);
+                        isCollectingRef.current = false;
+                        sessionStartedRef.current = false;
+                        if (successTimerRef.current) {
+                          clearTimeout(successTimerRef.current);
+                          successTimerRef.current = null;
+                        }
                       }}
                       className="flex items-center justify-center w-10 h-10 bg-white border-[3px] border-foreground rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 transition-transform"
                     >
@@ -852,18 +1013,20 @@ const Index = () => {
                         <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
                           {activePhrase?.id === "g1"
                             ? (selectedVariant === "adult" ? "สวัสดีผู้ใหญ่" : "สวัสดีเพื่อน")
-                            : (activePhrase?.text ?? "Hello")
+                            : activePhrase?.id === "g6"
+                              ? (selectedVariant === "adult" ? "สบายดี" : "ไม่สบายใจ")
+                              : (activePhrase?.text ?? "Hello")
                           }
                         </h2>
                       )}
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5 sm:gap-2 lg:gap-3 items-start max-w-[740px] mx-auto w-full">
-                      <div className="flex flex-col gap-1 sm:gap-1.5 lg:gap-2 w-full items-center lg:items-end">
+                      <div className="relative flex flex-col gap-1 sm:gap-1.5 lg:gap-2 w-full items-center lg:items-end">
                         <div className="relative aspect-square w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mr-0 bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
                           <VideoCard
                             phrase={activePhrase?.text ?? "Hello"}
                             category={activePhrase?.category ?? "general"}
-                            variant={(activePhrase?.id === "g1" || activePhrase?.id === "g4") ? selectedVariant : undefined}
+                            variant={(activePhrase?.id === "g1" || activePhrase?.id === "g4" || activePhrase?.id === "g6") ? selectedVariant : undefined}
                             byeStep={activePhrase?.id === "g2" ? byeStep : undefined}
                             eatStep={(activePhrase?.id === "g3" || activePhrase?.id === "g4") ? eatStep : undefined}
                             isLive={isLive || isDetecting}
@@ -872,6 +1035,13 @@ const Index = () => {
                             <div className="bg-white/90 px-2 py-1 border-[3px] border-foreground rounded-full font-black text-xs absolute top-3 left-3">
                               TUTORIAL
                             </div>
+                            <img
+                              src={hintImg}
+                              alt="Hint"
+                              // 🚨 ปรับลดขนาด w- และ h- ลงในทุก breakpoint
+                              onClick={() => setShowHintModal(true)}
+                              className="absolute bottom-2 right-2 sm:bottom-2.5 sm:right-2.5 w-6 h-6 sm:w-8 sm:h-8 lg:w-9 lg:h-9 object-contain opacity-90 drop-shadow-md pointer-events-auto cursor-pointer hover:scale-110 transition-transform"
+                            />
                           </div>
                         </div>
 
@@ -916,6 +1086,28 @@ const Index = () => {
                                 }`}
                             >
                               ยังไม่ได้กิน
+                            </button>
+                          </div>
+                        )}
+                        {activePhrase?.id === "g6" && (
+                          <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
+                            <button
+                              onClick={() => handleVariantChange("adult")}
+                              className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
+                                ? "bg-yellow-400 text-slate-900"
+                                : "bg-white text-slate-900 hover:bg-slate-50"
+                                }`}
+                            >
+                              สบายดี
+                            </button>
+                            <button
+                              onClick={() => handleVariantChange("friend")}
+                              className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
+                                ? "bg-yellow-400 text-slate-900"
+                                : "bg-white text-slate-900 hover:bg-slate-50"
+                                }`}
+                            >
+                              ไม่สบายใจ
                             </button>
                           </div>
                         )}
@@ -1016,9 +1208,15 @@ const Index = () => {
                             );
                           }
 
-                          const currentScore = getScoreFromConfidence(bestConfidence);
+                          const currentScore = getScoreFromConfidence(bestConfidence); // tier: 40, 70, 100
                           const isLocked = bestConfidence < 0.5;
-                          const alreadyCollected = collectedPhrases.has(activePhrase?.id);
+                          const phraseKey = (activePhrase?.id === "g1" || activePhrase?.id === "g4" || activePhrase?.id === "g6")
+                            ? `${activePhrase.id}_${selectedVariant}`
+                            : activePhrase?.id;
+                          // คะแนนที่สะสมไว้แล้วสำหรับคำนี้
+                          const earnedForPhrase = phraseKey ? (phrasePoints[phraseKey] || 0) : 0;
+                          // delta = คะแนนที่จะได้เพิ่มถ้ากด Collect ตอนนี้
+                          const deltaPoints = Math.max(0, currentScore - earnedForPhrase);
 
                           // Try Again state
                           if (buttonState === "tryagain") {
@@ -1032,31 +1230,49 @@ const Index = () => {
                             );
                           }
 
-                          // Collect Point state (only if not already collected)
-                          if (buttonState === "collect" && isPhraseCompleted && !alreadyCollected) {
+                          // Collect Point state
+                          if (buttonState === "collect" && isPhraseCompleted) {
                             return (
-                              <button
-                                onClick={() => { if (!isLocked) handleCollectPoints(); }}
-                                disabled={isLocked}
-                                className={`w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm ${
-                                  isLocked
-                                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                                    : 'bg-yellow-400 hover:bg-yellow-500 text-slate-900 hover:translate-y-0.5'
-                                }`}
-                              >
-                                {isLocked
-                                  ? `🔒 ต้องถึง 50% (ตอนนี้ ${(bestConfidence * 100).toFixed(0)}%)`
-                                  : `⭐ COLLECT ${currentScore} POINTS`
-                                }
-                              </button>
+                              <div className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 flex flex-col gap-1.5">
+                                <button
+                                  onClick={() => {
+                                    if (isLocked) return;
+                                    if (deltaPoints <= 0) {
+                                      handleTryAgain();
+                                    } else {
+                                      handleCollectPoints();
+                                    }
+                                  }}
+                                  disabled={isLocked}
+                                  className={`w-full h-12 lg:h-14 flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm ${isLocked
+                                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-70'
+                                    : deltaPoints <= 0
+                                      ? 'bg-purple-500 hover:bg-purple-600 text-white'
+                                      : 'bg-yellow-400 hover:bg-yellow-500 text-slate-900 hover:translate-y-0.5'
+                                    }`}
+                                >
+                                  {isLocked
+                                    ? `🔒 ต้องถึง 50% (ตอนนี้ ${(bestConfidence * 100).toFixed(0)}%)`
+                                    : deltaPoints <= 0
+                                      ? `🔄 TRY AGAIN`
+                                      : (
+                                        <>
+                                          <img src={collectPointsImg} alt="Collect points" className="w-14 h-14 object-contain" />
+                                          <span className="text-white">COLLECT +{deltaPoints} PTS</span>
+                                        </>
+                                      )
+                                  }
+                                </button>
+                              </div>
                             );
                           }
 
-                          // Stop state (during detection/live, or if already collected)
+                          // Stop state (กล้องกำลัง live หรือ detecting)
                           if (buttonState === "stop" || isDetecting || isLive) {
                             return (
                               <button
                                 onClick={() => {
+                                  // กด Stop = หยุด session ทั้งหมด รีเซ็ตกล้อง
                                   setIsLive(false);
                                   setIsDetecting(false);
                                   setTutorialStep("initial");
@@ -1065,6 +1281,8 @@ const Index = () => {
                                   setButtonState("start");
                                   setByeStep(1);
                                   setEatStep(1);
+                                  isCollectingRef.current = false;
+                                  sessionStartedRef.current = false; // Reset session
                                   if (successTimerRef.current) {
                                     clearTimeout(successTimerRef.current);
                                     successTimerRef.current = null;
@@ -1081,6 +1299,8 @@ const Index = () => {
                           return (
                             <button
                               onClick={() => {
+                                // 🔑 One-Time Start — set sessionStartedRef
+                                sessionStartedRef.current = true;
                                 setTutorialStep("scanning");
                                 setIsDetecting(true);
                                 setBestConfidence(0);
@@ -1099,22 +1319,14 @@ const Index = () => {
                       <div className="flex justify-center gap-2 sm:gap-4 pb-2 pt-3 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {currentCategoryPhrases.map((phrase) => {
                           const isActive = phrase.id === activePhrase?.id;
-                          const isCompleted = completedPhrases.has(phrase.id);
+                          const isCompleted = isPhraseCompletedCheck(phrase.id, completedPhrases);
                           return (
                             <div
                               key={phrase.id}
                               onClick={() => {
                                 handlePhraseSelect(phrase);
-                                setIsLive(false);
-                                setIsDetecting(false);
-                                setTutorialStep("initial");
-                                setIsPhraseCompleted(false);
-                                setBestConfidence(0);
-                                setButtonState("start");
-                                if (successTimerRef.current) {
-                                  clearTimeout(successTimerRef.current);
-                                  successTimerRef.current = null;
-                                }
+                                // 🔑 One-Time Start: ไม่ปิดกล้อง — แค่รีเซ็ต state ของ phrase
+                                resetPhraseState();
                               }}
                               className={`relative border-[2px] border-foreground rounded-lg flex items-center py-1 px-2 sm:py-2 sm:px-3 cursor-pointer flex-none w-[120px] sm:w-[140px] md:w-[160px] min-h-[48px] sm:min-h-[56px] transition-all ${isActive
                                 ? 'shadow-[0px_0px_0px_3px_rgba(253,224,71,1)] scale-[1.02] z-10'
@@ -1127,7 +1339,7 @@ const Index = () => {
                                 </div>
                               ) : (
                                 <div className="absolute -top-2 -right-2 bg-[#f94fa4] text-white font-black text-[7px] sm:text-[9px] px-1.5 py-0.5 rounded-full border-[1.5px] border-foreground z-10">
-                                  +{phrase.id === "g1" || phrase.id === "g4" ? "200" : "100"} pts
+                                  +{phrase.id === "g1" || phrase.id === "g4" || phrase.id === "g6" ? "200" : "100"} pts
                                 </div>
                               )}
 
@@ -1157,6 +1369,34 @@ const Index = () => {
           </>
         )}
       </main>
+
+      {/* Hint Modal */}
+      {showHintModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setShowHintModal(false)}
+          />
+          <div className="relative bg-slate-100 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-full max-w-[200px] sm:max-w-[240px] p-4 animate-in zoom-in duration-200">
+            <h2 className="text-lg sm:text-xl font-black text-center text-foreground uppercase tracking-wider mb-1">Hint!</h2>
+            <p className="text-center font-bold text-red-500 text-sm sm:text-base mb-4">-25 pts</p>
+            <div className="flex flex-col gap-2 sm:gap-2.5">
+              <button
+                onClick={handleConfirmHint}
+                className="w-full bg-yellow-400 hover:bg-yellow-500 text-slate-900 border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-lg sm:rounded-xl py-1.5 sm:py-2 font-black text-xs sm:text-sm transition-all"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={() => setShowHintModal(false)}
+                className="w-full bg-white hover:bg-slate-50 border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-lg sm:rounded-xl py-1.5 sm:py-2 font-black text-slate-900 text-xs sm:text-sm transition-all"
+              >
+                Not now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
 

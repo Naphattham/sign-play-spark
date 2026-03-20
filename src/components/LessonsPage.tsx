@@ -1,4 +1,4 @@
-import { Category, categories, getPhrasesByCategory } from "@/lib/categories";
+import { Category, categories, getPhrasesByCategory, isPhraseCompletedCheck } from "@/lib/categories";
 
 import generalImg from "@/asset/image/general.png";
 import emotionalImg from "@/asset/image/emotional.png";
@@ -15,7 +15,7 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
   // calculate total progress
   const allPhrases = categories.flatMap(c => getPhrasesByCategory(c.id));
   const totalAll = allPhrases.length;
-  const completedAll = allPhrases.filter(p => completedPhrases.has(p.id)).length;
+  const completedAll = allPhrases.filter(p => isPhraseCompletedCheck(p.id, completedPhrases)).length;
   const totalProgressPercent = totalAll > 0 ? Math.round((completedAll / totalAll) * 100) : 0;
 
   return (
