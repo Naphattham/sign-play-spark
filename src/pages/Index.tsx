@@ -12,13 +12,13 @@ import { LessonsPage } from "@/components/LessonsPage";
 import { QuestView } from "@/components/QuestView";
 import { GameSetupPage } from "@/components/GameSetupPage";
 import { Category, Phrase, getPhrasesByCategory, categories, isPhraseCompletedCheck } from "@/lib/categories";
-import { LogOut, X, Camera, Home, User, ArrowLeft } from "lucide-react";
+import { LogOut, X, Camera, Home, User, ArrowLeft, Check } from "lucide-react";
 import { useDistanceDetection, DistanceStatus } from "@/hooks/useDistanceDetection";
 import { useMediaPipeHolistic } from "@/hooks/useMediaPipeHolistic";
 import { auth, database } from "@/lib/firebase";
 import { ref as dbRef, get, update } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
-import { signOutUser, updateStreakOnLogin, getUserData, addUserPoints, incrementUserLevel, addCompletedPhrase, updatePhrasePoints } from "@/lib/auth";
+import { signOutUser, updateStreakOnLogin, getUserData, addUserPoints, incrementUserLevel, addCompletedPhrase, updatePhrasePoints, saveUnlockedHint } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { warmUpModel } from "@/lib/signLanguageAPI";
 
@@ -45,8 +45,52 @@ import arrowLeftImg from "@/asset/image/arrow_left.png";
 import arrowRightImg from "@/asset/image/arrow_right.png";
 import collectPointsImg from "@/asset/image/CollectPoints.png";
 import hintImg from "@/asset/image/Hint.png";
+import hintboxImg from "@/asset/image/Hintbox.png";
+import alreadyAteImg from "@/asset/image/Already ate | Not yet.png";
+import feverImg from "@/asset/image/fever.png";
+import goodbyeImg from "@/asset/image/Goodbye.png";
+import haveYouEatenImg from "@/asset/image/Have you eaten.png";
+import helloImg from "@/asset/image/Hello.png";
+import howMuchImg from "@/asset/image/How much.png";
+import loveImg from "@/asset/image/Love.png";
+import scaredImg from "@/asset/image/Scared.png";
+import soreThroatImg from "@/asset/image/Sore throat.png";
+import stomachacheImg from "@/asset/image/Stomachache.png";
+import tiredImg from "@/asset/image/Tired.png";
+import whatImg from "@/asset/image/What.png";
+import whyImg from "@/asset/image/Why.png";
+import angryImg from "@/asset/image/angry.png";
+import yesImg from "@/asset/image/yes.png";
+import noImg from "@/asset/image/no.png";
+import headacheImg from "@/asset/image/headache.png";
+import coldImg from "@/asset/image/cold.png";
+import fineUnhappyImg from "@/asset/image/I'm fine | Unhappy.png";
+import howAreYouImg from "@/asset/image/how_are_you.png";
 
 type View = "home" | "lessons" | "game" | "leaderboard" | "quest" | "profile" | "playing" | "gamesetup";
+
+const phraseIconMap: Record<string, string> = {
+  g1: helloImg,
+  g2: goodbyeImg,
+  g3: haveYouEatenImg,
+  g4: alreadyAteImg,
+  g5: howAreYouImg,
+  g6: fineUnhappyImg,
+  e1: angryImg,
+  e2: scaredImg,
+  e3: loveImg,
+  e5: tiredImg,
+  q1: whatImg,
+  q2: whyImg,
+  q3: howMuchImg,
+  q4: yesImg,
+  q5: noImg,
+  i1: coldImg,
+  i2: soreThroatImg,
+  i3: stomachacheImg,
+  i4: headacheImg,
+  i5: feverImg,
+};
 
 const categoryIconMap: Record<string, string> = {
   general: generalImg,
@@ -57,7 +101,7 @@ const categoryIconMap: Record<string, string> = {
 
 const preloadAllAvatars = async () => {
   try {
-    console.log("🖼️ แอบโหลดรูปภาพโปรไฟล์ล่วงหน้า...");
+
     const usersRef = dbRef(database, 'users');
     const snapshot = await get(usersRef);
 
@@ -69,7 +113,7 @@ const preloadAllAvatars = async () => {
           img.src = user.photoURL;
         }
       });
-      console.log("✅ โหลดรูปล่วงหน้าเสร็จสิ้น พร้อมโชว์ทันที!");
+
     }
   } catch (error) {
     console.error("Error preloading avatars:", error);
@@ -99,6 +143,7 @@ const Index = () => {
   const [userLevel, setUserLevel] = useState(1);
   const [isLive, setIsLive] = useState(false);
   const [gameOpen, setGameOpen] = useState(false);
+  const [isClosingModal, setIsClosingModal] = useState(false);
   const [isPhraseCompleted, setIsPhraseCompleted] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<"adult" | "friend">("adult");
   const [byeStep, setByeStep] = useState<1 | 2>(1);
@@ -116,7 +161,38 @@ const Index = () => {
 
   const { toast } = useToast();
   const [showHintModal, setShowHintModal] = useState(false);
-  const [isHintActive, setIsHintActive] = useState(false);
+  // hintUnlocked tracks which phrase+variant keys have been paid for (e.g. "g1_adult", "g1_friend", "e1")
+  const [hintUnlocked, setHintUnlocked] = useState<Set<string>>(new Set());
+  const [showHintContent, setShowHintContent] = useState(false);
+
+  // Hint text per modelClass — two sentences separated by \n for line-breaking
+  const phraseHintMap: Record<string, string> = {
+    already:      "ลองทำมือเฉียงกับแบอีกสักนิด\nลองคว่ำมือ เพิ่มความเฉียงอีกนิดหน่อย",
+    angry:        "แสดงสีหน้าโกรธขึ้นมาอีกนิดนึง\nลองหยิกนิ้วให้มากขึ้นกว่านี้",
+    bye_go:       "ทำท่าเหมือนไล่น้องหมา ชิ้วๆ\nลองทำแบบสะบัดแล้วตั้งวงดู",
+    bye_me:       "เอามือทาบอก นิ้วชิด วางมือตรงหน้าท้อง\nนำมืออีกข้างทาบอก",
+    cold:         "ใช้มือสองนิ้ว (นิ้วชี้และนิ้วกลาง) รูดขึ้นลงจมูกและปาก\nลองเอียงข้างและรูดขึ้นลงจมูกและปาก",
+    eat:          "จีบมือและลองนำไปไว้ที่ปาก อ้าปากนิดๆ\nลองก้มและจีบมือเอามาไว้ที่ปาก",
+    fear:         "กำมือสองข้างและขยับซ้ายขวา เอียนตัวไปข้างหลังเล็กน้อย\nกำมือสองข้างส่ายไปมา เอียงตัวเล็กน้อย อย่าลืมแสดงสีหน้าว่ากลัว",
+    fever:        "เอามืออังหน้าผากและพัดบริเวณหน้าท้อง\nทำสีหน้าท่าทางว่าร้อน",
+    fine:         "ทำท่าคล้ายคำว่า 'สบายดีไหม' แต่ยิ้มออกมา\nยิ้มเห็นฟันสักนิด แสดงให้อีกฝ่ายรู้ว่าเราสบายดี",
+    headache:     "แสดงสีหน้าว่าปวด นำมือขยำบริเวณหัว\nมืออีกข้างวางบริเวณหน้าท้อง (หลังมือหันเข้าหากล้อง)",
+    hello_adult:  "ทำท่าทางเหมือนสวัสดีผู้ใหญ่ พนมมือไว้กลางหน้าอก\nก้มให้ปลายนิ้วโป้งอยู่บริเวณจมูก แล้วเงยหน้าขึ้นมา",
+    hello_friend: "แบมือจากนั้นดันมือออกข้างหน้าเล็กน้อย\nทำท่าคล้ายคำว่า 'ทำไม' แต่นิ้วทุกนิ้วชิดกัน",
+    how_are_you:  "มือทั้งสองข้างรูดจากกึ่งกลางหน้าอกไปทางต้นแขน แล้วทำนิ้วเยี่ยม\nเอียงคอ ทำสีหน้าสงสัยเล็กน้อย (เป็นประโยคคำถาม)",
+    how_much:     "ทำมือจีบและยื่นออกไปข้างหน้า\nนับนิ้วโป้งถูไปมากับบริเวณนิ้วชี้",
+    love:         "นำมือขวาทับซ้าย (หรือซ้ายทับขวา) วางที่บริเวณหัวใจ\nเอียงหัวไปทางมือเล็กน้อยพร้อมแสดงสีหน้ามีความสุข",
+    no:           "แบมือและยื่นมาข้างหน้า พร้อมสะบัดหน้าและมือเล็กน้อย\nส่ายหัวเล็กน้อยพร้อมสะบัดมือยื่นมาข้างหน้า",
+    rice:         "แบมือและนำนิ้วโป้งสะกิดกับนิ้วก้อย\nยื่นมือไปข้างหน้า แล้วใช้นิ้วโป้งดีดนิ้วน้อย",
+    sore_throat:  "นำนิ้วโป้งและนิ้วชี้ลง รูดจากต้นคอยันปลายคอ\nแสดงสีหน้าว่าเจ็บ",
+    stomachache:  "ขยำมือบริเวณหน้าท้องพร้อมแสดงสีหน้าว่าเจ็บ\nนำมือที่ขยำไปไว้บริเวณหน้าท้อง แสดงสีหน้าว่าเจ็บ",
+    tried:        "นำมือทาบหน้าอกและหักแขนเข้าหาตัว\nปลายนิ้วทั้งหมดวางที่หน้าอก ข้อศอกอยู่บริเวณหน้าท้อง",
+    unhappy:      "ทำนิ้วชิดกันห้านิ้ว ลูบจากช่วงท้องขึ้นมาจนถึงหัวไหล่อย่างช้าๆ\nสะบัดออก อย่าลืมทำหน้าย่นเพื่อแสดงความรู้สึก",
+    what:         "นำนิ้วชี้ออกมาข้างหน้า ให้มืออยู่ขนานกับหัวไหล่\nส่ายนิ้วชี้ โดยที่มืออยู่นิ่ง",
+    why:          "ทำท่ามือตาม Tutorial แล้วแตะหน้าผาก\nขยับมือมาไว้บริเวณด้านหน้าอย่างช้าๆ",
+    yes:          "กำมือแล้วให้มือขนานกับหน้า\nนำข้อมือขยับขึ้นลง โดยที่แขนไม่ขยับ",
+    yet:          "ให้มือขนานกับคาง\nขยับซ้ายขวาโดยที่แขนไม่ขยับ",
+  };
 
   // New states for confidence scoring & button flow
   const [bestConfidence, setBestConfidence] = useState(0);
@@ -173,6 +249,32 @@ const Index = () => {
           ? { ...activePhrase, modelClass: g6TargetClass, modelClasses: undefined }
           : activePhrase;
 
+  // Helper: unique key per phrase+variant for tracking which hints are unlocked
+  const getCurrentHintKey = (): string => {
+    if (!activePhrase) return "";
+    // These phrases have two separately-paid variants
+    if (activePhrase.id === "g1" || activePhrase.id === "g4" || activePhrase.id === "g6") {
+      return `${activePhrase.id}_${selectedVariant}`;
+    }
+    return activePhrase.id;
+  };
+
+  // Helper: get hint text for the active phrase/step/variant as a single string
+  const getCurrentHintText = (): string => {
+    if (!activePhrase) return "";
+    if (activePhrase.id === "g1") return phraseHintMap[selectedVariant === "adult" ? "hello_adult" : "hello_friend"] || "";
+    if (activePhrase.id === "g2") return [phraseHintMap["bye_me"], phraseHintMap["bye_go"]].filter(Boolean).join(" ");
+    if (activePhrase.id === "g3") return [phraseHintMap["rice"], phraseHintMap["eat"], phraseHintMap["yet"]].filter(Boolean).join(" ");
+    if (activePhrase.id === "g4") return selectedVariant === "adult"
+      ? [phraseHintMap["eat"], phraseHintMap["already"]].filter(Boolean).join(" ")
+      : [phraseHintMap["eat"], phraseHintMap["yet"]].filter(Boolean).join(" ");
+    if (activePhrase.id === "g5") return phraseHintMap["how_are_you"] || "";
+    if (activePhrase.id === "g6") return phraseHintMap[selectedVariant === "adult" ? "fine" : "unhappy"] || "";
+    const mc = effectivePhrase?.modelClass;
+    if (mc && phraseHintMap[mc]) return phraseHintMap[mc];
+    return "";
+  };
+
   const currentCategoryPhrases = getPhrasesByCategory(category);
   const currentPhraseIndex = currentCategoryPhrases.findIndex(p => p.id === activePhrase?.id);
   const isFirstPhrase = currentPhraseIndex <= 0;
@@ -185,7 +287,7 @@ const Index = () => {
     targetPhrase: effectivePhrase,
     variant: (activePhrase?.id === "g1" || activePhrase?.id === "g4" || activePhrase?.id === "g6") ? selectedVariant : undefined,
     onPhraseMatch: (prediction, confidence) => {
-      console.log(`✅ Phrase matched! ${prediction} (${(confidence * 100).toFixed(1)}%)`);
+
       // Track best confidence
       setBestConfidence(prev => Math.max(prev, confidence));
       if (activePhrase?.id === "g2") {
@@ -221,7 +323,7 @@ const Index = () => {
       }
     },
     onPrediction: (prediction) => {
-      console.log(`🔍 Prediction: ${prediction.prediction} (${(prediction.confidence * 100).toFixed(1)}%)`);
+
       // Update best confidence if it matches target
       if (signRecognition.isMatched) {
         setBestConfidence(prev => Math.max(prev, prediction.confidence));
@@ -365,6 +467,10 @@ const Index = () => {
           if (userData.data?.phrasePoints && typeof userData.data.phrasePoints === "object") {
             setPhrasePoints(userData.data.phrasePoints as Record<string, number>);
           }
+          // Load unlocked hints from Firebase
+          if (userData.data?.unlockedHints && Array.isArray(userData.data.unlockedHints)) {
+            setHintUnlocked(new Set(userData.data.unlockedHints as string[]));
+          }
         } catch (error) {
           console.error("Error updating streak:", error);
         }
@@ -486,7 +592,7 @@ const Index = () => {
     setBestConfidence(newBest);
     setIsPhraseCompleted(true);
 
-    console.log(`🎉 Phrase matched! Best confidence: ${(newBest * 100).toFixed(1)}%`);
+
 
     // ไม่ Auto-Collect — ให้ผู้ใช้กดเองทุกครั้ง
     setButtonState("collect");
@@ -540,12 +646,12 @@ const Index = () => {
         const newCompleted = new Set([...completedPhrases, phraseKey]);
         const allCategoryDone = categoryPhrases.every(p => isPhraseCompletedCheck(p.id, newCompleted));
         if (allCategoryDone) {
-          console.log(`🏆 Category "${category}" completed! Level up!`);
+
           await incrementUserLevel(user.uid);
         }
       }
 
-      console.log(`💰 +${result.delta} pts (tier ${tierScore}) for "${phraseKey}" → total ${newTotal}/100`);
+
       // แสดง Try Again เสมอ (ทำซ้ำได้จนแตะ 100 คะแนน)
       setButtonState("tryagain");
     } catch (error) {
@@ -553,6 +659,27 @@ const Index = () => {
     } finally {
       isCollectingRef.current = false;
     }
+  };
+
+  // 🔑 ปิด Modal พร้อม smooth animation
+  const handleCloseModal = () => {
+    setIsClosingModal(true);
+    setTimeout(() => {
+      setGameOpen(false);
+      setIsClosingModal(false);
+      setIsLive(false);
+      setIsDetecting(false);
+      setTutorialStep("initial");
+      setBestConfidence(0);
+      setButtonState("start");
+      setIsPhraseCompleted(false);
+      isCollectingRef.current = false;
+      sessionStartedRef.current = false;
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current);
+        successTimerRef.current = null;
+      }
+    }, 240);
   };
 
   const handleTryAgain = () => {
@@ -580,13 +707,18 @@ const Index = () => {
         if (currentPoints >= 25) {
           await update(userRef, { points: currentPoints - 25 });
 
+          const hintKey = getCurrentHintKey();
+          // Save unlocked hint to Firebase so it persists across refreshes
+          await saveUnlockedHint(user.uid, hintKey);
+
           toast({
             title: "Success",
             description: "ใช้ Hint สำเร็จ!",
             variant: "success",
           });
-          setIsHintActive(true);
+          setHintUnlocked(prev => new Set([...prev, hintKey]));
           setShowHintModal(false);
+          setShowHintContent(true); // show hintbox right after confirming
         } else {
           toast({
             title: "Error",
@@ -615,6 +747,9 @@ const Index = () => {
     isCollectingRef.current = false;
     setByeStep(1);
     setEatStep(1);
+    // Close hint modals when switching phrases (hintUnlocked persists — key differs per phrase)
+    setShowHintContent(false);
+    setShowHintModal(false);
     // ถ้าเคย start กล้องแล้ว ให้ยังคง detect ต่อ (One-Time Start)
     if (sessionStartedRef.current) {
       setButtonState("stop"); // แสดง Stop เพราะกำลัง live
@@ -846,15 +981,19 @@ const Index = () => {
                     >
                       {isCompleted ? (
                         <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-green-500 text-white font-black text-[10px] sm:text-xs md:text-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10 flex items-center gap-1">
-                          <span>✅</span> <span className="hidden sm:inline">ผ่านแล้ว</span>
+                          <Check size={14} className="shrink-0" strokeWidth={4} /> <span className="hidden sm:inline">{phrase.id === "g1" || phrase.id === "g4" || phrase.id === "g6" ? "200" : "100"} pts</span>
                         </div>
                       ) : (
                         <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-[#f94fa4] text-white font-black text-[10px] sm:text-xs md:text-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10">
                           +{phrase.id === "g1" || phrase.id === "g4" || phrase.id === "g6" ? "200" : "100"} pts
                         </div>
                       )}
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-accent/20 brutal-card flex items-center justify-center text-xl sm:text-2xl md:text-3xl mr-3 sm:mr-4 md:mr-6 shrink-0">
-                        {phrase.emoji || "✋"}
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-accent/20 brutal-card flex items-center justify-center text-xl sm:text-2xl md:text-3xl mr-3 sm:mr-4 md:mr-6 shrink-0 p-1">
+                        {phraseIconMap[phrase.id] ? (
+                          <img src={phraseIconMap[phrase.id]} alt={phrase.text} className="w-full h-full object-contain drop-shadow-sm" />
+                        ) : (
+                          phrase.emoji || "✋"
+                        )}
                       </div>
                       <div>
                         <h3 className="font-black text-base sm:text-lg md:text-2xl mb-0.5 sm:mb-1">{phrase.text}</h3>
@@ -871,27 +1010,16 @@ const Index = () => {
         {gameOpen && (
           <>
             <div
-              className="fixed inset-0 z-50 bg-foreground/30 backdrop-blur-sm animate-backdrop-in"
-              onClick={() => {
-                // 🔑 ปิด Modal = Reset ทุกอย่าง (รวมถึง session)
-                setGameOpen(false);
-                setIsLive(false);
-                setIsDetecting(false);
-                setTutorialStep("initial");
-                setBestConfidence(0);
-                setButtonState("start");
-                setIsPhraseCompleted(false);
-                isCollectingRef.current = false;
-                sessionStartedRef.current = false;
-                if (successTimerRef.current) {
-                  clearTimeout(successTimerRef.current);
-                  successTimerRef.current = null;
-                }
-              }}
+              className={`fixed inset-0 z-50 bg-foreground/30 backdrop-blur-sm ${
+                isClosingModal ? "animate-backdrop-out" : "animate-backdrop-in"
+              }`}
+              onClick={handleCloseModal}
             />
 
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-              <div className="bg-white dark:bg-slate-900 border-[2px] sm:border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col max-w-7xl w-full h-[95vh] sm:h-[90vh] pointer-events-auto animate-modal-in">
+              <div className={`bg-white dark:bg-slate-900 border-[2px] sm:border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col max-w-7xl w-full h-[95vh] sm:h-[90vh] pointer-events-auto ${
+                isClosingModal ? "animate-modal-out" : "animate-modal-in"
+              }`}>
                 <header className="flex items-center justify-end p-2 sm:p-3 md:p-4 lg:p-6 border-b-[3px] border-foreground bg-yellow-400">
                   <div className="flex items-center gap-3 lg:gap-4">
                     <div className="hidden md:flex items-center px-3 lg:px-4 py-1.5 lg:py-2 bg-pink-400 border-[3px] border-foreground rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
@@ -900,22 +1028,7 @@ const Index = () => {
                       </span>
                     </div>
                     <button
-                      onClick={() => {
-                        // 🔑 ปิด Modal = Reset ทุกอย่าง (รวมถึง session)
-                        setGameOpen(false);
-                        setIsLive(false);
-                        setIsDetecting(false);
-                        setTutorialStep("initial");
-                        setBestConfidence(0);
-                        setButtonState("start");
-                        setIsPhraseCompleted(false);
-                        isCollectingRef.current = false;
-                        sessionStartedRef.current = false;
-                        if (successTimerRef.current) {
-                          clearTimeout(successTimerRef.current);
-                          successTimerRef.current = null;
-                        }
-                      }}
+                      onClick={handleCloseModal}
                       className="flex items-center justify-center w-10 h-10 bg-white border-[3px] border-foreground rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 transition-transform"
                     >
                       <X size={20} className="text-slate-900" />
@@ -1044,8 +1157,13 @@ const Index = () => {
                             <img
                               src={hintImg}
                               alt="Hint"
-                              // 🚨 ปรับลดขนาด w- และ h- ลงในทุก breakpoint
-                              onClick={() => setShowHintModal(true)}
+                              onClick={() => {
+                                if (hintUnlocked.has(getCurrentHintKey())) {
+                                  setShowHintContent(true);
+                                } else {
+                                  setShowHintModal(true);
+                                }
+                              }}
                               className="absolute bottom-2 right-2 sm:bottom-2.5 sm:right-2.5 w-6 h-6 sm:w-8 sm:h-8 lg:w-9 lg:h-9 object-contain opacity-90 drop-shadow-md pointer-events-auto cursor-pointer hover:scale-110 transition-transform"
                             />
                           </div>
@@ -1341,7 +1459,7 @@ const Index = () => {
                             >
                               {isCompleted ? (
                                 <div className="absolute -top-2 -right-2 bg-green-500 text-white font-black text-[7px] sm:text-[9px] px-1.5 py-0.5 rounded-full border-[1.5px] border-foreground z-10 flex items-center gap-1">
-                                  <span>✅</span> <span className="hidden sm:inline">ผ่านแล้ว</span>
+                                  <Check size={10} className="shrink-0" strokeWidth={4} /> <span className="hidden sm:inline">{phrase.id === "g1" || phrase.id === "g4" || phrase.id === "g6" ? "200" : "100"} pts</span>
                                 </div>
                               ) : (
                                 <div className="absolute -top-2 -right-2 bg-[#f94fa4] text-white font-black text-[7px] sm:text-[9px] px-1.5 py-0.5 rounded-full border-[1.5px] border-foreground z-10">
@@ -1350,8 +1468,12 @@ const Index = () => {
                               )}
 
                               {/* ไอคอน */}
-                              <div className={`w-7 h-7 sm:w-9 sm:h-9 border-[1.5px] border-foreground rounded-md flex items-center justify-center text-sm sm:text-base shrink-0 mr-2 sm:mr-3 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] bg-pink-300`}>
-                                {phrase.emoji || '✋'}
+                              <div className={`w-7 h-7 sm:w-9 sm:h-9 border-[1.5px] border-foreground rounded-md flex items-center justify-center text-sm sm:text-base shrink-0 mr-2 sm:mr-3 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] bg-pink-300 p-0.5`}>
+                                {phraseIconMap[phrase.id] ? (
+                                  <img src={phraseIconMap[phrase.id]} alt={phrase.text} className="w-full h-full object-contain" />
+                                ) : (
+                                  phrase.emoji || '✋'
+                                )}
                               </div>
 
                               {/* ข้อความ */}
@@ -1376,7 +1498,7 @@ const Index = () => {
         )}
       </main>
 
-      {/* Hint Modal */}
+      {/* Hint Confirm Modal (-25 pts) */}
       {showHintModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <div
@@ -1403,6 +1525,39 @@ const Index = () => {
           </div>
         </div>
       )}
+
+      {/* Hint Content Modal — Hintbox image frame with per-phrase hint text */}
+      {showHintContent && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setShowHintContent(false)}
+          />
+          <div className="relative flex items-center justify-center animate-in zoom-in duration-200">
+            {/* Hintbox.png as the visual frame */}
+            <img
+              src={hintboxImg}
+              alt="Hint Box"
+              className="w-[300px] sm:w-[380px] md:w-[440px] drop-shadow-[6px_6px_0px_rgba(0,0,0,0.5)]"
+            />
+            {/* Hint text rendered on top, centered inside the image */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center px-8 sm:px-12 pt-10 pb-8 gap-4">
+              {/* Close Button at top-right of the box */}
+              <button
+                onClick={() => setShowHintContent(false)}
+                className="absolute top-4 right-4 sm:top-5 sm:right-5 p-1 bg-white hover:bg-slate-50 border-[2px] border-foreground rounded-full text-slate-900 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 transition-all z-10"
+              >
+                <X size={16} strokeWidth={3} className="sm:w-5 sm:h-5" />
+              </button>
+
+              <p className="text-slate-800 font-bold text-center text-[12px] sm:text-sm md:text-[15px] leading-relaxed whitespace-pre-line mt-2">
+                {getCurrentHintText()}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
 

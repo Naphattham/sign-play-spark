@@ -160,11 +160,11 @@ export function videoFrameToDataUrl(video: HTMLVideoElement): string {
  * (แนะนำให้เรียกใช้ตอนผู้ใช้ Login สำเร็จ)
  */
 export async function warmUpModel(): Promise<void> {
-  console.log("🔥 Warming up AI model in background...");
+
   try {
     // การเรียก getModelInfo ตอนนี้จะสั่งให้ Backend โหลด TF Model ด้วย
     await getModelInfo();
-    console.log("✅ AI model is warmed up and ready!");
+
   } catch (error) {
     console.warn("⚠️ Warm up failed, but will retry when playing.", error);
   }

@@ -109,9 +109,17 @@ export default {
           from: { opacity: "0", transform: "scale(0.95) translateY(10px)" },
           to: { opacity: "1", transform: "scale(1) translateY(0)" },
         },
+        "modal-out": {
+          from: { opacity: "1", transform: "scale(1) translateY(0)" },
+          to: { opacity: "0", transform: "scale(0.95) translateY(10px)" },
+        },
         "backdrop-in": {
           from: { opacity: "0" },
           to: { opacity: "1" },
+        },
+        "backdrop-out": {
+          from: { opacity: "1" },
+          to: { opacity: "0" },
         },
       },
       animation: {
@@ -122,7 +130,9 @@ export default {
         "fade-in": "fade-in 0.3s ease-out",
         "fade-in-up": "fade-in-up 0.4s ease-out",
         "modal-in": "modal-in 0.3s ease-out",
+        "modal-out": "modal-out 0.25s ease-in forwards",
         "backdrop-in": "backdrop-in 0.2s ease-out",
+        "backdrop-out": "backdrop-out 0.25s ease-in forwards",
       },
       boxShadow: {
         brutal: "4px 4px 0px 0px hsl(0 0% 0%)",

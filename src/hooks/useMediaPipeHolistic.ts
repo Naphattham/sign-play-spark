@@ -134,35 +134,8 @@ export function useMediaPipeHolistic({
     ctx.save();
     ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
-    if (results.poseLandmarks) {
-      if (POSE_CONNECTIONS) {
-        drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, { color: '#00FF00', lineWidth: 4 });
-      }
-      drawLandmarks(ctx, results.poseLandmarks, { color: '#FF0000', lineWidth: 2, radius: 4 });
-    }
-
-    if (results.faceLandmarks) {
-      if (FACEMESH_TESSELATION) {
-        drawConnectors(ctx, results.faceLandmarks, FACEMESH_TESSELATION, { color: '#C0C0C070', lineWidth: 1 });
-      }
-      const selectedFacePoints = FACE_SELECTED.map(idx => results.faceLandmarks[idx]).filter(Boolean);
-      drawLandmarks(ctx, selectedFacePoints, { color: '#FFD700', lineWidth: 1, radius: 2 });
-    }
-
-    if (results.leftHandLandmarks) {
-      if (HAND_CONNECTIONS) {
-        drawConnectors(ctx, results.leftHandLandmarks, HAND_CONNECTIONS, { color: '#CC0000', lineWidth: 5 });
-      }
-      drawLandmarks(ctx, results.leftHandLandmarks, { color: '#00FF00', lineWidth: 2, radius: 4 });
-    }
-
-    if (results.rightHandLandmarks) {
-      if (HAND_CONNECTIONS) {
-        drawConnectors(ctx, results.rightHandLandmarks, HAND_CONNECTIONS, { color: '#00CC00', lineWidth: 5 });
-      }
-      drawLandmarks(ctx, results.rightHandLandmarks, { color: '#FF0000', lineWidth: 2, radius: 4 });
-    }
-
+    // ซ่อน skeleton และใบหน้า (ไม่ต้องวาดอะไรบนหน้าจอ)
+    
     ctx.restore();
   }, [canvasElement]);
 
@@ -249,7 +222,7 @@ export function useMediaPipeHolistic({
       }
 
       const holistic = new HolisticConstructor({
-        locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1675471629/${file}`,
+        locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`,
       });
 
       holistic.setOptions({

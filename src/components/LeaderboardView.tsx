@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { Trophy, Medal, Award } from "lucide-react";
 import { getAvatarUrl } from "@/lib/avatar";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
+import firstPlaceImg from "@/asset/image/1st.png";
+import secondPlaceImg from "@/asset/image/2nd.png";
+import thirdPlaceImg from "@/asset/image/3rd.png";
 
 const rankIcon = (rank: number) => {
   if (rank === 1) return <Trophy className="w-5 h-5 text-secondary-foreground" />;
@@ -85,7 +88,7 @@ export function LeaderboardView() {
         {/* 2nd Place */}
         <div className="flex flex-col items-center animate-slide-up" style={{ animationDelay: "100ms" }}>
           <div className="flex flex-col items-center gap-2 mb-2">
-            <div className="text-2xl sm:text-4xl">🥈</div>
+            <div className="text-2xl sm:text-4xl"><img src={secondPlaceImg} alt="2nd Place" className="w-8 h-8 sm:w-12 sm:h-12 object-contain" /></div>
             <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-[2px] sm:border-[3px] border-foreground bg-muted overflow-hidden">
               <img 
                 src={topThree.find(e => e.rank === 2)?.photoURL || getAvatarUrl(null, topThree.find(e => e.rank === 2)?.username || "user")}
@@ -100,7 +103,7 @@ export function LeaderboardView() {
               />
             </div>
             <p className="font-black text-xs sm:text-sm text-center line-clamp-1 w-16 sm:w-20 break-words">
-              {topThree.find(e => e.rank === 2)?.username}
+              {topThree.find(e => e.rank === 2)?.username?.split(' ')[0].toUpperCase()}
             </p>
             <p className="text-[10px] sm:text-xs font-bold text-primary">
               {topThree.find(e => e.rank === 2)?.points.toLocaleString()} PTS
@@ -114,7 +117,7 @@ export function LeaderboardView() {
         {/* 1st Place */}
         <div className="flex flex-col items-center animate-slide-up" style={{ animationDelay: "0ms" }}>
           <div className="flex flex-col items-center gap-2 mb-2">
-            <div className="text-2xl sm:text-4xl">👑</div>
+            <div className="text-2xl sm:text-4xl"><img src={firstPlaceImg} alt="1st Place" className="w-8 h-8 sm:w-12 sm:h-12 object-contain" /></div>
             <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full border-[2px] sm:border-[3px] border-foreground bg-accent overflow-hidden shadow-[2px_2px_0px_rgba(0,0,0,1)]">
               <img 
                 src={topThree.find(e => e.rank === 1)?.photoURL || getAvatarUrl(null, topThree.find(e => e.rank === 1)?.username || "user")}
@@ -129,7 +132,7 @@ export function LeaderboardView() {
               />
             </div>
             <p className="font-black text-xs sm:text-sm text-center line-clamp-1 w-18 sm:w-24 break-words">
-              {topThree.find(e => e.rank === 1)?.username}
+              {topThree.find(e => e.rank === 1)?.username?.split(' ')[0].toUpperCase()}
             </p>
             <p className="text-[10px] sm:text-xs font-bold text-primary">
               {topThree.find(e => e.rank === 1)?.points.toLocaleString()} PTS
@@ -143,7 +146,7 @@ export function LeaderboardView() {
         {/* 3rd Place */}
         <div className="flex flex-col items-center animate-slide-up" style={{ animationDelay: "200ms" }}>
           <div className="flex flex-col items-center gap-2 mb-2">
-            <div className="text-2xl sm:text-4xl">🥉</div>
+            <div className="text-2xl sm:text-4xl"><img src={thirdPlaceImg} alt="3rd Place" className="w-8 h-8 sm:w-12 sm:h-12 object-contain" /></div>
             <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-[2px] sm:border-[3px] border-foreground bg-muted overflow-hidden">
               <img 
                 src={topThree.find(e => e.rank === 3)?.photoURL || getAvatarUrl(null, topThree.find(e => e.rank === 3)?.username || "user")}
@@ -158,7 +161,7 @@ export function LeaderboardView() {
               />
             </div>
             <p className="font-black text-xs sm:text-sm text-center line-clamp-1 w-16 sm:w-20 break-words">
-              {topThree.find(e => e.rank === 3)?.username}
+              {topThree.find(e => e.rank === 3)?.username?.split(' ')[0].toUpperCase()}
             </p>
             <p className="text-[10px] sm:text-xs font-bold text-primary">
               {topThree.find(e => e.rank === 3)?.points.toLocaleString()} PTS

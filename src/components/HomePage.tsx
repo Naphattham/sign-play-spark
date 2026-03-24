@@ -1,8 +1,11 @@
 import { Category, getPhrasesByCategory, isPhraseCompletedCheck } from "@/lib/categories";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { getAvatarUrl } from "@/lib/avatar";
-import { useMemo } from "react";
-import { auth } from "@/lib/firebase";
+import { useState, useEffect } from "react";
+import { auth, database } from "@/lib/firebase";
+import { ref, get } from "firebase/database";
+import steakImg from "@/asset/image/steak.png";
+import trophyImg from "@/asset/image/Trophy.png";
 
 interface HomePageProps {
   onCategorySelect: (category: Category) => void;
@@ -16,6 +19,41 @@ interface HomePageProps {
 
 export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLessons, completedPhrases, streak, level }: HomePageProps) {
   const { leaderboardData, loading } = useLeaderboard();
+
+  // ── Daily Practice tracking (mirrors QuestView logic) ──────────────────────
+  const [practiceMinutes, setPracticeMinutes] = useState(0);
+  const [dailyPracticeClaimed, setDailyPracticeClaimed] = useState(false);
+
+  useEffect(() => {
+    const readPractice = () => {
+      const today = new Date().toISOString().split('T')[0];
+      const storedDate = localStorage.getItem('dailyPracticeDate');
+      if (storedDate === today) {
+        const secs = parseInt(localStorage.getItem('dailyPracticeSeconds') || '0', 10);
+        setPracticeMinutes(Math.floor(secs / 60));
+      } else {
+        setPracticeMinutes(0);
+      }
+    };
+    readPractice();
+    const interval = setInterval(readPractice, 5000);
+
+    // Check if reward already claimed today
+    const user = auth.currentUser;
+    if (user) {
+      get(ref(database, `users/${user.uid}`)).then(snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const today = new Date().toISOString().split('T')[0];
+          if (data.dailyPracticeClaimedDate === today) setDailyPracticeClaimed(true);
+        }
+      }).catch(() => {});
+    }
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const practiceProgressPct = Math.min((practiceMinutes / 30) * 100, 100);
   const topThree = leaderboardData.slice(0, 3);
 
   // Get last accessed category and phrase from localStorage
@@ -91,7 +129,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
               </h2>
               <div className="flex items-center gap-2 sm:gap-3 mt-3 sm:mt-6 justify-center md:justify-start">
                 <div className="bg-background border-2 border-foreground px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg font-black flex items-center gap-1.5 sm:gap-2 shadow-brutal-sm">
-                  <span className="text-lg sm:text-2xl">🔥</span>
+                  <img src={steakImg} alt="Streak" className="w-5 h-5 sm:w-7 sm:h-7 object-contain" />
                   <span className="text-foreground text-xs sm:text-base">{streak} DAY STREAK!</span>
                 </div>
               </div>
@@ -165,7 +203,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
           {/* Top Challengers */}
           <section className="brutal-card bg-card p-3 sm:p-4 md:p-6 rounded-xl">
             <div className="flex items-center gap-2 mb-3 sm:mb-4 md:mb-6">
-              <span className="text-2xl sm:text-3xl">🏆</span>
+              <img src={trophyImg} alt="Trophy" className="w-7 h-7 sm:w-9 sm:h-9 object-contain" />
               <h3 className="text-base sm:text-lg md:text-xl font-black uppercase italic tracking-tighter">Top Challengers</h3>
             </div>
             {loading ? (
@@ -237,16 +275,29 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
 
               {/* Goal 2: ฝึกซ้อม 30 นาที */}
               <div className="flex items-start gap-3">
-                <div className="size-6 border-2 border-background rounded-md flex items-center justify-center bg-background/20 mt-1 flex-shrink-0">
-                  {/* <span className="text-xs font-black text-background/50">○</span> */}
+                <div
+                  className={`size-6 border-2 border-background rounded-md flex items-center justify-center mt-1 flex-shrink-0 ${
+                    dailyPracticeClaimed || practiceMinutes >= 30 ? "bg-primary" : "bg-background/20"
+                  }`}
+                >
+                  {(dailyPracticeClaimed || practiceMinutes >= 30) && (
+                    <span className="text-sm font-black text-background">✓</span>
+                  )}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <p className="font-bold text-sm">ฝึกซ้อม 30 นาที</p>
-                    <p className="text-[10px] text-background/60 font-semibold">0 / 30 นาที</p>
+                    <p className="text-[10px] text-background/60 font-semibold">
+                      {dailyPracticeClaimed ? "สำเร็จแล้ว!" : `${Math.min(practiceMinutes, 30)} / 30 นาที`}
+                    </p>
                   </div>
                   <div className="w-full h-2 bg-background/20 rounded-full mt-2 border border-background/30">
-                    <div className="w-0 h-full bg-accent rounded-full"></div>
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        dailyPracticeClaimed ? "bg-primary" : "bg-accent"
+                      }`}
+                      style={{ width: `${dailyPracticeClaimed ? 100 : practiceProgressPct}%` }}
+                    />
                   </div>
                 </div>
               </div>

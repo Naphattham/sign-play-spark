@@ -48,11 +48,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
     // อัปเดต photoURL อีกรอบเผื่อกรณี LocalStorage ว่าง
     if (user.photoURL && !photoURL) setPhotoURL(user.photoURL);
 
-    console.log("Initial user data loaded:", {
-      displayName: user.displayName,
-      photoURL: user.photoURL,
-      email: user.email
-    });
+
 
     // Load additional data from database asynchronously (non-blocking)
     const loadDatabaseData = async () => {
@@ -62,7 +58,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
 
         if (snapshot.exists()) {
           const userData = snapshot.val();
-          console.log("Database data loaded:", userData);
+
 
           // Update with database values if available
           if (userData.bio !== undefined) setBio(userData.bio);
@@ -145,7 +141,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
       setPhotoURL(croppedUrl);
       setImageError(false); // Reset error state
       setShowCropper(false);
-      console.log("Image cropped successfully");
+
     } catch (error) {
       console.error("Error cropping image:", error);
       toast({
@@ -237,7 +233,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
         duration: 3000,
       });
 
-      console.log("Profile saved successfully");
+
     } catch (error) {
       console.error("Error saving profile:", error);
       toast({
@@ -273,8 +269,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
                 referrerPolicy="no-referrer"
                 onError={(e) => {
                   const img = e.target as HTMLImageElement;
-                  console.log("Image failed to load:", photoURL);
-                  console.log("Will use fallback avatar");
+
                   if (!imageError) {
                     setImageError(true);
                     // Set fallback immediately
@@ -282,7 +277,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
                   }
                 }}
                 onLoad={() => {
-                  console.log("Image loaded successfully:", photoURL || "generated avatar");
+
                 }}
               />
             </div>

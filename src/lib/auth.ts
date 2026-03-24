@@ -19,7 +19,7 @@ export const addUserPoints = async (uid: string, pointsToAdd: number) => {
     const userData = snapshot.val();
     const newPoints = (userData.points || 0) + pointsToAdd;
     await update(userRef, { points: newPoints });
-    console.log(`💰 Added ${pointsToAdd} points. Total: ${newPoints}`);
+
     return { points: newPoints, error: null };
   } catch (error: any) {
     console.error("Error adding points:", error);
@@ -36,7 +36,7 @@ export const incrementUserLevel = async (uid: string) => {
     const userData = snapshot.val();
     const newLevel = (userData.level || 1) + 1;
     await update(userRef, { level: newLevel });
-    console.log(`⬆️ Level up! Now level ${newLevel}`);
+
     return { level: newLevel, error: null };
   } catch (error: any) {
     console.error("Error incrementing level:", error);
@@ -68,11 +68,30 @@ export const updatePhrasePoints = async (
     phrasePoints[phraseKey] = newTotal;
 
     await update(userRef, { phrasePoints });
-    console.log(`📊 Phrase "${phraseKey}": ${current} → ${newTotal} (+${delta})`);
+
     return { delta, totalForPhrase: newTotal, error: null };
   } catch (error: any) {
     console.error("Error updating phrase points:", error);
     return { delta: 0, totalForPhrase: 0, error: error.message };
+  }
+};
+
+// Save an unlocked hint key to user's record in DB
+export const saveUnlockedHint = async (uid: string, hintKey: string) => {
+  try {
+    const userRef = ref(database, `users/${uid}`);
+    const snapshot = await get(userRef);
+    if (!snapshot.exists()) return { error: "User not found" };
+    const userData = snapshot.val();
+    const unlockedHints: string[] = userData.unlockedHints || [];
+    if (!unlockedHints.includes(hintKey)) {
+      unlockedHints.push(hintKey);
+      await update(userRef, { unlockedHints });
+    }
+    return { unlockedHints, error: null };
+  } catch (error: any) {
+    console.error("Error saving unlocked hint:", error);
+    return { unlockedHints: [], error: error.message };
   }
 };
 
@@ -171,13 +190,7 @@ export const signInWithGoogle = async () => {
       photoURL = photoURL.split('=')[0];
     }
 
-    console.log("Google sign-in user data:", {
-      uid: user.uid,
-      displayName: user.displayName,
-      photoURL: photoURL,
-      originalPhotoURL: user.photoURL,
-      email: user.email
-    });
+
 
     // Ensure Firebase Auth profile has the photo
     if (photoURL) {
@@ -208,7 +221,7 @@ export const signInWithGoogle = async () => {
         lastLoginDate: today.toISOString(),
         completedPhrases: [],
       };
-      console.log("Creating new user in database:", userData);
+
       await set(userRef, userData);
 
       // Update global stat
@@ -225,7 +238,7 @@ export const signInWithGoogle = async () => {
           displayName: user.displayName || existingData.displayName,
           username: user.displayName || existingData.username,
         };
-        console.log("Updating existing user with Google photo:", updatedData);
+
         await set(userRef, updatedData);
       }
     }
