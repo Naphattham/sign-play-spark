@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { GameSidebar } from "@/components/GameSidebar";
 import { VideoCard } from "@/components/VideoCard";
 import { WebcamView } from "@/components/WebcamView";
@@ -131,7 +132,17 @@ const Index = () => {
   const [category, setCategory] = useState<Category>("general");
   const [activePhrase, setActivePhrase] = useState<Phrase>(getPhrasesByCategory("general")[0]);
   const [completedPhrases, setCompletedPhrases] = useState<Set<string>>(new Set());
-  const [view, setView] = useState<View>("home");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [view, setView] = useState<View>(((location.state as any)?.view as View) || "home");
+
+  useEffect(() => {
+    // Clear the router state on mount so that a hard refresh defaults back to "home" instead of persisting "gamesetup"
+    if ((location.state as any)?.view) {
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, []);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [cameraPermissionGranted, setCameraPermissionGranted] = useState(() => {
@@ -167,31 +178,31 @@ const Index = () => {
 
   // Hint text per modelClass — two sentences separated by \n for line-breaking
   const phraseHintMap: Record<string, string> = {
-    already:      "ลองทำมือเฉียงกับแบอีกสักนิด\nลองคว่ำมือ เพิ่มความเฉียงอีกนิดหน่อย",
-    angry:        "แสดงสีหน้าโกรธขึ้นมาอีกนิดนึง\nลองหยิกนิ้วให้มากขึ้นกว่านี้",
-    bye_go:       "ทำท่าเหมือนไล่น้องหมา ชิ้วๆ\nลองทำแบบสะบัดแล้วตั้งวงดู",
-    bye_me:       "เอามือทาบอก นิ้วชิด วางมือตรงหน้าท้อง\nนำมืออีกข้างทาบอก",
-    cold:         "ใช้มือสองนิ้ว (นิ้วชี้และนิ้วกลาง) รูดขึ้นลงจมูกและปาก\nลองเอียงข้างและรูดขึ้นลงจมูกและปาก",
-    eat:          "จีบมือและลองนำไปไว้ที่ปาก อ้าปากนิดๆ\nลองก้มและจีบมือเอามาไว้ที่ปาก",
-    fear:         "กำมือสองข้างและขยับซ้ายขวา เอียนตัวไปข้างหลังเล็กน้อย\nกำมือสองข้างส่ายไปมา เอียงตัวเล็กน้อย อย่าลืมแสดงสีหน้าว่ากลัว",
-    fever:        "เอามืออังหน้าผากและพัดบริเวณหน้าท้อง\nทำสีหน้าท่าทางว่าร้อน",
-    fine:         "ทำท่าคล้ายคำว่า 'สบายดีไหม' แต่ยิ้มออกมา\nยิ้มเห็นฟันสักนิด แสดงให้อีกฝ่ายรู้ว่าเราสบายดี",
-    headache:     "แสดงสีหน้าว่าปวด นำมือขยำบริเวณหัว\nมืออีกข้างวางบริเวณหน้าท้อง (หลังมือหันเข้าหากล้อง)",
-    hello_adult:  "ทำท่าทางเหมือนสวัสดีผู้ใหญ่ พนมมือไว้กลางหน้าอก\nก้มให้ปลายนิ้วโป้งอยู่บริเวณจมูก แล้วเงยหน้าขึ้นมา",
+    already: "ลองทำมือเฉียงกับแบอีกสักนิด\nลองคว่ำมือ เพิ่มความเฉียงอีกนิดหน่อย",
+    angry: "แสดงสีหน้าโกรธขึ้นมาอีกนิดนึง\nลองหยิกนิ้วให้มากขึ้นกว่านี้",
+    bye_go: "ทำท่าเหมือนไล่น้องหมา ชิ้วๆ\nลองทำแบบสะบัดแล้วตั้งวงดู",
+    bye_me: "เอามือทาบอก นิ้วชิด วางมือตรงหน้าท้อง\nนำมืออีกข้างทาบอก",
+    cold: "ใช้มือสองนิ้ว (นิ้วชี้และนิ้วกลาง) รูดขึ้นลงจมูกและปาก\nลองเอียงข้างและรูดขึ้นลงจมูกและปาก",
+    eat: "จีบมือและลองนำไปไว้ที่ปาก อ้าปากนิดๆ\nลองก้มและจีบมือเอามาไว้ที่ปาก",
+    fear: "กำมือสองข้างและขยับซ้ายขวา เอียนตัวไปข้างหลังเล็กน้อย\nกำมือสองข้างส่ายไปมา เอียงตัวเล็กน้อย อย่าลืมแสดงสีหน้าว่ากลัว",
+    fever: "เอามืออังหน้าผากและพัดบริเวณหน้าท้อง\nทำสีหน้าท่าทางว่าร้อน",
+    fine: "ทำท่าคล้ายคำว่า 'สบายดีไหม' แต่ยิ้มออกมา\nยิ้มเห็นฟันสักนิด แสดงให้อีกฝ่ายรู้ว่าเราสบายดี",
+    headache: "แสดงสีหน้าว่าปวด นำมือขยำบริเวณหัว\nมืออีกข้างวางบริเวณหน้าท้อง (หลังมือหันเข้าหากล้อง)",
+    hello_adult: "ทำท่าทางเหมือนสวัสดีผู้ใหญ่ พนมมือไว้กลางหน้าอก\nก้มให้ปลายนิ้วโป้งอยู่บริเวณจมูก แล้วเงยหน้าขึ้นมา",
     hello_friend: "แบมือจากนั้นดันมือออกข้างหน้าเล็กน้อย\nทำท่าคล้ายคำว่า 'ทำไม' แต่นิ้วทุกนิ้วชิดกัน",
-    how_are_you:  "มือทั้งสองข้างรูดจากกึ่งกลางหน้าอกไปทางต้นแขน แล้วทำนิ้วเยี่ยม\nเอียงคอ ทำสีหน้าสงสัยเล็กน้อย (เป็นประโยคคำถาม)",
-    how_much:     "ทำมือจีบและยื่นออกไปข้างหน้า\nนับนิ้วโป้งถูไปมากับบริเวณนิ้วชี้",
-    love:         "นำมือขวาทับซ้าย (หรือซ้ายทับขวา) วางที่บริเวณหัวใจ\nเอียงหัวไปทางมือเล็กน้อยพร้อมแสดงสีหน้ามีความสุข",
-    no:           "แบมือและยื่นมาข้างหน้า พร้อมสะบัดหน้าและมือเล็กน้อย\nส่ายหัวเล็กน้อยพร้อมสะบัดมือยื่นมาข้างหน้า",
-    rice:         "แบมือและนำนิ้วโป้งสะกิดกับนิ้วก้อย\nยื่นมือไปข้างหน้า แล้วใช้นิ้วโป้งดีดนิ้วน้อย",
-    sore_throat:  "นำนิ้วโป้งและนิ้วชี้ลง รูดจากต้นคอยันปลายคอ\nแสดงสีหน้าว่าเจ็บ",
-    stomachache:  "ขยำมือบริเวณหน้าท้องพร้อมแสดงสีหน้าว่าเจ็บ\nนำมือที่ขยำไปไว้บริเวณหน้าท้อง แสดงสีหน้าว่าเจ็บ",
-    tried:        "นำมือทาบหน้าอกและหักแขนเข้าหาตัว\nปลายนิ้วทั้งหมดวางที่หน้าอก ข้อศอกอยู่บริเวณหน้าท้อง",
-    unhappy:      "ทำนิ้วชิดกันห้านิ้ว ลูบจากช่วงท้องขึ้นมาจนถึงหัวไหล่อย่างช้าๆ\nสะบัดออก อย่าลืมทำหน้าย่นเพื่อแสดงความรู้สึก",
-    what:         "นำนิ้วชี้ออกมาข้างหน้า ให้มืออยู่ขนานกับหัวไหล่\nส่ายนิ้วชี้ โดยที่มืออยู่นิ่ง",
-    why:          "ทำท่ามือตาม Tutorial แล้วแตะหน้าผาก\nขยับมือมาไว้บริเวณด้านหน้าอย่างช้าๆ",
-    yes:          "กำมือแล้วให้มือขนานกับหน้า\nนำข้อมือขยับขึ้นลง โดยที่แขนไม่ขยับ",
-    yet:          "ให้มือขนานกับคาง\nขยับซ้ายขวาโดยที่แขนไม่ขยับ",
+    how_are_you: "มือทั้งสองข้างรูดจากกึ่งกลางหน้าอกไปทางต้นแขน แล้วทำนิ้วเยี่ยม\nเอียงคอ ทำสีหน้าสงสัยเล็กน้อย (เป็นประโยคคำถาม)",
+    how_much: "ทำมือจีบและยื่นออกไปข้างหน้า\nนับนิ้วโป้งถูไปมากับบริเวณนิ้วชี้",
+    love: "นำมือขวาทับซ้าย (หรือซ้ายทับขวา) วางที่บริเวณหัวใจ\nเอียงหัวไปทางมือเล็กน้อยพร้อมแสดงสีหน้ามีความสุข",
+    no: "แบมือและยื่นมาข้างหน้า พร้อมสะบัดหน้าและมือเล็กน้อย\nส่ายหัวเล็กน้อยพร้อมสะบัดมือยื่นมาข้างหน้า",
+    rice: "แบมือและนำนิ้วโป้งสะกิดกับนิ้วก้อย\nยื่นมือไปข้างหน้า แล้วใช้นิ้วโป้งดีดนิ้วน้อย",
+    sore_throat: "นำนิ้วโป้งและนิ้วชี้ลง รูดจากต้นคอยันปลายคอ\nแสดงสีหน้าว่าเจ็บ",
+    stomachache: "ขยำมือบริเวณหน้าท้องพร้อมแสดงสีหน้าว่าเจ็บ\nนำมือที่ขยำไปไว้บริเวณหน้าท้อง แสดงสีหน้าว่าเจ็บ",
+    tried: "นำมือทาบหน้าอกและหักแขนเข้าหาตัว\nปลายนิ้วทั้งหมดวางที่หน้าอก ข้อศอกอยู่บริเวณหน้าท้อง",
+    unhappy: "ทำนิ้วชิดกันห้านิ้ว ลูบจากช่วงท้องขึ้นมาจนถึงหัวไหล่อย่างช้าๆ\nสะบัดออก อย่าลืมทำหน้าย่นเพื่อแสดงความรู้สึก",
+    what: "นำนิ้วชี้ออกมาข้างหน้า ให้มืออยู่ขนานกับหัวไหล่\nส่ายนิ้วชี้ โดยที่มืออยู่นิ่ง",
+    why: "ทำท่ามือตาม Tutorial แล้วแตะหน้าผาก\nขยับมือมาไว้บริเวณด้านหน้าอย่างช้าๆ",
+    yes: "กำมือแล้วให้มือขนานกับหน้า\nนำข้อมือขยับขึ้นลง โดยที่แขนไม่ขยับ",
+    yet: "ให้มือขนานกับคาง\nขยับซ้ายขวาโดยที่แขนไม่ขยับ",
   };
 
   // New states for confidence scoring & button flow
@@ -337,7 +348,7 @@ const Index = () => {
     const checkPermission = async () => {
       try {
         permissionStatus = await navigator.permissions.query({ name: 'camera' as PermissionName });
-        
+
         const updatePermissionState = () => {
           if (permissionStatus?.state === 'denied' || permissionStatus?.state === 'prompt') {
             setCameraPermissionGranted(false);
@@ -362,9 +373,9 @@ const Index = () => {
         console.warn("Permission API not supported", error);
       }
     };
-    
+
     checkPermission();
-    
+
     return () => {
       if (permissionStatus) {
         permissionStatus.onchange = null;
@@ -515,15 +526,19 @@ const Index = () => {
   useEffect(() => {
     if (!isAuthenticated) return;
     const interval = setInterval(() => {
+      const user = auth.currentUser;
+      if (!user) return;
       const today = new Date().toISOString().split('T')[0];
-      const storedDate = localStorage.getItem('dailyPracticeDate');
-      let seconds = parseInt(localStorage.getItem('dailyPracticeSeconds') || '0', 10);
+      const dateKey = `dailyPracticeDate_${user.uid}`;
+      const secKey = `dailyPracticeSeconds_${user.uid}`;
+      const storedDate = localStorage.getItem(dateKey);
+      let seconds = parseInt(localStorage.getItem(secKey) || '0', 10);
       if (storedDate !== today) {
         seconds = 0;
-        localStorage.setItem('dailyPracticeDate', today);
+        localStorage.setItem(dateKey, today);
       }
       seconds += 1;
-      localStorage.setItem('dailyPracticeSeconds', seconds.toString());
+      localStorage.setItem(secKey, seconds.toString());
     }, 1000);
     return () => clearInterval(interval);
   }, [isAuthenticated]);
@@ -832,7 +847,7 @@ const Index = () => {
 
       <main className="flex-1 min-h-screen">
         <header className="border-b-[3px] border-foreground bg-card px-3 py-2 sm:px-4 sm:py-2.5 md:px-6 md:py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3 pl-12 lg:pl-0">
+          <div className="flex items-center gap-2 sm:gap-3 pl-2 lg:pl-0">
             {view === "home" && (
               <>
                 <Home size={20} className="text-foreground" />
@@ -841,38 +856,39 @@ const Index = () => {
             )}
             {view === "lessons" && (
               <>
-                <img src={lessonImg} alt="Lessons" className="w-[20px] h-[20px] object-contain" />
-                <h2 className="font-display text-xl text-foreground">Lessons</h2>
+                <img src={lessonImg} alt="Lessons" className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] object-contain" />
+                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground">Lessons</h2>
               </>
             )}
             {view === "leaderboard" && (
               <>
-                <img src={trophyImg} alt="Leaderboard" className="w-5 h-5 object-contain" />
-                <h2 className="font-display text-xl text-foreground">Leaderboard</h2>
+                <img src={trophyImg} alt="Leaderboard" className="w-4 h-4 sm:w-5 sm:h-5 object-contain" />
+                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground">Leaderboard</h2>
               </>
             )}
             {view === "quest" && (
               <>
-                <img src={questImg} alt="Quest" className="w-[20px] h-[20px] object-contain" />
-                <h2 className="font-display text-xl text-foreground">Quest</h2>
+                <img src={questImg} alt="Quest" className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] object-contain" />
+                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground">Quest</h2>
               </>
             )}
             {view === "profile" && (
               <>
-                <User size={20} className="text-foreground" />
-                <h2 className="font-display text-xl text-foreground">Profile</h2>
+                <User size={18} className="text-foreground sm:hidden" />
+                <User size={20} className="text-foreground hidden sm:block" />
+                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground">Profile</h2>
               </>
             )}
             {view === "gamesetup" && (
               <>
-                <img src={challengeImg} alt="Play Game" className="w-[20px] h-[20px] object-contain" />
-                <h2 className="font-display text-xl text-foreground">Challenge</h2>
+                <img src={challengeImg} alt="Play Game" className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] object-contain" />
+                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground">Challenge</h2>
               </>
             )}
             {view === "game" && (
               <>
-                <img src={categoryIconMap[category]} alt={category} className="w-5 h-5 object-contain" />
-                <h2 className="font-display text-xl text-foreground">
+                <img src={categoryIconMap[category]} alt={category} className="w-4 h-4 sm:w-5 sm:h-5 object-contain" />
+                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground">
                   {categories.find(c => c.id === category)?.label || category}
                 </h2>
               </>
@@ -883,7 +899,7 @@ const Index = () => {
               <LogOut size={14} className="sm:hidden" />
               <LogOut size={16} className="hidden sm:block" />
               <span className="hidden sm:inline">Logout</span>
-              <span className="sm:hidden">Out</span>
+              <span className="sm:hidden">Logout</span>
             </button>
           </div>
         </header>
@@ -1010,16 +1026,14 @@ const Index = () => {
         {gameOpen && (
           <>
             <div
-              className={`fixed inset-0 z-50 bg-foreground/30 backdrop-blur-sm ${
-                isClosingModal ? "animate-backdrop-out" : "animate-backdrop-in"
-              }`}
+              className={`fixed inset-0 z-50 bg-foreground/30 backdrop-blur-sm ${isClosingModal ? "animate-backdrop-out" : "animate-backdrop-in"
+                }`}
               onClick={handleCloseModal}
             />
 
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-              <div className={`bg-white dark:bg-slate-900 border-[2px] sm:border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col max-w-7xl w-full h-[95vh] sm:h-[90vh] pointer-events-auto ${
-                isClosingModal ? "animate-modal-out" : "animate-modal-in"
-              }`}>
+              <div className={`bg-white dark:bg-slate-900 border-[2px] sm:border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col max-w-7xl w-full h-[95vh] sm:h-[90vh] pointer-events-auto ${isClosingModal ? "animate-modal-out" : "animate-modal-in"
+                }`}>
                 <header className="flex items-center justify-end p-2 sm:p-3 md:p-4 lg:p-6 border-b-[3px] border-foreground bg-yellow-400">
                   <div className="flex items-center gap-3 lg:gap-4">
                     <div className="hidden md:flex items-center px-3 lg:px-4 py-1.5 lg:py-2 bg-pink-400 border-[3px] border-foreground rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
@@ -1040,7 +1054,7 @@ const Index = () => {
                   <button
                     onClick={handlePrevPhrase}
                     disabled={isFirstPhrase}
-                    className={`absolute left-0 sm:left-2 md:left-4 lg:left-6 top-1/2 -translate-y-1/2 z-50 w-14 sm:w-16 md:w-20 lg:w-24 hover:-translate-x-2 transition-transform cursor-pointer ${isFirstPhrase ? 'opacity-30 pointer-events-none' : ''}`}
+                    className={`absolute left-0 sm:left-2 md:left-4 lg:left-6 top-1/2 -translate-y-1/2 z-50 w-10 sm:w-14 md:w-20 lg:w-24 hover:-translate-x-2 transition-transform cursor-pointer ${isFirstPhrase ? 'opacity-30 pointer-events-none' : ''}`}
                   >
                     <img src={arrowLeftImg} alt="Previous" className="w-full h-full object-contain drop-shadow-[2px_2px_0px_rgba(0,0,0,0.2)]" />
                   </button>
@@ -1048,15 +1062,16 @@ const Index = () => {
                   <button
                     onClick={handleNextPhrase}
                     disabled={isLastPhrase}
-                    className={`absolute right-0 sm:right-2 md:right-4 lg:right-6 top-1/2 -translate-y-1/2 z-50 w-14 sm:w-16 md:w-20 lg:w-24 hover:translate-x-2 transition-transform cursor-pointer ${isLastPhrase ? 'opacity-30 pointer-events-none' : ''}`}
+                    className={`absolute right-0 sm:right-2 md:right-4 lg:right-6 top-1/2 -translate-y-1/2 z-50 w-10 sm:w-14 md:w-20 lg:w-24 hover:translate-x-2 transition-transform cursor-pointer ${isLastPhrase ? 'opacity-30 pointer-events-none' : ''}`}
                   >
                     <img src={arrowRightImg} alt="Next" className="w-full h-full object-contain drop-shadow-[2px_2px_0px_rgba(0,0,0,0.2)]" />
                   </button>
 
-                  <main className="flex-1 p-1 sm:p-2 lg:p-3 xl:p-4 px-10 sm:px-12 md:px-4 bg-[#f8f6f6] dark:bg-[#221610] overflow-hidden flex flex-col justify-between">
-                    <div className="flex items-center justify-center pb-1">
-                      {activePhrase?.id === "g2" ? (
-                        <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
+                  <main className="flex-1 p-1 sm:p-2 lg:p-3 xl:p-4 px-8 sm:px-12 md:px-4 bg-[#f8f6f6] dark:bg-[#221610] overflow-hidden flex flex-col justify-between">
+                    <div className="flex-1 flex flex-col justify-center">
+                      <div className="flex items-center justify-center mb-1.5 sm:mb-3 lg:mb-4 pt-1 sm:pt-0">
+                        {activePhrase?.id === "g2" ? (
+                          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
                           <span className="text-slate-900 dark:text-white">ลาก่อน</span>
                           <span className="text-slate-900 dark:text-white mx-1">|</span>
                           <span
@@ -1077,7 +1092,7 @@ const Index = () => {
                           </span>
                         </h2>
                       ) : activePhrase?.id === "g3" ? (
-                        <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
                           <span className="text-slate-900 dark:text-white">กินข้าวหรือยัง?</span>
                           <span className="text-slate-900 dark:text-white mx-1">|</span>
                           <span
@@ -1106,7 +1121,7 @@ const Index = () => {
                           </span>
                         </h2>
                       ) : activePhrase?.id === "g4" ? (
-                        <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
                           <span className="text-slate-900 dark:text-white">
                             {selectedVariant === "adult" ? "กินแล้ว" : "ยังไม่ได้กิน"}
                           </span>
@@ -1129,7 +1144,7 @@ const Index = () => {
                           </span>
                         </h2>
                       ) : (
-                        <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
                           {activePhrase?.id === "g1"
                             ? (selectedVariant === "adult" ? "สวัสดีผู้ใหญ่" : "สวัสดีเพื่อน")
                             : activePhrase?.id === "g6"
@@ -1438,9 +1453,10 @@ const Index = () => {
                         })()}
                       </div>
                     </div>
+                  </div>
 
-                    <footer className="mt-1 sm:mt-2 pt-1 sm:pt-2 border-t-[2px] border-slate-200 dark:border-slate-800 w-full">
-                      <div className="flex justify-center gap-2 sm:gap-4 pb-2 pt-3 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  <footer className="mt-1 sm:mt-2 pt-1 sm:pt-2 border-t-[2px] border-slate-200 dark:border-slate-800 w-full">
+                      <div className="flex justify-start lg:justify-center gap-2 sm:gap-4 pb-2 pt-3 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {currentCategoryPhrases.map((phrase) => {
                           const isActive = phrase.id === activePhrase?.id;
                           const isCompleted = isPhraseCompletedCheck(phrase.id, completedPhrases);
@@ -1550,7 +1566,7 @@ const Index = () => {
                 <X size={16} strokeWidth={3} className="sm:w-5 sm:h-5" />
               </button>
 
-              <p className="text-slate-800 font-bold text-center text-[12px] sm:text-sm md:text-[15px] leading-relaxed whitespace-pre-line mt-2">
+              <p className="text-slate-800 font-bold text-center text-[10px] sm:text-[12px] md:text-sm leading-normal sm:leading-relaxed whitespace-pre-line mt-1.5 sm:mt-2">
                 {getCurrentHintText()}
               </p>
             </div>

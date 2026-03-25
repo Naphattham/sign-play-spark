@@ -1,4 +1,7 @@
+import { useNavigate } from "react-router-dom";
+
 export function GameSetupPage() {
+  const navigate = useNavigate();
   return (
     <main className="flex-1 overflow-y-auto p-3 sm:p-5 md:p-8 lg:p-12">
       <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8 md:space-y-12">
@@ -15,10 +18,13 @@ export function GameSetupPage() {
                 <span className="material-symbols-outlined text-6xl text-black">style</span>
               </div>
               <div className="flex-1">
-                <h3 className="text-base sm:text-lg font-black uppercase mb-0.5 sm:mb-1">Sign Flashcards</h3>
+                <h3 className="text-base sm:text-lg font-black uppercase mb-0.5 sm:mb-1">Match & Sign</h3>
                 <p className="text-[10px] sm:text-xs font-medium opacity-80 line-clamp-2">Master the basics with visual memory aids and repetitive learning.</p>
               </div>
-              <button className="neo-brutalism bg-primary text-white py-2 text-sm font-black uppercase hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform">
+              <button 
+                className="neo-brutalism bg-primary text-white py-2 text-sm font-black uppercase hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform"
+                onClick={() => navigate("/match-and-sign")}
+              >
                 Play Now
               </button>
             </div>

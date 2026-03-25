@@ -19,14 +19,14 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
   const totalProgressPercent = totalAll > 0 ? Math.round((completedAll / totalAll) * 100) : 0;
 
   return (
-    <div className="flex-1 bg-background h-full rounded-xl flex flex-col overflow-hidden">
-      <section className="p-4 md:p-6 lg:p-8 flex-1 flex flex-col max-w-6xl mx-auto w-full h-full">
-        <div className="mb-4 text-center md:text-left shrink-0">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-1 md:mb-2 font-display">เริ่มเรียนรู้กันเลย!</h2>
-          <p className="text-base md:text-lg text-muted-foreground font-medium font-body">เลือกหัวข้อที่คุณต้องการฝึกฝนภาษามือวันนี้</p>
+    <div className="flex-1 bg-background h-full rounded-xl overflow-y-auto">
+      <section className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full min-h-max pb-12">
+        <div className="mb-4 sm:mb-6 text-center md:text-left">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-1 md:mb-2 font-display">เริ่มเรียนรู้กันเลย!</h2>
+          <p className="text-sm sm:text-base md:text-lg text-muted-foreground font-medium font-body">เลือกหัวข้อที่คุณต้องการฝึกฝนภาษามือวันนี้</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 font-body flex-1 min-h-0 pb-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 font-body">
           {/* Category 1: General Conversation */}
           <button 
             onClick={() => onCategorySelect("general")}

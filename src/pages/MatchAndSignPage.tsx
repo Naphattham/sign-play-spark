@@ -1,0 +1,307 @@
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { LoadingScreen } from "@/components/LoadingScreen";
+import { auth } from "@/lib/firebase";
+import { addUserPoints } from "@/lib/auth";
+
+// A small helper to shuffle arrays
+function shuffleArray<T>(array: T[]): T[] {
+  const newArr = [...array];
+  for (let i = newArr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+  }
+  return newArr;
+}
+
+const ALL_QUESTIONS = [
+  { term: "สวัสดีผู้ใหญ่", translation: "Hello (Adult)", correct: "/videos/general/สวัสดี (ผู้ใหญ่).mp4" },
+  { term: "สวัสดีเพื่อน", translation: "Hello (Friend)", correct: "/videos/general/สวัสดี (เพื่อน).mp4" },
+  { term: "สบายดีไหม", translation: "How are you?", correct: "/videos/general/สบายดีไหม.mp4" },
+  { term: "สบายดี", translation: "I'm fine", correct: "/videos/general/สบายดี.mp4" },
+  { term: "ไม่สบายใจ", translation: "Unhappy", correct: "/videos/general/ไม่สบายใจ.mp4" },
+  { term: "กินข้าวหรือยัง", translation: "Have you eaten?", correct: "/videos/general/กินข้าวแล้วหรือยัง.mp4" },
+  { term: "กินแล้ว", translation: "Already ate", correct: "/videos/general/กินแล้ว.mp4" },
+  { term: "ยังไม่ได้กิน", translation: "Not yet eaten", correct: "/videos/general/ยังไม่ได้กิน.mp4" },
+  { term: "ลาก่อน", translation: "Goodbye", correct: "/videos/general/ลาก่อน.mp4" },
+  { term: "กลัว", translation: "Scared", correct: "/videos/emotions/กลัว.mp4" },
+  { term: "รัก", translation: "Love", correct: "/videos/emotions/รัก.mp4" },
+  { term: "เหนื่อย", translation: "Tired", correct: "/videos/emotions/เหนื่อย.mp4" },
+  { term: "โกรธ", translation: "Angry", correct: "/videos/emotions/โกรธ.mp4" },
+  { term: "ทำไม", translation: "Why?", correct: "/videos/qa/ทำไม.mp4" },
+  { term: "อะไร", translation: "What?", correct: "/videos/qa/อะไร.mp4" },
+  { term: "เท่าไหร่", translation: "How much?", correct: "/videos/qa/เท่าไหร่.mp4" },
+  { term: "ใช่", translation: "Yes", correct: "/videos/qa/ใช่.mp4" },
+  { term: "ไม่", translation: "No", correct: "/videos/qa/ไม่.mp4" },
+  { term: "ปวดท้อง", translation: "Stomachache", correct: "/videos/illness/ปวดท้อง.mp4" },
+  { term: "ปวดหัว", translation: "Headache", correct: "/videos/illness/ปวดหัว.mp4" },
+  { term: "เจ็บคอ", translation: "Sore throat", correct: "/videos/illness/เจ็บคอ.mp4" },
+  { term: "เป็นหวัด", translation: "Cold", correct: "/videos/illness/เป็นหวัด.mp4" },
+  { term: "เป็นไข้", translation: "Fever", correct: "/videos/illness/เป็นไข้.mp4" }
+];
+
+const ALL_VIDEOS = ALL_QUESTIONS.map(q => q.correct);
+
+export default function MatchAndSignPage() {
+  const navigate = useNavigate();
+  const [currentQuestions, setCurrentQuestions] = useState<typeof ALL_QUESTIONS>([]);
+  const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(10);
+  const [score, setScore] = useState(0);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [options, setOptions] = useState<string[]>([]);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [isReturningHome, setIsReturningHome] = useState(false);
+  const pointsAddedRef = useRef(false);
+
+  // Initialize game on start
+  const startGame = () => {
+    setCurrentQuestions(shuffleArray(ALL_QUESTIONS).slice(0, 5));
+    setCurrentRoundIndex(0);
+    setScore(0);
+    setIsGameOver(false);
+    setSelectedOption(null);
+    setIsCorrect(null);
+    pointsAddedRef.current = false;
+  };
+
+  useEffect(() => {
+    startGame();
+  }, []);
+
+  // Save points to user when game is over
+  useEffect(() => {
+    if (isGameOver && !pointsAddedRef.current) {
+      pointsAddedRef.current = true;
+      if (auth.currentUser && score > 0) {
+        addUserPoints(auth.currentUser.uid, score).catch(console.error);
+      }
+    }
+  }, [isGameOver, score]);
+
+  // Set up round options
+  useEffect(() => {
+    if (currentQuestions.length > 0 && currentRoundIndex < currentQuestions.length) {
+      const q = currentQuestions[currentRoundIndex];
+      // get 3 wrong videos
+      const wrongVids = ALL_VIDEOS.filter(v => v !== q.correct);
+      const shuffledWrongVids = shuffleArray(wrongVids).slice(0, 3);
+      setOptions(shuffleArray([q.correct, ...shuffledWrongVids]));
+      setTimeLeft(10); // reset timer
+    } else if (currentQuestions.length > 0) {
+      setIsGameOver(true);
+    }
+  }, [currentRoundIndex, currentQuestions]);
+
+  // Timer logic
+  useEffect(() => {
+    if (isGameOver || selectedOption !== null) return;
+
+    if (timeLeft === 0) {
+      // time up -> wrong, show correct, then next round
+      setSelectedOption("TIMEOUT");
+      setIsCorrect(false);
+      setTimeout(() => {
+        setSelectedOption(null);
+        setIsCorrect(null);
+        handleNextRound();
+      }, 1500);
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft, isGameOver, selectedOption]);
+
+  const handleNextRound = () => {
+    setCurrentRoundIndex(prev => {
+      if (prev + 1 < currentQuestions.length) {
+        return prev + 1;
+      } else {
+        setIsGameOver(true);
+        return prev;
+      }
+    });
+  };
+
+  const handleSelectOption = (videoUrl: string) => {
+    if (selectedOption !== null) return;
+
+    const q = currentQuestions[currentRoundIndex];
+    setSelectedOption(videoUrl);
+
+    if (videoUrl === q.correct) {
+      setIsCorrect(true);
+      setScore(prev => prev + 10);
+    } else {
+      setIsCorrect(false);
+    }
+
+    // proceed to next after delay
+    setTimeout(() => {
+      setSelectedOption(null);
+      setIsCorrect(null);
+      handleNextRound();
+    }, 1500);
+  };
+
+  const handleBackToHome = () => {
+    setIsReturningHome(true);
+    setTimeout(() => {
+      navigate("/", { state: { view: "gamesetup" } });
+    }, 3000); // Wait for the 3s powerBarFill animation to finish
+  };
+
+  if (isGameOver) {
+    return (
+      <>
+        {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
+        <main className="flex-1 overflow-y-auto p-6 md:p-12 flex items-center justify-center min-h-screen bg-[#f8f9fa] dark:bg-slate-900">
+        <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-[2rem] p-12 text-center max-w-lg w-full">
+          <h2 className="text-4xl sm:text-6xl font-black uppercase mb-4 tracking-tighter text-primary">Game Over</h2>
+          <p className="text-2xl font-bold mb-8">Score: {score} / {currentQuestions.length * 10}</p>
+          <div className="flex flex-col gap-4">
+            <Button
+              className="neo-brutalism bg-primary text-white py-6 text-xl font-black uppercase"
+              onClick={startGame}
+              disabled={isReturningHome}
+            >
+              Play Again
+            </Button>
+            <Button
+              className="neo-brutalism bg-surface text-black py-6 text-xl font-black uppercase"
+              onClick={handleBackToHome}
+              disabled={isReturningHome}
+            >
+              Back to Home
+            </Button>
+          </div>
+        </div>
+      </main>
+      </>
+    );
+  }
+
+  const currentQ = currentQuestions[currentRoundIndex];
+  if (!currentQ) return null;
+
+  return (
+    <main className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col items-center justify-center min-h-screen bg-[#f8f9fa] dark:bg-slate-900">
+
+      {/* Top Bar with Timer and Score */}
+      <div className="w-full max-w-5xl flex justify-between items-center mb-6 px-4">
+        <div className="neo-brutalism bg-white px-4 py-2 rounded-xl flex items-center gap-2 font-black text-xl">
+          <span className="material-symbols-outlined text-red-500">timer</span>
+          {timeLeft}s
+        </div>
+        <div className="text-2xl font-black uppercase">
+          Question {currentRoundIndex + 1} / {currentQuestions.length}
+        </div>
+        <div className="neo-brutalism bg-white px-4 py-2 rounded-xl flex items-center gap-2 font-black text-xl text-primary">
+          <span className="material-symbols-outlined">stars</span>
+          {score}
+        </div>
+      </div>
+
+      {/* Thai Word Display (The Question) */}
+      <div className="w-full max-w-2xl mb-8">
+        <div className="relative">
+          {/* Decorative back layers for Pop-Brutalism feel */}
+          <div className="absolute inset-0 bg-black rounded-[2rem] translate-x-2 translate-y-2 sm:translate-x-3 sm:translate-y-3"></div>
+          <div className="relative bg-primary text-white border-4 border-black rounded-[2rem] p-8 sm:p-12 text-center overflow-hidden">
+            <div className="absolute top-4 left-6 opacity-20 transform -rotate-12">
+              <span className="material-symbols-outlined text-6xl" data-icon="format_quote">format_quote</span>
+            </div>
+
+            <h3 className="text-5xl sm:text-7xl md:text-8xl font-black mb-2 tracking-tighter">{currentQ?.term}</h3>
+            <p className="text-lg sm:text-xl md:text-2xl font-bold opacity-90 uppercase tracking-[0.2em]">{currentQ?.translation}</p>
+
+            <div className="absolute bottom-4 right-6 bg-secondary text-white border-2 border-black px-4 py-1 rounded-full font-black text-sm rotate-6">
+              Match It!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Hand Sign Grid (The Options) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full max-w-5xl px-4">
+        {options.map((opt, i) => {
+
+          let buttonClass = "bg-white dark:bg-slate-800";
+          if (selectedOption !== null) {
+            if (opt === currentQ?.correct) {
+              buttonClass = "bg-green-400 border-green-600 scale-105";
+            } else if (opt === selectedOption && !isCorrect) {
+              buttonClass = "bg-red-400 border-red-600 opacity-80 scale-95";
+            } else {
+              buttonClass = "bg-white dark:bg-slate-800 opacity-50";
+            }
+          }
+
+          return (
+            <button
+              key={i}
+              disabled={selectedOption !== null}
+              onClick={() => handleSelectOption(opt)}
+              className={`group relative flex flex-col neo-brutalism rounded-2xl overflow-hidden transition-all duration-300 transform ${buttonClass} ${selectedOption === null ? 'hover:translate-x-[-2px] hover:translate-y-[-2px]' : ''}`}
+            >
+              <div className="aspect-square w-full bg-black/5 flex items-center justify-center relative overflow-hidden">
+                <video
+                  src={encodeURI(opt)}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+
+                {selectedOption !== null && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-20 transition-opacity">
+                    {opt === currentQ?.correct && (
+                      <span className="material-symbols-outlined text-5xl sm:text-6xl text-green-500 bg-white rounded-full drop-shadow-md p-2">check_circle</span>
+                    )}
+                    {opt === selectedOption && !isCorrect && (
+                      <span className="material-symbols-outlined text-5xl sm:text-6xl text-red-500 bg-white rounded-full drop-shadow-md p-2">cancel</span>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="absolute top-3 left-3 bg-black text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white flex items-center justify-center font-black text-sm sm:text-base z-10">
+                {i + 1}
+              </div>
+              <div className="p-3 border-t-4 border-black text-center font-black uppercase text-sm sm:text-base bg-white dark:bg-slate-800">
+                Select
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Bottom Actions */}
+      <div className="mt-8 flex items-center gap-6">
+        <button
+          disabled={selectedOption !== null}
+          onClick={() => {
+            // handle manual skip like timeout
+            setSelectedOption("SKIP");
+            setIsCorrect(false);
+            setTimeout(() => {
+              setSelectedOption(null);
+              setIsCorrect(null);
+              handleNextRound();
+            }, 1500);
+          }}
+          className={`neo-brutalism bg-white border-4 border-black px-6 py-3 rounded-xl font-black text-base transition-all flex items-center gap-2 ${selectedOption !== null ? 'opacity-50 cursor-not-allowed' : 'shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none'}`}
+        >
+          <span className="material-symbols-outlined" data-icon="skip_next">skip_next</span>
+          SKIP WORD
+        </button>
+      </div>
+    </main>
+  );
+}

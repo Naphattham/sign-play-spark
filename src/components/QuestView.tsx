@@ -57,9 +57,11 @@ export function QuestView({ streak }: QuestViewProps) {
         }
 
         const ltToday = new Date().toISOString().split('T')[0];
-        const storedDate = localStorage.getItem('dailyPracticeDate');
+        const dateKey = `dailyPracticeDate_${user.uid}`;
+        const secKey = `dailyPracticeSeconds_${user.uid}`;
+        const storedDate = localStorage.getItem(dateKey);
         if (storedDate === ltToday) {
-          setPracticeSeconds(parseInt(localStorage.getItem('dailyPracticeSeconds') || '0', 10));
+          setPracticeSeconds(parseInt(localStorage.getItem(secKey) || '0', 10));
         }
       } catch (error) {
         console.error("Error fetching quest data:", error);
@@ -71,10 +73,14 @@ export function QuestView({ streak }: QuestViewProps) {
 
     // Poll practice time so it updates on screen
     const interval = setInterval(() => {
+      const user = auth.currentUser;
+      if (!user) return;
       const ltToday = new Date().toISOString().split('T')[0];
-      const storedDate = localStorage.getItem('dailyPracticeDate');
+      const dateKey = `dailyPracticeDate_${user.uid}`;
+      const secKey = `dailyPracticeSeconds_${user.uid}`;
+      const storedDate = localStorage.getItem(dateKey);
       if (storedDate === ltToday) {
-        setPracticeSeconds(parseInt(localStorage.getItem('dailyPracticeSeconds') || '0', 10));
+        setPracticeSeconds(parseInt(localStorage.getItem(secKey) || '0', 10));
       }
     }, 5000);
     return () => clearInterval(interval);

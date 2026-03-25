@@ -253,12 +253,12 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
         Back to Home
       </button>
 
-      <div className="max-w-lg mx-auto brutal-card-lg overflow-hidden">
-        <div className="bg-accent border-b-[3px] border-foreground px-5 py-3">
-          <h2 className="font-display text-xl text-accent-foreground">Edit Profile</h2>
+      <div className="w-full max-w-lg mx-auto brutal-card-lg overflow-hidden">
+        <div className="bg-accent border-b-[3px] border-foreground px-3 py-2 sm:px-5 sm:py-3">
+          <h2 className="font-display text-lg sm:text-xl text-accent-foreground">Edit Profile</h2>
         </div>
 
-        <div className="p-6 space-y-5">
+        <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-5">
           {/* Avatar and User Info */}
           <div className="flex flex-col items-center gap-3">
             <div className="w-24 h-24 rounded-full border-[3px] border-foreground bg-secondary flex items-center justify-center text-3xl font-display text-secondary-foreground overflow-hidden" style={{ boxShadow: "3px 3px 0px 0px hsl(0 0% 0%)" }}>
@@ -290,12 +290,12 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
 
           {/* Cropper Modal */}
           <Dialog open={showCropper} onOpenChange={setShowCropper}>
-            <DialogContent className="brutal-card-lg max-w-2xl">
+            <DialogContent className="brutal-card-lg w-full max-w-2xl">
               <DialogHeader>
                 <DialogTitle className="font-display text-xl">Crop Your Photo</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <div className="relative w-full h-96 border-[3px] border-foreground rounded-lg overflow-hidden bg-foreground">
+                <div className="relative w-full h-64 sm:h-80 md:h-96 border-[3px] border-foreground rounded-lg overflow-hidden bg-foreground">
                   {imageSrc && (
                     <Cropper
                       image={imageSrc}

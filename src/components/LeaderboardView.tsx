@@ -180,11 +180,11 @@ export function LeaderboardView() {
             {rest.map((entry, i) => (
               <div
                 key={entry.rank}
-                className="flex items-center gap-2 sm:gap-4 px-3 sm:px-6 py-2.5 sm:py-3 font-body transition-all animate-slide-up bg-card hover:bg-muted/50"
+                className="flex items-center gap-2 sm:gap-4 px-3 sm:px-6 py-1.5 sm:py-3 font-body transition-all animate-slide-up bg-card hover:bg-muted/50"
                 style={{ animationDelay: `${(i + 3) * 50}ms` }}
               >
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-[2px] border-foreground bg-muted overflow-hidden" style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-[2px] border-foreground bg-muted overflow-hidden shrink-0" style={{ boxShadow: "1px 1px 0px 0px hsl(0 0% 0%)" }}>
                     <img 
                       src={entry.photoURL || getAvatarUrl(null, entry.username)}
                       alt={entry.username}
@@ -196,13 +196,13 @@ export function LeaderboardView() {
                       }}
                     />
                   </div>
-                  <div className="w-6 h-6 flex items-center justify-center">
+                  <div className="w-6 h-6 flex items-center justify-center shrink-0">
                     {rankIcon(entry.rank)}
                   </div>
                 </div>
-                <span className="flex-1 font-semibold truncate text-sm sm:text-base">{entry.username}</span>
-                <span className="font-display text-primary text-sm sm:text-lg">{entry.points.toLocaleString()}</span>
-                <span className="text-xs text-muted-foreground">pts</span>
+                <span className="flex-1 font-bold truncate text-sm sm:text-base">{entry.username}</span>
+                <span className="font-display text-primary text-base sm:text-lg">{entry.points.toLocaleString()}</span>
+                <span className="text-xs text-muted-foreground ml-1 mt-0.5 sm:mt-1">pts</span>
               </div>
             ))}
           </div>

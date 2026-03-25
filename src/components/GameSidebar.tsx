@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, User, Home, ChevronRight } from "lucide-react";
+import { User, Home, ChevronRight, ChevronLeft } from "lucide-react";
 import { auth, database } from "@/lib/firebase";
 import { ref as dbRef, get, onValue } from "firebase/database";
 import { getAvatarUrl } from "@/lib/avatar";
@@ -101,23 +101,21 @@ export function GameSidebar({
 
   return (
     <>
-      {/* Mobile toggle */}
-      <button
-        onClick={onToggle}
-        className="fixed top-4 left-4 z-50 brutal-btn-primary p-2 lg:hidden"
-      >
-        {isOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
-
       {/* Overlay */}
       {isOpen && (
         <div className="fixed inset-0 bg-foreground/30 z-30 lg:hidden" onClick={onToggle} />
       )}
 
-      <aside
-        className={`fixed lg:static z-40 top-0 left-0 h-screen w-64 bg-primary border-r-[3px] border-foreground flex flex-col transition-transform duration-200 ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-          }`}
+      {/* Sidebar wrapper — the arrow tab is positioned at the right edge of this wrapper */}
+      <div
+        className={`fixed lg:static z-40 top-0 left-0 h-screen transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+        style={{ width: "fit-content" }}
       >
+        <aside
+          className="h-full w-64 bg-primary border-r-[3px] border-foreground flex flex-col"
+        >
         <div className="p-6 border-b-[3px] border-foreground">
           <h1 className="text-2xl font-display text-primary-foreground tracking-wide flex items-center gap-2">
             <img src="/LOGO_SignMate.png" alt="SignMate" className="w-7 h-7 object-contain" />
@@ -207,6 +205,25 @@ export function GameSidebar({
           </div>
         </div>
       </aside>
+
+        {/* Arrow toggle tab — sticks to the right edge of the sidebar */}
+        <button
+          onClick={onToggle}
+          className="absolute top-1/2 -translate-y-1/2 -right-5 z-50 lg:hidden
+            w-5 h-14 bg-primary border-[2px] border-l-0 border-foreground
+            rounded-r-lg flex items-center justify-center
+            shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
+            hover:bg-primary/90 active:shadow-none active:translate-x-[1px]
+            transition-all"
+          aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
+        >
+          {isOpen ? (
+            <ChevronLeft size={16} className="text-primary-foreground" />
+          ) : (
+            <ChevronRight size={16} className="text-primary-foreground" />
+          )}
+        </button>
+      </div>
     </>
   );
 }

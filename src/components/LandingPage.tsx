@@ -197,39 +197,39 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
         </nav>
 
         {/* Main Content */}
-        <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 md:py-8 lg:py-12 flex-1 flex flex-col md:flex-row items-center gap-8 sm:gap-12 md:gap-16 lg:gap-24">
+        <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 md:py-8 lg:py-12 flex-1 flex flex-col-reverse md:flex-row items-center gap-8 sm:gap-12 md:gap-16 lg:gap-24">
           {/* Hero Text Section */}
-          <div className="flex-1 space-y-6">
-            <div className="inline-block bg-sq-pink text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest sq-border">
+          <div className="flex-1 space-y-5 sm:space-y-6 flex flex-col items-center md:items-start text-center md:text-left pb-4 md:pb-0">
+            <div className="inline-block bg-sq-pink text-white px-3 py-1 rounded-full text-xs sm:text-sm font-bold uppercase tracking-widest sq-border">
               เรียนรู้ภาษามือแบบอินเทอร์แอคทีฟ
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight">
-              <span className="whitespace-nowrap">เชี่ยวชาญ<span className="text-sq-pink">ภาษามือ</span></span> <br /> ผ่านการเล่นเกม!
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight font-black">
+              <span className="whitespace-nowrap">เชี่ยวชาญ<span className="text-sq-pink">ภาษามือ</span></span> <br className="hidden sm:block" /> ผ่านการเล่นเกม!
             </h1>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl font-medium text-sq-black/70 max-w-xl">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl font-medium text-sq-black/70 max-w-lg md:max-w-xl">
               วิธีเรียนรู้ภาษามือไทยที่สนุก ฟรี และมีประสิทธิภาพ พัฒนาทักษะของคุณด้วยการตอบรับแบบเรียลไทม์และมินิเกมที่น่าสนใจ
             </p>
-            <div className="flex flex-wrap gap-3 sm:gap-4 pt-2 sm:pt-4">
+            <div className="flex flex-wrap justify-center md:justify-start gap-3 sm:gap-4 pt-2 sm:pt-4">
               <button
                 onClick={() => setShowLoginModal(true)}
-                className="bg-sq-yellow text-base sm:text-lg md:text-xl px-5 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-2xl sq-border-lg sq-button-hover font-bold brand-font hover:bg-sq-dark-yellow transition-all"
+                className="bg-sq-yellow text-base sm:text-lg md:text-xl px-6 py-3 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-2xl sq-border-lg sq-button-hover font-bold brand-font hover:bg-sq-dark-yellow transition-all w-full sm:w-auto"
               >
                 เริ่มเกม
               </button>
               <button
                 onClick={() => navigate("/categories")}
-                className="bg-white text-sm sm:text-base md:text-lg px-5 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-2xl sq-border sq-button-hover font-bold flex items-center gap-2 sm:gap-3"
+                className="bg-white text-sm sm:text-base md:text-lg px-6 py-3 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-2xl sq-border sq-button-hover font-bold flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto"
               >
                 สำรวจบทเรียน
               </button>
             </div>
-            <div className="flex items-center gap-3 pt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2 sm:gap-3 pt-6 sm:pt-4">
               <div className="flex -space-x-3">
-                <div className="w-10 h-10 rounded-full border-3 border-sq-black bg-blue-400 flex items-center justify-center text-white font-bold text-sm">JD</div>
-                <div className="w-10 h-10 rounded-full border-3 border-sq-black bg-green-400 flex items-center justify-center text-white font-bold text-sm">AS</div>
-                <div className="w-10 h-10 rounded-full border-3 border-sq-black bg-sq-pink flex items-center justify-center text-white font-bold text-sm">MK</div>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-blue-400 flex items-center justify-center text-white font-bold text-xs sm:text-sm">JD</div>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-green-400 flex items-center justify-center text-white font-bold text-xs sm:text-sm">AS</div>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-sq-pink flex items-center justify-center text-white font-bold text-xs sm:text-sm">MK</div>
               </div>
-              <p className="font-bold text-sq-black/60 text-xs sm:text-sm">มีผู้เรียนลงทะเบียนทั้งหมด {totalUsers} คนในระบบ!</p>
+              <p className="font-bold text-sq-black/60 text-xs sm:text-sm">มีผู้เรียนลงทะเบียนทั้งหมด {totalUsers} คน!</p>
             </div>
           </div>
 
@@ -258,8 +258,8 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
                   <button
                     onClick={() => setSelectedVideo("/videos/general/สวัสดี (ผู้ใหญ่)main.mp4")}
                     className={`p-2 rounded-xl sq-border flex justify-center items-center font-bold text-base relative transition-all ${selectedVideo === "/videos/general/สวัสดี (ผู้ใหญ่)main.mp4"
-                        ? "bg-sq-yellow"
-                        : "bg-gray-100 opacity-50 hover:opacity-75"
+                      ? "bg-sq-yellow"
+                      : "bg-gray-100 opacity-50 hover:opacity-75"
                       }`}
                   >
                     สวัสดี(ผู้ใหญ่)
@@ -270,8 +270,8 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
                   <button
                     onClick={() => setSelectedVideo("/videos/general/สวัสดี (เพื่อน)main.mp4")}
                     className={`p-2 rounded-xl sq-border flex justify-center items-center font-bold text-base relative transition-all ${selectedVideo === "/videos/general/สวัสดี (เพื่อน)main.mp4"
-                        ? "bg-sq-yellow"
-                        : "bg-gray-100 opacity-50 hover:opacity-75"
+                      ? "bg-sq-yellow"
+                      : "bg-gray-100 opacity-50 hover:opacity-75"
                       }`}
                   >
                     สวัสดี(เพื่อน)

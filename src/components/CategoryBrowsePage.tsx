@@ -21,7 +21,7 @@ export function CategoryBrowsePage() {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
+
     // Validate signup fields
     if (isSignup) {
       if (!username.trim()) {
@@ -37,7 +37,7 @@ export function CategoryBrowsePage() {
         return;
       }
     }
-    
+
     setLoading(true);
 
     try {
@@ -70,10 +70,10 @@ export function CategoryBrowsePage() {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError("");
-    
+
     try {
       const result = await signInWithGoogle();
-      
+
       if (result.error) {
         setError(result.error);
         setLoading(false);
@@ -95,7 +95,7 @@ export function CategoryBrowsePage() {
 
   const getVideoUrl = (phrase: string, category: Category) => {
     let videoFileName = phrase;
-    
+
     // Handle phrases with multiple options
     if (category === "general") {
       if (phrase.includes("สวัสดี") && phrase.includes("|")) {
@@ -112,12 +112,12 @@ export function CategoryBrowsePage() {
         videoFileName = "สบายดีไหม";
       }
     }
-    
+
     // Remove question marks from Q&A category video filenames
     if (category === "qa") {
       videoFileName = videoFileName.replace("?", "");
     }
-    
+
     return `/videos/${category}/${videoFileName}.mp4`;
   };
 
@@ -177,7 +177,7 @@ export function CategoryBrowsePage() {
             </div>
           </div>
           <div className="flex items-center gap-6">
-            <button 
+            <button
               onClick={() => setShowLoginModal(true)}
               className="bg-sq-yellow px-6 py-2 rounded-xl sq-border sq-button-hover flex items-center gap-2 font-bold"
             >
@@ -194,7 +194,7 @@ export function CategoryBrowsePage() {
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-6 py-8 md:py-12 flex-1">
           <div className="text-center mb-12 relative">
-            <button 
+            <button
               onClick={() => navigate(-1)}
               className="absolute right-0 top-0 bg-sq-yellow px-6 py-2 rounded-xl sq-border sq-button-hover flex items-center gap-2 font-bold"
             >
@@ -212,7 +212,7 @@ export function CategoryBrowsePage() {
           <div className="grid md:grid-cols-2 gap-8">
             {categories.map((category) => {
               const categoryPhrases = getPhrasesByCategory(category.id);
-              
+
               return (
                 <div key={category.id} className="bg-white p-6 rounded-3xl sq-border-lg">
                   <div className="flex items-center gap-3 mb-6">
@@ -267,11 +267,11 @@ export function CategoryBrowsePage() {
 
       {/* Video Popup Modal */}
       {selectedVideo && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => setSelectedVideo(null)}
         >
-          <div 
+          <div
             className="bg-white w-full max-w-3xl max-h-[90vh] rounded-3xl sq-border-lg overflow-hidden animate-fade-in-up flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
@@ -410,8 +410,8 @@ export function CategoryBrowsePage() {
                   </div>
                 )}
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="w-full bg-sq-yellow py-4 rounded-xl sq-border sq-button-hover font-bold text-lg brand-font disabled:opacity-50"
                   disabled={loading}
                 >
@@ -444,20 +444,20 @@ export function CategoryBrowsePage() {
               )}
 
               <div className="text-center mt-6">
-                  <button
-                    onClick={() => {
-                      setIsSignup(!isSignup);
-                      setError('');
-                      setPassword('');
-                      setUsername('');
-                      setConfirmPassword('');
-                    }}
-                    disabled={loading}
-                    className="text-sq-pink hover:text-sq-dark-pink font-bold hover:underline disabled:opacity-50 transition-all"
-                  >
-                    {isSignup ? "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ" : "ยังไม่มีบัญชี? สมัครสมาชิก"}
-                  </button>
-                </div>
+                <button
+                  onClick={() => {
+                    setIsSignup(!isSignup);
+                    setError('');
+                    setPassword('');
+                    setUsername('');
+                    setConfirmPassword('');
+                  }}
+                  disabled={loading}
+                  className="text-sq-pink hover:text-sq-dark-pink font-bold hover:underline disabled:opacity-50 transition-all"
+                >
+                  {isSignup ? "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ" : "ยังไม่มีบัญชี? สมัครสมาชิก"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

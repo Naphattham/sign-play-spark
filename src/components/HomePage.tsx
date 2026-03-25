@@ -20,16 +20,29 @@ interface HomePageProps {
 export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLessons, completedPhrases, streak, level }: HomePageProps) {
   const { leaderboardData, loading } = useLeaderboard();
 
+  // Detect new user: creationTime and lastSignInTime are within 5 minutes of each other
+  const isNewUser = (() => {
+    const meta = auth.currentUser?.metadata;
+    if (!meta?.creationTime || !meta?.lastSignInTime) return false;
+    const created = new Date(meta.creationTime).getTime();
+    const lastSignIn = new Date(meta.lastSignInTime).getTime();
+    return Math.abs(lastSignIn - created) < 5 * 60 * 1000;
+  })();
+
   // ── Daily Practice tracking (mirrors QuestView logic) ──────────────────────
   const [practiceMinutes, setPracticeMinutes] = useState(0);
   const [dailyPracticeClaimed, setDailyPracticeClaimed] = useState(false);
 
   useEffect(() => {
     const readPractice = () => {
+      const user = auth.currentUser;
+      if (!user) return;
       const today = new Date().toISOString().split('T')[0];
-      const storedDate = localStorage.getItem('dailyPracticeDate');
+      const dateKey = `dailyPracticeDate_${user.uid}`;
+      const secKey = `dailyPracticeSeconds_${user.uid}`;
+      const storedDate = localStorage.getItem(dateKey);
       if (storedDate === today) {
-        const secs = parseInt(localStorage.getItem('dailyPracticeSeconds') || '0', 10);
+        const secs = parseInt(localStorage.getItem(secKey) || '0', 10);
         setPracticeMinutes(Math.floor(secs / 60));
       } else {
         setPracticeMinutes(0);
@@ -47,7 +60,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
           const today = new Date().toISOString().split('T')[0];
           if (data.dailyPracticeClaimedDate === today) setDailyPracticeClaimed(true);
         }
-      }).catch(() => {});
+      }).catch(() => { });
     }
 
     return () => clearInterval(interval);
@@ -125,7 +138,9 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
                 Master Signer • LVL {level}
               </span>
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground mt-2 sm:mt-4 leading-none uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
-                Welcome Back,<br />{auth.currentUser?.displayName?.split(" ")[0] || 'Questor'}!
+                {isNewUser ? 'Welcome, ' : 'Welcome Back,'}
+                {!isNewUser && <br />}
+                {auth.currentUser?.displayName?.split(" ")[0] || 'Questor'}!
               </h2>
               <div className="flex items-center gap-2 sm:gap-3 mt-3 sm:mt-6 justify-center md:justify-start">
                 <div className="bg-background border-2 border-foreground px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg font-black flex items-center gap-1.5 sm:gap-2 shadow-brutal-sm">
@@ -276,9 +291,8 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
               {/* Goal 2: ฝึกซ้อม 30 นาที */}
               <div className="flex items-start gap-3">
                 <div
-                  className={`size-6 border-2 border-background rounded-md flex items-center justify-center mt-1 flex-shrink-0 ${
-                    dailyPracticeClaimed || practiceMinutes >= 30 ? "bg-primary" : "bg-background/20"
-                  }`}
+                  className={`size-6 border-2 border-background rounded-md flex items-center justify-center mt-1 flex-shrink-0 ${dailyPracticeClaimed || practiceMinutes >= 30 ? "bg-primary" : "bg-background/20"
+                    }`}
                 >
                   {(dailyPracticeClaimed || practiceMinutes >= 30) && (
                     <span className="text-sm font-black text-background">✓</span>
@@ -293,9 +307,8 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
                   </div>
                   <div className="w-full h-2 bg-background/20 rounded-full mt-2 border border-background/30">
                     <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        dailyPracticeClaimed ? "bg-primary" : "bg-accent"
-                      }`}
+                      className={`h-full rounded-full transition-all duration-500 ${dailyPracticeClaimed ? "bg-primary" : "bg-accent"
+                        }`}
                       style={{ width: `${dailyPracticeClaimed ? 100 : practiceProgressPct}%` }}
                     />
                   </div>
