@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound.tsx";
 import { CategoryBrowsePage } from "@/components/CategoryBrowsePage";
 import { GameSetupPage } from "@/components/GameSetupPage";
 import MatchAndSignPage from "@/pages/MatchAndSignPage";
+import SignAndMatchPage from "@/pages/SignAndMatchPage";
 import { AudioProvider, useAudio } from "@/lib/audioContext";
 import { Volume2, VolumeX } from "lucide-react";
 
@@ -75,6 +76,7 @@ const App = () => (
             <Route path="/categories" element={<CategoryBrowsePage />} />
             {/* <Route path="/game-setup" element={<GameSetupPage />} /> */}
             <Route path="/match-and-sign" element={<MatchAndSignPage />} />
+            <Route path="/sign-and-match" element={<SignAndMatchPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

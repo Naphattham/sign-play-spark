@@ -12,11 +12,11 @@ const gameCards = [
   },
   {
     id: 2,
-    icon: "extension",
+    icon: "smart_display",
     color: "bg-[#ff79c6]",
-    title: "Memory Match",
-    description: "Pair signs with their correct meanings. Fast-paced recall training.",
-    available: false,
+    title: "Sign & Match",
+    description: "Watch a sign-language clip and choose the correct Thai word from 4 options.",
+    available: true,
     delay: "100ms",
   },
   {
@@ -101,7 +101,11 @@ export function GameSetupPage() {
                 {/* Button */}
                 <button
                   disabled={!card.available}
-                  onClick={() => card.available && navigate("/match-and-sign")}
+                  onClick={() => {
+                    if (!card.available) return;
+                    if (card.id === 1) navigate("/match-and-sign");
+                    else if (card.id === 2) navigate("/sign-and-match");
+                  }}
                   className={`
                     neo-brutalism py-2 text-sm font-black uppercase
                     transition-all duration-300 ease-in-out
