@@ -47,7 +47,6 @@ export default function MatchAndSignPage() {
   const navigate = useNavigate();
   const [currentQuestions, setCurrentQuestions] = useState<typeof ALL_QUESTIONS>([]);
   const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(10);
   const [score, setScore] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
   const [options, setOptions] = useState<string[]>([]);
@@ -56,23 +55,12 @@ export default function MatchAndSignPage() {
   const [isReturningHome, setIsReturningHome] = useState(false);
 
   const pointsAddedRef = useRef(false);
-  // Imperative timer – never driven by React's effect/dependency system
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Stable refs so timer callbacks don't close over stale state
   const questionsRef = useRef<typeof ALL_QUESTIONS>([]);
   const roundIndexRef = useRef(0);
 
-  /** Kill any running interval */
-  const stopTimer = useCallback(() => {
-    if (timerRef.current !== null) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  }, []);
-
   /**
    * Advance to the next question (or end the game).
-   * Reads from refs so it can be called safely from inside timers.
    */
   const advanceRound = useCallback(() => {
     const nextIndex = roundIndexRef.current + 1;
@@ -83,35 +71,6 @@ export default function MatchAndSignPage() {
       setIsGameOver(true);
     }
   }, []);
-
-  /**
-   * Start a fresh 10-second countdown for the current round.
-   * Uses a plain local variable for the count so it NEVER reads React state
-   * inside the interval callback – completely immune to stale-closure bugs.
-   */
-  const startTimer = useCallback(() => {
-    stopTimer();
-    let count = 10;
-    setTimeLeft(10);
-
-    timerRef.current = setInterval(() => {
-      count -= 1;
-      setTimeLeft(count);
-
-      if (count <= 0) {
-        // Stop the interval immediately so it can't fire again
-        stopTimer();
-        // Show timeout feedback, then advance
-        setSelectedOption("TIMEOUT");
-        setIsCorrect(false);
-        setTimeout(() => {
-          setSelectedOption(null);
-          setIsCorrect(null);
-          advanceRound();
-        }, 1500);
-      }
-    }, 1000);
-  }, [stopTimer, advanceRound]);
 
   // Keep refs in sync with state (for the timer callbacks)
   useEffect(() => {
@@ -124,7 +83,6 @@ export default function MatchAndSignPage() {
 
   /** Reset everything and begin a new game */
   const startGame = useCallback(() => {
-    stopTimer();
     const questions = shuffleArray(ALL_QUESTIONS).slice(0, 5);
     questionsRef.current = questions;
     roundIndexRef.current = 0;
@@ -136,12 +94,11 @@ export default function MatchAndSignPage() {
     setSelectedOption(null);
     setIsCorrect(null);
     pointsAddedRef.current = false;
-  }, [stopTimer]);
+  }, []);
 
   // Boot the game once on mount
   useEffect(() => {
     startGame();
-    return () => stopTimer(); // cleanup on unmount
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -157,10 +114,6 @@ export default function MatchAndSignPage() {
     const wrongVids = ALL_VIDEOS.filter(v => v !== q.correct);
     const shuffledWrong = shuffleArray(wrongVids).slice(0, 3);
     setOptions(shuffleArray([q.correct, ...shuffledWrong]));
-    startTimer();
-
-    return () => stopTimer(); // clean up if deps change before timer fires
-  // startTimer / stopTimer are stable (useCallback with no deps that change)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentRoundIndex, currentQuestions]);
 
@@ -168,16 +121,14 @@ export default function MatchAndSignPage() {
   useEffect(() => {
     if (isGameOver && !pointsAddedRef.current) {
       pointsAddedRef.current = true;
-      stopTimer();
       if (auth.currentUser && score > 0) {
         addUserPoints(auth.currentUser.uid, score).catch(console.error);
       }
     }
-  }, [isGameOver, score, stopTimer]);
+  }, [isGameOver, score]);
 
   const handleSelectOption = (videoUrl: string) => {
     if (selectedOption !== null) return;
-    stopTimer(); // stop countdown immediately
 
     const q = currentQuestions[currentRoundIndex];
     setSelectedOption(videoUrl);
@@ -198,7 +149,6 @@ export default function MatchAndSignPage() {
 
   const handleSkip = () => {
     if (selectedOption !== null) return;
-    stopTimer();
     setSelectedOption("SKIP");
     setIsCorrect(false);
     setTimeout(() => {
@@ -253,10 +203,7 @@ export default function MatchAndSignPage() {
 
       {/* Top Bar with Timer and Score */}
       <div className="w-full max-w-5xl flex justify-between items-center mb-6 px-4">
-        <div className="neo-brutalism bg-white px-4 py-2 rounded-xl flex items-center gap-2 font-black text-xl">
-          <span className="material-symbols-outlined text-red-500">timer</span>
-          {timeLeft}s
-        </div>
+        <div className="w-24"></div> {/* Placeholder to keep alignment */}
         <div className="text-2xl font-black uppercase">
           Question {currentRoundIndex + 1} / {currentQuestions.length}
         </div>

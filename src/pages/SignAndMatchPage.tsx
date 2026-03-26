@@ -50,7 +50,6 @@ export default function SignAndMatchPage() {
 
   const [currentQuestions, setCurrentQuestions] = useState<typeof ALL_QUESTIONS>([]);
   const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(10);
   const [score, setScore] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
   const [options, setOptions] = useState<string[]>([]); // four Thai term choices
@@ -59,18 +58,10 @@ export default function SignAndMatchPage() {
   const [isReturningHome, setIsReturningHome] = useState(false);
 
   const pointsAddedRef = useRef(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const questionsRef = useRef<typeof ALL_QUESTIONS>([]);
   const roundIndexRef = useRef(0);
 
-  // ── Timer helpers ──────────────────────────────────────────────────────────
-
-  const stopTimer = useCallback(() => {
-    if (timerRef.current !== null) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  }, []);
+  // ── Game helpers ──────────────────────────────────────────────────────────
 
   const advanceRound = useCallback(() => {
     const nextIndex = roundIndexRef.current + 1;
@@ -82,28 +73,6 @@ export default function SignAndMatchPage() {
     }
   }, []);
 
-  const startTimer = useCallback(() => {
-    stopTimer();
-    let count = 10;
-    setTimeLeft(10);
-
-    timerRef.current = setInterval(() => {
-      count -= 1;
-      setTimeLeft(count);
-
-      if (count <= 0) {
-        stopTimer();
-        setSelectedOption("TIMEOUT");
-        setIsCorrect(false);
-        setTimeout(() => {
-          setSelectedOption(null);
-          setIsCorrect(null);
-          advanceRound();
-        }, 1500);
-      }
-    }, 1000);
-  }, [stopTimer, advanceRound]);
-
   // Keep refs in sync
   useEffect(() => { roundIndexRef.current = currentRoundIndex; }, [currentRoundIndex]);
   useEffect(() => { questionsRef.current = currentQuestions; }, [currentQuestions]);
@@ -111,7 +80,6 @@ export default function SignAndMatchPage() {
   // ── Game control ───────────────────────────────────────────────────────────
 
   const startGame = useCallback(() => {
-    stopTimer();
     const questions = shuffleArray(ALL_QUESTIONS).slice(0, 5);
     questionsRef.current = questions;
     roundIndexRef.current = 0;
@@ -123,12 +91,11 @@ export default function SignAndMatchPage() {
     setSelectedOption(null);
     setIsCorrect(null);
     pointsAddedRef.current = false;
-  }, [stopTimer]);
+  }, []);
 
   // Boot
   useEffect(() => {
     startGame();
-    return () => stopTimer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -144,9 +111,6 @@ export default function SignAndMatchPage() {
     const wrongTerms = ALL_TERMS.filter((t) => t !== q.term);
     const shuffledWrong = shuffleArray(wrongTerms).slice(0, 3);
     setOptions(shuffleArray([q.term, ...shuffledWrong]));
-    startTimer();
-
-    return () => stopTimer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentRoundIndex, currentQuestions]);
 
@@ -154,18 +118,16 @@ export default function SignAndMatchPage() {
   useEffect(() => {
     if (isGameOver && !pointsAddedRef.current) {
       pointsAddedRef.current = true;
-      stopTimer();
       if (auth.currentUser && score > 0) {
         addUserPoints(auth.currentUser.uid, score).catch(console.error);
       }
     }
-  }, [isGameOver, score, stopTimer]);
+  }, [isGameOver, score]);
 
   // ── Handlers ───────────────────────────────────────────────────────────────
 
   const handleSelectOption = (term: string) => {
     if (selectedOption !== null) return;
-    stopTimer();
 
     const q = currentQuestions[currentRoundIndex];
     setSelectedOption(term);
@@ -186,7 +148,6 @@ export default function SignAndMatchPage() {
 
   const handleSkip = () => {
     if (selectedOption !== null) return;
-    stopTimer();
     setSelectedOption("SKIP");
     setIsCorrect(false);
     setTimeout(() => {
@@ -245,10 +206,7 @@ export default function SignAndMatchPage() {
 
       {/* Top Bar */}
       <div className="w-full max-w-4xl flex justify-between items-center mb-6 px-4">
-        <div className="neo-brutalism bg-white px-4 py-2 rounded-xl flex items-center gap-2 font-black text-xl">
-          <span className="material-symbols-outlined text-red-500">timer</span>
-          {timeLeft}s
-        </div>
+        <div className="w-24"></div> {/* Placeholder to keep alignment */}
         <div className="text-2xl font-black uppercase">
           Question {currentRoundIndex + 1} / {currentQuestions.length}
         </div>
