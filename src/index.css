@@ -86,7 +86,7 @@
   }
 
   .brutal-btn {
-    @apply border-[3px] border-foreground font-semibold transition-all duration-100 rounded-lg px-4 py-2;
+    @apply border-[3px] border-foreground font-semibold transition-all duration-300 ease-in-out rounded-lg px-4 py-2;
     box-shadow: var(--shadow-brutal);
   }
 

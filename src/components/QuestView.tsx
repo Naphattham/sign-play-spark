@@ -240,8 +240,8 @@ export function QuestView({ streak }: QuestViewProps) {
 
             {/* Welcome Bonus */}
             <div
-              className={`${welcomeClaimed ? "bg-green-100 dark:bg-green-900/30" : "bg-white dark:bg-slate-800"} border-[2px] sm:border-[3px] border-foreground rounded-lg p-3 sm:p-4 md:p-6 flex flex-col gap-2 sm:gap-3 md:gap-4`}
-              style={{ boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)" }}
+              className={`${welcomeClaimed ? "bg-green-100 dark:bg-green-900/30" : "bg-white dark:bg-slate-800"} border-[2px] sm:border-[3px] border-foreground rounded-lg p-3 sm:p-4 md:p-6 flex flex-col gap-2 sm:gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500`}
+              style={{ boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)", animationDelay: '0ms' }}
             >
               <div className="flex justify-between items-start">
                 <div>
@@ -285,7 +285,7 @@ export function QuestView({ streak }: QuestViewProps) {
                 <button
                   onClick={handleClaimWelcomeBonus}
                   disabled={claimingWelcome}
-                  className="w-full py-3 bg-secondary border-[3px] border-foreground rounded-lg font-black uppercase hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all mt-2"
+                  className="w-full py-3 bg-secondary border-[3px] border-foreground rounded-lg font-black uppercase hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-300 ease-in-out mt-2"
                   style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}
                 >
                   {claimingWelcome ? "กำลังรับรางวัล..." : "รับรางวัล 100 คะแนน!"}
@@ -295,8 +295,8 @@ export function QuestView({ streak }: QuestViewProps) {
 
             {/* 1. เข้าสู่ระบบ 1 ครั้งต่อวัน */}
             <div
-              className={`${dailyLoginClaimed ? "bg-green-100 dark:bg-green-900/30" : "bg-[#f94fa4]/20 dark:bg-[#f94fa4]/30"} border-[2px] sm:border-[3px] border-foreground rounded-lg p-3 sm:p-4 md:p-6 flex flex-col gap-2 sm:gap-3 md:gap-4`}
-              style={{ boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)" }}
+              className={`${dailyLoginClaimed ? "bg-green-100 dark:bg-green-900/30" : "bg-[#f94fa4]/20 dark:bg-[#f94fa4]/30"} border-[2px] sm:border-[3px] border-foreground rounded-lg p-3 sm:p-4 md:p-6 flex flex-col gap-2 sm:gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500`}
+              style={{ boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)", animationDelay: '100ms' }}
             >
               <div className="flex justify-between items-start">
                 <div>
@@ -340,7 +340,7 @@ export function QuestView({ streak }: QuestViewProps) {
                 <button
                   onClick={handleClaimDailyLogin}
                   disabled={claimingDailyLogin}
-                  className="w-full py-3 bg-secondary border-[3px] border-foreground rounded-lg font-black uppercase hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all mt-2"
+                  className="w-full py-3 bg-secondary border-[3px] border-foreground rounded-lg font-black uppercase hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-300 ease-in-out mt-2"
                   style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}
                 >
                   {claimingDailyLogin ? "กำลังรับรางวัล..." : "รับรางวัล 50 คะแนน!"}
@@ -350,8 +350,8 @@ export function QuestView({ streak }: QuestViewProps) {
 
             {/* 2. ฝึกซ้อม 30 นาที/วัน */}
             <div
-              className={`${dailyPracticeClaimed ? "bg-green-100 dark:bg-green-900/30" : practiceMinutes >= 30 ? "bg-[#f94fa4]/20 dark:bg-[#f94fa4]/30" : "bg-white dark:bg-slate-800"} border-[2px] sm:border-[3px] border-foreground rounded-lg p-3 sm:p-4 md:p-6 flex flex-col gap-2 sm:gap-3 md:gap-4`}
-              style={{ boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)" }}
+              className={`${dailyPracticeClaimed ? "bg-green-100 dark:bg-green-900/30" : practiceMinutes >= 30 ? "bg-[#f94fa4]/20 dark:bg-[#f94fa4]/30" : "bg-white dark:bg-slate-800"} border-[2px] sm:border-[3px] border-foreground rounded-lg p-3 sm:p-4 md:p-6 flex flex-col gap-2 sm:gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500`}
+              style={{ boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)", animationDelay: '200ms' }}
             >
               <div className="flex justify-between items-start">
                 <div>
@@ -395,7 +395,7 @@ export function QuestView({ streak }: QuestViewProps) {
                 <button
                   onClick={handleClaimDailyPractice}
                   disabled={claimingDailyPractice}
-                  className="w-full py-3 bg-secondary border-[3px] border-foreground rounded-lg font-black uppercase hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all mt-2"
+                  className="w-full py-3 bg-secondary border-[3px] border-foreground rounded-lg font-black uppercase hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-300 ease-in-out mt-2"
                   style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}
                 >
                   {claimingDailyPractice ? "กำลังรับรางวัล..." : "รับรางวัล 100 คะแนน!"}
@@ -412,8 +412,8 @@ export function QuestView({ streak }: QuestViewProps) {
 
             {/* 3. เรียนรู้ 5 คำ */}
             <div
-              className={`${learn5WordsClaimed ? "bg-green-100 dark:bg-green-900/30" : completedPhrasesCount >= 5 ? "bg-[#f94fa4]/20 dark:bg-[#f94fa4]/30" : "bg-white dark:bg-slate-800"} border-[2px] sm:border-[3px] border-foreground rounded-lg p-3 sm:p-4 md:p-6 flex flex-col gap-2 sm:gap-3 md:gap-4`}
-              style={{ boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)" }}
+              className={`${learn5WordsClaimed ? "bg-green-100 dark:bg-green-900/30" : completedPhrasesCount >= 5 ? "bg-[#f94fa4]/20 dark:bg-[#f94fa4]/30" : "bg-white dark:bg-slate-800"} border-[2px] sm:border-[3px] border-foreground rounded-lg p-3 sm:p-4 md:p-6 flex flex-col gap-2 sm:gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500`}
+              style={{ boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)", animationDelay: '300ms' }}
             >
               <div className="flex justify-between items-start">
                 <div>
@@ -457,7 +457,7 @@ export function QuestView({ streak }: QuestViewProps) {
                 <button
                   onClick={handleClaimLearn5Words}
                   disabled={claimingLearn5Words}
-                  className="w-full py-3 bg-secondary border-[3px] border-foreground rounded-lg font-black uppercase hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all mt-2"
+                  className="w-full py-3 bg-secondary border-[3px] border-foreground rounded-lg font-black uppercase hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-300 ease-in-out mt-2"
                   style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}
                 >
                   {claimingLearn5Words ? "กำลังรับรางวัล..." : "รับรางวัล 30 คะแนน!"}
@@ -474,8 +474,8 @@ export function QuestView({ streak }: QuestViewProps) {
 
             {/* 4. เรียนรู้ 10 คำ */}
             <div
-              className={`${learn10WordsClaimed ? "bg-green-100 dark:bg-green-900/30" : completedPhrasesCount >= 10 ? "bg-[#f94fa4]/20 dark:bg-[#f94fa4]/30" : "bg-white dark:bg-slate-800"} border-[2px] sm:border-[3px] border-foreground rounded-lg p-3 sm:p-4 md:p-6 flex flex-col gap-2 sm:gap-3 md:gap-4`}
-              style={{ boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)" }}
+              className={`${learn10WordsClaimed ? "bg-green-100 dark:bg-green-900/30" : completedPhrasesCount >= 10 ? "bg-[#f94fa4]/20 dark:bg-[#f94fa4]/30" : "bg-white dark:bg-slate-800"} border-[2px] sm:border-[3px] border-foreground rounded-lg p-3 sm:p-4 md:p-6 flex flex-col gap-2 sm:gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500`}
+              style={{ boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)", animationDelay: '400ms' }}
             >
               <div className="flex justify-between items-start">
                 <div>
@@ -519,7 +519,7 @@ export function QuestView({ streak }: QuestViewProps) {
                 <button
                   onClick={handleClaimLearn10Words}
                   disabled={claimingLearn10Words}
-                  className="w-full py-3 bg-secondary border-[3px] border-foreground rounded-lg font-black uppercase hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all mt-2"
+                  className="w-full py-3 bg-secondary border-[3px] border-foreground rounded-lg font-black uppercase hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-300 ease-in-out mt-2"
                   style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}
                 >
                   {claimingLearn10Words ? "กำลังรับรางวัล..." : "รับรางวัล 100 คะแนน!"}

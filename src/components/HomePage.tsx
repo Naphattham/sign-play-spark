@@ -132,7 +132,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
         {/* Left Column: Main Content */}
         <div className="lg:col-span-8 space-y-8">
           {/* Hero Section */}
-          <section className="brutal-card bg-accent p-4 sm:p-6 md:p-8 rounded-xl relative overflow-hidden flex flex-col md:flex-row items-center gap-4 md:gap-6">
+          <section className="brutal-card bg-accent p-4 sm:p-6 md:p-8 rounded-xl relative overflow-hidden flex flex-col md:flex-row items-center gap-4 md:gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="relative z-10 text-center md:text-left flex-1">
               <span className="bg-foreground text-background px-2 py-0.5 sm:px-3 sm:py-1 rounded font-black text-[10px] sm:text-xs uppercase tracking-widest">
                 Master Signer • LVL {level}
@@ -152,7 +152,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
             <div className="relative z-10">
               <button
                 onClick={onLessons}
-                className="brutal-btn-primary px-4 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-xl font-black text-sm sm:text-base md:text-xl uppercase tracking-tighter"
+                className="brutal-btn-primary px-4 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-xl font-black text-sm sm:text-base md:text-xl uppercase tracking-tighter transition-all duration-300 ease-in-out hover:brightness-110"
               >
                 Keep Learning
               </button>
@@ -169,12 +169,12 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
               <h3 className="text-lg sm:text-xl md:text-2xl font-black uppercase italic tracking-tighter">Current Quest</h3>
               <button
                 onClick={() => onCategorySelect(lastCategory)}
-                className="text-sm font-bold underline decoration-primary decoration-2 underline-offset-4"
+                className="text-sm font-bold underline decoration-primary decoration-2 underline-offset-4 transition-all duration-300 ease-in-out hover:text-primary"
               >
                 View All
               </button>
             </div>
-            <div className="brutal-card bg-card p-3 sm:p-4 md:p-6 rounded-xl flex flex-col md:flex-row gap-3 sm:gap-4 md:gap-6 items-center">
+            <div className="brutal-card bg-card p-3 sm:p-4 md:p-6 rounded-xl flex flex-col md:flex-row gap-3 sm:gap-4 md:gap-6 items-center animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: '100ms' }}>
               <div className="w-full md:w-40 lg:w-48 aspect-video md:aspect-square bg-muted rounded-lg border-2 border-foreground overflow-hidden">
                 <video
                   className="w-full h-full object-cover"
@@ -203,7 +203,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
                 <div className="flex justify-end">
                   <button
                     onClick={onResumeLesson}
-                    className="brutal-btn-primary px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-2 rounded-lg font-black uppercase text-xs sm:text-sm"
+                    className="brutal-btn-primary px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-2 rounded-lg font-black uppercase text-xs sm:text-sm transition-all duration-300 ease-in-out hover:brightness-110"
                   >
                     Click to Resume
                   </button>
@@ -260,7 +260,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
             )}
             <button
               onClick={onLeaderboard}
-              className="w-full mt-3 sm:mt-4 md:mt-6 brutal-btn-secondary py-1.5 sm:py-2 font-black uppercase text-[10px] sm:text-xs tracking-widest"
+              className="w-full mt-3 sm:mt-4 md:mt-6 brutal-btn-secondary py-1.5 sm:py-2 font-black uppercase text-[10px] sm:text-xs tracking-widest transition-all duration-300 ease-in-out hover:brightness-105"
             >
               View Full Board
             </button>

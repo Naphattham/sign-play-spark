@@ -30,7 +30,8 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
           {/* Category 1: General Conversation */}
           <button 
             onClick={() => onCategorySelect("general")}
-            className="group relative bg-primary border-[3px] border-foreground rounded-[1.5rem] md:rounded-[2rem] p-6 lg:p-8 text-left flex flex-col justify-between h-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all"
+            className="group relative bg-primary border-[3px] border-foreground rounded-[1.5rem] md:rounded-[2rem] p-6 lg:p-8 text-left flex flex-col justify-between h-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-bottom-4"
+            style={{ animationDelay: '0ms', animationDuration: '500ms' }}
           >
             <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 transition-transform group-hover:scale-110">
               <img src={generalImg} alt="บทสนทนาทั่วไป" className="w-full h-full object-contain drop-shadow-md" />
@@ -44,7 +45,8 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
           {/* Category 2: Emotions */}
           <button 
             onClick={() => onCategorySelect("emotions")}
-            className="group relative bg-secondary border-[3px] border-foreground rounded-[1.5rem] md:rounded-[2rem] p-6 lg:p-8 text-left flex flex-col justify-between h-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all"
+            className="group relative bg-secondary border-[3px] border-foreground rounded-[1.5rem] md:rounded-[2rem] p-6 lg:p-8 text-left flex flex-col justify-between h-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-bottom-4"
+            style={{ animationDelay: '100ms', animationDuration: '500ms' }}
           >
             <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 transition-transform group-hover:scale-110">
               <img src={emotionalImg} alt="อารมณ์" className="w-full h-full object-contain drop-shadow-md" />
@@ -58,7 +60,8 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
           {/* Category 3: Q&A */}
           <button 
             onClick={() => onCategorySelect("qa")}
-            className="group relative bg-orange-300 border-[3px] border-foreground rounded-[1.5rem] md:rounded-[2rem] p-6 lg:p-8 text-left flex flex-col justify-between h-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all"
+            className="group relative bg-orange-300 border-[3px] border-foreground rounded-[1.5rem] md:rounded-[2rem] p-6 lg:p-8 text-left flex flex-col justify-between h-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-bottom-4"
+            style={{ animationDelay: '200ms', animationDuration: '500ms' }}
           >
             <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 transition-transform group-hover:scale-110">
               <img src={qaImg} alt="คำถาม-คำตอบ" className="w-full h-full object-contain drop-shadow-md" />
@@ -72,7 +75,8 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
           {/* Category 4: Illness */}
           <button 
             onClick={() => onCategorySelect("illness")}
-            className="group relative bg-emerald-400 border-[3px] border-foreground rounded-[1.5rem] md:rounded-[2rem] p-6 lg:p-8 text-left flex flex-col justify-between h-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all"
+            className="group relative bg-emerald-400 border-[3px] border-foreground rounded-[1.5rem] md:rounded-[2rem] p-6 lg:p-8 text-left flex flex-col justify-between h-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-bottom-4"
+            style={{ animationDelay: '300ms', animationDuration: '500ms' }}
           >
             <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 transition-transform group-hover:scale-110">
               <img src={illnessImg} alt="อาการเจ็บป่วย" className="w-full h-full object-contain drop-shadow-md" />

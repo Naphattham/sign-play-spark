@@ -184,7 +184,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
           <a className="font-bold hover:text-sq-pink transition-colors" href="#">Courses</a> */}
             <button
               onClick={() => setShowLoginModal(true)}
-              className="bg-sq-yellow px-3 py-1.5 sm:px-6 sm:py-2 rounded-xl sq-border sq-button-hover flex items-center gap-1.5 sm:gap-2 font-bold text-sm sm:text-base"
+              className="bg-sq-yellow px-3 py-1.5 sm:px-6 sm:py-2 rounded-xl sq-border sq-button-hover flex items-center gap-1.5 sm:gap-2 font-bold text-sm sm:text-base transition-all duration-300 ease-in-out hover:brightness-105"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" viewBox="0 0 24 24">
                 <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
@@ -199,7 +199,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
         {/* Main Content */}
         <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 md:py-8 lg:py-12 flex-1 flex flex-col-reverse md:flex-row items-center gap-8 sm:gap-12 md:gap-16 lg:gap-24">
           {/* Hero Text Section */}
-          <div className="flex-1 space-y-5 sm:space-y-6 flex flex-col items-center md:items-start text-center md:text-left pb-4 md:pb-0">
+          <div className="flex-1 space-y-5 sm:space-y-6 flex flex-col items-center md:items-start text-center md:text-left pb-4 md:pb-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="inline-block bg-sq-pink text-white px-3 py-1 rounded-full text-xs sm:text-sm font-bold uppercase tracking-widest sq-border">
               เรียนรู้ภาษามือแบบอินเทอร์แอคทีฟ
             </div>
@@ -212,13 +212,13 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
             <div className="flex flex-wrap justify-center md:justify-start gap-3 sm:gap-4 pt-2 sm:pt-4">
               <button
                 onClick={() => setShowLoginModal(true)}
-                className="bg-sq-yellow text-base sm:text-lg md:text-xl px-6 py-3 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-2xl sq-border-lg sq-button-hover font-bold brand-font hover:bg-sq-dark-yellow transition-all w-full sm:w-auto"
+                className="bg-sq-yellow text-base sm:text-lg md:text-xl px-6 py-3 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-2xl sq-border-lg sq-button-hover font-bold brand-font hover:bg-sq-dark-yellow transition-all duration-300 ease-in-out w-full sm:w-auto"
               >
                 เริ่มเกม
               </button>
               <button
                 onClick={() => navigate("/categories")}
-                className="bg-white text-sm sm:text-base md:text-lg px-6 py-3 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-2xl sq-border sq-button-hover font-bold flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto"
+                className="bg-white text-sm sm:text-base md:text-lg px-6 py-3 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-2xl sq-border sq-button-hover font-bold flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto transition-all duration-300 ease-in-out hover:bg-gray-50"
               >
                 สำรวจบทเรียน
               </button>
@@ -234,7 +234,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
           </div>
 
           {/* Hero Visual Section */}
-          <div className="flex-1 relative hero-visual-section">
+          <div className="flex-1 relative hero-visual-section animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="absolute -top-8 -left-8 w-24 h-24 bg-sq-pink/20 rounded-full blur-3xl -z-10"></div>
             <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-sq-yellow/30 rounded-full blur-3xl -z-10"></div>
 
@@ -257,7 +257,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setSelectedVideo("/videos/general/สวัสดี (ผู้ใหญ่)main.mp4")}
-                    className={`p-2 rounded-xl sq-border flex justify-center items-center font-bold text-base relative transition-all ${selectedVideo === "/videos/general/สวัสดี (ผู้ใหญ่)main.mp4"
+                    className={`p-2 rounded-xl sq-border flex justify-center items-center font-bold text-base relative transition-all duration-300 ease-in-out ${selectedVideo === "/videos/general/สวัสดี (ผู้ใหญ่)main.mp4"
                       ? "bg-sq-yellow"
                       : "bg-gray-100 opacity-50 hover:opacity-75"
                       }`}
@@ -269,7 +269,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
                   </button>
                   <button
                     onClick={() => setSelectedVideo("/videos/general/สวัสดี (เพื่อน)main.mp4")}
-                    className={`p-2 rounded-xl sq-border flex justify-center items-center font-bold text-base relative transition-all ${selectedVideo === "/videos/general/สวัสดี (เพื่อน)main.mp4"
+                    className={`p-2 rounded-xl sq-border flex justify-center items-center font-bold text-base relative transition-all duration-300 ease-in-out ${selectedVideo === "/videos/general/สวัสดี (เพื่อน)main.mp4"
                       ? "bg-sq-yellow"
                       : "bg-gray-100 opacity-50 hover:opacity-75"
                       }`}
@@ -339,7 +339,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
         {/* Login Modal */}
         {showLoginModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowLoginModal(false)}>
-            <div className="bg-white w-full max-w-md rounded-3xl sq-border-lg overflow-hidden animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white w-full max-w-md rounded-3xl sq-border-lg overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300" onClick={(e) => e.stopPropagation()}>
               {/* Modal Header */}
               <div className="bg-sq-pink p-6 relative">
                 <button
@@ -349,7 +349,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
                     setEmail('');
                     setPassword('');
                   }}
-                  className="absolute top-4 right-4 text-white hover:text-white/80 transition-colors"
+                  className="absolute top-4 right-4 text-white hover:text-white/80 transition-all duration-300 ease-in-out hover:scale-110"
                 >
                   <X size={24} />
                 </button>
@@ -428,7 +428,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
 
                   <button
                     type="submit"
-                    className="w-full bg-sq-yellow py-4 rounded-xl sq-border sq-button-hover font-bold text-lg brand-font disabled:opacity-50"
+                    className="w-full bg-sq-yellow py-4 rounded-xl sq-border sq-button-hover font-bold text-lg brand-font disabled:opacity-50 transition-all duration-300 ease-in-out hover:brightness-105"
                     disabled={loading}
                   >
                     {loading ? "Loading..." : (isSignup ? "Sign Up" : "Let's Go!")}
@@ -446,7 +446,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
                     <button
                       onClick={handleGoogleSignIn}
                       disabled={loading}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-3 border-sq-black rounded-xl hover:bg-gray-50 transition-all font-bold disabled:opacity-50 sq-border"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-3 border-sq-black rounded-xl hover:bg-gray-50 transition-all duration-300 ease-in-out font-bold disabled:opacity-50 sq-border"
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -469,7 +469,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
                       setConfirmPassword('');
                     }}
                     disabled={loading}
-                    className="text-sq-pink hover:text-sq-dark-pink font-bold hover:underline disabled:opacity-50 transition-all"
+                    className="text-sq-pink hover:text-sq-dark-pink font-bold hover:underline disabled:opacity-50 transition-all duration-300 ease-in-out"
                   >
                     {isSignup ? "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ" : "ยังไม่มีบัญชี? สมัครสมาชิก"}
                   </button>

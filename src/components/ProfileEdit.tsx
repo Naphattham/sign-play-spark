@@ -248,12 +248,12 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
 
   return (
     <div className="w-full">
-      <button onClick={onBack} className="brutal-btn-secondary flex items-center gap-2 text-sm mb-6">
+      <button onClick={onBack} className="brutal-btn-secondary flex items-center gap-2 text-sm mb-6 transition-all duration-300 ease-in-out hover:brightness-105">
         <ArrowLeft size={16} />
         Back to Home
       </button>
 
-      <div className="w-full max-w-lg mx-auto brutal-card-lg overflow-hidden">
+      <div className="w-full max-w-lg mx-auto brutal-card-lg overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="bg-accent border-b-[3px] border-foreground px-3 py-2 sm:px-5 sm:py-3">
           <h2 className="font-display text-lg sm:text-xl text-accent-foreground">Edit Profile</h2>
         </div>
@@ -281,7 +281,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
                 }}
               />
             </div>
-            <label className="brutal-btn-secondary flex items-center gap-2 text-sm cursor-pointer">
+            <label className="brutal-btn-secondary flex items-center gap-2 text-sm cursor-pointer transition-all duration-300 ease-in-out hover:brightness-105">
               <Upload size={14} />
               {photoURL && !photoURL.startsWith('blob:') && !imageError ? 'Change Photo' : 'Upload Photo'}
               <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
@@ -320,7 +320,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
                     onChange={(e) => setZoom(Number(e.target.value))}
                     className="flex-1"
                   />
-                  <button onClick={handleCropDone} className="brutal-btn-primary flex items-center gap-2 text-sm">
+                  <button onClick={handleCropDone} className="brutal-btn-primary flex items-center gap-2 text-sm transition-all duration-300 ease-in-out hover:brightness-110">
                     <Check size={16} />
                     Done
                   </button>
@@ -359,7 +359,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
           <button
             onClick={handleSaveProfile}
             disabled={isSaving}
-            className="w-full brutal-btn-primary py-3 font-body flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full brutal-btn-primary py-3 font-body flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-in-out hover:brightness-110"
           >
             <Check size={18} />
             {isSaving ? "Saving..." : "Save Changes"}

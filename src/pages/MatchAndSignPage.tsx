@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LoadingScreen } from "@/components/LoadingScreen";
@@ -54,83 +54,130 @@ export default function MatchAndSignPage() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [isReturningHome, setIsReturningHome] = useState(false);
-  const pointsAddedRef = useRef(false);
 
-  // Initialize game on start
-  const startGame = () => {
-    setCurrentQuestions(shuffleArray(ALL_QUESTIONS).slice(0, 5));
+  const pointsAddedRef = useRef(false);
+  // Imperative timer – never driven by React's effect/dependency system
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Stable refs so timer callbacks don't close over stale state
+  const questionsRef = useRef<typeof ALL_QUESTIONS>([]);
+  const roundIndexRef = useRef(0);
+
+  /** Kill any running interval */
+  const stopTimer = useCallback(() => {
+    if (timerRef.current !== null) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  /**
+   * Advance to the next question (or end the game).
+   * Reads from refs so it can be called safely from inside timers.
+   */
+  const advanceRound = useCallback(() => {
+    const nextIndex = roundIndexRef.current + 1;
+    if (nextIndex < questionsRef.current.length) {
+      roundIndexRef.current = nextIndex;
+      setCurrentRoundIndex(nextIndex);
+    } else {
+      setIsGameOver(true);
+    }
+  }, []);
+
+  /**
+   * Start a fresh 10-second countdown for the current round.
+   * Uses a plain local variable for the count so it NEVER reads React state
+   * inside the interval callback – completely immune to stale-closure bugs.
+   */
+  const startTimer = useCallback(() => {
+    stopTimer();
+    let count = 10;
+    setTimeLeft(10);
+
+    timerRef.current = setInterval(() => {
+      count -= 1;
+      setTimeLeft(count);
+
+      if (count <= 0) {
+        // Stop the interval immediately so it can't fire again
+        stopTimer();
+        // Show timeout feedback, then advance
+        setSelectedOption("TIMEOUT");
+        setIsCorrect(false);
+        setTimeout(() => {
+          setSelectedOption(null);
+          setIsCorrect(null);
+          advanceRound();
+        }, 1500);
+      }
+    }, 1000);
+  }, [stopTimer, advanceRound]);
+
+  // Keep refs in sync with state (for the timer callbacks)
+  useEffect(() => {
+    roundIndexRef.current = currentRoundIndex;
+  }, [currentRoundIndex]);
+
+  useEffect(() => {
+    questionsRef.current = currentQuestions;
+  }, [currentQuestions]);
+
+  /** Reset everything and begin a new game */
+  const startGame = useCallback(() => {
+    stopTimer();
+    const questions = shuffleArray(ALL_QUESTIONS).slice(0, 5);
+    questionsRef.current = questions;
+    roundIndexRef.current = 0;
+
+    setCurrentQuestions(questions);
     setCurrentRoundIndex(0);
     setScore(0);
     setIsGameOver(false);
     setSelectedOption(null);
     setIsCorrect(null);
     pointsAddedRef.current = false;
-  };
+  }, [stopTimer]);
 
+  // Boot the game once on mount
   useEffect(() => {
     startGame();
+    return () => stopTimer(); // cleanup on unmount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Save points to user when game is over
+  // When the round index changes, set up new options and start timer
+  useEffect(() => {
+    if (
+      currentQuestions.length === 0 ||
+      currentRoundIndex >= currentQuestions.length ||
+      isGameOver
+    ) return;
+
+    const q = currentQuestions[currentRoundIndex];
+    const wrongVids = ALL_VIDEOS.filter(v => v !== q.correct);
+    const shuffledWrong = shuffleArray(wrongVids).slice(0, 3);
+    setOptions(shuffleArray([q.correct, ...shuffledWrong]));
+    startTimer();
+
+    return () => stopTimer(); // clean up if deps change before timer fires
+  // startTimer / stopTimer are stable (useCallback with no deps that change)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentRoundIndex, currentQuestions]);
+
+  // Save points when game ends
   useEffect(() => {
     if (isGameOver && !pointsAddedRef.current) {
       pointsAddedRef.current = true;
+      stopTimer();
       if (auth.currentUser && score > 0) {
         addUserPoints(auth.currentUser.uid, score).catch(console.error);
       }
     }
-  }, [isGameOver, score]);
-
-  // Set up round options
-  useEffect(() => {
-    if (currentQuestions.length > 0 && currentRoundIndex < currentQuestions.length) {
-      const q = currentQuestions[currentRoundIndex];
-      // get 3 wrong videos
-      const wrongVids = ALL_VIDEOS.filter(v => v !== q.correct);
-      const shuffledWrongVids = shuffleArray(wrongVids).slice(0, 3);
-      setOptions(shuffleArray([q.correct, ...shuffledWrongVids]));
-      setTimeLeft(10); // reset timer
-    } else if (currentQuestions.length > 0) {
-      setIsGameOver(true);
-    }
-  }, [currentRoundIndex, currentQuestions]);
-
-  // Timer logic
-  useEffect(() => {
-    if (isGameOver || selectedOption !== null) return;
-
-    if (timeLeft === 0) {
-      // time up -> wrong, show correct, then next round
-      setSelectedOption("TIMEOUT");
-      setIsCorrect(false);
-      setTimeout(() => {
-        setSelectedOption(null);
-        setIsCorrect(null);
-        handleNextRound();
-      }, 1500);
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setTimeLeft(prev => Math.max(0, prev - 1));
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [timeLeft, isGameOver, selectedOption]);
-
-  const handleNextRound = () => {
-    setCurrentRoundIndex(prev => {
-      if (prev + 1 < currentQuestions.length) {
-        return prev + 1;
-      } else {
-        setIsGameOver(true);
-        return prev;
-      }
-    });
-  };
+  }, [isGameOver, score, stopTimer]);
 
   const handleSelectOption = (videoUrl: string) => {
     if (selectedOption !== null) return;
+    stopTimer(); // stop countdown immediately
 
     const q = currentQuestions[currentRoundIndex];
     setSelectedOption(videoUrl);
@@ -142,11 +189,22 @@ export default function MatchAndSignPage() {
       setIsCorrect(false);
     }
 
-    // proceed to next after delay
     setTimeout(() => {
       setSelectedOption(null);
       setIsCorrect(null);
-      handleNextRound();
+      advanceRound();
+    }, 1500);
+  };
+
+  const handleSkip = () => {
+    if (selectedOption !== null) return;
+    stopTimer();
+    setSelectedOption("SKIP");
+    setIsCorrect(false);
+    setTimeout(() => {
+      setSelectedOption(null);
+      setIsCorrect(null);
+      advanceRound();
     }, 1500);
   };
 
@@ -154,7 +212,7 @@ export default function MatchAndSignPage() {
     setIsReturningHome(true);
     setTimeout(() => {
       navigate("/", { state: { view: "gamesetup" } });
-    }, 3000); // Wait for the 3s powerBarFill animation to finish
+    }, 3000);
   };
 
   if (isGameOver) {
@@ -286,16 +344,7 @@ export default function MatchAndSignPage() {
       <div className="mt-8 flex items-center gap-6">
         <button
           disabled={selectedOption !== null}
-          onClick={() => {
-            // handle manual skip like timeout
-            setSelectedOption("SKIP");
-            setIsCorrect(false);
-            setTimeout(() => {
-              setSelectedOption(null);
-              setIsCorrect(null);
-              handleNextRound();
-            }, 1500);
-          }}
+          onClick={handleSkip}
           className={`neo-brutalism bg-white border-4 border-black px-6 py-3 rounded-xl font-black text-base transition-all flex items-center gap-2 ${selectedOption !== null ? 'opacity-50 cursor-not-allowed' : 'shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none'}`}
         >
           <span className="material-symbols-outlined" data-icon="skip_next">skip_next</span>

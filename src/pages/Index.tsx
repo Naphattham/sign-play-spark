@@ -12,7 +12,7 @@ import { HomePage } from "@/components/HomePage";
 import { LessonsPage } from "@/components/LessonsPage";
 import { QuestView } from "@/components/QuestView";
 import { GameSetupPage } from "@/components/GameSetupPage";
-import { Category, Phrase, getPhrasesByCategory, categories, isPhraseCompletedCheck } from "@/lib/categories";
+import { Category, Phrase, getPhrasesByCategory, categories, isPhraseCompletedCheck, checkPhraseMatch } from "@/lib/categories";
 import { LogOut, X, Camera, Home, User, ArrowLeft, Check } from "lucide-react";
 import { useDistanceDetection, DistanceStatus } from "@/hooks/useDistanceDetection";
 import { useMediaPipeHolistic } from "@/hooks/useMediaPipeHolistic";
@@ -1072,390 +1072,394 @@ const Index = () => {
                       <div className="flex items-center justify-center mb-1.5 sm:mb-3 lg:mb-4 pt-1 sm:pt-0">
                         {activePhrase?.id === "g2" ? (
                           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
-                          <span className="text-slate-900 dark:text-white">ลาก่อน</span>
-                          <span className="text-slate-900 dark:text-white mx-1">|</span>
-                          <span
-                            className={`transition-colors duration-300 ${(isLive || isDetecting) && byeStep === 1
-                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                              : "text-slate-400"
-                              }`}
-                          >
-                            ฉัน
-                          </span>
-                          <span
-                            className={`transition-colors duration-300 ${(isLive || isDetecting) && byeStep === 2
-                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                              : "text-slate-400"
-                              }`}
-                          >
-                            ไป
-                          </span>
-                        </h2>
-                      ) : activePhrase?.id === "g3" ? (
-                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
-                          <span className="text-slate-900 dark:text-white">กินข้าวหรือยัง?</span>
-                          <span className="text-slate-900 dark:text-white mx-1">|</span>
-                          <span
-                            className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 1
-                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                              : "text-slate-400"
-                              }`}
-                          >
-                            ข้าว
-                          </span>
-                          <span
-                            className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 2
-                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                              : "text-slate-400"
-                              }`}
-                          >
-                            กิน
-                          </span>
-                          <span
-                            className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 3
-                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                              : "text-slate-400"
-                              }`}
-                          >
-                            หรือยัง?
-                          </span>
-                        </h2>
-                      ) : activePhrase?.id === "g4" ? (
-                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
-                          <span className="text-slate-900 dark:text-white">
-                            {selectedVariant === "adult" ? "กินแล้ว" : "ยังไม่ได้กิน"}
-                          </span>
-                          <span className="text-slate-900 dark:text-white mx-1">|</span>
-                          <span
-                            className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 1
-                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                              : "text-slate-400"
-                              }`}
-                          >
-                            กิน
-                          </span>
-                          <span
-                            className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 2
-                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                              : "text-slate-400"
-                              }`}
-                          >
-                            {selectedVariant === "adult" ? "แล้ว" : "ยัง"}
-                          </span>
-                        </h2>
-                      ) : (
-                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
-                          {activePhrase?.id === "g1"
-                            ? (selectedVariant === "adult" ? "สวัสดีผู้ใหญ่" : "สวัสดีเพื่อน")
-                            : activePhrase?.id === "g6"
-                              ? (selectedVariant === "adult" ? "สบายดี" : "ไม่สบายใจ")
-                              : (activePhrase?.text ?? "Hello")
-                          }
-                        </h2>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5 sm:gap-2 lg:gap-3 items-start max-w-[740px] mx-auto w-full">
-                      <div className="relative flex flex-col gap-1 sm:gap-1.5 lg:gap-2 w-full items-center lg:items-end">
-                        <div className="relative aspect-square w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mr-0 bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-                          <VideoCard
-                            phrase={activePhrase?.text ?? "Hello"}
-                            category={activePhrase?.category ?? "general"}
-                            variant={(activePhrase?.id === "g1" || activePhrase?.id === "g4" || activePhrase?.id === "g6") ? selectedVariant : undefined}
-                            byeStep={activePhrase?.id === "g2" ? byeStep : undefined}
-                            eatStep={(activePhrase?.id === "g3" || activePhrase?.id === "g4") ? eatStep : undefined}
-                            isLive={isLive || isDetecting}
-                          />
-                          <div className="absolute inset-0 bg-black/10 flex items-center justify-center pointer-events-none">
-                            <div className="bg-white/90 px-2 py-1 border-[3px] border-foreground rounded-full font-black text-xs absolute top-3 left-3">
-                              TUTORIAL
-                            </div>
-                            <img
-                              src={hintImg}
-                              alt="Hint"
-                              onClick={() => {
-                                if (hintUnlocked.has(getCurrentHintKey())) {
-                                  setShowHintContent(true);
-                                } else {
-                                  setShowHintModal(true);
-                                }
-                              }}
-                              className="absolute bottom-2 right-2 sm:bottom-2.5 sm:right-2.5 w-6 h-6 sm:w-8 sm:h-8 lg:w-9 lg:h-9 object-contain opacity-90 drop-shadow-md pointer-events-auto cursor-pointer hover:scale-110 transition-transform"
-                            />
-                          </div>
-                        </div>
-
-                        {activePhrase?.id === "g1" && (
-                          <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
-                            <button
-                              onClick={() => handleVariantChange("adult")}
-                              className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
-                                ? "bg-yellow-400 text-slate-900"
-                                : "bg-white text-slate-900 hover:bg-slate-50"
+                            <span className="text-slate-900 dark:text-white">ลาก่อน</span>
+                            <span className="text-slate-900 dark:text-white mx-1">|</span>
+                            <span
+                              className={`transition-colors duration-300 ${(isLive || isDetecting) && byeStep === 1
+                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                                : "text-slate-400"
                                 }`}
                             >
-                              สวัสดีผู้ใหญ่
-                            </button>
-                            <button
-                              onClick={() => handleVariantChange("friend")}
-                              className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
-                                ? "bg-yellow-400 text-slate-900"
-                                : "bg-white text-slate-900 hover:bg-slate-50"
+                              ฉัน
+                            </span>
+                            <span
+                              className={`transition-colors duration-300 ${(isLive || isDetecting) && byeStep === 2
+                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                                : "text-slate-400"
                                 }`}
                             >
-                              สวัสดีเพื่อน
-                            </button>
-                          </div>
-                        )}
-                        {activePhrase?.id === "g4" && (
-                          <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
-                            <button
-                              onClick={() => handleVariantChange("adult")}
-                              className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
-                                ? "bg-yellow-400 text-slate-900"
-                                : "bg-white text-slate-900 hover:bg-slate-50"
+                              ไป
+                            </span>
+                          </h2>
+                        ) : activePhrase?.id === "g3" ? (
+                          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
+                            <span className="text-slate-900 dark:text-white">กินข้าวหรือยัง?</span>
+                            <span className="text-slate-900 dark:text-white mx-1">|</span>
+                            <span
+                              className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 1
+                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                                : "text-slate-400"
                                 }`}
                             >
-                              กินแล้ว
-                            </button>
-                            <button
-                              onClick={() => handleVariantChange("friend")}
-                              className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
-                                ? "bg-yellow-400 text-slate-900"
-                                : "bg-white text-slate-900 hover:bg-slate-50"
+                              ข้าว
+                            </span>
+                            <span
+                              className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 2
+                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                                : "text-slate-400"
                                 }`}
                             >
-                              ยังไม่ได้กิน
-                            </button>
-                          </div>
-                        )}
-                        {activePhrase?.id === "g6" && (
-                          <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
-                            <button
-                              onClick={() => handleVariantChange("adult")}
-                              className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
-                                ? "bg-yellow-400 text-slate-900"
-                                : "bg-white text-slate-900 hover:bg-slate-50"
+                              กิน
+                            </span>
+                            <span
+                              className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 3
+                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                                : "text-slate-400"
                                 }`}
                             >
-                              สบายดี
-                            </button>
-                            <button
-                              onClick={() => handleVariantChange("friend")}
-                              className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
-                                ? "bg-yellow-400 text-slate-900"
-                                : "bg-white text-slate-900 hover:bg-slate-50"
+                              หรือยัง?
+                            </span>
+                          </h2>
+                        ) : activePhrase?.id === "g4" ? (
+                          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
+                            <span className="text-slate-900 dark:text-white">
+                              {selectedVariant === "adult" ? "กินแล้ว" : "ยังไม่ได้กิน"}
+                            </span>
+                            <span className="text-slate-900 dark:text-white mx-1">|</span>
+                            <span
+                              className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 1
+                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                                : "text-slate-400"
                                 }`}
                             >
-                              ไม่สบายใจ
-                            </button>
-                          </div>
+                              กิน
+                            </span>
+                            <span
+                              className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 2
+                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                                : "text-slate-400"
+                                }`}
+                            >
+                              {selectedVariant === "adult" ? "แล้ว" : "ยัง"}
+                            </span>
+                          </h2>
+                        ) : (
+                          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                            {activePhrase?.id === "g1"
+                              ? (selectedVariant === "adult" ? "สวัสดีผู้ใหญ่" : "สวัสดีเพื่อน")
+                              : activePhrase?.id === "g6"
+                                ? (selectedVariant === "adult" ? "สบายดี" : "ไม่สบายใจ")
+                                : (activePhrase?.text ?? "Hello")
+                            }
+                          </h2>
                         )}
                       </div>
-
-                      <div className="flex flex-col gap-1 sm:gap-1.5 lg:gap-2 w-full items-center lg:items-start">
-                        <div className="relative aspect-square w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-                          <WebcamView
-                            onNextLevel={() => setIsPhraseCompleted(true)}
-                            cameraEnabled={cameraPermissionGranted}
-                            onVideoReady={(video) => setWebcamVideo(video)}
-                            onCanvasReady={(canvas) => setWebcamCanvas(canvas)}
-                          />
-
-                          {(tutorialStep === "scanning" || tutorialStep === "too_close") && (
-                            <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center z-20 transition-all">
-                              <img src={guideHumanImg} alt="Guide" className="w-full h-full object-cover opacity-80" />
-                              <div className={`absolute bottom-6 bg-white/95 border-[3px] border-foreground rounded-full px-4 py-2 font-black text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${tutorialStep === "too_close" ? "text-red-500 animate-pulse border-red-500 scale-105 transition-transform" : "animate-bounce"}`}>
-                                {tutorialStep === "too_close" ? "ขยับถอยห่างไปอีกหน่อย" : "ถอยหลังออกไปให้มีระยะห่างจากกล้อง"}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5 sm:gap-2 lg:gap-3 items-start max-w-[740px] mx-auto w-full">
+                        <div className="relative flex flex-col gap-1 sm:gap-1.5 lg:gap-2 w-full items-center lg:items-end">
+                          <div className="relative aspect-square w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mr-0 bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+                            <VideoCard
+                              phrase={activePhrase?.text ?? "Hello"}
+                              category={activePhrase?.category ?? "general"}
+                              variant={(activePhrase?.id === "g1" || activePhrase?.id === "g4" || activePhrase?.id === "g6") ? selectedVariant : undefined}
+                              byeStep={activePhrase?.id === "g2" ? byeStep : undefined}
+                              eatStep={(activePhrase?.id === "g3" || activePhrase?.id === "g4") ? eatStep : undefined}
+                              isLive={isLive || isDetecting}
+                            />
+                            <div className="absolute inset-0 bg-black/10 flex items-center justify-center pointer-events-none">
+                              <div className="bg-white/90 px-2 py-1 border-[3px] border-foreground rounded-full font-black text-xs absolute top-3 left-3">
+                                TUTORIAL
                               </div>
-                            </div>
-                          )}
-
-                          {tutorialStep === "success" && (
-                            <div className="absolute inset-0 bg-green-500/80 flex flex-col items-center justify-center backdrop-blur-sm z-30 animate-in fade-in zoom-in duration-300">
-                              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 border-[4px] border-foreground shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                                <span className="text-4xl flex items-center justify-center w-full h-full pt-1">✓</span>
-                              </div>
-                              <h3 className="text-white font-black text-2xl drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">Success!</h3>
-                              <p className="text-white font-bold drop-shadow-[1px_1px_0px_rgba(0,0,0,1)] mt-2">คุณอยู่ในตำแหน่งที่เหมาะสมแล้ว</p>
-                            </div>
-                          )}
-
-                          <div className="absolute inset-0 border-4 border-dashed border-[#ec5b13]/50 m-3 rounded-lg pointer-events-none"></div>
-
-                          <div className="absolute top-3 right-3 animate-bounce z-10">
-                            <div className="bg-pink-500 text-white border-[3px] border-foreground rounded-xl px-2 lg:px-3 py-1 font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1 text-xs">
-                              {(() => {
-                                const score = getScoreFromConfidence(bestConfidence);
-                                return score > 0 ? `+ ${score} PTS` : '+ ? PTS';
-                              })()}
+                              <img
+                                src={hintImg}
+                                alt="Hint"
+                                onClick={() => {
+                                  if (hintUnlocked.has(getCurrentHintKey())) {
+                                    setShowHintContent(true);
+                                  } else {
+                                    setShowHintModal(true);
+                                  }
+                                }}
+                                className="absolute bottom-2 right-2 sm:bottom-2.5 sm:right-2.5 w-6 h-6 sm:w-8 sm:h-8 lg:w-9 lg:h-9 object-contain opacity-90 drop-shadow-md pointer-events-auto cursor-pointer hover:scale-110 transition-transform"
+                              />
                             </div>
                           </div>
 
-                          <div className="absolute bottom-3 left-3 z-10">
-                            <div className={`px-2 py-1 border-[3px] border-foreground rounded-full font-black text-xs flex items-center gap-1.5 ${isLive
-                              ? 'bg-red-500 text-white animate-pulse'
-                              : 'bg-gray-400 text-white'
-                              }`}>
-                              <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-white animate-pulse' : 'bg-white/50'
-                                }`}></span>
-                              LIVE
+                          {activePhrase?.id === "g1" && (
+                            <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
+                              <button
+                                onClick={() => handleVariantChange("adult")}
+                                className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
+                                  ? "bg-yellow-400 text-slate-900"
+                                  : "bg-white text-slate-900 hover:bg-slate-50"
+                                  }`}
+                              >
+                                สวัสดีผู้ใหญ่
+                              </button>
+                              <button
+                                onClick={() => handleVariantChange("friend")}
+                                className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
+                                  ? "bg-yellow-400 text-slate-900"
+                                  : "bg-white text-slate-900 hover:bg-slate-50"
+                                  }`}
+                              >
+                                สวัสดีเพื่อน
+                              </button>
                             </div>
-                          </div>
-
-                          {isLive && (
-                            <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
-
-                              {/* กล่องแสดงคำทำนาย (ค้างไว้ตลอดตราบใดที่มีข้อมูล) - ปรับขนาดให้เล็กลง */}
-                              <div className={`bg-white/95 backdrop-blur-sm border-[2px] ${signRecognition.isMatched ? 'border-green-500 bg-green-50/95' : 'border-foreground'} rounded-md px-2 py-1 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] min-w-[110px] transition-colors duration-300`}>
-
-                                {/* คำที่ทาย + เปอร์เซ็นต์ */}
-                                <div className="flex items-end justify-between gap-2">
-                                  <span className={`text-sm leading-none ${signRecognition.isMatched ? 'text-green-700' : 'text-slate-800'} truncate max-w-[90px]`}>
-                                    {targetDisplayWord}
-                                  </span>
-                                  <span className={`text-xs leading-none ${signRecognition.isMatched ? 'text-green-600' : 'text-primary'}`}>
-                                    {signRecognition.isMatched ? (signRecognition.currentConfidence * 100).toFixed(0) : "0"}%
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* กล่องแจ้งเตือน Error */}
-                              {signRecognition.error && (
-                                <div className="bg-red-500/95 backdrop-blur-sm border-[2px] border-foreground rounded-lg px-3 py-2 font-bold text-xs text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] max-w-[180px]">
-                                  <div className="flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-[14px]">warning</span>
-                                    <span>ไม่พบกล้อง / เกิดข้อผิดพลาด</span>
-                                  </div>
-                                </div>
-                              )}
-
+                          )}
+                          {activePhrase?.id === "g4" && (
+                            <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
+                              <button
+                                onClick={() => handleVariantChange("adult")}
+                                className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
+                                  ? "bg-yellow-400 text-slate-900"
+                                  : "bg-white text-slate-900 hover:bg-slate-50"
+                                  }`}
+                              >
+                                กินแล้ว
+                              </button>
+                              <button
+                                onClick={() => handleVariantChange("friend")}
+                                className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
+                                  ? "bg-yellow-400 text-slate-900"
+                                  : "bg-white text-slate-900 hover:bg-slate-50"
+                                  }`}
+                              >
+                                ยังไม่ได้กิน
+                              </button>
+                            </div>
+                          )}
+                          {activePhrase?.id === "g6" && (
+                            <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
+                              <button
+                                onClick={() => handleVariantChange("adult")}
+                                className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
+                                  ? "bg-yellow-400 text-slate-900"
+                                  : "bg-white text-slate-900 hover:bg-slate-50"
+                                  }`}
+                              >
+                                สบายดี
+                              </button>
+                              <button
+                                onClick={() => handleVariantChange("friend")}
+                                className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
+                                  ? "bg-yellow-400 text-slate-900"
+                                  : "bg-white text-slate-900 hover:bg-slate-50"
+                                  }`}
+                              >
+                                ไม่สบายใจ
+                              </button>
                             </div>
                           )}
                         </div>
 
-                        {/* Multi-state button: Start → Stop → Collect Point → Try Again */}
-                        {(() => {
-                          // Camera permission button
-                          if (!cameraPermissionGranted) {
-                            return (
-                              <button
-                                onClick={() => setShowCameraPermission(true)}
-                                className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-blue-500 hover:bg-blue-600 text-white"
-                              >
-                                📹 อนุญาตการเข้าถึงกล้อง
-                              </button>
-                            );
-                          }
+                        <div className="flex flex-col gap-1 sm:gap-1.5 lg:gap-2 w-full items-center lg:items-start">
+                          <div className="relative aspect-square w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+                            <WebcamView
+                              onNextLevel={() => setIsPhraseCompleted(true)}
+                              cameraEnabled={cameraPermissionGranted}
+                              onVideoReady={(video) => setWebcamVideo(video)}
+                              onCanvasReady={(canvas) => setWebcamCanvas(canvas)}
+                            />
 
-                          const currentScore = getScoreFromConfidence(bestConfidence); // tier: 40, 70, 100
-                          const isLocked = bestConfidence < 0.5;
-                          const phraseKey = (activePhrase?.id === "g1" || activePhrase?.id === "g4" || activePhrase?.id === "g6")
-                            ? `${activePhrase.id}_${selectedVariant}`
-                            : activePhrase?.id;
-                          // คะแนนที่สะสมไว้แล้วสำหรับคำนี้
-                          const earnedForPhrase = phraseKey ? (phrasePoints[phraseKey] || 0) : 0;
-                          // delta = คะแนนที่จะได้เพิ่มถ้ากด Collect ตอนนี้
-                          const deltaPoints = Math.max(0, currentScore - earnedForPhrase);
+                            {(tutorialStep === "scanning" || tutorialStep === "too_close") && (
+                              <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center z-20 transition-all">
+                                <img src={guideHumanImg} alt="Guide" className="w-full h-full object-cover opacity-80" />
+                                <div className={`absolute bottom-6 bg-white/95 border-[3px] border-foreground rounded-full px-4 py-2 font-black text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${tutorialStep === "too_close" ? "text-red-500 animate-pulse border-red-500 scale-105 transition-transform" : "animate-bounce"}`}>
+                                  {tutorialStep === "too_close" ? "ขยับถอยห่างไปอีกหน่อย" : "ถอยหลังออกไปให้มีระยะห่างจากกล้อง"}
+                                </div>
+                              </div>
+                            )}
 
-                          // Try Again state
-                          if (buttonState === "tryagain") {
-                            return (
-                              <button
-                                onClick={handleTryAgain}
-                                className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-purple-500 hover:bg-purple-600 text-white"
-                              >
-                                🔄 TRY AGAIN
-                              </button>
-                            );
-                          }
+                            {tutorialStep === "success" && (
+                              <div className="absolute inset-0 bg-green-500/80 flex flex-col items-center justify-center backdrop-blur-sm z-30 animate-in fade-in zoom-in duration-300">
+                                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 border-[4px] border-foreground shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                                  <span className="text-4xl flex items-center justify-center w-full h-full pt-1">✓</span>
+                                </div>
+                                <h3 className="text-white font-black text-2xl drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">Success!</h3>
+                                <p className="text-white font-bold drop-shadow-[1px_1px_0px_rgba(0,0,0,1)] mt-2">คุณอยู่ในตำแหน่งที่เหมาะสมแล้ว</p>
+                              </div>
+                            )}
 
-                          // Collect Point state
-                          if (buttonState === "collect" && isPhraseCompleted) {
-                            return (
-                              <div className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 flex flex-col gap-1.5">
+                            <div className="absolute inset-0 border-4 border-dashed border-[#ec5b13]/50 m-3 rounded-lg pointer-events-none"></div>
+
+                            <div className="absolute top-3 right-3 animate-bounce z-10">
+                              <div className="bg-pink-500 text-white border-[3px] border-foreground rounded-xl px-2 lg:px-3 py-1 font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1 text-xs">
+                                {(() => {
+                                  const score = getScoreFromConfidence(bestConfidence);
+                                  return score > 0 ? `+ ${score} PTS` : '+ ? PTS';
+                                })()}
+                              </div>
+                            </div>
+
+                            <div className="absolute bottom-3 left-3 z-10">
+                              <div className={`px-2 py-1 border-[3px] border-foreground rounded-full font-black text-xs flex items-center gap-1.5 ${isLive
+                                ? 'bg-red-500 text-white animate-pulse'
+                                : 'bg-gray-400 text-white'
+                                }`}>
+                                <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-white animate-pulse' : 'bg-white/50'
+                                  }`}></span>
+                                LIVE
+                              </div>
+                            </div>
+
+                            {isLive && (
+                              <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+
+                                {/* กล่องแสดงคำทำนาย (ค้างไว้ตลอดตราบใดที่มีข้อมูล) - ปรับขนาดให้เล็กลง */}
+                                <div className={`bg-white/95 backdrop-blur-sm border-[2px] ${signRecognition.isMatched ? 'border-green-500 bg-green-50/95' : 'border-foreground'} rounded-md px-2 py-1 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] min-w-[110px] transition-colors duration-300`}>
+
+                                  {/* คำที่ทาย + เปอร์เซ็นต์ */}
+                                  <div className="flex items-end justify-between gap-2">
+                                    <span className={`text-sm leading-none ${signRecognition.isMatched ? 'text-green-700' : 'text-slate-800'} truncate max-w-[90px]`}>
+                                      {targetDisplayWord}
+                                    </span>
+                                    <span className={`text-xs leading-none ${signRecognition.isMatched ? 'text-green-600' : 'text-primary'}`}>
+                                      {(() => {
+                                        const top3 = signRecognition.top3Predictions || [];
+                                        const found = effectivePhrase ? top3.find(p => checkPhraseMatch(effectivePhrase, p.class, selectedVariant)) : null;
+                                        return found ? (found.confidence * 100).toFixed(0) : "0";
+                                      })()}%
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* กล่องแจ้งเตือน Error */}
+                                {signRecognition.error && (
+                                  <div className="bg-red-500/95 backdrop-blur-sm border-[2px] border-foreground rounded-lg px-3 py-2 font-bold text-xs text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] max-w-[180px]">
+                                    <div className="flex items-center gap-1">
+                                      <span className="material-symbols-outlined text-[14px]">warning</span>
+                                      <span>ไม่พบกล้อง / เกิดข้อผิดพลาด</span>
+                                    </div>
+                                  </div>
+                                )}
+
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Multi-state button: Start → Stop → Collect Point → Try Again */}
+                          {(() => {
+                            // Camera permission button
+                            if (!cameraPermissionGranted) {
+                              return (
+                                <button
+                                  onClick={() => setShowCameraPermission(true)}
+                                  className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-blue-500 hover:bg-blue-600 text-white"
+                                >
+                                  📹 อนุญาตการเข้าถึงกล้อง
+                                </button>
+                              );
+                            }
+
+                            const currentScore = getScoreFromConfidence(bestConfidence); // tier: 40, 70, 100
+                            const isLocked = bestConfidence < 0.5;
+                            const phraseKey = (activePhrase?.id === "g1" || activePhrase?.id === "g4" || activePhrase?.id === "g6")
+                              ? `${activePhrase.id}_${selectedVariant}`
+                              : activePhrase?.id;
+                            // คะแนนที่สะสมไว้แล้วสำหรับคำนี้
+                            const earnedForPhrase = phraseKey ? (phrasePoints[phraseKey] || 0) : 0;
+                            // delta = คะแนนที่จะได้เพิ่มถ้ากด Collect ตอนนี้
+                            const deltaPoints = Math.max(0, currentScore - earnedForPhrase);
+
+                            // Try Again state
+                            if (buttonState === "tryagain") {
+                              return (
+                                <button
+                                  onClick={handleTryAgain}
+                                  className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-purple-500 hover:bg-purple-600 text-white"
+                                >
+                                  🔄 TRY AGAIN
+                                </button>
+                              );
+                            }
+
+                            // Collect Point state
+                            if (buttonState === "collect" && isPhraseCompleted) {
+                              return (
+                                <div className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 flex flex-col gap-1.5">
+                                  <button
+                                    onClick={() => {
+                                      if (isLocked) return;
+                                      if (deltaPoints <= 0) {
+                                        handleTryAgain();
+                                      } else {
+                                        handleCollectPoints();
+                                      }
+                                    }}
+                                    disabled={isLocked}
+                                    className={`w-full h-12 lg:h-14 flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm ${isLocked
+                                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-70'
+                                      : deltaPoints <= 0
+                                        ? 'bg-purple-500 hover:bg-purple-600 text-white'
+                                        : 'bg-yellow-400 hover:bg-yellow-500 text-slate-900 hover:translate-y-0.5'
+                                      }`}
+                                  >
+                                    {isLocked
+                                      ? `🔒 ต้องถึง 50% (ตอนนี้ ${(bestConfidence * 100).toFixed(0)}%)`
+                                      : deltaPoints <= 0
+                                        ? `🔄 TRY AGAIN`
+                                        : (
+                                          <>
+                                            <img src={collectPointsImg} alt="Collect points" className="w-14 h-14 object-contain" />
+                                            <span className="text-white">COLLECT +{deltaPoints} PTS</span>
+                                          </>
+                                        )
+                                    }
+                                  </button>
+                                </div>
+                              );
+                            }
+
+                            // Stop state (กล้องกำลัง live หรือ detecting)
+                            if (buttonState === "stop" || isDetecting || isLive) {
+                              return (
                                 <button
                                   onClick={() => {
-                                    if (isLocked) return;
-                                    if (deltaPoints <= 0) {
-                                      handleTryAgain();
-                                    } else {
-                                      handleCollectPoints();
+                                    // กด Stop = หยุด session ทั้งหมด รีเซ็ตกล้อง
+                                    setIsLive(false);
+                                    setIsDetecting(false);
+                                    setTutorialStep("initial");
+                                    setIsPhraseCompleted(false);
+                                    setBestConfidence(0);
+                                    setButtonState("start");
+                                    setByeStep(1);
+                                    setEatStep(1);
+                                    isCollectingRef.current = false;
+                                    sessionStartedRef.current = false; // Reset session
+                                    if (successTimerRef.current) {
+                                      clearTimeout(successTimerRef.current);
+                                      successTimerRef.current = null;
                                     }
                                   }}
-                                  disabled={isLocked}
-                                  className={`w-full h-12 lg:h-14 flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm ${isLocked
-                                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-70'
-                                    : deltaPoints <= 0
-                                      ? 'bg-purple-500 hover:bg-purple-600 text-white'
-                                      : 'bg-yellow-400 hover:bg-yellow-500 text-slate-900 hover:translate-y-0.5'
-                                    }`}
+                                  className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-red-500 hover:bg-red-600 text-white"
                                 >
-                                  {isLocked
-                                    ? `🔒 ต้องถึง 50% (ตอนนี้ ${(bestConfidence * 100).toFixed(0)}%)`
-                                    : deltaPoints <= 0
-                                      ? `🔄 TRY AGAIN`
-                                      : (
-                                        <>
-                                          <img src={collectPointsImg} alt="Collect points" className="w-14 h-14 object-contain" />
-                                          <span className="text-white">COLLECT +{deltaPoints} PTS</span>
-                                        </>
-                                      )
-                                  }
+                                  ⏹ STOP
                                 </button>
-                              </div>
-                            );
-                          }
+                              );
+                            }
 
-                          // Stop state (กล้องกำลัง live หรือ detecting)
-                          if (buttonState === "stop" || isDetecting || isLive) {
+                            // Default: Start state
                             return (
                               <button
                                 onClick={() => {
-                                  // กด Stop = หยุด session ทั้งหมด รีเซ็ตกล้อง
-                                  setIsLive(false);
-                                  setIsDetecting(false);
-                                  setTutorialStep("initial");
-                                  setIsPhraseCompleted(false);
+                                  // 🔑 One-Time Start — set sessionStartedRef
+                                  sessionStartedRef.current = true;
+                                  setTutorialStep("scanning");
+                                  setIsDetecting(true);
                                   setBestConfidence(0);
-                                  setButtonState("start");
-                                  setByeStep(1);
-                                  setEatStep(1);
-                                  isCollectingRef.current = false;
-                                  sessionStartedRef.current = false; // Reset session
-                                  if (successTimerRef.current) {
-                                    clearTimeout(successTimerRef.current);
-                                    successTimerRef.current = null;
-                                  }
+                                  setButtonState("stop");
                                 }}
-                                className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-red-500 hover:bg-red-600 text-white"
+                                className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-green-500 hover:bg-green-600 text-white"
                               >
-                                ⏹ STOP
+                                ▶ START
                               </button>
                             );
-                          }
-
-                          // Default: Start state
-                          return (
-                            <button
-                              onClick={() => {
-                                // 🔑 One-Time Start — set sessionStartedRef
-                                sessionStartedRef.current = true;
-                                setTutorialStep("scanning");
-                                setIsDetecting(true);
-                                setBestConfidence(0);
-                                setButtonState("stop");
-                              }}
-                              className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-green-500 hover:bg-green-600 text-white"
-                            >
-                              ▶ START
-                            </button>
-                          );
-                        })()}
+                          })()}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <footer className="mt-1 sm:mt-2 pt-1 sm:pt-2 border-t-[2px] border-slate-200 dark:border-slate-800 w-full">
+                    <footer className="mt-1 sm:mt-2 pt-1 sm:pt-2 border-t-[2px] border-slate-200 dark:border-slate-800 w-full">
                       <div className="flex justify-start lg:justify-center gap-2 sm:gap-4 pb-2 pt-3 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {currentCategoryPhrases.map((phrase) => {
                           const isActive = phrase.id === activePhrase?.id;

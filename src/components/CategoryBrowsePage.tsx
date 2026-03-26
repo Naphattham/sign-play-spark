@@ -179,7 +179,7 @@ export function CategoryBrowsePage() {
           <div className="flex items-center gap-6">
             <button
               onClick={() => setShowLoginModal(true)}
-              className="bg-sq-yellow px-6 py-2 rounded-xl sq-border sq-button-hover flex items-center gap-2 font-bold"
+              className="bg-sq-yellow px-6 py-2 rounded-xl sq-border sq-button-hover flex items-center gap-2 font-bold transition-all duration-300 ease-in-out hover:brightness-105"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" viewBox="0 0 24 24">
                 <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
@@ -193,10 +193,10 @@ export function CategoryBrowsePage() {
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-6 py-8 md:py-12 flex-1">
-          <div className="text-center mb-12 relative">
+          <div className="text-center mb-12 relative animate-in fade-in slide-in-from-bottom-4 duration-500">
             <button
               onClick={() => navigate(-1)}
-              className="absolute right-0 top-0 bg-sq-yellow px-6 py-2 rounded-xl sq-border sq-button-hover flex items-center gap-2 font-bold"
+              className="absolute right-0 top-0 bg-sq-yellow px-6 py-2 rounded-xl sq-border sq-button-hover flex items-center gap-2 font-bold transition-all duration-300 ease-in-out hover:brightness-105"
             >
               ← กลับ
             </button>
@@ -236,7 +236,7 @@ export function CategoryBrowsePage() {
                       <button
                         key={phrase.id}
                         onClick={() => setSelectedVideo({ phrase: phrase.text, category: category.id })}
-                        className="bg-sq-cream p-4 rounded-xl sq-border sq-button-hover font-bold text-left hover:bg-sq-yellow/50 transition-all"
+                        className="bg-sq-cream p-4 rounded-xl sq-border sq-button-hover font-bold text-left hover:bg-sq-yellow/50 transition-all duration-300 ease-in-out"
                       >
                         {phrase.text}
                       </button>
@@ -272,7 +272,7 @@ export function CategoryBrowsePage() {
           onClick={() => setSelectedVideo(null)}
         >
           <div
-            className="bg-white w-full max-w-3xl max-h-[90vh] rounded-3xl sq-border-lg overflow-hidden animate-fade-in-up flex flex-col"
+            className="bg-white w-full max-w-3xl max-h-[90vh] rounded-3xl sq-border-lg overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -292,7 +292,7 @@ export function CategoryBrowsePage() {
               </div>
               <button
                 onClick={() => setSelectedVideo(null)}
-                className="text-white hover:text-white/80 transition-colors"
+                className="text-white hover:text-white/80 transition-all duration-300 ease-in-out hover:scale-110"
               >
                 <X size={28} strokeWidth={3} />
               </button>
@@ -323,7 +323,7 @@ export function CategoryBrowsePage() {
       {/* Login Modal */}
       {showLoginModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowLoginModal(false)}>
-          <div className="bg-white w-full max-w-md rounded-3xl sq-border-lg overflow-hidden animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white w-full max-w-md rounded-3xl sq-border-lg overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300" onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
             <div className="bg-sq-pink p-6 relative">
               <button
@@ -333,7 +333,7 @@ export function CategoryBrowsePage() {
                   setEmail('');
                   setPassword('');
                 }}
-                className="absolute top-4 right-4 text-white hover:text-white/80 transition-colors"
+                className="absolute top-4 right-4 text-white hover:text-white/80 transition-all duration-300 ease-in-out hover:scale-110"
               >
                 <X size={24} />
               </button>
@@ -412,7 +412,7 @@ export function CategoryBrowsePage() {
 
                 <button
                   type="submit"
-                  className="w-full bg-sq-yellow py-4 rounded-xl sq-border sq-button-hover font-bold text-lg brand-font disabled:opacity-50"
+                  className="w-full bg-sq-yellow py-4 rounded-xl sq-border sq-button-hover font-bold text-lg brand-font disabled:opacity-50 transition-all duration-300 ease-in-out hover:brightness-105"
                   disabled={loading}
                 >
                   {loading ? "Loading..." : (isSignup ? "Sign Up" : "Let's Go!")}
@@ -430,7 +430,7 @@ export function CategoryBrowsePage() {
                   <button
                     onClick={handleGoogleSignIn}
                     disabled={loading}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-3 border-sq-black rounded-xl hover:bg-gray-50 transition-all font-bold disabled:opacity-50 sq-border"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-3 border-sq-black rounded-xl hover:bg-gray-50 transition-all duration-300 ease-in-out font-bold disabled:opacity-50 sq-border"
                   >
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -453,7 +453,7 @@ export function CategoryBrowsePage() {
                     setConfirmPassword('');
                   }}
                   disabled={loading}
-                  className="text-sq-pink hover:text-sq-dark-pink font-bold hover:underline disabled:opacity-50 transition-all"
+                  className="text-sq-pink hover:text-sq-dark-pink font-bold hover:underline disabled:opacity-50 transition-all duration-300 ease-in-out"
                 >
                   {isSignup ? "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ" : "ยังไม่มีบัญชี? สมัครสมาชิก"}
                 </button>
