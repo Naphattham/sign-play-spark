@@ -4,6 +4,8 @@ import { X, Check } from "lucide-react";
 import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "@/lib/auth";
 import { database } from "@/lib/firebase";
 import { ref as dbRef, get } from "firebase/database";
+import { getVideoUrl } from "@/lib/categories";
+import { HLSVideoPlayer } from "@/components/HLSVideoPlayer";
 import generalImg from "@/asset/image/general.png";
 
 interface LandingPageProps {
@@ -20,7 +22,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState("/videos/general/สวัสดี (ผู้ใหญ่)main.mp4");
+  const [selectedVideo, setSelectedVideo] = useState(getVideoUrl("general", "สวัสดี (ผู้ใหญ่)main"));
   const [totalUsers, setTotalUsers] = useState<number>(0);
 
   useEffect(() => {
@@ -256,26 +258,26 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <button
-                    onClick={() => setSelectedVideo("/videos/general/สวัสดี (ผู้ใหญ่)main.mp4")}
-                    className={`p-2 rounded-xl sq-border flex justify-center items-center font-bold text-base relative transition-all duration-300 ease-in-out ${selectedVideo === "/videos/general/สวัสดี (ผู้ใหญ่)main.mp4"
+                    onClick={() => setSelectedVideo(getVideoUrl("general", "สวัสดี (ผู้ใหญ่)main"))}
+                    className={`p-2 rounded-xl sq-border flex justify-center items-center font-bold text-base relative transition-all duration-300 ease-in-out ${selectedVideo === getVideoUrl("general", "สวัสดี (ผู้ใหญ่)main")
                       ? "bg-sq-yellow"
                       : "bg-gray-100 opacity-50 hover:opacity-75"
                       }`}
                   >
                     สวัสดี(ผู้ใหญ่)
-                    {selectedVideo === "/videos/general/สวัสดี (ผู้ใหญ่)main.mp4" && (
+                    {selectedVideo === getVideoUrl("general", "สวัสดี (ผู้ใหญ่)main") && (
                       <div className="absolute -top-1 -right-1 w-2 h-2 bg-sq-pink rounded-full border-2 border-sq-black"></div>
                     )}
                   </button>
                   <button
-                    onClick={() => setSelectedVideo("/videos/general/สวัสดี (เพื่อน)main.mp4")}
-                    className={`p-2 rounded-xl sq-border flex justify-center items-center font-bold text-base relative transition-all duration-300 ease-in-out ${selectedVideo === "/videos/general/สวัสดี (เพื่อน)main.mp4"
+                    onClick={() => setSelectedVideo(getVideoUrl("general", "สวัสดี (เพื่อน)main"))}
+                    className={`p-2 rounded-xl sq-border flex justify-center items-center font-bold text-base relative transition-all duration-300 ease-in-out ${selectedVideo === getVideoUrl("general", "สวัสดี (เพื่อน)main")
                       ? "bg-sq-yellow"
                       : "bg-gray-100 opacity-50 hover:opacity-75"
                       }`}
                   >
                     สวัสดี(เพื่อน)
-                    {selectedVideo === "/videos/general/สวัสดี (เพื่อน)main.mp4" && (
+                    {selectedVideo === getVideoUrl("general", "สวัสดี (เพื่อน)main") && (
                       <div className="absolute -top-1 -right-1 w-2 h-2 bg-sq-pink rounded-full border-2 border-sq-black"></div>
                     )}
                   </button>
@@ -285,13 +287,13 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
               {/* Camera Feed / Video Display */}
               <div className="bg-[#222] rounded-2xl p-2 aspect-square flex flex-col items-center justify-center border-3 border-sq-black overflow-hidden video-container">
                 <div className="w-full h-full relative">
-                  <video
+                  <HLSVideoPlayer
                     key={selectedVideo}
                     src={selectedVideo}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
+                    lazyLoad={false}
+                    loop={true}
+                    muted={true}
+                    showControls={false}
                     className="w-full h-full object-cover rounded-xl video-fade-in absolute inset-0"
                   />
                 </div>

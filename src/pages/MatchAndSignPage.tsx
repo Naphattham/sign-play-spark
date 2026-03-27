@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { auth } from "@/lib/firebase";
 import { addUserPoints } from "@/lib/auth";
+import { getVideoUrl } from "@/lib/categories";
+import { HLSVideoPlayer } from "@/components/HLSVideoPlayer";
 
 // A small helper to shuffle arrays
 function shuffleArray<T>(array: T[]): T[] {
@@ -16,29 +18,29 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 const ALL_QUESTIONS = [
-  { term: "สวัสดีผู้ใหญ่", translation: "Hello (Adult)", correct: "/videos/general/สวัสดี (ผู้ใหญ่).mp4" },
-  { term: "สวัสดีเพื่อน", translation: "Hello (Friend)", correct: "/videos/general/สวัสดี (เพื่อน).mp4" },
-  { term: "สบายดีไหม", translation: "How are you?", correct: "/videos/general/สบายดีไหม.mp4" },
-  { term: "สบายดี", translation: "I'm fine", correct: "/videos/general/สบายดี.mp4" },
-  { term: "ไม่สบายใจ", translation: "Unhappy", correct: "/videos/general/ไม่สบายใจ.mp4" },
-  { term: "กินข้าวหรือยัง", translation: "Have you eaten?", correct: "/videos/general/กินข้าวแล้วหรือยัง.mp4" },
-  { term: "กินแล้ว", translation: "Already ate", correct: "/videos/general/กินแล้ว.mp4" },
-  { term: "ยังไม่ได้กิน", translation: "Not yet eaten", correct: "/videos/general/ยังไม่ได้กิน.mp4" },
-  { term: "ลาก่อน", translation: "Goodbye", correct: "/videos/general/ลาก่อน.mp4" },
-  { term: "กลัว", translation: "Scared", correct: "/videos/emotions/กลัว.mp4" },
-  { term: "รัก", translation: "Love", correct: "/videos/emotions/รัก.mp4" },
-  { term: "เหนื่อย", translation: "Tired", correct: "/videos/emotions/เหนื่อย.mp4" },
-  { term: "โกรธ", translation: "Angry", correct: "/videos/emotions/โกรธ.mp4" },
-  { term: "ทำไม", translation: "Why?", correct: "/videos/qa/ทำไม.mp4" },
-  { term: "อะไร", translation: "What?", correct: "/videos/qa/อะไร.mp4" },
-  { term: "เท่าไหร่", translation: "How much?", correct: "/videos/qa/เท่าไหร่.mp4" },
-  { term: "ใช่", translation: "Yes", correct: "/videos/qa/ใช่.mp4" },
-  { term: "ไม่", translation: "No", correct: "/videos/qa/ไม่.mp4" },
-  { term: "ปวดท้อง", translation: "Stomachache", correct: "/videos/illness/ปวดท้อง.mp4" },
-  { term: "ปวดหัว", translation: "Headache", correct: "/videos/illness/ปวดหัว.mp4" },
-  { term: "เจ็บคอ", translation: "Sore throat", correct: "/videos/illness/เจ็บคอ.mp4" },
-  { term: "เป็นหวัด", translation: "Cold", correct: "/videos/illness/เป็นหวัด.mp4" },
-  { term: "เป็นไข้", translation: "Fever", correct: "/videos/illness/เป็นไข้.mp4" }
+  { term: "สวัสดีผู้ใหญ่", translation: "Hello (Adult)", correct: getVideoUrl("general", "สวัสดี (ผู้ใหญ่)") },
+  { term: "สวัสดีเพื่อน", translation: "Hello (Friend)", correct: getVideoUrl("general", "สวัสดี (เพื่อน)") },
+  { term: "สบายดีไหม", translation: "How are you?", correct: getVideoUrl("general", "สบายดีไหม") },
+  { term: "สบายดี", translation: "I'm fine", correct: getVideoUrl("general", "สบายดี") },
+  { term: "ไม่สบายใจ", translation: "Unhappy", correct: getVideoUrl("general", "ไม่สบายใจ") },
+  { term: "กินข้าวหรือยัง", translation: "Have you eaten?", correct: getVideoUrl("general", "กินข้าวแล้วหรือยัง") },
+  { term: "กินแล้ว", translation: "Already ate", correct: getVideoUrl("general", "กินแล้ว") },
+  { term: "ยังไม่ได้กิน", translation: "Not yet eaten", correct: getVideoUrl("general", "ยังไม่ได้กิน") },
+  { term: "ลาก่อน", translation: "Goodbye", correct: getVideoUrl("general", "ลาก่อน") },
+  { term: "กลัว", translation: "Scared", correct: getVideoUrl("emotions", "กลัว") },
+  { term: "รัก", translation: "Love", correct: getVideoUrl("emotions", "รัก") },
+  { term: "เหนื่อย", translation: "Tired", correct: getVideoUrl("emotions", "เหนื่อย") },
+  { term: "โกรธ", translation: "Angry", correct: getVideoUrl("emotions", "โกรธ") },
+  { term: "ทำไม", translation: "Why?", correct: getVideoUrl("qa", "ทำไม") },
+  { term: "อะไร", translation: "What?", correct: getVideoUrl("qa", "อะไร") },
+  { term: "เท่าไหร่", translation: "How much?", correct: getVideoUrl("qa", "เท่าไหร่") },
+  { term: "ใช่", translation: "Yes", correct: getVideoUrl("qa", "ใช่") },
+  { term: "ไม่", translation: "No", correct: getVideoUrl("qa", "ไม่") },
+  { term: "ปวดท้อง", translation: "Stomachache", correct: getVideoUrl("illness", "ปวดท้อง") },
+  { term: "ปวดหัว", translation: "Headache", correct: getVideoUrl("illness", "ปวดหัว") },
+  { term: "เจ็บคอ", translation: "Sore throat", correct: getVideoUrl("illness", "เจ็บคอ") },
+  { term: "เป็นหวัด", translation: "Cold", correct: getVideoUrl("illness", "เป็นหวัด") },
+  { term: "เป็นไข้", translation: "Fever", correct: getVideoUrl("illness", "เป็นไข้") }
 ];
 
 const ALL_VIDEOS = ALL_QUESTIONS.map(q => q.correct);
@@ -256,13 +258,13 @@ export default function MatchAndSignPage() {
               className={`group relative flex flex-col neo-brutalism rounded-2xl overflow-hidden transition-all duration-300 transform ${buttonClass} ${selectedOption === null ? 'hover:translate-x-[-2px] hover:translate-y-[-2px]' : ''}`}
             >
               <div className="aspect-square w-full bg-black/5 flex items-center justify-center relative overflow-hidden">
-                <video
+                <HLSVideoPlayer
                   src={encodeURI(opt)}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  lazyLoad={false}
+                  loop={true}
+                  muted={true}
+                  showControls={false}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none"
                 />
 
                 {selectedOption !== null && (

@@ -12,6 +12,8 @@ import SignAndMatchPage from "@/pages/SignAndMatchPage";
 import SignDefenderPage from "@/pages/SignDefenderPage";
 import { AudioProvider, useAudio } from "@/lib/audioContext";
 import { Volume2, VolumeX } from "lucide-react";
+import { getVideoUrl } from "@/lib/categories";
+import { HLSVideoPlayer } from "@/components/HLSVideoPlayer";
 
 const queryClient = new QueryClient();
 
@@ -35,24 +37,20 @@ function GlobalSoundButton() {
 }
 
 const PRELOAD_VIDEOS = [
-  "g1_adult.mp4",
-  "g1_friend.mp4",
-  "g2.mp4",
-  "g3.mp4",
-  "g4_adult.mp4",
-  "g4_friend.mp4",
+  { category: "general", file: "สวัสดี (ผู้ใหญ่)main" },
+  { category: "general", file: "สวัสดี (เพื่อน)main" },
 ];
 
-function GlobalVideoPreloader({ videoFiles }: { videoFiles: string[] }) {
+function GlobalVideoPreloader({ videoFiles }: { videoFiles: { category: string, file: string }[] }) {
   return (
     <div style={{ display: "none" }} aria-hidden="true">
-      {videoFiles.map((fileName, index) => (
-        <video
+      {videoFiles.map((v, index) => (
+        <HLSVideoPlayer
           key={index}
-          src={fileName.startsWith("/") ? fileName : `/videos/${fileName}`}
-          preload="auto"
-          muted
-          playsInline
+          src={getVideoUrl(v.category, v.file)}
+          lazyLoad={false}
+          loop={true}
+          muted={true}
         />
       ))}
     </div>

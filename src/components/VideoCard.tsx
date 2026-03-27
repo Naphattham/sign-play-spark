@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from "react";
-import { Play, Pause, RotateCcw } from "lucide-react";
 import type { Category } from "@/lib/categories";
+import { getVideoUrl } from "@/lib/categories";
+import { HLSVideoPlayer } from "./HLSVideoPlayer";
 
 interface VideoCardProps {
   phrase: string;
@@ -12,12 +12,8 @@ interface VideoCardProps {
 }
 
 export function VideoCard({ phrase, category, variant, byeStep, eatStep, isLive }: VideoCardProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
   // Build video path based on category and phrase
-  const getVideoUrl = () => {
+  const getVideoSrc = () => {
     let videoFileName = phrase;
 
     // Handle phrases with multiple options (e.g., "สวัสดี (ผู้ใหญ่ | เพื่อน)")
@@ -89,64 +85,34 @@ export function VideoCard({ phrase, category, variant, byeStep, eatStep, isLive 
       videoFileName = videoFileName.replace("?", "");
     }
 
-    return `/videos/${category}/${videoFileName}.mp4`;
+    return getVideoUrl(category, videoFileName);
   };
 
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-    }
-  };
+  const srcUrl = getVideoSrc();
 
-  const reset = () => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.pause();
-      setIsPlaying(false);
-      setProgress(0);
-    }
-  };
+  // Fallback map for local MP4 debugging
+  if (srcUrl.endsWith(".mp4")) {
+    return (
+      <video
+        src={srcUrl}
+        loop
+        autoPlay
+        muted
+        className="w-full h-full object-cover rounded-xl"
+        playsInline
+      />
+    );
+  }
 
-  // Handle video events and autoplay
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleTimeUpdate = () => {
-      const progress = (video.currentTime / video.duration) * 100;
-      setProgress(progress || 0);
-    };
-
-    video.addEventListener("play", handlePlay);
-    video.addEventListener("pause", handlePause);
-    video.addEventListener("timeupdate", handleTimeUpdate);
-
-    // Auto-play video when loaded
-    video.play().catch(() => {
-      // Ignore autoplay errors (some browsers block it)
-    });
-
-    return () => {
-      video.removeEventListener("play", handlePlay);
-      video.removeEventListener("pause", handlePause);
-      video.removeEventListener("timeupdate", handleTimeUpdate);
-    };
-  }, [phrase, category, variant, byeStep, eatStep, isLive]);
-
+  // Production HLS implementation
   return (
-    <video
-      ref={videoRef}
-      src={getVideoUrl()}
-      loop
-      muted
-      className="w-full h-full object-cover"
-      playsInline
+    <HLSVideoPlayer 
+      src={srcUrl}
+      lazyLoad={true}
+      loop={true}
+      muted={true}
+      showControls={false}
+      className="w-full h-full rounded-xl"
     />
   );
 }

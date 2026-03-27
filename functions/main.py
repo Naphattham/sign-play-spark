@@ -112,8 +112,8 @@ def get_holistic():
             model_complexity=1,
             smooth_landmarks=True,
             refine_face_landmarks=True,
-            min_detection_confidence=0.3,
-            min_tracking_confidence=0.3
+            min_detection_confidence=0.5,
+            min_tracking_confidence=0.5
         )
         print("✅ MediaPipe ready!")
     return _holistic_instance

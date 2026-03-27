@@ -710,6 +710,8 @@ const Index = () => {
     if (!user) return;
 
     try {
+      // 🚨 ปิดการเช็คและตัดคะแนนชั่วคราว (คอมเมนต์ไว้)
+      /*
       const userRef = dbRef(database, `users/${user.uid}`);
       const snapshot = await get(userRef);
       if (snapshot.exists()) {
@@ -717,19 +719,24 @@ const Index = () => {
 
         if (currentPoints >= 25) {
           await update(userRef, { points: currentPoints - 25 });
+      */
 
+          // ปล่อยให้ทำงานส่วนนี้ทันที (ปลดล็อก Hint ฟรี)
           const hintKey = getCurrentHintKey();
+          
           // Save unlocked hint to Firebase so it persists across refreshes
           await saveUnlockedHint(user.uid, hintKey);
 
           toast({
             title: "Success",
-            description: "ใช้ Hint สำเร็จ!",
+            description: "ใช้ Hint สำเร็จ! (ใช้ฟรีชั่วคราว)", 
             variant: "success",
           });
           setHintUnlocked(prev => new Set([...prev, hintKey]));
           setShowHintModal(false);
           setShowHintContent(true); // show hintbox right after confirming
+
+      /*
         } else {
           toast({
             title: "Error",
@@ -739,6 +746,7 @@ const Index = () => {
           setShowHintModal(false);
         }
       }
+      */
     } catch (error) {
       console.error("Error using hint:", error);
       toast({

@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { auth } from "@/lib/firebase";
 import { addUserPoints } from "@/lib/auth";
+import { getVideoUrl } from "@/lib/categories";
+import { HLSVideoPlayer } from "@/components/HLSVideoPlayer";
 
 // Small helper to shuffle arrays
 function shuffleArray<T>(array: T[]): T[] {
@@ -15,32 +17,30 @@ function shuffleArray<T>(array: T[]): T[] {
   return newArr;
 }
 
-// Same question bank as MatchAndSign — but here the VIDEO is the question
-// and the TERM (Thai word) is what the player must identify.
 const ALL_QUESTIONS = [
-  { term: "สวัสดีผู้ใหญ่",  translation: "Hello (Adult)",   videoUrl: "/videos/general/สวัสดี (ผู้ใหญ่).mp4" },
-  { term: "สวัสดีเพื่อน",   translation: "Hello (Friend)",  videoUrl: "/videos/general/สวัสดี (เพื่อน).mp4" },
-  { term: "สบายดีไหม",      translation: "How are you?",    videoUrl: "/videos/general/สบายดีไหม.mp4" },
-  { term: "สบายดี",          translation: "I'm fine",        videoUrl: "/videos/general/สบายดี.mp4" },
-  { term: "ไม่สบายใจ",      translation: "Unhappy",          videoUrl: "/videos/general/ไม่สบายใจ.mp4" },
-  { term: "กินข้าวหรือยัง", translation: "Have you eaten?", videoUrl: "/videos/general/กินข้าวแล้วหรือยัง.mp4" },
-  { term: "กินแล้ว",         translation: "Already ate",     videoUrl: "/videos/general/กินแล้ว.mp4" },
-  { term: "ยังไม่ได้กิน",   translation: "Not yet eaten",   videoUrl: "/videos/general/ยังไม่ได้กิน.mp4" },
-  { term: "ลาก่อน",          translation: "Goodbye",          videoUrl: "/videos/general/ลาก่อน.mp4" },
-  { term: "กลัว",             translation: "Scared",           videoUrl: "/videos/emotions/กลัว.mp4" },
-  { term: "รัก",              translation: "Love",             videoUrl: "/videos/emotions/รัก.mp4" },
-  { term: "เหนื่อย",         translation: "Tired",            videoUrl: "/videos/emotions/เหนื่อย.mp4" },
-  { term: "โกรธ",             translation: "Angry",            videoUrl: "/videos/emotions/โกรธ.mp4" },
-  { term: "ทำไม",             translation: "Why?",             videoUrl: "/videos/qa/ทำไม.mp4" },
-  { term: "อะไร",             translation: "What?",            videoUrl: "/videos/qa/อะไร.mp4" },
-  { term: "เท่าไหร่",        translation: "How much?",       videoUrl: "/videos/qa/เท่าไหร่.mp4" },
-  { term: "ใช่",              translation: "Yes",              videoUrl: "/videos/qa/ใช่.mp4" },
-  { term: "ไม่",              translation: "No",               videoUrl: "/videos/qa/ไม่.mp4" },
-  { term: "ปวดท้อง",         translation: "Stomachache",      videoUrl: "/videos/illness/ปวดท้อง.mp4" },
-  { term: "ปวดหัว",           translation: "Headache",         videoUrl: "/videos/illness/ปวดหัว.mp4" },
-  { term: "เจ็บคอ",           translation: "Sore throat",      videoUrl: "/videos/illness/เจ็บคอ.mp4" },
-  { term: "เป็นหวัด",        translation: "Cold",             videoUrl: "/videos/illness/เป็นหวัด.mp4" },
-  { term: "เป็นไข้",         translation: "Fever",            videoUrl: "/videos/illness/เป็นไข้.mp4" },
+  { term: "สวัสดีผู้ใหญ่",  translation: "Hello (Adult)",   videoUrl: getVideoUrl("general", "สวัสดี (ผู้ใหญ่)") },
+  { term: "สวัสดีเพื่อน",   translation: "Hello (Friend)",  videoUrl: getVideoUrl("general", "สวัสดี (เพื่อน)") },
+  { term: "สบายดีไหม",      translation: "How are you?",    videoUrl: getVideoUrl("general", "สบายดีไหม") },
+  { term: "สบายดี",          translation: "I'm fine",        videoUrl: getVideoUrl("general", "สบายดี") },
+  { term: "ไม่สบายใจ",      translation: "Unhappy",          videoUrl: getVideoUrl("general", "ไม่สบายใจ") },
+  { term: "กินข้าวหรือยัง", translation: "Have you eaten?", videoUrl: getVideoUrl("general", "กินข้าวแล้วหรือยัง") },
+  { term: "กินแล้ว",         translation: "Already ate",     videoUrl: getVideoUrl("general", "กินแล้ว") },
+  { term: "ยังไม่ได้กิน",   translation: "Not yet eaten",   videoUrl: getVideoUrl("general", "ยังไม่ได้กิน") },
+  { term: "ลาก่อน",          translation: "Goodbye",          videoUrl: getVideoUrl("general", "ลาก่อน") },
+  { term: "กลัว",             translation: "Scared",           videoUrl: getVideoUrl("emotions", "กลัว") },
+  { term: "รัก",              translation: "Love",             videoUrl: getVideoUrl("emotions", "รัก") },
+  { term: "เหนื่อย",         translation: "Tired",            videoUrl: getVideoUrl("emotions", "เหนื่อย") },
+  { term: "โกรธ",             translation: "Angry",            videoUrl: getVideoUrl("emotions", "โกรธ") },
+  { term: "ทำไม",             translation: "Why?",             videoUrl: getVideoUrl("qa", "ทำไม") },
+  { term: "อะไร",             translation: "What?",            videoUrl: getVideoUrl("qa", "อะไร") },
+  { term: "เท่าไหร่",        translation: "How much?",       videoUrl: getVideoUrl("qa", "เท่าไหร่") },
+  { term: "ใช่",              translation: "Yes",              videoUrl: getVideoUrl("qa", "ใช่") },
+  { term: "ไม่",              translation: "No",               videoUrl: getVideoUrl("qa", "ไม่") },
+  { term: "ปวดท้อง",         translation: "Stomachache",      videoUrl: getVideoUrl("illness", "ปวดท้อง") },
+  { term: "ปวดหัว",           translation: "Headache",         videoUrl: getVideoUrl("illness", "ปวดหัว") },
+  { term: "เจ็บคอ",           translation: "Sore throat",      videoUrl: getVideoUrl("illness", "เจ็บคอ") },
+  { term: "เป็นหวัด",        translation: "Cold",             videoUrl: getVideoUrl("illness", "เป็นหวัด") },
+  { term: "เป็นไข้",         translation: "Fever",            videoUrl: getVideoUrl("illness", "เป็นไข้") },
 ];
 
 const ALL_TERMS = ALL_QUESTIONS.map((q) => q.term);
@@ -230,15 +230,14 @@ export default function SignAndMatchPage() {
               ดูภาษามือแล้วเลือกคำที่ถูก
             </div>
 
-            <video
-              key={currentQ.videoUrl}           // force remount when question changes
+            <HLSVideoPlayer
+              key={currentQ.videoUrl}
               src={encodeURI(currentQ.videoUrl)}
-              autoPlay
-              loop
-              muted
-              playsInline
-              // 🚨 แก้ไขสัดส่วนตรงนี้ จาก aspect-video เป็น aspect-square
-              className="w-full aspect-square object-cover" 
+              lazyLoad={false}
+              loop={true}
+              muted={true}
+              showControls={false}
+              className="w-full aspect-square object-cover"
             />
 
             {/* Decorative badge */}

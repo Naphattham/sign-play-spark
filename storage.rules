@@ -10,8 +10,14 @@ service firebase.storage {
                    && request.resource.contentType.matches('image/.*');
     }
     
-    // Allow read access to public videos
+    // Allow read access to public videos (local MP4 references)
     match /videos/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Allow read access to HLS streams (.m3u8 playlists + .ts segments)
+    match /hls/{allPaths=**} {
       allow read: if true;
       allow write: if false;
     }

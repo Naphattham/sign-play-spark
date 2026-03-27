@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Check } from "lucide-react";
-import { categories, getPhrasesByCategory, type Category } from "@/lib/categories";
+import { categories, getPhrasesByCategory, type Category, getVideoUrl } from "@/lib/categories";
 import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "@/lib/auth";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { HLSVideoPlayer } from "@/components/HLSVideoPlayer";
 
 export function CategoryBrowsePage() {
   const navigate = useNavigate();
@@ -93,7 +94,7 @@ export function CategoryBrowsePage() {
     }
   };
 
-  const getVideoUrl = (phrase: string, category: Category) => {
+  const getVideoSrc = (phrase: string, category: Category) => {
     let videoFileName = phrase;
 
     // Handle phrases with multiple options
@@ -118,7 +119,7 @@ export function CategoryBrowsePage() {
       videoFileName = videoFileName.replace("?", "");
     }
 
-    return `/videos/${category}/${videoFileName}.mp4`;
+    return getVideoUrl(category, videoFileName);
   };
 
   const categoryColors: Record<Category, string> = {
@@ -301,12 +302,12 @@ export function CategoryBrowsePage() {
             {/* Video Player */}
             <div className="p-4 flex flex-col items-center justify-center flex-shrink-0">
               <div className="bg-[#222] rounded-2xl overflow-hidden sq-border aspect-square w-full max-w-md">
-                <video
-                  key={getVideoUrl(selectedVideo.phrase, selectedVideo.category)}
-                  src={getVideoUrl(selectedVideo.phrase, selectedVideo.category)}
-                  autoPlay
-                  loop
-                  controls
+                <HLSVideoPlayer
+                  key={getVideoSrc(selectedVideo.phrase, selectedVideo.category)}
+                  src={getVideoSrc(selectedVideo.phrase, selectedVideo.category)}
+                  lazyLoad={false}
+                  loop={true}
+                  showControls={true}
                   className="w-full h-full object-cover"
                 />
               </div>

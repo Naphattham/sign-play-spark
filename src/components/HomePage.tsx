@@ -1,4 +1,5 @@
-import { Category, getPhrasesByCategory, isPhraseCompletedCheck } from "@/lib/categories";
+import { Category, getPhrasesByCategory, isPhraseCompletedCheck, getVideoUrl } from "@/lib/categories";
+import { HLSVideoPlayer } from "@/components/HLSVideoPlayer";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { getAvatarUrl } from "@/lib/avatar";
 import { useState, useEffect } from "react";
@@ -98,7 +99,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
   const nextPhrase = lastPhrase || categoryPhrases.find(p => !isPhraseCompletedCheck(p.id, completedPhrases)) || categoryPhrases[0];
 
   // Build video URL (same logic as VideoCard)
-  const getVideoUrl = () => {
+  const getVideoSrc = () => {
     let videoFileName = nextPhrase.text;
 
     // Handle phrases with multiple options
@@ -123,7 +124,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
       videoFileName = videoFileName.replace("?", "");
     }
 
-    return `/videos/${lastCategory}/${videoFileName}.mp4`;
+    return getVideoUrl(lastCategory, videoFileName);
   };
 
   return (
@@ -176,13 +177,13 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
             </div>
             <div className="brutal-card bg-card p-3 sm:p-4 md:p-6 rounded-xl flex flex-col md:flex-row gap-3 sm:gap-4 md:gap-6 items-center animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: '100ms' }}>
               <div className="w-full md:w-40 lg:w-48 aspect-video md:aspect-square bg-muted rounded-lg border-2 border-foreground overflow-hidden">
-                <video
+                <HLSVideoPlayer
                   className="w-full h-full object-cover"
-                  src={getVideoUrl()}
-                  muted
-                  loop
-                  autoPlay
-                  playsInline
+                  src={getVideoSrc()}
+                  muted={true}
+                  loop={true}
+                  lazyLoad={false}
+                  showControls={false}
                 />
               </div>
               <div className="flex-1 space-y-2 sm:space-y-3 w-full">

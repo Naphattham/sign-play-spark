@@ -352,112 +352,101 @@ export default function SignDefenderPage() {
       <>
         {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
         <main className="min-h-screen bg-background text-foreground relative p-4 md:p-8 flex flex-col items-center">
-        {/* Top-left Back Button */}
-        <div className="absolute top-4 left-4 md:top-8 md:left-8 z-30">
-          <button
-            onClick={handleBackToHome}
-            className="neo-brutalism bg-white dark:bg-slate-800 text-foreground text-sm md:text-base font-black py-2 px-4 rounded-xl transition-all hover:-translate-y-1 uppercase flex items-center justify-center gap-2"
-          >
-            ← Back to Challenge
-          </button>
-        </div>
-
-        <div className="max-w-6xl mx-auto flex flex-col items-center w-full">
-          {/* Centered Title */}
-          <div className="text-center mb-8 mt-12 md:mt-0">
-            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-2">Sign</h1>
-            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none text-primary">Defender</h1>
-            <div className="h-2 bg-foreground w-20 mx-auto mt-4 rounded-full neo-brutalism-sm"></div>
-            <p className="mt-4 font-bold text-base text-muted-foreground">ทำท่ามือให้ตรงกับมอนสเตอร์เพื่อทำลายพวกมัน!</p>
+          {/* Top-left Back Button */}
+          <div className="absolute top-4 left-4 md:top-8 md:left-8 z-30">
+            <button
+              onClick={handleBackToHome}
+              className="neo-brutalism bg-white dark:bg-slate-800 text-foreground text-sm md:text-base font-black py-2 px-4 rounded-xl transition-all hover:-translate-y-1 uppercase flex items-center justify-center gap-2"
+            >
+              ← Back to Challenge
+            </button>
           </div>
 
-          {/* Main Content Area: Side-by-side */}
-          <div className="flex flex-col md:flex-row gap-6 w-full items-stretch justify-center">
-
-            {/* How to Play Card (Left) */}
-            <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-xl p-5 w-full max-w-[400px] flex flex-col text-sm">
-              <h2 className="text-xl font-black uppercase mb-3 border-b-[3px] border-foreground pb-2">How to Play</h2>
-              <ul className="space-y-4 flex-grow flex flex-col justify-center font-bold">
-                <li className="flex items-start">
-                  <span className="neo-brutalism bg-primary text-white font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-xs">01</span>
-                  <p className="pt-1">มอนสเตอร์เคลื่อนเข้าหาศูนย์กลาง</p>
-                </li>
-                <li className="flex items-start">
-                  <span className="neo-brutalism bg-primary text-white font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-xs">02</span>
-                  <p className="pt-1">ทำท่าภาษามือไทยให้ตรงกับคำบนมอนสเตอร์</p>
-                </li>
-                <li className="flex items-start">
-                  <span className="neo-brutalism bg-primary text-white font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-xs">03</span>
-                  <div className="pt-1">
-                    <p>มอนสเตอร์ถึงศูนย์ = เสีย HP · หมด HP =</p>
-                    <p className="font-black">Game Over</p>
-                  </div>
-                </li>
-                <li className="flex items-start pt-4 border-t-[3px] border-foreground">
-                  <span className="neo-brutalism bg-secondary text-foreground font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-sm">
-                    ★
-                  </span>
-                  <p className="pt-1">+10 คะแนนต่อมอนสเตอร์ที่ทำลายได้</p>
-                </li>
-              </ul>
+          <div className="max-w-6xl mx-auto flex flex-col items-center w-full">
+            {/* Centered Title */}
+            <div className="text-center mb-8 mt-12 md:mt-0">
+              <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-2">Sign</h1>
+              <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none text-primary">Defender</h1>
+              <div className="h-2 bg-foreground w-20 mx-auto mt-4 rounded-full neo-brutalism-sm"></div>
+              <p className="mt-4 font-bold text-base text-muted-foreground">ทำท่ามือให้ตรงกับมอนสเตอร์เพื่อทำลายพวกมัน!</p>
             </div>
 
-            {/* Camera & Start Section (Right) */}
-            <div className="w-full max-w-[360px] flex flex-col gap-4">
+            {/* Main Content Area: Side-by-side */}
+            <div className="flex flex-col md:flex-row gap-6 w-full items-stretch justify-center">
 
-              {/* Camera Feed */}
-              <div className="w-full aspect-square neo-brutalism bg-black rounded-xl relative overflow-hidden flex-shrink-0">
-                <div className="absolute top-2 left-2 bg-primary text-white text-[10px] font-black px-2 py-1 rounded-full uppercase flex items-center gap-1 z-10 border-[2px] border-foreground">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                  LIVE
-                </div>
-                {signRecognition.isProcessing && (
-                  <div className="absolute top-2 right-2 bg-secondary text-foreground text-[10px] font-black uppercase px-2 py-1 rounded-full animate-pulse border-[2px] border-foreground z-10">
-                    AI...
-                  </div>
-                )}
-                <Webcam
-                  ref={webcamRef}
-                  audio={false}
-                  mirrored
-                  videoConstraints={{ facingMode: "user" }}
-                  className="w-full h-full object-cover opacity-80"
-                  style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}
-                />
-                <canvas
-                  ref={canvasRef}
-                  className="absolute top-0 left-0 w-full h-full pointer-events-none"
-                  style={{ transform: "scaleX(-1)" }}
-                />
-                <div className="absolute bottom-0 left-0 w-full h-1.5 bg-black/40">
-                  <div
-                    className={`h-full transition-all duration-100 ${isReady ? "bg-green-400" : "bg-secondary"}`}
-                    style={{ width: `${bufferPct}%` }}
-                  />
-                </div>
-                {/* Distance Status Overlay inside Webcam */}
-                {(signRecognition.distanceStatus === "too_close" || signRecognition.distanceStatus === "too_far" || signRecognition.distanceStatus === "no_face") && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10 flex-col p-2 text-center">
-                    <span className="text-2xl mb-1">⚠️</span>
-                    <span className="text-xs font-black text-white uppercase leading-tight">
-                      {signRecognition.distanceStatus === "too_close" ? "ถอยออกหน่อย" :
-                        signRecognition.distanceStatus === "too_far" ? "เข้ามาใกล้หน่อย" : "ไม่พบใบหน้า"}
+              {/* How to Play Card (Left) */}
+              <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-xl p-5 w-full max-w-[400px] flex flex-col text-sm">
+                <h2 className="text-xl font-black uppercase mb-3 border-b-[3px] border-foreground pb-2">How to Play</h2>
+                <ul className="space-y-4 flex-grow flex flex-col justify-center font-bold">
+                  <li className="flex items-start">
+                    <span className="neo-brutalism bg-primary text-white font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-xs">01</span>
+                    <p className="pt-1">มอนสเตอร์เคลื่อนเข้าหาศูนย์กลาง</p>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="neo-brutalism bg-primary text-white font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-xs">02</span>
+                    <p className="pt-1">ทำท่าภาษามือไทยให้ตรงกับคำบนมอนสเตอร์</p>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="neo-brutalism bg-primary text-white font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-xs">03</span>
+                    <div className="pt-1">
+                      <p>มอนสเตอร์ถึงศูนย์ = เสีย HP · หมด HP =</p>
+                      <p className="font-black">Game Over</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start pt-4 border-t-[3px] border-foreground">
+                    <span className="neo-brutalism bg-secondary text-foreground font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-sm">
+                      ★
                     </span>
-                  </div>
-                )}
+                    <p className="pt-1">+10 คะแนนต่อมอนสเตอร์ที่ทำลายได้</p>
+                  </li>
+                </ul>
               </div>
 
-              {/* Start Button */}
-              <button
-                onClick={startGame}
-                className="neo-brutalism bg-primary text-white text-xl font-black py-3 px-6 rounded-xl transition-all hover:-translate-y-1 hover:brightness-110 active:translate-y-1 uppercase w-full"
-              >
-                {isReady ? "START GAME" : `WARMING UP… ${bufferPct}%`}
-              </button>
+              {/* Camera & Start Section (Right) */}
+              <div className="w-full max-w-[360px] flex flex-col gap-4">
+
+                {/* Camera Feed */}
+                <div className="w-full aspect-square neo-brutalism bg-black rounded-xl relative overflow-hidden flex-shrink-0">
+                  <div className="absolute top-2 left-2 bg-primary text-white text-[10px] font-black px-2 py-1 rounded-full uppercase flex items-center gap-1 z-10 border-[2px] border-foreground">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                    LIVE
+                  </div>
+                  <Webcam
+                    ref={webcamRef}
+                    audio={false}
+                    mirrored
+                    videoConstraints={{ facingMode: "user" }}
+                    className="w-full h-full object-cover opacity-80"
+                    style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}
+                  />
+                  <canvas
+                    ref={canvasRef}
+                    className="absolute top-0 left-0 w-full h-full pointer-events-none"
+                    style={{ transform: "scaleX(-1)" }}
+                  />
+                  {/* Distance Status Overlay inside Webcam */}
+                  {(signRecognition.distanceStatus === "too_close" || signRecognition.distanceStatus === "too_far" || signRecognition.distanceStatus === "no_face") && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10 flex-col p-2 text-center">
+                      <span className="text-2xl mb-1">⚠️</span>
+                      <span className="text-xs font-black text-white uppercase leading-tight">
+                        {signRecognition.distanceStatus === "too_close" ? "ถอยออกหน่อย" :
+                          signRecognition.distanceStatus === "too_far" ? "เข้ามาใกล้หน่อย" : "ไม่พบใบหน้า"}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Start Button */}
+                <button
+                  onClick={startGame}
+                  className="neo-brutalism bg-primary text-white text-xl font-black py-3 px-6 rounded-xl transition-all hover:-translate-y-1 hover:brightness-110 active:translate-y-1 uppercase w-full"
+                >
+                  {isReady ? "START GAME" : `WARMING UP… ${bufferPct}%`}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </main>
+        </main>
       </>
     );
   }
@@ -625,14 +614,6 @@ export default function SignDefenderPage() {
                 style={{ transform: "scaleX(-1)" }}
               />
 
-              {/* Buffer bar */}
-              <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/40">
-                <div
-                  className={`h-full transition-all duration-100 ${isReady ? "bg-green-400" : "bg-yellow-400"}`}
-                  style={{ width: `${bufferPct}%` }}
-                />
-              </div>
-
               {/* LIVE badge */}
               <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-red-500 border-[2px] border-black px-2.5 py-1 rounded-full">
                 <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
@@ -640,12 +621,11 @@ export default function SignDefenderPage() {
               </div>
 
               {/* Distance warning overlay */}
-              {(signRecognition.distanceStatus === "too_close" || signRecognition.distanceStatus === "too_far" || signRecognition.distanceStatus === "no_face") && (
+              {(signRecognition.distanceStatus === "too_close" || signRecognition.distanceStatus === "too_far") && (
                 <div className="absolute inset-0 bg-black/65 flex flex-col items-center justify-center z-10 p-2 text-center">
                   <span className="text-2xl">⚠️</span>
                   <span className="text-[11px] font-black text-white uppercase leading-tight mt-1">
-                    {signRecognition.distanceStatus === "too_close" ? "ถอยออกหน่อย" :
-                      signRecognition.distanceStatus === "too_far" ? "เข้ามาใกล้หน่อย" : "ไม่พบใบหน้า"}
+                    {signRecognition.distanceStatus === "too_close" ? "ถอยออกหน่อย" : "เข้ามาใกล้หน่อย"}
                   </span>
                 </div>
               )}
@@ -677,8 +657,8 @@ export default function SignDefenderPage() {
                   background: isReady ? "linear-gradient(90deg, hsl(342 100% 50%), hsl(342 100% 70%))" : "hsl(44 100% 60%)",
                 }}
               />
-              <p className="relative z-10 text-black font-bold text-xs">
-                {!isReady ? `กำลังรวบรวม ${signRecognition.bufferLength}/40 frames…` : "ระบบพร้อมแล้ว! ทำท่ามือได้เลย"}
+              <p className={`relative z-10 text-black font-bold text-xs ${!isReady ? "animate-pulse" : ""}`}>
+                {!isReady ? "⏳ กำลังเตรียมพร้อม..." : "✨ ระบบพร้อมแล้ว! ทำท่ามือได้เลย"}
               </p>
             </div>
           </div>

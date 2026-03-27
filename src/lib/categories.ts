@@ -256,3 +256,69 @@ export const leaderboardData = [
   { rank: 9, username: "MuteButLoud", points: 3200 },
   { rank: 10, username: "NewLearner", points: 1050 },
 ];
+
+/**
+ * Map Thai words / Display names used in the app to the actual English folder names in /hls/ 
+ */
+const VIDEO_FILENAME_MAP: Record<string, string> = {
+  // General & Live fragments
+  "สวัสดี (ผู้ใหญ่)": "hello_adult",
+  "สวัสดี (ผู้ใหญ่)main": "hello_adult_main",
+  "สวัสดี (เพื่อน)": "hello_friend",
+  "สวัสดี (เพื่อน)main": "hello_friend_main",
+  "สบายดีไหม": "how_are_you",
+  "สบายดี": "fine",
+  "ไม่สบายใจ": "unhappy",
+  "กินข้าวแล้วหรือยัง": "Are_you_eaten",
+  "กินข้าวหรือยัง": "Are_you_eaten",
+  "กินแล้ว": "already_eat",
+  "ยังไม่ได้กิน": "not_eat",
+  "ลาก่อน": "goodbye",
+  "กิน": "eat",
+  "แล้ว": "already",
+  "ยัง": "not_yet",
+  "ฉัน": "me",
+  "ไป": "go",
+  "ข้าว": "rice",
+  "หรือยัง": "or_not_yet",
+
+  // Emotions
+  "กลัว": "fear",
+  "รัก": "love",
+  "เหนื่อย": "tired",
+  "โกรธ": "angry",
+
+  // Questions & Answers
+  "ทำไม": "why",
+  "อะไร": "what",
+  "เท่าไหร่": "how_much",
+  "ใช่": "yes",
+  "ไม่": "no",
+
+  // Illness
+  "ปวดท้อง": "stomachache",
+  "ปวดหัว": "headache",
+  "เจ็บคอ": "sore_throat",
+  "เป็นหวัด": "cold",
+  "เป็นไข้": "fever",
+};
+
+/**
+ * Helper function to get the HLS (.m3u8) video URL
+ * @param category - Category (e.g., "illness", "general")
+ * @param fileName - Name of the video file (Thai display name, mapped to English)
+ * @returns HLS video path (.m3u8)
+ */
+export const getVideoUrl = (category: Category | string, fileName: string): string => {
+  const baseUrl = import.meta.env.VITE_VIDEO_BASE_URL || "/hls";
+  // remove any trailing slashes from baseUrl just in case
+  const cleanBaseUrl = baseUrl.replace(/\/+$/, "");
+  
+  // Map internal display names to corresponding folders
+  const mappedFileName = VIDEO_FILENAME_MAP[fileName] || fileName;
+  
+  // URL Encode the mappedFileName to support any characters if the mapping missed
+  const encodedFileName = encodeURIComponent(mappedFileName);
+  
+  return `${cleanBaseUrl}/${category}/${encodedFileName}/index.m3u8`;
+};
