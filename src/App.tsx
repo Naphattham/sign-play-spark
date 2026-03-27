@@ -9,6 +9,7 @@ import { CategoryBrowsePage } from "@/components/CategoryBrowsePage";
 import { GameSetupPage } from "@/components/GameSetupPage";
 import MatchAndSignPage from "@/pages/MatchAndSignPage";
 import SignAndMatchPage from "@/pages/SignAndMatchPage";
+import SignDefenderPage from "@/pages/SignDefenderPage";
 import { AudioProvider, useAudio } from "@/lib/audioContext";
 import { Volume2, VolumeX } from "lucide-react";
 
@@ -77,6 +78,7 @@ const App = () => (
             {/* <Route path="/game-setup" element={<GameSetupPage />} /> */}
             <Route path="/match-and-sign" element={<MatchAndSignPage />} />
             <Route path="/sign-and-match" element={<SignAndMatchPage />} />
+            <Route path="/sign-defender" element={<SignDefenderPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

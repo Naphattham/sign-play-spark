@@ -32,9 +32,9 @@ const gameCards = [
     id: 4,
     icon: "timer",
     color: "bg-[#bd93f9]",
-    title: "Speed Signer",
+    title: "Sign Defender",
     description: "Timed challenge for experts. How many signs can you get in 60s?",
-    available: false,
+    available: true,
     delay: "300ms",
   },
 ];
@@ -105,6 +105,7 @@ export function GameSetupPage() {
                     if (!card.available) return;
                     if (card.id === 1) navigate("/match-and-sign");
                     else if (card.id === 2) navigate("/sign-and-match");
+                    else if (card.id === 4) navigate("/sign-defender");
                   }}
                   className={`
                     neo-brutalism py-2 text-sm font-black uppercase

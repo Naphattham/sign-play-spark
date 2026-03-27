@@ -14,8 +14,7 @@ import { QuestView } from "@/components/QuestView";
 import { GameSetupPage } from "@/components/GameSetupPage";
 import { Category, Phrase, getPhrasesByCategory, categories, isPhraseCompletedCheck, checkPhraseMatch } from "@/lib/categories";
 import { LogOut, X, Camera, Home, User, ArrowLeft, Check } from "lucide-react";
-import { useDistanceDetection, DistanceStatus } from "@/hooks/useDistanceDetection";
-import { useMediaPipeHolistic } from "@/hooks/useMediaPipeHolistic";
+import { useSignAndDistance, DistanceStatus } from "@/hooks/useSignAndDistance";
 import { auth, database } from "@/lib/firebase";
 import { ref as dbRef, get, update } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
@@ -197,7 +196,7 @@ const Index = () => {
     rice: "แบมือและนำนิ้วโป้งสะกิดกับนิ้วก้อย\nยื่นมือไปข้างหน้า แล้วใช้นิ้วโป้งดีดนิ้วน้อย",
     sore_throat: "นำนิ้วโป้งและนิ้วชี้ลง รูดจากต้นคอยันปลายคอ\nแสดงสีหน้าว่าเจ็บ",
     stomachache: "ขยำมือบริเวณหน้าท้องพร้อมแสดงสีหน้าว่าเจ็บ\nนำมือที่ขยำไปไว้บริเวณหน้าท้อง แสดงสีหน้าว่าเจ็บ",
-    tried: "นำมือทาบหน้าอกและหักแขนเข้าหาตัว\nปลายนิ้วทั้งหมดวางที่หน้าอก ข้อศอกอยู่บริเวณหน้าท้อง",
+    tired: "นำมือทาบหน้าอกและหักแขนเข้าหาตัว\nปลายนิ้วทั้งหมดวางที่หน้าอก ข้อศอกอยู่บริเวณหน้าท้อง",
     unhappy: "ทำนิ้วชิดกันห้านิ้ว ลูบจากช่วงท้องขึ้นมาจนถึงหัวไหล่อย่างช้าๆ\nสะบัดออก อย่าลืมทำหน้าย่นเพื่อแสดงความรู้สึก",
     what: "นำนิ้วชี้ออกมาข้างหน้า ให้มืออยู่ขนานกับหัวไหล่\nส่ายนิ้วชี้ โดยที่มืออยู่นิ่ง",
     why: "ทำท่ามือตาม Tutorial แล้วแตะหน้าผาก\nขยับมือมาไว้บริเวณด้านหน้าอย่างช้าๆ",
@@ -215,13 +214,7 @@ const Index = () => {
   // 🚨 1. ปรับลดเวลาที่บังคับสแกนจาก 3 วิ เหลือ 1.5 วินาที
   const MIN_SCANNING_DURATION = 1500;
 
-  // Real distance detection using MediaPipe Face Detection
-  const distanceStatus = useDistanceDetection({
-    enabled: isDetecting,
-    videoElement: webcamVideo,
-    // 🚨 2. ปรับให้ไม่ต้องถอยไกลเกินไป (ลดค่าลงจาก 0.45)
-    tooCloseThreshold: 0.40,
-  });
+
 
   const byeTargetClass = activePhrase?.id === "g2" ? (byeStep === 1 ? "bye_me" : "bye_go") : undefined;
   const eatTargetClass = activePhrase?.id === "g3" ? (eatStep === 1 ? "rice" : eatStep === 2 ? "eat" : "yet") : undefined;
@@ -291,14 +284,15 @@ const Index = () => {
   const isFirstPhrase = currentPhraseIndex <= 0;
   const isLastPhrase = currentPhraseIndex >= currentCategoryPhrases.length - 1;
 
-  const signRecognition = useMediaPipeHolistic({
+  const signRecognition = useSignAndDistance({
     videoElement: webcamVideo,
     canvasElement: webcamCanvas,
     enabled: isLive && gameOpen,
     targetPhrase: effectivePhrase,
+    tooCloseThreshold: 0.15,
+    distanceThreshold: 0.05,
     variant: (activePhrase?.id === "g1" || activePhrase?.id === "g4" || activePhrase?.id === "g6") ? selectedVariant : undefined,
     onPhraseMatch: (prediction, confidence) => {
-
       // Track best confidence
       setBestConfidence(prev => Math.max(prev, confidence));
       if (activePhrase?.id === "g2") {
@@ -334,13 +328,15 @@ const Index = () => {
       }
     },
     onPrediction: (prediction) => {
-
       // Update best confidence if it matches target
       if (signRecognition.isMatched) {
         setBestConfidence(prev => Math.max(prev, prediction.confidence));
       }
     },
   });
+
+  // Proxy the distanceStatus state for the original Index logic
+  const distanceStatus = signRecognition.distanceStatus;
 
   // 🚨 ตรวจจับการเปลี่ยนแปลงสิทธิ์กล้อง (เช่น ผู้ใช้กด Reset หรือ Block บน Browser ระหว่างใช้งาน)
   useEffect(() => {
