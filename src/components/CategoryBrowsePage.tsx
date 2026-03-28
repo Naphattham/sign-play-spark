@@ -4,7 +4,6 @@ import { X, Check } from "lucide-react";
 import { categories, getPhrasesByCategory, type Category, getVideoUrl } from "@/lib/categories";
 import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "@/lib/auth";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import { HLSVideoPlayer } from "@/components/HLSVideoPlayer";
 
 export function CategoryBrowsePage() {
   const navigate = useNavigate();
@@ -236,6 +235,11 @@ export function CategoryBrowsePage() {
                     {categoryPhrases.map((phrase) => (
                       <button
                         key={phrase.id}
+                        onMouseEnter={() => {
+                          // Prefetch m3u8 playlist on hover so video is ready (stand by) when clicked
+                          const url = getVideoSrc(phrase.text, category.id);
+                          fetch(url).catch(() => { });
+                        }}
                         onClick={() => setSelectedVideo({ phrase: phrase.text, category: category.id })}
                         className="bg-sq-cream p-4 rounded-xl sq-border sq-button-hover font-bold text-left hover:bg-sq-yellow/50 transition-all duration-300 ease-in-out"
                       >
@@ -302,12 +306,10 @@ export function CategoryBrowsePage() {
             {/* Video Player */}
             <div className="p-4 flex flex-col items-center justify-center flex-shrink-0">
               <div className="bg-[#222] rounded-2xl overflow-hidden sq-border aspect-square w-full max-w-md">
-                <HLSVideoPlayer
+                <img
                   key={getVideoSrc(selectedVideo.phrase, selectedVideo.category)}
                   src={getVideoSrc(selectedVideo.phrase, selectedVideo.category)}
-                  lazyLoad={false}
-                  loop={true}
-                  showControls={true}
+                  loading="eager"
                   className="w-full h-full object-cover"
                 />
               </div>

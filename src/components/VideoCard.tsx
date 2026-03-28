@@ -1,6 +1,5 @@
 import type { Category } from "@/lib/categories";
 import { getVideoUrl } from "@/lib/categories";
-import { HLSVideoPlayer } from "./HLSVideoPlayer";
 
 interface VideoCardProps {
   phrase: string;
@@ -90,29 +89,11 @@ export function VideoCard({ phrase, category, variant, byeStep, eatStep, isLive 
 
   const srcUrl = getVideoSrc();
 
-  // Fallback map for local MP4 debugging
-  if (srcUrl.endsWith(".mp4")) {
-    return (
-      <video
-        src={srcUrl}
-        loop
-        autoPlay
-        muted
-        className="w-full h-full object-cover rounded-xl"
-        playsInline
-      />
-    );
-  }
-
-  // Production HLS implementation
   return (
-    <HLSVideoPlayer 
+    <img
       src={srcUrl}
-      lazyLoad={true}
-      loop={true}
-      muted={true}
-      showControls={false}
-      className="w-full h-full rounded-xl"
+      loading="eager"
+      className="w-full h-full object-cover rounded-xl"
     />
   );
 }

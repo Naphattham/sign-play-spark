@@ -26,7 +26,6 @@ function getOrCreateHolistic(): Promise<any> {
       return;
     }
 
-    console.log('[Holistic Singleton] 🚀 Creating Holistic instance (once per session)...');
     const holistic = new HolisticConstructor({
       locateFile: (file: string) =>
         `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`,
@@ -48,7 +47,6 @@ function getOrCreateHolistic(): Promise<any> {
     });
 
     _holisticInstance = holistic;
-    console.log('[Holistic Singleton] ✅ Holistic instance ready.');
     resolve(holistic);
   });
 
@@ -208,12 +206,9 @@ export function useSignAndDistance({
       isPredictingRef.current = true;
       setState((prev) => ({ ...prev, isProcessing: true }));
 
-      console.log("🚀 [API] กำลังส่งข้อมูล 40 frames ไปให้ Backend...");
-
       const prediction = await predictSign(bufferToPredict);
 
       if (prediction.success) {
-        console.log("✅ [API] ทายสำเร็จ ได้คำว่า:", prediction.prediction, "ความมั่นใจ:", prediction.confidence);
 
         const isMatched = targetPhrase && prediction.confidence >= 0.5 && checkPhraseMatch(targetPhrase, prediction.prediction, variant);
 
@@ -399,7 +394,6 @@ export function useSignAndDistance({
     keypointsBufferRef.current = [];
     frameCountRef.current = 0;
     setState((prev) => ({ ...prev, bufferLength: 0 }));
-    console.log('[useSignAndDistance] Buffer cleared.');
   }, []);
 
   return { ...state, clearBuffer };

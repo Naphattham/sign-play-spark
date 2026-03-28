@@ -286,40 +286,41 @@ const Index = () => {
     const base = "/videos/Tips_video/";
     if (activePhrase.id === "g1") {
       const key = selectedVariant === "adult" ? "hello_adult" : "hello_friend";
-      return [{ url: `${base}${key}-tip.mp4`, label: selectedVariant === "adult" ? "สวัสดีผู้ใหญ่" : "สวัสดีเพื่อน", text: phraseHintMap[key] || "" }];
+      return [{ url: `${base}${key}-tip.webp`, label: selectedVariant === "adult" ? "สวัสดีผู้ใหญ่" : "สวัสดีเพื่อน", text: phraseHintMap[key] || "" }];
     }
     if (activePhrase.id === "g2") {
       const stepKey = byeStep === 1 ? "bye_me" : "bye_go";
       const stepLabel = byeStep === 1 ? "ฉัน" : "ไป";
-      return [{ url: `${base}${stepKey}-tip.mp4`, label: stepLabel, text: phraseHintMap[stepKey] || "" }];
+      return [{ url: `${base}${stepKey}-tip.webp`, label: stepLabel, text: phraseHintMap[stepKey] || "" }];
     }
     if (activePhrase.id === "g3") {
       const stepKey = eatStep === 1 ? "rice" : eatStep === 2 ? "eat" : "yet";
       const stepLabel = eatStep === 1 ? "ข้าว" : "กิน";
       const stepLabelFinal = eatStep === 3 ? "หรือยัง?" : stepLabel;
-      return [{ url: `${base}${stepKey}-tip.mp4`, label: stepLabelFinal, text: phraseHintMap[stepKey] || "" }];
+      return [{ url: `${base}${stepKey}-tip.webp`, label: stepLabelFinal, text: phraseHintMap[stepKey] || "" }];
     }
     if (activePhrase.id === "g4") {
       if (selectedVariant === "adult") {
         const stepKey = eatStep === 1 ? "eat" : "already";
         const stepLabel = eatStep === 1 ? "กิน" : "แล้ว";
-        return [{ url: `${base}${stepKey}-tip.mp4`, label: stepLabel, text: phraseHintMap[stepKey] || "" }];
+        return [{ url: `${base}${stepKey}-tip.webp`, label: stepLabel, text: phraseHintMap[stepKey] || "" }];
       } else {
         const stepKey = eatStep === 1 ? "eat" : "yet";
         const stepLabel = eatStep === 1 ? "กิน" : "ยัง";
-        return [{ url: `${base}${stepKey}-tip.mp4`, label: stepLabel, text: phraseHintMap[stepKey] || "" }];
+        return [{ url: `${base}${stepKey}-tip.webp`, label: stepLabel, text: phraseHintMap[stepKey] || "" }];
       }
     }
-    if (activePhrase.id === "g5") return [{ url: `${base}how_are_you-tip.mp4`, label: "สบายดีไหม?", text: phraseHintMap["how_are_you"] || "" }];
+    if (activePhrase.id === "g5") return [{ url: `${base}how_are_you-tip.webp`, label: "สบายดีไหม?", text: phraseHintMap["how_are_you"] || "" }];
     if (activePhrase.id === "g6") {
       const key = selectedVariant === "adult" ? "fine" : "unhappy";
-      return [{ url: `${base}${key}-tip.mp4`, label: selectedVariant === "adult" ? "สบายดี" : "ไม่สบายใจ", text: phraseHintMap[key] || "" }];
+      return [{ url: `${base}${key}-tip.webp`, label: selectedVariant === "adult" ? "สบายดี" : "ไม่สบายใจ", text: phraseHintMap[key] || "" }];
     }
     // Other phrases — map from modelClass
     const mc = effectivePhrase?.modelClass;
-    if (mc) return [{ url: `${base}${mc}-tip.mp4`, label: activePhrase.text, text: phraseHintMap[mc] || "" }];
+    if (mc) return [{ url: `${base}${mc}-tip.webp`, label: activePhrase.text, text: phraseHintMap[mc] || "" }];
     return [];
   };
+
 
   const currentCategoryPhrases = getPhrasesByCategory(category);
   const currentPhraseIndex = currentCategoryPhrases.findIndex(p => p.id === activePhrase?.id);

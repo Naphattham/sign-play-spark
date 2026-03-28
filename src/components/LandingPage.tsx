@@ -5,7 +5,7 @@ import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "@/lib/auth";
 import { database } from "@/lib/firebase";
 import { ref as dbRef, get } from "firebase/database";
 import { getVideoUrl } from "@/lib/categories";
-import { HLSVideoPlayer } from "@/components/HLSVideoPlayer";
+
 import generalImg from "@/asset/image/general.webp";
 
 interface LandingPageProps {
@@ -287,13 +287,10 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
               {/* Camera Feed / Video Display */}
               <div className="bg-[#222] rounded-2xl p-2 aspect-square flex flex-col items-center justify-center border-3 border-sq-black overflow-hidden video-container">
                 <div className="w-full h-full relative">
-                  <HLSVideoPlayer
+                  <img
                     key={selectedVideo}
                     src={selectedVideo}
-                    lazyLoad={false}
-                    loop={true}
-                    muted={true}
-                    showControls={false}
+                    loading="eager"
                     className="w-full h-full object-cover rounded-xl video-fade-in absolute inset-0"
                   />
                 </div>

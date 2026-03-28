@@ -32,7 +32,6 @@ async function walk(dir) {
 }
 
 async function main() {
-  console.log(`🔍  Scanning: ${ROOT}\n`);
 
   const allFiles = await walk(ROOT);
   const pngFiles = allFiles.filter(
@@ -40,11 +39,9 @@ async function main() {
   );
 
   if (pngFiles.length === 0) {
-    console.log("✅  No .png files found.");
     return;
   }
 
-  console.log(`📦  Found ${pngFiles.length} PNG file(s) to convert:\n`);
 
   let converted = 0;
   let skipped = 0;
@@ -68,28 +65,12 @@ async function main() {
       ).toFixed(1);
       const sign = savings >= 0 ? "-" : "+";
 
-      console.log(
-        `  ✅  ${name}  →  ${basename(dest)}` +
-          `  (${(srcStat.size / 1024).toFixed(1)} KB → ${(destStat.size / 1024).toFixed(1)} KB, ${sign}${Math.abs(savings)}%)`
-      );
       converted++;
     } catch (err) {
       console.error(`  ❌  ${name}  →  FAILED: ${err.message}`);
       failed++;
     }
   }
-
-  console.log(`
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Converted : ${converted}
-  Skipped   : ${skipped}
-  Failed    : ${failed}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🎉  Done! WebP files sit next to the originals.
-    When you're happy, delete the .png files with:
-      find src/asset/image -name "*.png" -delete
-`);
 }
 
 main().catch((e) => {

@@ -24,11 +24,11 @@ export const categories: { id: Category; label: string; icon: string; color: str
 
 export const phrases: Phrase[] = [
   // General (บทสนทนาทั่วไป)
-  { 
-    id: "g1", 
-    text: "สวัสดี (ผู้ใหญ่ | เพื่อน)", 
-    category: "general", 
-    emoji: "👋", 
+  {
+    id: "g1",
+    text: "สวัสดี (ผู้ใหญ่ | เพื่อน)",
+    category: "general",
+    emoji: "👋",
     english: "Hello",
     modelClasses: ["hello_adult", "hello_friend"],
     variantModelMapping: {
@@ -36,43 +36,43 @@ export const phrases: Phrase[] = [
       friend: "hello_friend"
     }
   },
-  { 
-    id: "g2", 
-    text: "ลาก่อน", 
-    category: "general", 
-    emoji: "👋", 
+  {
+    id: "g2",
+    text: "ลาก่อน",
+    category: "general",
+    emoji: "👋",
     english: "Goodbye",
     modelClasses: ["bye_go", "bye_me"]
   },
-  { 
-    id: "g3", 
-    text: "กินข้าวหรือยัง?", 
-    category: "general", 
-    emoji: "🍚", 
+  {
+    id: "g3",
+    text: "กินข้าวหรือยัง?",
+    category: "general",
+    emoji: "🍚",
     english: "Have you eaten?",
     modelClasses: ["rice", "eat", "yet"]
   },
-  { 
-    id: "g4", 
-    text: "กินแล้ว | ยังไม่ได้กิน", 
-    category: "general", 
-    emoji: "✅", 
+  {
+    id: "g4",
+    text: "กินแล้ว | ยังไม่ได้กิน",
+    category: "general",
+    emoji: "✅",
     english: "Already ate | Not yet",
     modelClasses: ["already", "yet", "eat"]
   },
-  { 
-    id: "g5", 
-    text: "สบายดีไหม?", 
-    category: "general", 
-    emoji: "😊", 
+  {
+    id: "g5",
+    text: "สบายดีไหม?",
+    category: "general",
+    emoji: "😊",
     english: "How are you?",
     modelClass: "how_are_you"
   },
-  { 
-    id: "g6", 
-    text: "สบายดี | ไม่สบายใจ", 
-    category: "general", 
-    emoji: "👍", 
+  {
+    id: "g6",
+    text: "สบายดี | ไม่สบายใจ",
+    category: "general",
+    emoji: "👍",
     english: "I'm fine | Unhappy",
     modelClasses: ["fine", "unhappy"],
     variantModelMapping: {
@@ -80,122 +80,122 @@ export const phrases: Phrase[] = [
       friend: "unhappy"
     }
   },
-  
+
   // Emotions (อารมณ์)
-  { 
-    id: "e1", 
-    text: "โกรธ", 
-    category: "emotions", 
-    emoji: "😡", 
+  {
+    id: "e1",
+    text: "โกรธ",
+    category: "emotions",
+    emoji: "😡",
     english: "Angry",
     modelClass: "angry"
   },
-  { 
-    id: "e2", 
-    text: "กลัว", 
-    category: "emotions", 
-    emoji: "😨", 
+  {
+    id: "e2",
+    text: "กลัว",
+    category: "emotions",
+    emoji: "😨",
     english: "Scared",
     modelClass: "fear"
   },
-  { 
-    id: "e3", 
-    text: "รัก", 
-    category: "emotions", 
-    emoji: "❤️", 
+  {
+    id: "e3",
+    text: "รัก",
+    category: "emotions",
+    emoji: "❤️",
     english: "Love",
     modelClass: "love"
   },
 
-  { 
-    id: "e5", 
-    text: "เหนื่อย", 
-    category: "emotions", 
-    emoji: "😩", 
+  {
+    id: "e5",
+    text: "เหนื่อย",
+    category: "emotions",
+    emoji: "😩",
     english: "Tired",
     modelClass: "tired"
   },
-  
+
   // Q&A (คำถาม-คำตอบ)
-  { 
-    id: "q1", 
-    text: "อะไร?", 
-    category: "qa", 
-    emoji: "❓", 
+  {
+    id: "q1",
+    text: "อะไร?",
+    category: "qa",
+    emoji: "❓",
     english: "What?",
     modelClass: "what"
   },
-  { 
-    id: "q2", 
-    text: "ทำไม?", 
-    category: "qa", 
-    emoji: "🤔", 
+  {
+    id: "q2",
+    text: "ทำไม?",
+    category: "qa",
+    emoji: "🤔",
     english: "Why?",
     modelClass: "why"
   },
-  { 
-    id: "q3", 
-    text: "เท่าไหร่?", 
-    category: "qa", 
-    emoji: "💰", 
+  {
+    id: "q3",
+    text: "เท่าไหร่?",
+    category: "qa",
+    emoji: "💰",
     english: "How much?",
     modelClass: "how_much"
   },
-  { 
-    id: "q4", 
-    text: "ใช่", 
-    category: "qa", 
-    emoji: "✅", 
+  {
+    id: "q4",
+    text: "ใช่",
+    category: "qa",
+    emoji: "✅",
     english: "Yes",
     modelClass: "yes"
   },
-  { 
-    id: "q5", 
-    text: "ไม่", 
-    category: "qa", 
-    emoji: "❌", 
+  {
+    id: "q5",
+    text: "ไม่",
+    category: "qa",
+    emoji: "❌",
     english: "No",
     modelClass: "no"
   },
 
   // Illness (อาการเจ็บป่วย)
-  { 
-    id: "i1", 
-    text: "เป็นหวัด", 
-    category: "illness", 
-    emoji: "🤧", 
+  {
+    id: "i1",
+    text: "เป็นหวัด",
+    category: "illness",
+    emoji: "🤧",
     english: "Cold",
     modelClass: "cold"
   },
-  { 
-    id: "i2", 
-    text: "เจ็บคอ", 
-    category: "illness", 
-    emoji: "😷", 
+  {
+    id: "i2",
+    text: "เจ็บคอ",
+    category: "illness",
+    emoji: "😷",
     english: "Sore throat",
     modelClass: "sore_throat"
   },
-  { 
-    id: "i3", 
-    text: "ปวดท้อง", 
-    category: "illness", 
-    emoji: "🤰", 
+  {
+    id: "i3",
+    text: "ปวดท้อง",
+    category: "illness",
+    emoji: "🤰",
     english: "Stomachache",
     modelClass: "stomachache"
   },
-  { 
-    id: "i4", 
-    text: "ปวดหัว", 
-    category: "illness", 
-    emoji: "🤕", 
+  {
+    id: "i4",
+    text: "ปวดหัว",
+    category: "illness",
+    emoji: "🤕",
     english: "Headache",
     modelClass: "headache"
   },
-  { 
-    id: "i5", 
-    text: "เป็นไข้", 
-    category: "illness", 
-    emoji: "🌡️", 
+  {
+    id: "i5",
+    text: "เป็นไข้",
+    category: "illness",
+    emoji: "🌡️",
     english: "Fever",
     modelClass: "fever"
   },
@@ -215,8 +215,8 @@ export const getPhraseByModelClass = (modelClass: string): Phrase | undefined =>
 
 // Helper function to check if a model prediction matches a phrase
 export const checkPhraseMatch = (
-  phrase: Phrase, 
-  modelClass: string, 
+  phrase: Phrase,
+  modelClass: string,
   variant?: "adult" | "friend"
 ): boolean => {
   // If phrase has variant mapping and a variant is specified, use it
@@ -228,7 +228,7 @@ export const checkPhraseMatch = (
       return variantClasses.includes(modelClass);
     }
   }
-  
+
   // Fallback to original behavior
   if (phrase.modelClass === modelClass) return true;
   if (phrase.modelClasses?.includes(modelClass)) return true;
@@ -258,67 +258,82 @@ export const leaderboardData = [
 ];
 
 /**
- * Map Thai words / Display names used in the app to the actual English folder names in /hls/ 
+ * Direct map from logical video keys to /videos/*.webp public paths.
+ * Each key is the Thai display name or internal English key used in the app.
  */
-const VIDEO_FILENAME_MAP: Record<string, string> = {
-  // General & Live fragments
-  "สวัสดี (ผู้ใหญ่)": "hello_adult",
-  "สวัสดี (ผู้ใหญ่)main": "hello_adult_main",
-  "สวัสดี (เพื่อน)": "hello_friend",
-  "สวัสดี (เพื่อน)main": "hello_friend_main",
-  "สบายดีไหม": "how_are_you",
-  "สบายดี": "fine",
-  "ไม่สบายใจ": "unhappy",
-  "กินข้าวแล้วหรือยัง": "Are_you_eaten",
-  "กินข้าวหรือยัง": "Are_you_eaten",
-  "กินแล้ว": "already_eat",
-  "ยังไม่ได้กิน": "not_eat",
-  "ลาก่อน": "goodbye",
-  "กิน": "eat",
-  "แล้ว": "already",
-  "ยัง": "not_yet",
-  "ฉัน": "me",
-  "ไป": "go",
-  "ข้าว": "rice",
-  "หรือยัง": "or_not_yet",
-
+export const VIDEO_URL_MAP: Record<string, string> = {
+  // General — main clips
+  "สวัสดี (ผู้ใหญ่)":      "/videos/general/hello_adult.webp",
+  "สวัสดี (ผู้ใหญ่)main":  "/videos/general/hello_adult_main.webp",
+  "สวัสดี (เพื่อน)":       "/videos/general/hello_friend.webp",
+  "สวัสดี (เพื่อน)main":   "/videos/general/hello_friend_main.webp",
+  "สบายดีไหม":             "/videos/general/how_are_you.webp",
+  "สบายดี":                "/videos/general/fine.webp",
+  "ไม่สบายใจ":             "/videos/general/unhappy.webp",
+  "กินข้าวแล้วหรือยัง":   "/videos/general/Are_you_eaten.webp",
+  "กินข้าวหรือยัง":        "/videos/general/Are_you_eaten.webp",
+  "กินแล้ว":               "/videos/general/already_eat.webp",
+  "ยังไม่ได้กิน":          "/videos/general/not_eat.webp",
+  "ลาก่อน":                "/videos/general/goodbye.webp",
+  // General — live step clips
+  "กิน":                   "/videos/general/eat.webp",
+  "แล้ว":                  "/videos/general/already.webp",
+  "ยัง":                   "/videos/general/not_yet.webp",
+  "ฉัน":                   "/videos/general/me.webp",
+  "ไป":                    "/videos/general/go.webp",
+  "ข้าว":                  "/videos/general/rice.webp",
+  "หรือยัง":               "/videos/general/or_not_yet.webp",
   // Emotions
-  "กลัว": "fear",
-  "รัก": "love",
-  "เหนื่อย": "tired",
-  "โกรธ": "angry",
-
-  // Questions & Answers
-  "ทำไม": "why",
-  "อะไร": "what",
-  "เท่าไหร่": "how_much",
-  "ใช่": "yes",
-  "ไม่": "no",
-
+  "กลัว":                  "/videos/emotions/fear.webp",
+  "รัก":                   "/videos/emotions/love.webp",
+  "เหนื่อย":               "/videos/emotions/tired.webp",
+  "โกรธ":                  "/videos/emotions/angry.webp",
+  // Q&A
+  "ทำไม":                  "/videos/qa/why.webp",
+  "อะไร":                  "/videos/qa/what.webp",
+  "เท่าไหร่":              "/videos/qa/how_much.webp",
+  "ใช่":                   "/videos/qa/yes.webp",
+  "ไม่":                   "/videos/qa/no.webp",
   // Illness
-  "ปวดท้อง": "stomachache",
-  "ปวดหัว": "headache",
-  "เจ็บคอ": "sore_throat",
-  "เป็นหวัด": "cold",
-  "เป็นไข้": "fever",
+  "ปวดท้อง":               "/videos/illness/stomachache.webp",
+  "ปวดหัว":                "/videos/illness/headache.webp",
+  "เจ็บคอ":                "/videos/illness/sore_throat.webp",
+  "เป็นหวัด":              "/videos/illness/cold.webp",
+  "เป็นไข้":               "/videos/illness/fever.webp",
+  // Tips
+  "hello_adult-tip":       "/videos/Tips_video/hello_adult-tip.webp",
+  "hello_friend-tip":      "/videos/Tips_video/hello_friend-tip.webp",
+  "bye_me-tip":            "/videos/Tips_video/bye_me-tip.webp",
+  "bye_go-tip":            "/videos/Tips_video/bye_go-tip.webp",
+  "rice-tip":              "/videos/Tips_video/rice-tip.webp",
+  "eat-tip":               "/videos/Tips_video/eat-tip.webp",
+  "yet-tip":               "/videos/Tips_video/yet-tip.webp",
+  "already-tip":           "/videos/Tips_video/already-tip.webp",
+  "how_are_you-tip":       "/videos/Tips_video/how_are_you-tip.webp",
+  "fine-tip":              "/videos/Tips_video/fine-tip.webp",
+  "unhappy-tip":           "/videos/Tips_video/unhappy-tip.webp",
+  "angry-tip":             "/videos/Tips_video/angry-tip.webp",
+  "fear-tip":              "/videos/Tips_video/fear-tip.webp",
+  "love-tip":              "/videos/Tips_video/love-tip.webp",
+  "tired-tip":             "/videos/Tips_video/tired-tip.webp",
+  "what-tip":              "/videos/Tips_video/what-tip.webp",
+  "why-tip":               "/videos/Tips_video/why-tip.webp",
+  "how_much-tip":          "/videos/Tips_video/how_much-tip.webp",
+  "yes-tip":               "/videos/Tips_video/yes-tip.webp",
+  "no-tip":                "/videos/Tips_video/no-tip.webp",
+  "stomachache-tip":       "/videos/Tips_video/stomachache-tip.webp",
+  "headache-tip":          "/videos/Tips_video/headache-tip.webp",
+  "sore_throat-tip":       "/videos/Tips_video/sore_throat-tip.webp",
+  "cold-tip":              "/videos/Tips_video/cold-tip.webp",
+  "fever-tip":             "/videos/Tips_video/fever-tip.webp",
 };
 
 /**
- * Helper function to get the HLS (.m3u8) video URL
- * @param category - Category (e.g., "illness", "general")
- * @param fileName - Name of the video file (Thai display name, mapped to English)
- * @returns HLS video path (.m3u8)
+ * Returns the direct /videos/*.webp path for a given display name or tip key.
+ * Fallback: constructs a best-guess path if key is not in the map.
  */
 export const getVideoUrl = (category: Category | string, fileName: string): string => {
-  const baseUrl = import.meta.env.VITE_VIDEO_BASE_URL || "/hls";
-  // remove any trailing slashes from baseUrl just in case
-  const cleanBaseUrl = baseUrl.replace(/\/+$/, "");
-  
-  // Map internal display names to corresponding folders
-  const mappedFileName = VIDEO_FILENAME_MAP[fileName] || fileName;
-  
-  // URL Encode the mappedFileName to support any characters if the mapping missed
-  const encodedFileName = encodeURIComponent(mappedFileName);
-  
-  return `${cleanBaseUrl}/${category}/${encodedFileName}/index.m3u8`;
+  if (VIDEO_URL_MAP[fileName]) return VIDEO_URL_MAP[fileName];
+  // Fallback — construct path directly (English filename, no mapping needed)
+  return `/videos/${category}/${fileName}.webp`;
 };

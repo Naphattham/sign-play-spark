@@ -223,7 +223,6 @@ export default function SignDefenderPage() {
   // Stable ref so onPredictionRef can call clearBuffer without a stale closure
   const clearBufferRef = useRef<() => void>(() => { });
   onPredictionRef.current = (prediction: any) => {
-    console.log("[SignDefender] onPrediction fired! Phase:", phaseRef.current, "Success:", prediction.success);
     if (phaseRef.current !== "playing") return;
     if (!prediction.success) return;
     if (prediction.confidence < CONFIDENCE_THRESHOLD) return;

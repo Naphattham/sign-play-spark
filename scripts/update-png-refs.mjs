@@ -21,7 +21,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const SRC_ROOT = join(__dirname, "..", "src");
 const DRY_RUN = process.argv.includes("--dry-run");
 
-if (DRY_RUN) console.log("🔎  DRY-RUN mode — no files will be written.\n");
+if (DRY_RUN) ("🔎  DRY-RUN mode — no files will be written.\console.logn");
 
 /** Recursively collect .ts / .tsx files */
 async function walkSrc(dir) {
@@ -66,7 +66,6 @@ function transformContent(content) {
 
 async function main() {
   const files = await walkSrc(SRC_ROOT);
-  console.log(`🔍  Scanning ${files.length} TypeScript/TSX files in src/\n`);
 
   let changed = 0;
   let unchanged = 0;
@@ -89,7 +88,6 @@ async function main() {
       }
 
       const rel = file.replace(SRC_ROOT + "/", "src/");
-      console.log(`  ✏️   ${rel}  (${changedLines.length} change(s))`);
       changedLines.forEach((l) => console.log(l));
 
       if (!DRY_RUN) {
@@ -101,13 +99,6 @@ async function main() {
     }
   }
 
-  console.log(`
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Files updated  : ${DRY_RUN ? `${changed} (dry-run, not written)` : changed}
-  Files unchanged: ${unchanged}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${DRY_RUN ? "\n⚠️  Re-run without --dry-run to apply changes." : "\n✅  All done! Commit the changes and delete the old .png files."}
-`);
 }
 
 main().catch((e) => {

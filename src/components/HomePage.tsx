@@ -1,5 +1,4 @@
 import { Category, getPhrasesByCategory, isPhraseCompletedCheck, getVideoUrl } from "@/lib/categories";
-import { HLSVideoPlayer } from "@/components/HLSVideoPlayer";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { getAvatarUrl } from "@/lib/avatar";
 import { useState, useEffect } from "react";
@@ -177,13 +176,10 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
             </div>
             <div className="brutal-card bg-card p-3 sm:p-4 md:p-6 rounded-xl flex flex-col md:flex-row gap-3 sm:gap-4 md:gap-6 items-center animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: '100ms' }}>
               <div className="w-full md:w-40 lg:w-48 aspect-video md:aspect-square bg-muted rounded-lg border-2 border-foreground overflow-hidden">
-                <HLSVideoPlayer
+                <img
                   className="w-full h-full object-cover"
                   src={getVideoSrc()}
-                  muted={true}
-                  loop={true}
-                  lazyLoad={false}
-                  showControls={false}
+                  loading="eager"
                 />
               </div>
               <div className="flex-1 space-y-2 sm:space-y-3 w-full">

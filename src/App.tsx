@@ -13,7 +13,6 @@ import SignDefenderPage from "@/pages/SignDefenderPage";
 import { AudioProvider, useAudio } from "@/lib/audioContext";
 import { Volume2, VolumeX } from "lucide-react";
 import { getVideoUrl } from "@/lib/categories";
-import { HLSVideoPlayer } from "@/components/HLSVideoPlayer";
 
 const queryClient = new QueryClient();
 
@@ -42,15 +41,15 @@ const PRELOAD_VIDEOS = [
 ];
 
 function GlobalVideoPreloader({ videoFiles }: { videoFiles: { category: string, file: string }[] }) {
+  // Preload animated WebP images via hidden img tags
   return (
     <div style={{ display: "none" }} aria-hidden="true">
       {videoFiles.map((v, index) => (
-        <HLSVideoPlayer
+        <img
           key={index}
           src={getVideoUrl(v.category, v.file)}
-          lazyLoad={false}
-          loop={true}
-          muted={true}
+          loading="eager"
+          alt=""
         />
       ))}
     </div>
