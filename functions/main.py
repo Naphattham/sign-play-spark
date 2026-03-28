@@ -11,6 +11,10 @@ import os
 import json
 import base64
 import pickle
+import numpy as np
+import cv2
+import mediapipe as mp
+import tensorflow as tf
 
 # Initialize Firebase Admin
 initialize_app()

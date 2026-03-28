@@ -17,6 +17,8 @@ interface HLSVideoPlayerProps {
   showControls?: boolean;
   /** Auto-play as soon as the user clicks play (default: false for Autoplay) */
   lazyLoad?: boolean;
+  /** Playback speed (default: 0.7 for slower motion) */
+  playbackRate?: number;
 }
 
 type PlayerState = "idle" | "loading" | "ready" | "playing" | "paused" | "error";
@@ -29,6 +31,7 @@ type PlayerState = "idle" | "loading" | "ready" | "playing" | "paused" | "error"
  * - Safari native HLS fallback  (<video> supports HLS natively on Safari)
  * - Proper Hls instance lifecycle management
  * - Smooth progress bar + custom controls
+ * - Custom Playback Rate (Speed)
  */
 export function HLSVideoPlayer({
   src,
@@ -38,6 +41,7 @@ export function HLSVideoPlayer({
   className = "",
   showControls = true,
   lazyLoad = false, // บังคับให้โหลดทันที ไม่ต้องรอคลิก
+  playbackRate = 0.7, // เพิ่มค่าเริ่มต้นสปีดเป็น 0.7 ที่นี่
 }: HLSVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
@@ -130,6 +134,13 @@ export function HLSVideoPlayer({
     const video = videoRef.current;
     if (!video) return;
 
+    // --- ฟังก์ชันสำหรับจัดการสปีดวิดีโอ ---
+    const applyPlaybackRate = () => {
+      if (video.playbackRate !== playbackRate) {
+        video.playbackRate = playbackRate;
+      }
+    };
+
     const onTimeUpdate = () => {
       setCurrentTime(video.currentTime);
       setProgress(video.duration ? (video.currentTime / video.duration) * 100 : 0);
@@ -138,8 +149,14 @@ export function HLSVideoPlayer({
     const onEnded = () => {
       if (!loop) setPlayerState("paused");
     };
-    const onPlay = () => setPlayerState("playing");
+    const onPlay = () => {
+      setPlayerState("playing");
+      applyPlaybackRate(); // บังคับเซ็ตสปีดอีกครั้งตอนกดเล่น
+    };
     const onPause = () => setPlayerState("paused");
+
+    // บังคับเซ็ตสปีดทันทีที่โหลด
+    applyPlaybackRate();
 
     video.addEventListener("timeupdate", onTimeUpdate);
     video.addEventListener("durationchange", onDurationChange);
@@ -159,7 +176,7 @@ export function HLSVideoPlayer({
       video.removeEventListener("play", onPlay);
       video.removeEventListener("pause", onPause);
     };
-  }, [src, isLazy, loop, initHls]);
+  }, [src, isLazy, loop, initHls, playbackRate]);
 
   /** Cleanup Hls on unmount */
   useEffect(() => {
