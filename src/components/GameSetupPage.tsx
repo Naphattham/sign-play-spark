@@ -24,9 +24,9 @@ const gameCards = [
     id: 3,
     icon: "spellcheck",
     color: "bg-[#50fa7b]",
-    title: "Sign Wall Challenge",
-    description: "Unscramble letters to match the signing shown in the video clips.",
-    available: false,
+    title: "Sign Master Memory",
+    description: "จับคู่วิดีโอภาษามือกับคำศัพท์ ยิ่ง Moves น้อย ยิ่งได้คะแนนสูง!",
+    available: true,
     delay: "200ms",
   },
   {
@@ -123,6 +123,7 @@ export function GameSetupPage() {
                       if (isLocked) return;
                       if (card.id === 1) navigate("/match-and-sign");
                       else if (card.id === 2) navigate("/sign-and-match");
+                      else if (card.id === 3) navigate("/sign-master-memory");
                       else if (card.id === 4) navigate("/sign-defender");
                     }}
                     className={`

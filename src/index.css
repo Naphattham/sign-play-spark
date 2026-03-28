@@ -152,6 +152,23 @@
     @apply border-[3px] border-foreground;
     box-shadow: var(--shadow-brutal-sm);
   }
+  /* Sign Master Memory – neo-brutalist utilities */
+  .dot-grid {
+    background-image: radial-gradient(#bab9b2 1.5px, transparent 1.5px);
+    background-size: 24px 24px;
+  }
+
+  .neo-shadow {
+    box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+  }
+
+  .neo-shadow-lg {
+    box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+  }
+
+  .fill-icon {
+    font-variation-settings: 'FILL' 1;
+  }
 }
 
 /* Hardware acceleration for smooth video rendering */

@@ -10,6 +10,7 @@ import { GameSetupPage } from "@/components/GameSetupPage";
 import MatchAndSignPage from "@/pages/MatchAndSignPage";
 import SignAndMatchPage from "@/pages/SignAndMatchPage";
 import SignDefenderPage from "@/pages/SignDefenderPage";
+import SignMasterMemoryPage from "@/pages/SignMasterMemoryPage";
 import { AudioProvider, useAudio } from "@/lib/audioContext";
 import { Volume2, VolumeX } from "lucide-react";
 import { getVideoUrl } from "@/lib/categories";
@@ -76,6 +77,7 @@ const App = () => (
             <Route path="/match-and-sign" element={<MatchAndSignPage />} />
             <Route path="/sign-and-match" element={<SignAndMatchPage />} />
             <Route path="/sign-defender" element={<SignDefenderPage />} />
+            <Route path="/sign-master-memory" element={<SignMasterMemoryPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
