@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { Trophy, Medal, Award } from "lucide-react";
 import { getAvatarUrl } from "@/lib/avatar";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
-import firstPlaceImg from "@/asset/image/1st.png";
-import secondPlaceImg from "@/asset/image/2nd.png";
-import thirdPlaceImg from "@/asset/image/3rd.png";
+import firstPlaceImg from "@/asset/image/1st.webp";
+import secondPlaceImg from "@/asset/image/2nd.webp";
+import thirdPlaceImg from "@/asset/image/3rd.webp";
 
 const rankIcon = (rank: number) => {
   if (rank === 1) return <Trophy className="w-5 h-5 text-secondary-foreground" />;

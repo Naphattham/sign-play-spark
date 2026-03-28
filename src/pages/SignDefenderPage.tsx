@@ -7,18 +7,18 @@ import { useSignAndDistance } from "@/hooks/useSignAndDistance";
 import { auth } from "@/lib/firebase";
 import { addUserPoints } from "@/lib/auth";
 
-import m1 from "@/asset/image/monster/my_monster-1.png";
-import m2 from "@/asset/image/monster/my_monster-2.png";
-import m3 from "@/asset/image/monster/my_monster-3.png";
-import m4 from "@/asset/image/monster/my_monster-4.png";
-import m5 from "@/asset/image/monster/my_monster-5.png";
-import m6 from "@/asset/image/monster/my_monster-6.png";
-import m7 from "@/asset/image/monster/my_monster-7.png";
-import m8 from "@/asset/image/monster/my_monster-8.png";
-import m9 from "@/asset/image/monster/my_monster-9.png";
-import powImg from "@/asset/image/monster/pow.png";
-import shieldImg from "@/asset/image/monster/shield.png";
-import heartImg from "@/asset/image/monster/heart.png";
+import m1 from "@/asset/image/monster/my_monster-1.webp";
+import m2 from "@/asset/image/monster/my_monster-2.webp";
+import m3 from "@/asset/image/monster/my_monster-3.webp";
+import m4 from "@/asset/image/monster/my_monster-4.webp";
+import m5 from "@/asset/image/monster/my_monster-5.webp";
+import m6 from "@/asset/image/monster/my_monster-6.webp";
+import m7 from "@/asset/image/monster/my_monster-7.webp";
+import m8 from "@/asset/image/monster/my_monster-8.webp";
+import m9 from "@/asset/image/monster/my_monster-9.webp";
+import powImg from "@/asset/image/monster/pow.webp";
+import shieldImg from "@/asset/image/monster/shield.webp";
+import heartImg from "@/asset/image/monster/heart.webp";
 
 const MONSTER_IMAGES = [m1, m2, m3, m4, m5, m6, m7, m8, m9];
 

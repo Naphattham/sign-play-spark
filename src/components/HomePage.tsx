@@ -5,8 +5,8 @@ import { getAvatarUrl } from "@/lib/avatar";
 import { useState, useEffect } from "react";
 import { auth, database } from "@/lib/firebase";
 import { ref, get } from "firebase/database";
-import steakImg from "@/asset/image/steak.png";
-import trophyImg from "@/asset/image/Trophy.png";
+import steakImg from "@/asset/image/steak.webp";
+import trophyImg from "@/asset/image/Trophy.webp";
 
 interface HomePageProps {
   onCategorySelect: (category: Category) => void;

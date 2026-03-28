@@ -6,7 +6,7 @@ import { database } from "@/lib/firebase";
 import { ref as dbRef, get } from "firebase/database";
 import { getVideoUrl } from "@/lib/categories";
 import { HLSVideoPlayer } from "@/components/HLSVideoPlayer";
-import generalImg from "@/asset/image/general.png";
+import generalImg from "@/asset/image/general.webp";
 
 interface LandingPageProps {
   onLoginSuccess: () => void;

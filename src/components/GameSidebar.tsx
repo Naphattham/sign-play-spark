@@ -5,14 +5,14 @@ import { ref as dbRef, get, onValue } from "firebase/database";
 import { getAvatarUrl } from "@/lib/avatar";
 
 import { Category, categories } from "@/lib/categories";
-import generalImg from "@/asset/image/general.png";
-import emotionalImg from "@/asset/image/emotional.png";
-import qaImg from "@/asset/image/qa.png";
-import illnessImg from "@/asset/image/illness.png";
-import trophyImg from "@/asset/image/Trophy.png";
-import questImg from "@/asset/image/quest.png";
-import challengeImg from "@/asset/image/challenge.png";
-import playImg from "@/asset/image/Play.png";
+import generalImg from "@/asset/image/general.webp";
+import emotionalImg from "@/asset/image/emotional.webp";
+import qaImg from "@/asset/image/qa.webp";
+import illnessImg from "@/asset/image/illness.webp";
+import trophyImg from "@/asset/image/Trophy.webp";
+import questImg from "@/asset/image/quest.webp";
+import challengeImg from "@/asset/image/challenge.webp";
+import playImg from "@/asset/image/Play.webp";
 
 const iconMap: Record<string, string> = {
   Hand: generalImg,

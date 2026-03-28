@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { Category, categories, getPhrasesByCategory, isPhraseCompletedCheck } from "@/lib/categories";
+import { warmUpModel } from "@/lib/signLanguageAPI";
 
-import generalImg from "@/asset/image/general.png";
-import emotionalImg from "@/asset/image/emotional.png";
-import qaImg from "@/asset/image/qa.png";
-import illnessImg from "@/asset/image/illness.png";
+import generalImg from "@/asset/image/general.webp";
+import emotionalImg from "@/asset/image/emotional.webp";
+import qaImg from "@/asset/image/qa.webp";
+import illnessImg from "@/asset/image/illness.webp";
 
 export interface LessonsPageProps {
   onCategorySelect: (category: Category) => void;
@@ -12,6 +14,17 @@ export interface LessonsPageProps {
 }
 
 export function LessonsPage({ onCategorySelect, completedPhrases, streak }: LessonsPageProps) {
+  // 🔥 สั่ง Preload (Warm Up) ทันทีที่เปิดเข้ามาหน้านี้
+  useEffect(() => {
+    warmUpModel();
+  }, []);
+
+  // 🔥 สั่ง Preload อีกครั้งเพื่อความชัวร์ก่อนส่งต่อให้หน้า Game
+  const handleCategoryClick = (categoryId: Category) => {
+    warmUpModel();
+    onCategorySelect(categoryId);
+  };
+
   // calculate total progress
   const allPhrases = categories.flatMap(c => getPhrasesByCategory(c.id));
   const totalAll = allPhrases.length;
@@ -29,7 +42,7 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 font-body">
           {/* Category 1: General Conversation */}
           <button 
-            onClick={() => onCategorySelect("general")}
+            onClick={() => handleCategoryClick("general")}
             className="group relative bg-primary border-[3px] border-foreground rounded-[1.5rem] md:rounded-[2rem] p-6 lg:p-8 text-left flex flex-col justify-between h-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-bottom-4"
             style={{ animationDelay: '0ms', animationDuration: '500ms' }}
           >
@@ -44,7 +57,7 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
 
           {/* Category 2: Emotions */}
           <button 
-            onClick={() => onCategorySelect("emotions")}
+            onClick={() => handleCategoryClick("emotions")}
             className="group relative bg-secondary border-[3px] border-foreground rounded-[1.5rem] md:rounded-[2rem] p-6 lg:p-8 text-left flex flex-col justify-between h-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-bottom-4"
             style={{ animationDelay: '100ms', animationDuration: '500ms' }}
           >
@@ -59,7 +72,7 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
 
           {/* Category 3: Q&A */}
           <button 
-            onClick={() => onCategorySelect("qa")}
+            onClick={() => handleCategoryClick("qa")}
             className="group relative bg-orange-300 border-[3px] border-foreground rounded-[1.5rem] md:rounded-[2rem] p-6 lg:p-8 text-left flex flex-col justify-between h-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-bottom-4"
             style={{ animationDelay: '200ms', animationDuration: '500ms' }}
           >
@@ -74,7 +87,7 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
 
           {/* Category 4: Illness */}
           <button 
-            onClick={() => onCategorySelect("illness")}
+            onClick={() => handleCategoryClick("illness")}
             className="group relative bg-emerald-400 border-[3px] border-foreground rounded-[1.5rem] md:rounded-[2rem] p-6 lg:p-8 text-left flex flex-col justify-between h-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-bottom-4"
             style={{ animationDelay: '300ms', animationDuration: '500ms' }}
           >
