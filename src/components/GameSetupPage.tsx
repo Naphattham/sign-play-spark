@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 const gameCards = [
   {
@@ -23,7 +24,7 @@ const gameCards = [
     id: 3,
     icon: "spellcheck",
     color: "bg-[#50fa7b]",
-    title: "Sign Scramble",
+    title: "Sign Wall Challenge",
     description: "Unscramble letters to match the signing shown in the video clips.",
     available: false,
     delay: "200ms",
@@ -41,6 +42,13 @@ const gameCards = [
 
 export function GameSetupPage() {
   const navigate = useNavigate();
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <main className="flex-1 overflow-y-auto p-3 sm:p-5 md:p-8 lg:p-12">
@@ -60,66 +68,77 @@ export function GameSetupPage() {
         {/* Game Cards */}
         <section>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-            {gameCards.map((card) => (
-              <div
-                key={card.id}
-                className="neo-brutalism bg-white dark:bg-slate-800 rounded-xl p-3 sm:p-4 flex flex-col gap-2 sm:gap-3 md:gap-4 group
-                  hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_hsl(0_0%_0%)]
-                  transition-all duration-300 ease-in-out
-                  animate-in fade-in slide-in-from-bottom-4"
-                style={{ animationDuration: "500ms", animationDelay: card.delay }}
-              >
-                {/* Icon Box */}
+            {gameCards.map((card) => {
+              const isLocked = !card.available || (card.id === 4 && !isDesktop);
+
+              return (
                 <div
-                  className={`aspect-square w-full neo-brutalism-sm ${card.color} flex items-center justify-center rounded-lg overflow-hidden relative
-                    transition-all duration-300 ease-in-out group-hover:scale-[1.03]`}
-                >
-                  <span
-                    className="material-symbols-outlined text-6xl text-black transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3"
-                  >
-                    {card.icon}
-                  </span>
-                  {!card.available && (
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                      <span className="bg-white/90 text-black text-[10px] font-black uppercase px-2 py-0.5 rounded tracking-wider">
-                        Coming Soon
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Text */}
-                <div className="flex-1">
-                  <h3 className="text-base sm:text-lg font-black uppercase mb-0.5 sm:mb-1 group-hover:text-primary transition-colors duration-300 ease-in-out">
-                    {card.title}
-                  </h3>
-                  <p className="text-[10px] sm:text-xs font-medium opacity-70 line-clamp-2">
-                    {card.description}
-                  </p>
-                </div>
-
-                {/* Button */}
-                <button
-                  disabled={!card.available}
-                  onClick={() => {
-                    if (!card.available) return;
-                    if (card.id === 1) navigate("/match-and-sign");
-                    else if (card.id === 2) navigate("/sign-and-match");
-                    else if (card.id === 4) navigate("/sign-defender");
-                  }}
-                  className={`
-                    neo-brutalism py-2 text-sm font-black uppercase
+                  key={card.id}
+                  className="neo-brutalism bg-white dark:bg-slate-800 rounded-xl p-3 sm:p-4 flex flex-col gap-2 sm:gap-3 md:gap-4 group
+                    hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_hsl(0_0%_0%)]
                     transition-all duration-300 ease-in-out
-                    ${card.available
-                      ? "bg-primary text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:brightness-110 cursor-pointer"
-                      : "bg-muted text-muted-foreground cursor-not-allowed opacity-60"
-                    }
-                  `}
+                    animate-in fade-in slide-in-from-bottom-4"
+                  style={{ animationDuration: "500ms", animationDelay: card.delay }}
                 >
-                  {card.available ? "Play Now" : "Locked"}
-                </button>
-              </div>
-            ))}
+                  {/* Icon Box */}
+                  <div
+                    className={`aspect-square w-full neo-brutalism-sm ${card.color} flex items-center justify-center rounded-lg overflow-hidden relative
+                      transition-all duration-300 ease-in-out group-hover:scale-[1.03]`}
+                  >
+                    <span
+                      className="material-symbols-outlined text-6xl text-black transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3"
+                    >
+                      {card.icon}
+                    </span>
+                    {!card.available && (
+                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                        <span className="bg-white/90 text-black text-[10px] font-black uppercase px-2 py-0.5 rounded tracking-wider">
+                          Coming Soon
+                        </span>
+                      </div>
+                    )}
+                    {(card.id === 4 && !isDesktop) && (
+                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                        <span className="bg-white/90 text-black text-[10px] font-black uppercase px-2 py-0.5 rounded tracking-wider">
+                          Desktop Only
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Text */}
+                  <div className="flex-1">
+                    <h3 className="text-base sm:text-lg font-black uppercase mb-0.5 sm:mb-1 group-hover:text-primary transition-colors duration-300 ease-in-out">
+                      {card.title}
+                    </h3>
+                    <p className="text-[10px] sm:text-xs font-medium opacity-70 line-clamp-2">
+                      {card.description}
+                    </p>
+                  </div>
+
+                  {/* Button */}
+                  <button
+                    disabled={isLocked}
+                    onClick={() => {
+                      if (isLocked) return;
+                      if (card.id === 1) navigate("/match-and-sign");
+                      else if (card.id === 2) navigate("/sign-and-match");
+                      else if (card.id === 4) navigate("/sign-defender");
+                    }}
+                    className={`
+                      neo-brutalism py-2 text-sm font-black uppercase
+                      transition-all duration-300 ease-in-out
+                      ${!isLocked
+                        ? "bg-primary text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:brightness-110 cursor-pointer"
+                        : "bg-muted text-muted-foreground cursor-not-allowed opacity-60"
+                      }
+                    `}
+                  >
+                    {!isLocked ? "Play Now" : "Locked"}
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </section>
 

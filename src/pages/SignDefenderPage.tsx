@@ -1,10 +1,26 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Webcam from "react-webcam";
+import { Camera } from "lucide-react";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { useSignAndDistance } from "@/hooks/useSignAndDistance";
 import { auth } from "@/lib/firebase";
 import { addUserPoints } from "@/lib/auth";
+
+import m1 from "@/asset/image/monster/my_monster-1.png";
+import m2 from "@/asset/image/monster/my_monster-2.png";
+import m3 from "@/asset/image/monster/my_monster-3.png";
+import m4 from "@/asset/image/monster/my_monster-4.png";
+import m5 from "@/asset/image/monster/my_monster-5.png";
+import m6 from "@/asset/image/monster/my_monster-6.png";
+import m7 from "@/asset/image/monster/my_monster-7.png";
+import m8 from "@/asset/image/monster/my_monster-8.png";
+import m9 from "@/asset/image/monster/my_monster-9.png";
+import powImg from "@/asset/image/monster/pow.png";
+import shieldImg from "@/asset/image/monster/shield.png";
+import heartImg from "@/asset/image/monster/heart.png";
+
+const MONSTER_IMAGES = [m1, m2, m3, m4, m5, m6, m7, m8, m9];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Monster {
@@ -73,18 +89,23 @@ function randBetween(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
 
-function spawnMonster(id: number): Monster {
-  const edge = Math.floor(Math.random() * 4);
+function spawnMonster(id: number, mode: "easy" | "medium" | "hard"): Monster {
+  // Exclude bottom edge (y=100) to prevent overlapping with bottom UI/Webcam
+  const edge = Math.floor(Math.random() * 3);
   let x = 50, y = 50;
   if (edge === 0) { x = randBetween(5, 95); y = 0; }
   else if (edge === 1) { x = 100; y = randBetween(5, 95); }
-  else if (edge === 2) { x = randBetween(5, 95); y = 100; }
   else { x = 0; y = randBetween(5, 95); }
 
   const dx = ARENA_CENTER.x - x;
   const dy = ARENA_CENTER.y - y;
   const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-  const speed = randBetween(0.03, 0.08);
+  
+  let speedMin = 0.03, speedMax = 0.08;
+  if (mode === "easy") { speedMin = 0.01; speedMax = 0.04; }
+  else if (mode === "hard") { speedMin = 0.06; speedMax = 0.12; }
+  
+  const speed = randBetween(speedMin, speedMax);
   const word = GAME_WORDS[Math.floor(Math.random() * GAME_WORDS.length)];
 
   return {
@@ -101,12 +122,66 @@ export default function SignDefenderPage() {
   const navigate = useNavigate();
 
   const [phase, setPhase] = useState<"idle" | "playing" | "gameover">("idle");
+  const [mode, setMode] = useState<"easy" | "medium" | "hard">("medium");
   const [monsters, setMonsters] = useState<Monster[]>([]);
   const [hp, setHp] = useState(3);
   const [score, setScore] = useState(0);
   const [wave, setWave] = useState(1);
   const [powPos, setPowPos] = useState<{ x: number; y: number; word: string } | null>(null);
   const [isReturningHome, setIsReturningHome] = useState(false);
+  const [showCameraPermission, setShowCameraPermission] = useState(false);
+  const [cameraPermissionGranted, setCameraPermissionGranted] = useState<boolean>(false);
+  const [cameraSkipped, setCameraSkipped] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (powPos) {
+      const audio = new Audio("/sounds/pow_sound.mp3");
+      audio.play().catch((err) => console.warn("Audio play failed:", err));
+    }
+  }, [powPos]);
+
+
+  // Auto-check if permission was already granted previously
+  useEffect(() => {
+    let mounted = true;
+    const checkCamera = async () => {
+      try {
+        const res = await navigator.permissions.query({ name: "camera" as any });
+        if (res.state === "granted" && mounted) setCameraPermissionGranted(true);
+        res.onchange = () => {
+          if (mounted) {
+            setCameraPermissionGranted(res.state === "granted");
+          }
+        };
+      } catch (err) {
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          if (devices.some(d => d.kind === "videoinput" && d.label !== "") && mounted) {
+            setCameraPermissionGranted(true);
+          }
+        } catch (e) {}
+      }
+    };
+    checkCamera();
+    return () => { mounted = false; };
+  }, []);
+
+  const requestCameraPermission = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach(track => track.stop());
+      setCameraPermissionGranted(true);
+      setShowCameraPermission(false);
+    } catch (err) {
+      console.error("Camera permission denied", err);
+      alert("ไม่สามารถเข้าถึงกล้องได้ โปรดตรวจสอบการตั้งค่าเบราว์เซอร์");
+    }
+  };
+
+  const handleUserMediaError = useCallback((err: string | DOMException) => {
+    console.warn("Camera failed to start / not found:", err);
+    setCameraPermissionGranted(false);
+  }, []);
 
   // ── Webcam / MediaPipe refs ──────────────────────────────────────────────
   // 🔑 Webcam is always mounted (hidden when not playing) so refs are stable
@@ -181,7 +256,7 @@ export default function SignDefenderPage() {
   const signRecognition = useSignAndDistance({
     videoElement: webcamVideo,
     canvasElement: webcamCanvas,
-    enabled: phase === "playing",
+    enabled: phase === "playing" && cameraPermissionGranted,
     onPrediction: stableOnPrediction,
   });
   // Keep clearBufferRef in sync with the latest hook reference
@@ -226,11 +301,11 @@ export default function SignDefenderPage() {
     const timer = setInterval(() => {
       setMonsters(prev => {
         if (prev.length >= maxOnScreen) return prev;
-        return [...prev, spawnMonster(nextIdRef.current++)];
+        return [...prev, spawnMonster(nextIdRef.current++, mode)];
       });
     }, interval);
     return () => clearInterval(timer);
-  }, [phase, wave]);
+  }, [phase, wave, mode]);
 
   // ── Wave ──────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -273,9 +348,15 @@ export default function SignDefenderPage() {
     setTimeout(() => navigate("/", { state: { view: "gamesetup" } }), 3000);
   };
 
+  const handleEndGame = () => {
+    if (frameRef.current) cancelAnimationFrame(frameRef.current);
+    phaseRef.current = "gameover";
+    setPhase("gameover");
+  };
+
   const renderHearts = () =>
     Array.from({ length: 3 }, (_, i) => (
-      <span key={i} style={{ fontSize: 22 }} className={i < hp ? "opacity-100" : "opacity-20 grayscale"}>❤️</span>
+      <img key={i} src={heartImg} alt="Heart" className={`w-6 h-6 object-contain ${i < hp ? "opacity-100" : "opacity-20 grayscale"}`} draggable={false} />
     ));
 
   const currentPred = signRecognition.currentPrediction;
@@ -286,12 +367,13 @@ export default function SignDefenderPage() {
   // ─── Shared Webcam Strip (always mounted) ─────────────────────────────────
   // 🔑 Always in DOM so refs are available immediately after mount
   // Hidden webcam elements – always mounted, out of visual flow
-  const HiddenWebcam = (
+  const HiddenWebcam = cameraPermissionGranted ? (
     <div className="fixed" style={{ width: 1, height: 1, opacity: 0, pointerEvents: "none", top: 0, left: 0 }}>
       <Webcam
         ref={webcamRef}
         audio={false}
         mirrored
+        onUserMediaError={handleUserMediaError}
         videoConstraints={{
           facingMode: "user",
           width: { ideal: 640 },
@@ -302,7 +384,7 @@ export default function SignDefenderPage() {
       />
       <canvas ref={canvasRef} style={{ width: 1, height: 1 }} />
     </div>
-  );
+  ) : null;
 
   // ─── GAME OVER ────────────────────────────────────────────────────────────
   if (phase === "gameover") {
@@ -322,7 +404,7 @@ export default function SignDefenderPage() {
               <div className="flex flex-col gap-4">
                 <button
                   disabled={isReturningHome}
-                  onClick={startGame}
+                  onClick={() => setPhase("idle")}
                   className="neo-brutalism bg-primary text-white font-black uppercase text-xl py-4 rounded-2xl
                     transition-all duration-200 hover:-translate-y-1 hover:brightness-110 disabled:opacity-50"
                 >
@@ -374,78 +456,173 @@ export default function SignDefenderPage() {
             {/* Main Content Area: Side-by-side */}
             <div className="flex flex-col md:flex-row gap-6 w-full items-stretch justify-center">
 
-              {/* How to Play Card (Left) */}
-              <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-xl p-5 w-full max-w-[400px] flex flex-col text-sm">
-                <h2 className="text-xl font-black uppercase mb-3 border-b-[3px] border-foreground pb-2">How to Play</h2>
-                <ul className="space-y-4 flex-grow flex flex-col justify-center font-bold">
-                  <li className="flex items-start">
-                    <span className="neo-brutalism bg-primary text-white font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-xs">01</span>
-                    <p className="pt-1">มอนสเตอร์เคลื่อนเข้าหาศูนย์กลาง</p>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="neo-brutalism bg-primary text-white font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-xs">02</span>
-                    <p className="pt-1">ทำท่าภาษามือไทยให้ตรงกับคำบนมอนสเตอร์</p>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="neo-brutalism bg-primary text-white font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-xs">03</span>
-                    <div className="pt-1">
-                      <p>มอนสเตอร์ถึงศูนย์ = เสีย HP · หมด HP =</p>
-                      <p className="font-black">Game Over</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start pt-4 border-t-[3px] border-foreground">
-                    <span className="neo-brutalism bg-secondary text-foreground font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-sm">
-                      ★
-                    </span>
-                    <p className="pt-1">+10 คะแนนต่อมอนสเตอร์ที่ทำลายได้</p>
-                  </li>
-                </ul>
+              {/* Left Column */}
+              <div className="w-full max-w-[400px] flex flex-col gap-4">
+                {/* How to Play Card (Left) */}
+                <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-xl p-5 w-full flex flex-col text-sm h-full">
+                  <h2 className="text-xl font-black uppercase mb-3 border-b-[3px] border-foreground pb-2">How to Play</h2>
+                  <ul className="space-y-4 flex-grow flex flex-col justify-center font-bold">
+                    <li className="flex items-start">
+                      <span className="neo-brutalism bg-primary text-white font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-xs">01</span>
+                      <p className="pt-1">มอนสเตอร์เคลื่อนเข้าหาศูนย์กลาง</p>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="neo-brutalism bg-primary text-white font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-xs">02</span>
+                      <p className="pt-1">ทำท่าภาษามือไทยให้ตรงกับคำบนมอนสเตอร์</p>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="neo-brutalism bg-primary text-white font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-xs">03</span>
+                      <div className="pt-1">
+                        <p>มอนสเตอร์ถึงศูนย์ = เสีย HP · หมด HP =</p>
+                        <p className="font-black">Game Over</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start pt-4 border-t-[3px] border-foreground">
+                      <span className="neo-brutalism bg-secondary text-foreground font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-sm">
+                        ★
+                      </span>
+                      <p className="pt-1">+10 คะแนนต่อมอนสเตอร์ที่ทำลายได้</p>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Mode Selection */}
+                <div className="relative flex bg-white dark:bg-slate-800 rounded-xl p-2 neo-brutalism w-full border-[3px] border-black shadow-[4px_4px_0_0_#000]">
+                  {/* Sliding Background */}
+                  <div 
+                    className="absolute top-2 bottom-2 left-2 rounded-lg bg-primary border-[2px] border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform duration-300 ease-out"
+                    style={{
+                      width: 'calc((100% - 16px) / 3)',
+                      transform: `translateX(calc(${mode === 'easy' ? 0 : mode === 'medium' ? 1 : 2} * 100%))`
+                    }}
+                  />
+                  {(["easy", "medium", "hard"] as const).map((m) => (
+                    <button
+                      key={m}
+                      onClick={() => setMode(m)}
+                      className={`relative z-10 flex-1 flex items-center justify-center py-2 sm:py-2.5 rounded-lg font-black uppercase text-sm transition-colors duration-300 ${
+                        mode === m
+                          ? 'text-white'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5'
+                      }`}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Camera & Start Section (Right) */}
               <div className="w-full max-w-[360px] flex flex-col gap-4">
 
                 {/* Camera Feed */}
-                <div className="w-full aspect-square neo-brutalism bg-black rounded-xl relative overflow-hidden flex-shrink-0">
-                  <div className="absolute top-2 left-2 bg-primary text-white text-[10px] font-black px-2 py-1 rounded-full uppercase flex items-center gap-1 z-10 border-[2px] border-foreground">
+                <div className="w-full aspect-square neo-brutalism bg-black rounded-xl relative overflow-hidden flex-shrink-0 border-[3px] border-foreground">
+                  <div className="absolute top-2 left-2 bg-primary text-white text-[10px] font-black px-2 py-1 rounded-full uppercase flex items-center gap-1 z-10 border-[2px] border-foreground shadow-[2px_2px_0_0_#000]">
                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
                     LIVE
                   </div>
-                  <Webcam
-                    ref={webcamRef}
-                    audio={false}
-                    mirrored
-                    videoConstraints={{ facingMode: "user" }}
-                    className="w-full h-full object-cover opacity-80"
-                    style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}
-                  />
-                  <canvas
-                    ref={canvasRef}
-                    className="absolute top-0 left-0 w-full h-full pointer-events-none"
-                    style={{ transform: "scaleX(-1)" }}
-                  />
-                  {/* Distance Status Overlay inside Webcam */}
-                  {(signRecognition.distanceStatus === "too_close" || signRecognition.distanceStatus === "too_far" || signRecognition.distanceStatus === "no_face") && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10 flex-col p-2 text-center">
-                      <span className="text-2xl mb-1">⚠️</span>
-                      <span className="text-xs font-black text-white uppercase leading-tight">
-                        {signRecognition.distanceStatus === "too_close" ? "ถอยออกหน่อย" :
-                          signRecognition.distanceStatus === "too_far" ? "เข้ามาใกล้หน่อย" : "ไม่พบใบหน้า"}
-                      </span>
+                  {cameraPermissionGranted ? (
+                    <>
+                      <Webcam
+                        ref={webcamRef}
+                        audio={false}
+                        mirrored
+                        onUserMediaError={handleUserMediaError}
+                        videoConstraints={{ facingMode: "user" }}
+                        className="w-full h-full object-cover opacity-80"
+                        style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}
+                      />
+                      <canvas
+                        ref={canvasRef}
+                        className="absolute top-0 left-0 w-full h-full pointer-events-none"
+                        style={{ transform: "scaleX(-1)" }}
+                      />
+                      {/* Distance Status Overlay inside Webcam */}
+                      {(signRecognition.distanceStatus === "too_close" || signRecognition.distanceStatus === "too_far" || signRecognition.distanceStatus === "no_face") && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10 flex-col p-2 text-center">
+                          <span className="text-2xl mb-1">⚠️</span>
+                          <span className="text-xs font-black text-white uppercase leading-tight">
+                            {signRecognition.distanceStatus === "too_close" ? "ถอยออกหน่อย" :
+                              signRecognition.distanceStatus === "too_far" ? "เข้ามาใกล้หน่อย" : "ไม่พบใบหน้า"}
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-white/50 p-4 text-center">
+                      <Camera size={48} className="opacity-50 mb-2 mt-4" />
+                      <p className="font-bold text-sm">ยังไม่ได้เปิดกล้อง</p>
                     </div>
                   )}
                 </div>
 
                 {/* Start Button */}
-                <button
-                  onClick={startGame}
-                  className="neo-brutalism bg-primary text-white text-xl font-black py-3 px-6 rounded-xl transition-all hover:-translate-y-1 hover:brightness-110 active:translate-y-1 uppercase w-full"
-                >
-                  {isReady ? "START GAME" : `WARMING UP… ${bufferPct}%`}
-                </button>
+                {!cameraPermissionGranted ? (
+                  <button
+                    onClick={() => setShowCameraPermission(true)}
+                    className="neo-brutalism bg-secondary text-foreground text-xl font-black py-3 px-6 rounded-xl transition-all uppercase w-full border-[3px] border-black shadow-[4px_4px_0_0_#000] hover:-translate-y-1 active:translate-y-1"
+                  >
+                    📹 ขออนุญาตใช้งานกล้อง
+                  </button>
+                ) : (
+                  <button
+                    onClick={startGame}
+                    disabled={!isReady}
+                    className={`neo-brutalism bg-primary text-white text-xl font-black py-3 px-6 rounded-xl transition-all uppercase w-full ${isReady ? 'hover:-translate-y-1 hover:brightness-110 active:translate-y-1' : 'opacity-50 cursor-not-allowed'}`}
+                  >
+                    {isReady ? "START GAME" : `LOADING… ${bufferPct}%`}
+                  </button>
+                )}
               </div>
             </div>
           </div>
+
+          {/* Camera Permission Modal */}
+          {showCameraPermission && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+              <div className="brutal-card-lg max-w-md w-full bg-background neo-brutalism rounded-xl border-[4px] border-black shadow-[8px_8px_0_0_#000] overflow-hidden">
+                <div className="border-b-[4px] border-black bg-secondary px-6 py-4">
+                  <h2 className="font-display font-black text-xl text-secondary-foreground text-center">
+                    📹 อนุญาตการเข้าถึงกล้อง
+                  </h2>
+                </div>
+                <div className="p-6 space-y-6">
+                  <div className="flex justify-center">
+                    <div className="w-24 h-24 rounded-full bg-accent/20 flex items-center justify-center border-[4px] border-black shadow-[4px_4px_0_0_#000]">
+                      <Camera size={48} className="text-accent" />
+                    </div>
+                  </div>
+                  <div className="text-center space-y-2">
+                    <p className="font-body text-foreground font-black text-lg">
+                      SignQuest ต้องการใช้กล้องของคุณ
+                    </p>
+                    <p className="font-body text-muted-foreground font-bold text-sm">
+                      เราใช้กล้องเพื่อตรวจจับท่าทางภาษามือของคุณแบบเรียลไทม์
+                      ข้อมูลวิดีโอจะไม่ถูกบันทึกหรือส่งออกไปจากอุปกรณ์ของคุณ
+                    </p>
+                  </div>
+                  <div className="space-y-3">
+                    <button
+                      onClick={requestCameraPermission}
+                      className="w-full neo-brutalism brutal-btn-primary bg-primary text-white font-black py-3 rounded-xl border-[3px] border-black shadow-[4px_4px_0_0_#000] hover:-translate-y-1 transition-all"
+                    >
+                      อนุญาตการเข้าถึงกล้อง
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowCameraPermission(false);
+                        setCameraSkipped(true);
+                        setCameraPermissionGranted(false);
+                      }}
+                      className="w-full neo-brutalism brutal-btn-secondary bg-white dark:bg-slate-700 text-foreground font-black py-3 rounded-xl border-[3px] border-black shadow-[4px_4px_0_0_#000] hover:-translate-y-1 transition-all text-sm"
+                    >
+                      ข้าม (เล่นโดยไม่มีกล้อง)
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </>
     );
@@ -466,7 +643,7 @@ export default function SignDefenderPage() {
         <header className="fixed top-0 left-0 w-full px-6 py-4 z-50 flex justify-between items-start pointer-events-none">
           {/* Exit Button */}
           <button
-            onClick={handleBackToHome}
+            onClick={handleEndGame}
             className="pointer-events-auto bg-white border-[3px] border-black px-5 py-2 rounded-xl flex items-center gap-2 transition-all hover:translate-x-[1px] hover:translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px]"
             style={{ boxShadow: "4px 4px 0px 0px #000", transition: "box-shadow 0.1s, transform 0.1s" }}
             onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px 0px #000"; }}
@@ -500,7 +677,7 @@ export default function SignDefenderPage() {
               style={{ boxShadow: "4px 4px 0px 0px #000" }}
             >
               {Array.from({ length: 3 }, (_, i) => (
-                <span key={i} style={{ fontSize: 26 }} className={i < hp ? "opacity-100" : "opacity-20 grayscale"}>❤️</span>
+                <img key={i} src={heartImg} alt="Heart" className={`w-7 h-7 object-contain ${i < hp ? "opacity-100" : "opacity-20 grayscale"}`} draggable={false} />
               ))}
             </div>
           </div>
@@ -536,22 +713,17 @@ export default function SignDefenderPage() {
                 boxShadow: "0 0 40px hsl(342 100% 64% / 0.3), 6px 6px 0 0 #000",
               }}
             >
-              <span style={{ fontSize: 44 }} className="select-none">🛡️</span>
+              <img src={shieldImg} alt="Shield" className="w-[52px] h-[52px] object-contain drop-shadow-md select-none" draggable={false} />
             </div>
           </div>
 
           {/* POW! */}
           {powPos && (
             <div
-              className="absolute z-30 pointer-events-none"
+              className="absolute z-30 pointer-events-none flex flex-col items-center justify-center animate-bounce drop-shadow-[4px_4px_0_rgba(0,0,0,0.5)]"
               style={{ left: `${powPos.x}%`, top: `${powPos.y}%`, transform: "translate(-50%,-50%)" }}
             >
-              <div
-                className="bg-yellow-300 text-black font-black text-2xl uppercase px-5 py-2 rounded-2xl animate-bounce border-[3px] border-black"
-                style={{ boxShadow: "4px 4px 0px 0px #000" }}
-              >
-                💥 {powPos.word}
-              </div>
+              <img src={powImg} alt="POW" className="w-32 h-32 object-contain" draggable={false} />
             </div>
           )}
 
@@ -559,26 +731,34 @@ export default function SignDefenderPage() {
           {monsters.map(m => (
             <div
               key={m.id}
-              className="absolute z-20 flex flex-col items-center"
-              style={{ left: `${m.x}%`, top: `${m.y}%`, transform: "translate(-50%,-50%)", width: m.size + 24 }}
+              className="absolute z-20 flex flex-col items-center gap-1"
+              style={{ left: `${m.x}%`, top: `${m.y}%`, transform: "translate(-50%,-50%)", width: m.size + 32 }}
             >
-              {/* Monster tile */}
+              {/* Word overhead */}
               <div
-                className="flex flex-col items-center rounded-2xl border-[4px] border-black p-2 w-full"
+                className="bg-black text-white font-black text-center px-3 py-1 rounded-xl whitespace-nowrap tracking-tight z-10"
                 style={{
-                  backgroundColor: m.color,
-                  boxShadow: "5px 5px 0px 0px #000",
-                  background: `linear-gradient(135deg, ${m.color}, ${m.color}cc)`,
+                  fontSize: Math.max(12, m.size * 0.18),
+                  boxShadow: `3px 3px 0px 0px ${m.color}`,
+                  border: "2px solid white"
                 }}
               >
-                <span style={{ fontSize: m.size * 0.38 }} className="select-none leading-none">👾</span>
-                <div
-                  className="mt-1 bg-black text-white font-black text-center px-2 py-0.5 rounded-lg whitespace-nowrap tracking-tight"
-                  style={{ fontSize: Math.max(11, m.size * 0.16) }}
-                >
-                  {WORD_LABELS[m.label] ?? m.label}
-                </div>
+                {WORD_LABELS[m.label] ?? m.label}
               </div>
+
+              {/* Monster Image */}
+              <img
+                src={MONSTER_IMAGES[m.id % MONSTER_IMAGES.length]}
+                alt="Monster"
+                className="select-none"
+                style={{ 
+                  width: m.size * 0.5, 
+                  height: m.size * 0.5, 
+                  objectFit: "contain",
+                  filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.5))"
+                }}
+                draggable={false}
+              />
             </div>
           ))}
 
@@ -589,49 +769,52 @@ export default function SignDefenderPage() {
         </div>
 
         {/* ── Fixed Bottom-Right: Webcam Feed ──────────────────────────── */}
-        <section className="fixed bottom-8 right-8 z-50">
-          <div className="relative group">
-            <div
-              className="w-56 h-56 bg-black border-[4px] border-black rounded-2xl overflow-hidden transition-transform group-hover:-translate-y-2"
-              style={{ boxShadow: "6px 6px 0px 0px #000" }}
-            >
-              <Webcam
-                ref={webcamRef}
-                audio={false}
-                mirrored
-                videoConstraints={{
-                  facingMode: "user",
-                  width: { ideal: 640 },
-                  height: { ideal: 480 },
-                  frameRate: { ideal: 30 },
-                }}
-                className="w-full h-full object-cover opacity-90"
-                style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}
-              />
-              <canvas
-                ref={canvasRef}
-                className="absolute top-0 left-0 w-full h-full pointer-events-none"
-                style={{ transform: "scaleX(-1)" }}
-              />
+        {cameraPermissionGranted && (
+          <section className="fixed bottom-8 right-8 z-50">
+            <div className="relative group">
+              <div
+                className="w-56 h-56 bg-black border-[4px] border-black rounded-2xl overflow-hidden transition-transform group-hover:-translate-y-2"
+                style={{ boxShadow: "6px 6px 0px 0px #000" }}
+              >
+                <Webcam
+                  ref={webcamRef}
+                  audio={false}
+                  mirrored
+                  onUserMediaError={handleUserMediaError}
+                  videoConstraints={{
+                    facingMode: "user",
+                    width: { ideal: 640 },
+                    height: { ideal: 480 },
+                    frameRate: { ideal: 30 },
+                  }}
+                  className="w-full h-full object-cover opacity-90"
+                  style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}
+                />
+                <canvas
+                  ref={canvasRef}
+                  className="absolute top-0 left-0 w-full h-full pointer-events-none"
+                  style={{ transform: "scaleX(-1)" }}
+                />
 
-              {/* LIVE badge */}
-              <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-red-500 border-[2px] border-black px-2.5 py-1 rounded-full">
-                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                <span className="text-white font-black text-[10px] uppercase tracking-widest">LIVE</span>
-              </div>
-
-              {/* Distance warning overlay */}
-              {(signRecognition.distanceStatus === "too_close" || signRecognition.distanceStatus === "too_far") && (
-                <div className="absolute inset-0 bg-black/65 flex flex-col items-center justify-center z-10 p-2 text-center">
-                  <span className="text-2xl">⚠️</span>
-                  <span className="text-[11px] font-black text-white uppercase leading-tight mt-1">
-                    {signRecognition.distanceStatus === "too_close" ? "ถอยออกหน่อย" : "เข้ามาใกล้หน่อย"}
-                  </span>
+                {/* LIVE badge */}
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-red-500 border-[2px] border-black px-2.5 py-1 rounded-full">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  <span className="text-white font-black text-[10px] uppercase tracking-widest">LIVE</span>
                 </div>
-              )}
+
+                {/* Distance warning overlay */}
+                {(signRecognition.distanceStatus === "too_close" || signRecognition.distanceStatus === "too_far") && (
+                  <div className="absolute inset-0 bg-black/65 flex flex-col items-center justify-center z-10 p-2 text-center">
+                    <span className="text-2xl">⚠️</span>
+                    <span className="text-[11px] font-black text-white uppercase leading-tight mt-1">
+                      {signRecognition.distanceStatus === "too_close" ? "ถอยออกหน่อย" : "เข้ามาใกล้หน่อย"}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* ── Fixed Bottom-Center: Feedback Bar ────────────────────────── */}
         <footer className="fixed bottom-8 left-1/2 z-50 w-full max-w-xl px-4" style={{ transform: "translateX(-50%)" }}>

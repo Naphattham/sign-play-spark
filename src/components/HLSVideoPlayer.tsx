@@ -216,7 +216,14 @@ export function HLSVideoPlayer({
   const isError = playerState === "error";
 
   return (
-    <div className={`hls-player-wrapper ${className}`} style={styles.wrapper}>
+    <div 
+      className={`hls-player-wrapper ${className}`} 
+      style={{
+        ...styles.wrapper,
+        aspectRatio: className.includes('aspect-') ? undefined : '16/9',
+        borderRadius: (className.includes('rounded-') || className.includes('rounded-none')) ? undefined : '0.75rem'
+      }}
+    >
       {/* ── Idle overlay (lazy play button) ─────────────────────────────── */}
       {playerState === "idle" && (
         <div style={styles.idleOverlay} onClick={handlePlayPause}>

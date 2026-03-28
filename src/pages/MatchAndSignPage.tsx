@@ -50,7 +50,7 @@ export default function MatchAndSignPage() {
   const [currentQuestions, setCurrentQuestions] = useState<typeof ALL_QUESTIONS>([]);
   const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
   const [score, setScore] = useState(0);
-  const [isGameOver, setIsGameOver] = useState(false);
+  const [phase, setPhase] = useState<"idle" | "playing" | "gameover">("idle");
   const [options, setOptions] = useState<string[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -70,7 +70,7 @@ export default function MatchAndSignPage() {
       roundIndexRef.current = nextIndex;
       setCurrentRoundIndex(nextIndex);
     } else {
-      setIsGameOver(true);
+      setPhase("gameover");
     }
   }, []);
 
@@ -92,7 +92,7 @@ export default function MatchAndSignPage() {
     setCurrentQuestions(questions);
     setCurrentRoundIndex(0);
     setScore(0);
-    setIsGameOver(false);
+    setPhase("playing");
     setSelectedOption(null);
     setIsCorrect(null);
     pointsAddedRef.current = false;
@@ -100,7 +100,7 @@ export default function MatchAndSignPage() {
 
   // Boot the game once on mount
   useEffect(() => {
-    startGame();
+    // Game is started manually from the idle screen now
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -109,7 +109,7 @@ export default function MatchAndSignPage() {
     if (
       currentQuestions.length === 0 ||
       currentRoundIndex >= currentQuestions.length ||
-      isGameOver
+      phase === "gameover"
     ) return;
 
     const q = currentQuestions[currentRoundIndex];
@@ -121,13 +121,13 @@ export default function MatchAndSignPage() {
 
   // Save points when game ends
   useEffect(() => {
-    if (isGameOver && !pointsAddedRef.current) {
+    if (phase === "gameover" && !pointsAddedRef.current) {
       pointsAddedRef.current = true;
       if (auth.currentUser && score > 0) {
         addUserPoints(auth.currentUser.uid, score).catch(console.error);
       }
     }
-  }, [isGameOver, score]);
+  }, [phase, score]);
 
   const handleSelectOption = (videoUrl: string) => {
     if (selectedOption !== null) return;
@@ -167,7 +167,79 @@ export default function MatchAndSignPage() {
     }, 3000);
   };
 
-  if (isGameOver) {
+  // ─── IDLE / START SCREEN ──────────────────────────────────────────────────
+  if (phase === "idle") {
+    return (
+      <>
+        {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
+        <main className="min-h-screen bg-[#f8f9fa] dark:bg-slate-900 text-foreground relative p-4 md:p-8 flex flex-col items-center">
+          {/* Top-left Back Button */}
+          <div className="absolute top-4 left-4 md:top-8 md:left-8 z-30">
+            <button
+              onClick={handleBackToHome}
+              className="neo-brutalism bg-white dark:bg-slate-800 text-foreground text-sm md:text-base font-black py-2 px-4 rounded-xl transition-all hover:-translate-y-1 uppercase flex items-center justify-center gap-2"
+            >
+              ← Back to Challenge
+            </button>
+          </div>
+
+          <div className="max-w-6xl mx-auto flex flex-col items-center w-full">
+            {/* Centered Title */}
+            <div className="text-center mb-8 mt-12 md:mt-24">
+              <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-2 whitespace-nowrap">
+                Match & <span className="text-primary">Sign</span>
+              </h1>
+              <div className="h-2 bg-foreground w-20 mx-auto mt-4 rounded-full neo-brutalism-sm"></div>
+              <p className="mt-4 font-bold text-base text-muted-foreground">อ่านคำศัพท์ภาษาไทยแล้วเลือกวิดีโอภาษามือที่ถูกต้อง!</p>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="flex flex-col gap-6 w-full max-w-[400px] mx-auto items-stretch justify-center">
+
+              {/* How to Play Card */}
+              <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-xl p-6 w-full flex flex-col text-sm">
+                <h2 className="text-2xl font-black uppercase mb-4 border-b-[3px] border-foreground pb-2">How to Play</h2>
+                <ul className="space-y-4 flex-grow flex flex-col justify-center font-bold text-base">
+                   <li className="flex items-start">
+                    <span className="neo-brutalism bg-primary text-white font-black rounded-full w-8 h-8 flex items-center justify-center shrink-0 mr-3 text-sm">01</span>
+                    <p className="pt-1">อ่านคำศัพท์ภาษาไทยจากโจทย์</p>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="neo-brutalism bg-primary text-white font-black rounded-full w-8 h-8 flex items-center justify-center shrink-0 mr-3 text-sm">02</span>
+                    <p className="pt-1">เลือกวิดีโอภาษามือที่ตรงกับคำศัพท์</p>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="neo-brutalism bg-primary text-white font-black rounded-full w-8 h-8 flex items-center justify-center shrink-0 mr-3 text-sm">03</span>
+                    <div className="pt-1">
+                      <p>ตอบถูกได้ +10 คะแนน</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start pt-4 border-t-[3px] border-foreground">
+                    <span className="neo-brutalism bg-secondary text-foreground font-black rounded-full w-8 h-8 flex items-center justify-center shrink-0 mr-3 text-sm">
+                      ★
+                    </span>
+                    <p className="pt-1">เล่นจนครบเพื่อสะสมคะแนน!</p>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Start Section */}
+              <div className="w-full flex flex-col gap-4 justify-center">
+                <button
+                  onClick={startGame}
+                  className="neo-brutalism bg-primary text-white text-2xl font-black py-4 px-6 rounded-xl transition-all uppercase w-full hover:-translate-y-1 hover:brightness-110 active:translate-y-1"
+                >
+                  START GAME
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </>
+    );
+  }
+
+  if (phase === "gameover") {
     return (
       <>
         {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
@@ -201,17 +273,29 @@ export default function MatchAndSignPage() {
   if (!currentQ) return null;
 
   return (
-    <main className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col items-center justify-center min-h-screen bg-[#f8f9fa] dark:bg-slate-900">
+    <>
+      {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col items-center justify-center min-h-screen bg-[#f8f9fa] dark:bg-slate-900">
 
       {/* Top Bar with Timer and Score */}
       <div className="w-full max-w-5xl flex justify-between items-center mb-6 px-4">
-        <div className="w-24"></div> {/* Placeholder to keep alignment */}
-        <div className="text-2xl font-black uppercase">
+        <div className="flex-1 flex justify-start">
+          <button
+            onClick={handleBackToHome}
+            disabled={isReturningHome}
+            className="neo-brutalism bg-white dark:bg-slate-800 text-foreground text-sm md:text-base font-black py-2 px-4 rounded-xl transition-all hover:-translate-y-1 uppercase flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            ← <span className="hidden sm:inline">EXIT</span>
+          </button>
+        </div>
+        <div className="text-xl sm:text-2xl font-black uppercase text-center flex-shrink-0 px-2">
           Question {currentRoundIndex + 1} / {currentQuestions.length}
         </div>
-        <div className="neo-brutalism bg-white px-4 py-2 rounded-xl flex items-center gap-2 font-black text-xl text-primary">
-          <span className="material-symbols-outlined">stars</span>
-          {score}
+        <div className="flex-1 flex justify-end">
+          <div className="neo-brutalism bg-white px-3 sm:px-4 py-2 rounded-xl flex items-center gap-2 font-black text-lg sm:text-xl text-primary">
+            <span className="material-symbols-outlined">stars</span>
+            {score}
+          </div>
         </div>
       </div>
 
@@ -301,5 +385,6 @@ export default function MatchAndSignPage() {
         </button>
       </div>
     </main>
+    </>
   );
 }

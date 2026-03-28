@@ -46,6 +46,7 @@ import arrowRightImg from "@/asset/image/arrow_right.png";
 import collectPointsImg from "@/asset/image/CollectPoints.png";
 import hintImg from "@/asset/image/Hint.png";
 import hintboxImg from "@/asset/image/Hintbox.png";
+import tipsImg from "@/asset/image/tips.png";
 import alreadyAteImg from "@/asset/image/Already ate | Not yet.png";
 import feverImg from "@/asset/image/fever.png";
 import goodbyeImg from "@/asset/image/Goodbye.png";
@@ -177,31 +178,31 @@ const Index = () => {
 
   // Hint text per modelClass — two sentences separated by \n for line-breaking
   const phraseHintMap: Record<string, string> = {
-    already: "ลองทำมือเฉียงกับแบอีกสักนิด\nลองคว่ำมือ เพิ่มความเฉียงอีกนิดหน่อย",
-    angry: "แสดงสีหน้าโกรธขึ้นมาอีกนิดนึง\nลองหยิกนิ้วให้มากขึ้นกว่านี้",
-    bye_go: "ทำท่าเหมือนไล่น้องหมา ชิ้วๆ\nลองทำแบบสะบัดแล้วตั้งวงดู",
-    bye_me: "เอามือทาบอก นิ้วชิด วางมือตรงหน้าท้อง\nนำมืออีกข้างทาบอก",
-    cold: "ใช้มือสองนิ้ว (นิ้วชี้และนิ้วกลาง) รูดขึ้นลงจมูกและปาก\nลองเอียงข้างและรูดขึ้นลงจมูกและปาก",
-    eat: "จีบมือและลองนำไปไว้ที่ปาก อ้าปากนิดๆ\nลองก้มและจีบมือเอามาไว้ที่ปาก",
-    fear: "กำมือสองข้างและขยับซ้ายขวา เอียนตัวไปข้างหลังเล็กน้อย\nกำมือสองข้างส่ายไปมา เอียงตัวเล็กน้อย อย่าลืมแสดงสีหน้าว่ากลัว",
-    fever: "เอามืออังหน้าผากและพัดบริเวณหน้าท้อง\nทำสีหน้าท่าทางว่าร้อน",
-    fine: "ทำท่าคล้ายคำว่า 'สบายดีไหม' แต่ยิ้มออกมา\nยิ้มเห็นฟันสักนิด แสดงให้อีกฝ่ายรู้ว่าเราสบายดี",
-    headache: "แสดงสีหน้าว่าปวด นำมือขยำบริเวณหัว\nมืออีกข้างวางบริเวณหน้าท้อง (หลังมือหันเข้าหากล้อง)",
-    hello_adult: "ทำท่าทางเหมือนสวัสดีผู้ใหญ่ พนมมือไว้กลางหน้าอก\nก้มให้ปลายนิ้วโป้งอยู่บริเวณจมูก แล้วเงยหน้าขึ้นมา",
-    hello_friend: "แบมือจากนั้นดันมือออกข้างหน้าเล็กน้อย\nทำท่าคล้ายคำว่า 'ทำไม' แต่นิ้วทุกนิ้วชิดกัน",
-    how_are_you: "มือทั้งสองข้างรูดจากกึ่งกลางหน้าอกไปทางต้นแขน แล้วทำนิ้วเยี่ยม\nเอียงคอ ทำสีหน้าสงสัยเล็กน้อย (เป็นประโยคคำถาม)",
-    how_much: "ทำมือจีบและยื่นออกไปข้างหน้า\nนับนิ้วโป้งถูไปมากับบริเวณนิ้วชี้",
-    love: "นำมือขวาทับซ้าย (หรือซ้ายทับขวา) วางที่บริเวณหัวใจ\nเอียงหัวไปทางมือเล็กน้อยพร้อมแสดงสีหน้ามีความสุข",
-    no: "แบมือและยื่นมาข้างหน้า พร้อมสะบัดหน้าและมือเล็กน้อย\nส่ายหัวเล็กน้อยพร้อมสะบัดมือยื่นมาข้างหน้า",
-    rice: "แบมือและนำนิ้วโป้งสะกิดกับนิ้วก้อย\nยื่นมือไปข้างหน้า แล้วใช้นิ้วโป้งดีดนิ้วน้อย",
-    sore_throat: "นำนิ้วโป้งและนิ้วชี้ลง รูดจากต้นคอยันปลายคอ\nแสดงสีหน้าว่าเจ็บ",
-    stomachache: "ขยำมือบริเวณหน้าท้องพร้อมแสดงสีหน้าว่าเจ็บ\nนำมือที่ขยำไปไว้บริเวณหน้าท้อง แสดงสีหน้าว่าเจ็บ",
-    tired: "นำมือทาบหน้าอกและหักแขนเข้าหาตัว\nปลายนิ้วทั้งหมดวางที่หน้าอก ข้อศอกอยู่บริเวณหน้าท้อง",
-    unhappy: "ทำนิ้วชิดกันห้านิ้ว ลูบจากช่วงท้องขึ้นมาจนถึงหัวไหล่อย่างช้าๆ\nสะบัดออก อย่าลืมทำหน้าย่นเพื่อแสดงความรู้สึก",
-    what: "นำนิ้วชี้ออกมาข้างหน้า ให้มืออยู่ขนานกับหัวไหล่\nส่ายนิ้วชี้ โดยที่มืออยู่นิ่ง",
-    why: "ทำท่ามือตาม Tutorial แล้วแตะหน้าผาก\nขยับมือมาไว้บริเวณด้านหน้าอย่างช้าๆ",
-    yes: "กำมือแล้วให้มือขนานกับหน้า\nนำข้อมือขยับขึ้นลง โดยที่แขนไม่ขยับ",
-    yet: "ให้มือขนานกับคาง\nขยับซ้ายขวาโดยที่แขนไม่ขยับ",
+    already: "ค่อยๆแบมือ -> สะบัดออกจากตัวช้าๆ -> ค้างไว้บริเวณเอว",
+    angry: "ค่อยๆงอนิ้วมือ -> ดึงออกจากหน้าผาก -> ค้างไว้",
+    bye_go: "ค่อยๆแบมือชิดกัน -> ตวัดมือออกจากตัวขึ้นไปด้านบน -> ค้างไว้",
+    bye_me: "ค่อยๆนำมือแนบหน้าอก -> นิ้วเรียงชิดกัน -> ตบหน้าอกเบาๆ -> ค้างไว้",
+    cold: "ค่อยๆเอียงหน้า -> ชูสองนิ้วขึ้นลง -> ตรงปลายจมูก -> ค้างไว้",
+    eat: "ค่อยๆทำนิ้วทั้งหมดเป็นรูปจีบ -> ไว้บริเวณปาก -> ค้างไว้",
+    fear: "ค่อยๆกำมือสองข้าง -> เขย่ามือ บริเวณหน้าอก -> ค้างไว้",
+    fever: "ค่อยๆแบมือ -> นิ้วชิดติดกัน -> ไว้บริเวณหน้าผาก -> มือมาพัดขึ้นลงที่ท้อง -> ค้างไว้",
+    fine: "ค่อยๆรูดมือจากกลางหน้าอก -> กำมือชูนิ้วโป้ง -> ยิ้ม -> ค้างไว้",
+    headache: "ค่อยๆงอนิ้วมือ -> มือมาไว้ที่หัว -> ทำท่าทางขยุมๆ -> เอียงหัวไปหามือ -> ค้างไว้",
+    hello_adult: "ค่อยๆพนมมือเป็นรูปดอกบัวแล้วก้มหัวลง -> ค้างไว้",
+    hello_friend: "ค่อยๆแบนิ้วชิดกัน -> ไว้บริเวณหน้าผาก -> เคลื่อนมือมาข้างหน้า -> ค้างไว้",
+    how_are_you: "ค่อยๆรูดมือจากกลางหน้าอก -> กำมือชูนิ้วโป้ง -> ก้มสงสัย -> ค้างไว้",
+    how_much: "ค่อยๆนำแค่นิ้วโป้งถูนิ้วชี้ไปมา (นิ้วที่เหลือชิดกัน) -> ค้างไว้",
+    love: "ค่อยๆแบมือมาซ้อนกัน -> วางไว้บริเวณหัวใจ -> เอียงคอ -> ค้างไว้",
+    no: "ค่อยๆแบหลังมือ -> ส่ายไปมา (ขนานกับไหล่) -> ค้างไว้",
+    rice: "ค่อยๆนำนิ้วโป้ง และนิ้วก้อยมาแตะๆกัน -> ค้างไว้",
+    sore_throat: "ค่อยๆนำนิ้วโป้ง และนิ้วก้อย รูดลงที่คอเบาๆ -> ค้างไว้",
+    stomachache: "ค่อยๆงอนิ้วมือทั้งห้า -> ขยำๆมือที่บริเวณหน้าท้อง (สะดือ) -> ค้างไว้",
+    tired: "ค่อยๆนำนิ้วทั้งหมด ชี้เข้าที่ตัวเอง -> ห่อไหล่ -> หุบแขนเข้า -> ก้มลงเล็กน้อย -> ค้างไว้",
+    unhappy: "ค่อยๆเอียงคอ -> รูดมือจากท้องถึงอก -> ค้างไว้บริเวณไหล่ -> ค่อยๆสะบัด -> ค้างไว้",
+    what: "ค่อยๆนิ้วชี้ส่ายไปมา -> ขนานกับหน้าอกหรือหัวไหล่ -> ค้างไว้",
+    why: "ค่อยๆแบนิ้วชิดกัน -> นาบมือไว้หน้าผาก -> ลากลงมาข้างหน้า -> กางนิ้วชี้และโป้งออก -> ค้างไว้",
+    yes: "ค่อยๆกำมือ -> วางไว้หน้าอก -> กวักมือ -> ค้างไว้",
+    yet: "ค่อยๆกางนิ้วก้อยและนิ้วโป้งออก -> ขยับส่ายไปมา -> ระยะเดียวกันกับหน้าอก -> ค้างไว้",
   };
 
   // New states for confidence scoring & button flow
@@ -267,16 +268,57 @@ const Index = () => {
   const getCurrentHintText = (): string => {
     if (!activePhrase) return "";
     if (activePhrase.id === "g1") return phraseHintMap[selectedVariant === "adult" ? "hello_adult" : "hello_friend"] || "";
-    if (activePhrase.id === "g2") return [phraseHintMap["bye_me"], phraseHintMap["bye_go"]].filter(Boolean).join(" ");
-    if (activePhrase.id === "g3") return [phraseHintMap["rice"], phraseHintMap["eat"], phraseHintMap["yet"]].filter(Boolean).join(" ");
+    if (activePhrase.id === "g2") return phraseHintMap[byeStep === 1 ? "bye_me" : "bye_go"] || "";
+    if (activePhrase.id === "g3") return phraseHintMap[eatStep === 1 ? "rice" : eatStep === 2 ? "eat" : "yet"] || "";
     if (activePhrase.id === "g4") return selectedVariant === "adult"
-      ? [phraseHintMap["eat"], phraseHintMap["already"]].filter(Boolean).join(" ")
-      : [phraseHintMap["eat"], phraseHintMap["yet"]].filter(Boolean).join(" ");
+      ? phraseHintMap[eatStep === 1 ? "eat" : "already"] || ""
+      : phraseHintMap[eatStep === 1 ? "eat" : "yet"] || "";
     if (activePhrase.id === "g5") return phraseHintMap["how_are_you"] || "";
     if (activePhrase.id === "g6") return phraseHintMap[selectedVariant === "adult" ? "fine" : "unhappy"] || "";
     const mc = effectivePhrase?.modelClass;
     if (mc && phraseHintMap[mc]) return phraseHintMap[mc];
     return "";
+  };
+
+  // Helper: get video URLs for current phrase/variant (for tip modal)
+  const getCurrentHintVideos = (): { url: string; label: string; text: string }[] => {
+    if (!activePhrase) return [];
+    const base = "/videos/Tips_video/";
+    if (activePhrase.id === "g1") {
+      const key = selectedVariant === "adult" ? "hello_adult" : "hello_friend";
+      return [{ url: `${base}${key}-tip.mp4`, label: selectedVariant === "adult" ? "สวัสดีผู้ใหญ่" : "สวัสดีเพื่อน", text: phraseHintMap[key] || "" }];
+    }
+    if (activePhrase.id === "g2") {
+      const stepKey = byeStep === 1 ? "bye_me" : "bye_go";
+      const stepLabel = byeStep === 1 ? "ฉัน" : "ไป";
+      return [{ url: `${base}${stepKey}-tip.mp4`, label: stepLabel, text: phraseHintMap[stepKey] || "" }];
+    }
+    if (activePhrase.id === "g3") {
+      const stepKey = eatStep === 1 ? "rice" : eatStep === 2 ? "eat" : "yet";
+      const stepLabel = eatStep === 1 ? "ข้าว" : "กิน";
+      const stepLabelFinal = eatStep === 3 ? "หรือยัง?" : stepLabel;
+      return [{ url: `${base}${stepKey}-tip.mp4`, label: stepLabelFinal, text: phraseHintMap[stepKey] || "" }];
+    }
+    if (activePhrase.id === "g4") {
+      if (selectedVariant === "adult") {
+        const stepKey = eatStep === 1 ? "eat" : "already";
+        const stepLabel = eatStep === 1 ? "กิน" : "แล้ว";
+        return [{ url: `${base}${stepKey}-tip.mp4`, label: stepLabel, text: phraseHintMap[stepKey] || "" }];
+      } else {
+        const stepKey = eatStep === 1 ? "eat" : "yet";
+        const stepLabel = eatStep === 1 ? "กิน" : "ยัง";
+        return [{ url: `${base}${stepKey}-tip.mp4`, label: stepLabel, text: phraseHintMap[stepKey] || "" }];
+      }
+    }
+    if (activePhrase.id === "g5") return [{ url: `${base}how_are_you-tip.mp4`, label: "สบายดีไหม?", text: phraseHintMap["how_are_you"] || "" }];
+    if (activePhrase.id === "g6") {
+      const key = selectedVariant === "adult" ? "fine" : "unhappy";
+      return [{ url: `${base}${key}-tip.mp4`, label: selectedVariant === "adult" ? "สบายดี" : "ไม่สบายใจ", text: phraseHintMap[key] || "" }];
+    }
+    // Other phrases — map from modelClass
+    const mc = effectivePhrase?.modelClass;
+    if (mc) return [{ url: `${base}${mc}-tip.mp4`, label: activePhrase.text, text: phraseHintMap[mc] || "" }];
+    return [];
   };
 
   const currentCategoryPhrases = getPhrasesByCategory(category);
@@ -721,20 +763,20 @@ const Index = () => {
           await update(userRef, { points: currentPoints - 25 });
       */
 
-          // ปล่อยให้ทำงานส่วนนี้ทันที (ปลดล็อก Hint ฟรี)
-          const hintKey = getCurrentHintKey();
-          
-          // Save unlocked hint to Firebase so it persists across refreshes
-          await saveUnlockedHint(user.uid, hintKey);
+      // ปล่อยให้ทำงานส่วนนี้ทันที (ปลดล็อก Hint ฟรี)
+      const hintKey = getCurrentHintKey();
 
-          toast({
-            title: "Success",
-            description: "ใช้ Hint สำเร็จ! (ใช้ฟรีชั่วคราว)", 
-            variant: "success",
-          });
-          setHintUnlocked(prev => new Set([...prev, hintKey]));
-          setShowHintModal(false);
-          setShowHintContent(true); // show hintbox right after confirming
+      // Save unlocked hint to Firebase so it persists across refreshes
+      await saveUnlockedHint(user.uid, hintKey);
+
+      toast({
+        title: "Success",
+        description: "ใช้ Hint สำเร็จ! (ใช้ฟรีชั่วคราว)",
+        variant: "success",
+      });
+      setHintUnlocked(prev => new Set([...prev, hintKey]));
+      setShowHintModal(false);
+      setShowHintContent(true); // show hintbox right after confirming
 
       /*
         } else {
@@ -1550,37 +1592,62 @@ const Index = () => {
         </div>
       )}
 
-      {/* Hint Content Modal — Hintbox image frame with per-phrase hint text */}
-      {showHintContent && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setShowHintContent(false)}
-          />
-          <div className="relative flex items-center justify-center animate-in zoom-in duration-200">
-            {/* Hintbox.png as the visual frame */}
-            <img
-              src={hintboxImg}
-              alt="Hint Box"
-              className="w-[300px] sm:w-[380px] md:w-[440px] drop-shadow-[6px_6px_0px_rgba(0,0,0,0.5)]"
+      {/* Hint Content Modal — Pro Tip video player with step-by-step instructions */}
+      {showHintContent && (() => {
+        const hintVideos = getCurrentHintVideos();
+        const activeVideo = hintVideos[0];
+        return (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setShowHintContent(false)}
             />
-            {/* Hint text rendered on top, centered inside the image */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center px-8 sm:px-12 pt-10 pb-8 gap-4">
-              {/* Close Button at top-right of the box */}
-              <button
-                onClick={() => setShowHintContent(false)}
-                className="absolute top-4 right-4 sm:top-5 sm:right-5 p-1 bg-white hover:bg-slate-50 border-[2px] border-foreground rounded-full text-slate-900 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 transition-all z-10"
-              >
-                <X size={16} strokeWidth={3} className="sm:w-5 sm:h-5" />
-              </button>
+            <div className="relative bg-white border-4 border-black rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] w-full max-w-[340px] sm:max-w-[400px] overflow-hidden animate-in zoom-in duration-200 flex flex-col">
+              {/* Modal Header */}
+              <div className="bg-primary p-4 border-b-4 border-black flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <div className="bg-white p-1.5 border-2 border-black rounded-lg flex items-center justify-center">
+                    <img src={tipsImg} alt="Tips" className="w-5 h-5 object-contain" />
+                  </div>
+                  <h2 className="text-xl font-black text-white uppercase tracking-wider italic">Pro Tips!</h2>
+                </div>
+                <button
+                  onClick={() => setShowHintContent(false)}
+                  className="w-8 h-8 bg-white border-2 border-black rounded-lg flex items-center justify-center hover:translate-y-0.5 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                >
+                  <X size={16} strokeWidth={3} />
+                </button>
+              </div>
 
-              <p className="text-slate-800 font-bold text-center text-[10px] sm:text-[12px] md:text-sm leading-normal sm:leading-relaxed whitespace-pre-line mt-1.5 sm:mt-2">
-                {getCurrentHintText()}
-              </p>
+              {/* Video Player Area (1:1 Aspect Ratio) */}
+              {activeVideo && (
+                <div className="p-4 pb-0">
+                  <div className="relative aspect-square w-full bg-slate-100 border-4 border-black rounded-2xl overflow-hidden">
+                    <video
+                      key={activeVideo.url}
+                      src={activeVideo.url}
+                      className="w-full h-full object-cover"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Instruction Section */}
+              <div className="p-4">
+                <div className="bg-slate-100 border-4 border-black rounded-2xl p-4">
+                  <p className="font-bold leading-relaxed text-sm text-center whitespace-pre-line">
+                    {activeVideo?.text || getCurrentHintText()}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
 
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />

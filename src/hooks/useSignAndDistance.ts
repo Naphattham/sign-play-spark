@@ -340,18 +340,34 @@ export function useSignAndDistance({
         const video = videoRef.current;
         const canvas = canvasRef.current;
 
-        if (video && canvas && video.readyState >= 2 && video.videoWidth > 0 && !isSendingRef.current) {
-          isSendingRef.current = true;
-          try {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            await holistic.send({ image: video });
-          } catch (error) {
-            console.error('MediaPipe send error:', error);
-          } finally {
-            isSendingRef.current = false;
-          }
+        // 🛑 Guard Clause: ดักเช็คไม่ให้วิดีโอที่มีขนาด 0x0 หลุดเข้าไปที่ MediaPipe
+        if (
+          !video ||
+          !canvas ||
+          video.readyState < 2 || // ต้องเริ่มเล่นแล้วเท่านั้น
+          video.videoWidth === 0 || // ความกว้างต้องมากกว่า 0
+          video.videoHeight === 0 || // ความสูงต้องมากกว่า 0
+          isSendingRef.current
+        ) {
+          // ถ้ายังไม่พร้อม ให้รอรอบถัดไปเงียบๆ (ไม่เกิด Error)
+          requestRef.current = requestAnimationFrame(detectFrame);
+          return;
         }
+
+        // ✅ ถ้าผ่าน Guard Clause แปลว่าวิดีโอพร้อม 100%
+        isSendingRef.current = true;
+        try {
+          // ปรับขนาด Canvas ให้ตรงกับวิดีโอ
+          if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth;
+          if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight;
+          
+          await holistic.send({ image: video });
+        } catch (error) {
+          console.error('[useSignAndDistance] MediaPipe send error:', error);
+        } finally {
+          isSendingRef.current = false;
+        }
+        
         requestRef.current = requestAnimationFrame(detectFrame);
       };
 
