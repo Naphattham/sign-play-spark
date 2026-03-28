@@ -180,7 +180,7 @@ export default function SignAndMatchPage() {
     return (
       <>
         {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
-        <main className="min-h-screen bg-[#f8f9fa] dark:bg-slate-900 text-foreground relative p-4 md:p-8 flex flex-col items-center">
+        <main className="min-h-screen bg-[hsl(44,95%,96%)] dark:bg-slate-900 text-foreground relative p-4 md:p-8 flex flex-col items-center">
           {/* Top-left Back Button */}
           <div className="absolute top-4 left-4 md:top-8 md:left-8 z-30">
             <button
@@ -253,9 +253,11 @@ export default function SignAndMatchPage() {
     return (
       <>
         {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
-        <main className="flex-1 overflow-y-auto p-6 md:p-12 flex items-center justify-center min-h-screen bg-[#f8f9fa] dark:bg-slate-900">
+        <main className="flex-1 overflow-y-auto p-6 md:p-12 flex items-center justify-center min-h-screen bg-[hsl(44,95%,96%)] dark:bg-slate-900">
           <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-[2rem] p-12 text-center max-w-lg w-full">
-            <h2 className="text-4xl sm:text-6xl font-black uppercase mb-4 tracking-tighter text-primary">Game Over</h2>
+            <h2 className="text-4xl sm:text-6xl font-black uppercase mb-4 tracking-tighter text-foreground">
+              GAME <span className="text-primary">OVER</span>
+            </h2>
             <p className="text-2xl font-bold mb-8">Score: {score} / {currentQuestions.length * 10}</p>
             <div className="flex flex-col gap-4">
               <Button
@@ -287,7 +289,7 @@ export default function SignAndMatchPage() {
   return (
     <>
       {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col items-center justify-center min-h-screen bg-[#f8f9fa] dark:bg-slate-900">
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col items-center justify-center min-h-screen bg-[hsl(44,95%,96%)] dark:bg-slate-900">
 
         {/* Top Bar */}
         <div className="w-full max-w-4xl flex justify-between items-center mb-6 px-4">

@@ -4,19 +4,19 @@ import { useState, useEffect } from "react";
 const gameCards = [
   {
     id: 1,
-    icon: "style",
+    icon: "extension",
     color: "bg-[#ffea00]",
     title: "Match & Sign",
-    description: "Master the basics with visual memory aids and repetitive learning.",
+    description: "ดูรูป เลือกท่า ฝึกจำคำศัพท์ โดยการเลือกวิดีโอภาษามือให้ตรงกับรูปภาพที่กำหนด",
     available: true,
     delay: "0ms",
   },
   {
     id: 2,
-    icon: "smart_display",
+    icon: "find_in_page",
     color: "bg-[#ff79c6]",
     title: "Sign & Match",
-    description: "Watch a sign-language clip and choose the correct Thai word from 4 options.",
+    description: "ดูท่า เลือกรูป ฝึกแปลความหมาย โดยการเลือกรูปภาพให้ตรงกับวิดีโอภาษามือที่เห็น",
     available: true,
     delay: "100ms",
   },
@@ -31,10 +31,10 @@ const gameCards = [
   },
   {
     id: 4,
-    icon: "timer",
+    icon: "shield",
     color: "bg-[#bd93f9]",
     title: "Sign Defender",
-    description: "Timed challenge for experts. How many signs can you get in 60s?",
+    description: "ทำท่า สู้มอนสเตอร์ เกมแอ็กชันใช้กล้องจริง ทำท่ามือให้ตรงกับคำบนตัวมอนสเตอร์",
     available: true,
     delay: "300ms",
   },
@@ -61,7 +61,7 @@ export function GameSetupPage() {
           </h1>
           <div className="h-2 sm:h-3 w-20 sm:w-28 md:w-32 bg-primary mt-1 sm:mt-2" />
           <p className="text-sm sm:text-base text-muted-foreground font-medium mt-2">
-            เลือกโหมดเกมที่คุณต้องการฝึก
+            เลือกเกมที่คุณสนใจ แล้วไปสนุกกัน!
           </p>
         </div>
 

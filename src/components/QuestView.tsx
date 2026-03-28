@@ -219,10 +219,13 @@ export function QuestView({ streak }: QuestViewProps) {
       <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8 md:space-y-12">
 
         <header className="mb-6 sm:mb-8 md:mb-12">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter">
-            Quest Log
-          </h2>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter">
+            Quest Master
+          </h1>
           <div className="h-2 sm:h-3 w-20 sm:w-28 md:w-32 bg-primary mt-1 sm:mt-2"></div>
+          <p className="text-sm sm:text-base text-muted-foreground font-medium mt-2">
+            รับเควสประจำวัน เพื่อก้าวสู่ความเป็นสุดยอดนักภาษามือ
+          </p>
         </header>
 
         <section className="mb-8 sm:mb-12 md:mb-16">

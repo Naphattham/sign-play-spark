@@ -252,7 +252,8 @@ export default function SignDefenderPage() {
       const hit = prev[idx];
       lastKilledRef.current = { pred, time: now };
       setPowPos({ x: hit.x, y: hit.y, word: WORD_LABELS[pred] ?? pred });
-      setScore(s => s + 10);
+      const points = mode === "easy" ? 5 : mode === "hard" ? 15 : 10;
+      setScore(s => s + points);
       setTimeout(() => setPowPos(null), 700);
       // 🔑 Flush stale buffer so AI starts fresh for the next gesture
       clearBufferRef.current();
@@ -492,15 +493,21 @@ export default function SignDefenderPage() {
                     <li className="flex items-start">
                       <span className="neo-brutalism bg-primary text-white font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-xs">03</span>
                       <div className="pt-1">
-                        <p>มอนสเตอร์ถึงศูนย์ = เสีย HP · หมด HP =</p>
-                        <p className="font-black">Game Over</p>
+                        <p>โดนโจมตีจนหัวใจหมด = GAME OVER</p>
                       </div>
                     </li>
-                    <li className="flex items-start pt-4 border-t-[3px] border-foreground">
-                      <span className="neo-brutalism bg-secondary text-foreground font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-sm">
-                        ★
-                      </span>
-                      <p className="pt-1">+10 คะแนนต่อมอนสเตอร์ที่ทำลายได้</p>
+                    <li className="flex flex-col pt-4 border-t-[3px] border-foreground gap-2">
+                      <div className="flex items-center">
+                        <span className="neo-brutalism bg-secondary text-foreground font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-sm">
+                          ★
+                        </span>
+                        <p className="font-bold">คะแนนต่อมอนสเตอร์ 1 ตัว:</p>
+                      </div>
+                      <div className="pl-10 space-y-1 text-xs font-black uppercase tracking-tight">
+                        <p className="text-green-600">● EASY : +5 PTS / MONSTER</p>
+                        <p className="text-amber-500">● MEDIUM : +10 PTS / MONSTER</p>
+                        <p className="text-rose-600">● HARD : +15 PTS / MONSTER</p>
+                      </div>
                     </li>
                   </ul>
                 </div>
@@ -709,7 +716,7 @@ export default function SignDefenderPage() {
               style={{ boxShadow: "4px 4px 0px 0px #000" }}
             >
               <p className="font-black uppercase text-lg text-black tracking-tighter italic">
-                {mode === 'easy' ? 'EASY' : mode === 'medium' ? 'NORMAL' : 'HARD'}
+                {mode === 'easy' ? 'EASY' : mode === 'medium' ? 'Medium' : 'HARD'}
               </p>
             </div>
 
