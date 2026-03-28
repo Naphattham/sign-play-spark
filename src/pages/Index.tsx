@@ -1624,14 +1624,11 @@ const Index = () => {
               {activeVideo && (
                 <div className="p-4 pb-0">
                   <div className="relative aspect-square w-full bg-slate-100 border-4 border-black rounded-2xl overflow-hidden">
-                    <video
+                    <img
                       key={activeVideo.url}
                       src={activeVideo.url}
                       className="w-full h-full object-cover"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
+                      loading="eager"
                     />
                   </div>
                 </div>

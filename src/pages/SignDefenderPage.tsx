@@ -100,11 +100,11 @@ function spawnMonster(id: number, mode: "easy" | "medium" | "hard"): Monster {
   const dx = ARENA_CENTER.x - x;
   const dy = ARENA_CENTER.y - y;
   const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-  
+
   let speedMin = 0.03, speedMax = 0.08;
   if (mode === "easy") { speedMin = 0.01; speedMax = 0.04; }
   else if (mode === "hard") { speedMin = 0.06; speedMax = 0.12; }
-  
+
   const speed = randBetween(speedMin, speedMax);
   const word = GAME_WORDS[Math.floor(Math.random() * GAME_WORDS.length)];
 
@@ -132,6 +132,19 @@ export default function SignDefenderPage() {
   const [showCameraPermission, setShowCameraPermission] = useState(false);
   const [cameraPermissionGranted, setCameraPermissionGranted] = useState<boolean>(false);
   const [cameraSkipped, setCameraSkipped] = useState<boolean>(false);
+  const [showExitModal, setShowExitModal] = useState(false);
+
+  const isPausedRef = useRef(false);
+
+  const openExitModal = useCallback(() => {
+    isPausedRef.current = true;
+    setShowExitModal(true);
+  }, []);
+
+  const closeExitModal = useCallback(() => {
+    isPausedRef.current = false;
+    setShowExitModal(false);
+  }, []);
 
   useEffect(() => {
     if (powPos) {
@@ -159,7 +172,7 @@ export default function SignDefenderPage() {
           if (devices.some(d => d.kind === "videoinput" && d.label !== "") && mounted) {
             setCameraPermissionGranted(true);
           }
-        } catch (e) {}
+        } catch (e) { }
       }
     };
     checkCamera();
@@ -223,7 +236,7 @@ export default function SignDefenderPage() {
   // Stable ref so onPredictionRef can call clearBuffer without a stale closure
   const clearBufferRef = useRef<() => void>(() => { });
   onPredictionRef.current = (prediction: any) => {
-    if (phaseRef.current !== "playing") return;
+    if (phaseRef.current !== "playing" || isPausedRef.current) return;
     if (!prediction.success) return;
     if (prediction.confidence < CONFIDENCE_THRESHOLD) return;
 
@@ -264,6 +277,10 @@ export default function SignDefenderPage() {
   // ── Game Loop ─────────────────────────────────────────────────────────────
   const tick = useCallback(() => {
     if (phaseRef.current !== "playing") return;
+    if (isPausedRef.current) {
+      frameRef.current = requestAnimationFrame(tick);
+      return;
+    }
 
     setMonsters(prev => {
       let dmg = 0;
@@ -298,6 +315,7 @@ export default function SignDefenderPage() {
     const interval = Math.max(2500, 4000 - (wave - 1) * 150);
     const maxOnScreen = Math.min(1 + wave, 4);
     const timer = setInterval(() => {
+      if (isPausedRef.current) return;
       setMonsters(prev => {
         if (prev.length >= maxOnScreen) return prev;
         return [...prev, spawnMonster(nextIdRef.current++, mode)];
@@ -309,7 +327,9 @@ export default function SignDefenderPage() {
   // ── Wave ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (phase !== "playing") return;
-    const timer = setInterval(() => setWave(w => w + 1), 20000);
+    const timer = setInterval(() => {
+      if (!isPausedRef.current) setWave(w => w + 1);
+    }, 20000);
     return () => clearInterval(timer);
   }, [phase]);
 
@@ -394,9 +414,9 @@ export default function SignDefenderPage() {
           <div className="flex-1 flex items-center justify-center p-6">
             <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-[2rem] p-10 text-center w-full max-w-md">
               <p className="text-xs font-black uppercase tracking-widest mb-1 text-muted-foreground">WAVE {wave}</p>
-              <h2 className="text-6xl font-black uppercase tracking-tighter mb-1 text-foreground">GAME</h2>
-              <h2 className="text-6xl font-black uppercase tracking-tighter mb-6 text-primary">OVER</h2>
-              <div className="neo-brutalism bg-secondary rounded-2xl px-8 py-4 mb-8 inline-block">
+              <h2 className="text-6xl font-black uppercase tracking-tighter mb-6 text-foreground whitespace-nowrap">
+                GAME <span className="text-primary">OVER</span>
+              </h2>              <div className="neo-brutalism bg-secondary rounded-2xl px-8 py-4 mb-8 inline-block">
                 <p className="text-xs font-black uppercase tracking-wider text-foreground opacity-70">Final Score</p>
                 <p className="text-5xl font-black text-foreground">{score}</p>
               </div>
@@ -488,7 +508,7 @@ export default function SignDefenderPage() {
                 {/* Mode Selection */}
                 <div className="relative flex bg-white dark:bg-slate-800 rounded-xl p-2 neo-brutalism w-full border-[3px] border-black shadow-[4px_4px_0_0_#000]">
                   {/* Sliding Background */}
-                  <div 
+                  <div
                     className="absolute top-2 bottom-2 left-2 rounded-lg bg-primary border-[2px] border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform duration-300 ease-out"
                     style={{
                       width: 'calc((100% - 16px) / 3)',
@@ -499,11 +519,10 @@ export default function SignDefenderPage() {
                     <button
                       key={m}
                       onClick={() => setMode(m)}
-                      className={`relative z-10 flex-1 flex items-center justify-center py-2 sm:py-2.5 rounded-lg font-black uppercase text-sm transition-colors duration-300 ${
-                        mode === m
-                          ? 'text-white'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5'
-                      }`}
+                      className={`relative z-10 flex-1 flex items-center justify-center py-2 sm:py-2.5 rounded-lg font-black uppercase text-sm transition-colors duration-300 ${mode === m
+                        ? 'text-white'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5'
+                        }`}
                     >
                       {m}
                     </button>
@@ -634,6 +653,35 @@ export default function SignDefenderPage() {
       {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
       {HiddenWebcam}
 
+      {/* ── Exit Modal ── */}
+      {showExitModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm pointer-events-auto">
+          <div className="brutal-card-lg max-w-sm w-full bg-white dark:bg-slate-800 neo-brutalism rounded-2xl border-[4px] border-black shadow-[8px_8px_0_0_#000] p-6 text-center animate-in fade-in zoom-in duration-200">
+            <h2 className="text-3xl font-black uppercase tracking-tighter mb-2 text-foreground">Exit Game?</h2>
+            <p className="font-bold text-muted-foreground mb-6">
+              คุณต้องการออกจากเกมใช่หรือไม่?<br />ความคืบหน้าจะหายไป
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={closeExitModal}
+                className="flex-1 neo-brutalism bg-white dark:bg-slate-700 text-foreground font-black uppercase py-3 rounded-xl border-[3px] border-black shadow-[4px_4px_0_0_#000] hover:-translate-y-1 transition-all"
+              >
+                CANCEL
+              </button>
+              <button
+                onClick={() => {
+                  closeExitModal();
+                  handleEndGame();
+                }}
+                className="flex-1 neo-brutalism bg-rose-500 text-white font-black uppercase py-3 rounded-xl border-[3px] border-black shadow-[4px_4px_0_0_#000] hover:-translate-y-1 hover:brightness-110 transition-all"
+              >
+                CONFIRM
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <main
         className="fixed inset-0 select-none overflow-hidden"
         style={{ background: "hsl(44 95% 96%)", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
@@ -642,7 +690,7 @@ export default function SignDefenderPage() {
         <header className="fixed top-0 left-0 w-full px-6 py-4 z-50 flex justify-between items-start pointer-events-none">
           {/* Exit Button */}
           <button
-            onClick={handleEndGame}
+            onClick={openExitModal}
             className="pointer-events-auto bg-white border-[3px] border-black px-5 py-2 rounded-xl flex items-center gap-2 transition-all hover:translate-x-[1px] hover:translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px]"
             style={{ boxShadow: "4px 4px 0px 0px #000", transition: "box-shadow 0.1s, transform 0.1s" }}
             onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px 0px #000"; }}
@@ -654,6 +702,17 @@ export default function SignDefenderPage() {
 
           {/* Right HUD Cluster */}
           <div className="pointer-events-auto flex gap-3">
+            {/* Mode */}
+            <div
+              className={`border-[3px] border-black px-6 py-2 rounded-2xl flex items-center justify-center
+                ${mode === 'easy' ? 'bg-green-400' : mode === 'medium' ? 'bg-yellow-400' : 'bg-red-500'}`}
+              style={{ boxShadow: "4px 4px 0px 0px #000" }}
+            >
+              <p className="font-black uppercase text-lg text-black tracking-tighter italic">
+                {mode === 'easy' ? 'EASY' : mode === 'medium' ? 'NORMAL' : 'HARD'}
+              </p>
+            </div>
+
             {/* Wave */}
             <div
               className="bg-yellow-300 border-[3px] border-black px-6 py-2 rounded-2xl"
@@ -750,9 +809,9 @@ export default function SignDefenderPage() {
                 src={MONSTER_IMAGES[m.id % MONSTER_IMAGES.length]}
                 alt="Monster"
                 className="select-none"
-                style={{ 
-                  width: m.size * 0.5, 
-                  height: m.size * 0.5, 
+                style={{
+                  width: m.size * 0.5,
+                  height: m.size * 0.5,
                   objectFit: "contain",
                   filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.5))"
                 }}
