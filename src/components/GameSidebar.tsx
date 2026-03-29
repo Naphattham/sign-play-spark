@@ -117,7 +117,10 @@ export function GameSidebar({
           className="h-full w-64 bg-primary border-r-[3px] border-foreground flex flex-col"
         >
         <div className="p-6 border-b-[3px] border-foreground">
-          <h1 className="text-2xl font-display text-primary-foreground tracking-wide flex items-center gap-2">
+          <h1 
+            className="text-2xl font-display text-primary-foreground tracking-wide flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={onHome}
+          >
             <img src="/LOGO_SignMate.png" alt="SignMate" className="w-7 h-7 object-contain" />
             SignMate
           </h1>

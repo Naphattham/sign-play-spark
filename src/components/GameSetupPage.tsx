@@ -22,7 +22,7 @@ const gameCards = [
   },
   {
     id: 3,
-    icon: "spellcheck",
+    icon: "psychology",
     color: "bg-[#50fa7b]",
     title: "Sign Master Memory",
     description: "จับคู่วิดีโอภาษามือกับคำศัพท์ ยิ่ง Moves น้อย ยิ่งได้คะแนนสูง!",

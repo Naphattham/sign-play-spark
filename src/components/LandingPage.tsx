@@ -172,7 +172,10 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
 
         {/* Navigation */}
         <nav className="w-full py-3 px-4 sm:py-4 sm:px-6 md:py-6 md:px-8 flex justify-between items-center border-b-4 border-sq-black bg-white">
-          <div className="flex items-center gap-3">
+          <div 
+            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate("/")}
+          >
             <div className="bg-sq-pink p-2 rounded-xl sq-border">
               <img src="/LOGO_SignMate.png" alt="SignMate Logo" className="w-8 h-8 object-contain" />
             </div>
@@ -324,7 +327,13 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
         <footer className="bg-sq-pink py-6 px-4 sm:py-8 sm:px-6 md:py-12 md:px-8 border-t-4 border-sq-black mt-auto">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 md:gap-8">
 
-            <div className="flex items-center gap-3">
+            <div 
+              className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => {
+                navigate("/");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+            >
               <span className="brand-font text-2xl tracking-tight text-sq-cream">SignMate</span>
             </div>
 

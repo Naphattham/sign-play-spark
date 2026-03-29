@@ -47,7 +47,7 @@ const WORD_POOL = [
 // ─── Config ──────────────────────────────────────────────────────────────
 const DIFF_CONFIG: Record<Difficulty, { label: string; pairs: number; cols: number; penalty: number; bonusBase: number; maxMisses: number }> = {
   easy: { label: "Easy", pairs: 3, cols: 3, penalty: 5, bonusBase: 50, maxMisses: 5 },
-  medium: { label: "Medium", pairs: 6, cols: 4, penalty: 10, bonusBase: 100, maxMisses: 15 },
+  medium: { label: "Medium", pairs: 6, cols: 4, penalty: 10, bonusBase: 100, maxMisses: 10 },
   hard: { label: "Hard", pairs: 9, cols: 6, penalty: 10, bonusBase: 200, maxMisses: 20 },
 };
 
@@ -113,6 +113,18 @@ function MemoryCardTile({ card, isFlipping, onClick, isLocked, isMatchGlowing }:
   const isVisible = card.status === "flipped" || card.status === "matched" || isFlipping;
   const isMatched = card.status === "matched";
 
+  const [playKey, setPlayKey] = useState(0);
+
+  useEffect(() => {
+    if (isVisible && card.type === "video") {
+      // Delay remount to exactly when the front of the card faces the user (offsetting the flip animation)
+      const timer = setTimeout(() => {
+        setPlayKey((k) => k + 1);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, card.type]);
+
   const handleClick = () => {
     if (card.status !== "hidden" || isLocked) return;
     onClick(card.uid);
@@ -157,6 +169,7 @@ function MemoryCardTile({ card, isFlipping, onClick, isLocked, isMatchGlowing }:
         >
           {card.type === "video" ? (
             <img
+              key={`${card.uid}-${playKey}`}
               src={card.videoUrl}
               alt={card.term}
               className="w-full h-full object-cover rounded-md"
@@ -303,7 +316,7 @@ export default function SignMasterMemoryPage() {
         )
       );
       setFlippedUids([]);
-      
+
       const newPairs = matchedPairs + 1;
       setMatchedPairs(newPairs);
 
@@ -323,7 +336,7 @@ export default function SignMasterMemoryPage() {
       // ❌ Mismatch
       playMissSound();
       setShowMismatch(true);
-      
+
       const newMisses = misses + 1;
       setMisses(newMisses);
 
@@ -336,6 +349,8 @@ export default function SignMasterMemoryPage() {
           setPhase("gameover_lose");
         }, 3000);
       } else {
+        const delayMs = (cardA.type === "video" || cardB.type === "video") ? 2500 : 1200;
+
         setTimeout(() => {
           setDeck((prev) =>
             prev.map((c) =>
@@ -345,7 +360,7 @@ export default function SignMasterMemoryPage() {
           setFlippedUids([]);
           setIsLocked(false);
           setShowMismatch(false);
-        }, 1200);
+        }, delayMs);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -471,7 +486,7 @@ export default function SignMasterMemoryPage() {
                   <span className="text-lg uppercase">MEDIUM</span>
                   <div className="flex flex-col items-center opacity-90 text-[10px] sm:text-[11px] leading-tight mt-1">
                     <span>100 PTS | -10 PTS</span>
-                    <span>ผิดได้ 15 ครั้ง</span>
+                    <span>ผิดได้ 10 ครั้ง</span>
                   </div>
                 </button>
 
@@ -599,7 +614,7 @@ export default function SignMasterMemoryPage() {
                 Out of mistakes
               </p>
             </div>
-            
+
             <button
               onClick={() => setPhase("idle")}
               className="w-full neo-brutalism bg-primary text-white border-4 border-black text-xl md:text-2xl font-black py-4 px-6 rounded-xl hover:-translate-y-1 hover:shadow-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase flex justify-center items-center gap-2"
@@ -625,25 +640,25 @@ export default function SignMasterMemoryPage() {
 
         {/* HUD Header */}
         <header className="w-full p-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4 border-b-4 border-black bg-white dark:bg-slate-800 shrink-0 z-10">
-          <button 
+          <button
             onClick={() => setPhase("idle")}
             className="flex items-center gap-2 bg-white dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 px-6 py-2 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform active:translate-y-1 active:shadow-none"
           >
             <span className="material-symbols-outlined font-bold">arrow_back</span>
             <span className="font-bold text-lg tracking-wide uppercase">Exit</span>
           </button>
-          
+
           <div className="flex flex-wrap items-center justify-center gap-4">
             <div className="flex items-center bg-primary px-4 py-2 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-white">
               <span className="text-sm font-semibold uppercase opacity-90 mr-2">Score</span>
               <span className="text-2xl font-black">{calcScore(cfg.bonusBase, misses, cfg.penalty).toLocaleString()}</span>
             </div>
-            
+
             <div className="flex items-center bg-secondary-container px-4 py-2 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-on-secondary-container">
               <span className="text-sm font-semibold uppercase opacity-90 mr-2">Time</span>
               <span className="text-2xl font-black tabular-nums">{formatTime(elapsed)}</span>
             </div>
-            
+
             <div className="flex items-center bg-tertiary-container px-4 py-2 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-on-tertiary-container">
               <span className="text-sm font-semibold uppercase opacity-90 mr-2">Moves</span>
               <span className="text-2xl font-black tabular-nums">{moves}</span>
