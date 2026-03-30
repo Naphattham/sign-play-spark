@@ -481,12 +481,13 @@ export default function SignMasterMemoryPage() {
                 <button
                   onClick={() => setDifficulty("easy")}
                   className={`border-4 border-on-primary-fixed py-6 px-4 rounded-xl transition-all flex flex-col items-center gap-1 font-black
-                    ${difficulty === "easy"
+        ${difficulty === "easy"
                       ? "bg-green-400 text-white neo-shadow-lg -translate-y-1 scale-105"
                       : "bg-green-100 text-green-900 neo-shadow hover:-translate-y-0.5"
                     }`}
                 >
-                  <Smile className="w-8 h-8" fill="currentColor" />
+                  {/* ลบ fill ออก และเพิ่มความหนาเส้นนิดนึงให้เข้ากับฟอนต์ */}
+                  <Smile className="w-8 h-8" strokeWidth={2.5} />
                   <span className="text-lg uppercase">EASY</span>
                   <div className="flex flex-col items-center opacity-90 text-[10px] sm:text-[11px] leading-tight mt-1">
                     <span>50 PTS | -5 PTS</span>
@@ -498,12 +499,12 @@ export default function SignMasterMemoryPage() {
                 <button
                   onClick={() => setDifficulty("medium")}
                   className={`border-4 border-on-primary-fixed py-6 px-4 rounded-xl transition-all flex flex-col items-center gap-1 font-black
-                    ${difficulty === "medium"
+        ${difficulty === "medium"
                       ? "bg-yellow-400 text-white neo-shadow-lg -translate-y-1 scale-105"
                       : "bg-yellow-100 text-yellow-900 neo-shadow hover:-translate-y-0.5"
                     }`}
                 >
-                  <Meh className="w-8 h-8" fill="currentColor" />
+                  <Meh className="w-8 h-8" strokeWidth={2.5} />
                   <span className="text-lg uppercase">MEDIUM</span>
                   <div className="flex flex-col items-center opacity-90 text-[10px] sm:text-[11px] leading-tight mt-1">
                     <span>100 PTS | -10 PTS</span>
@@ -515,12 +516,12 @@ export default function SignMasterMemoryPage() {
                 <button
                   onClick={() => setDifficulty("hard")}
                   className={`border-4 border-on-primary-fixed py-6 px-4 rounded-xl transition-all flex flex-col items-center gap-1 font-black
-                    ${difficulty === "hard"
+        ${difficulty === "hard"
                       ? "bg-red-500 text-white neo-shadow-lg -translate-y-1 scale-105"
                       : "bg-red-100 text-red-900 neo-shadow hover:-translate-y-0.5"
                     }`}
                 >
-                  <Frown className="w-8 h-8" fill="currentColor" />
+                  <Frown className="w-8 h-8" strokeWidth={2.5} />
                   <span className="text-lg uppercase">HARD</span>
                   <div className="flex flex-col items-center opacity-90 text-[10px] sm:text-[11px] leading-tight mt-1">
                     <span>200 PTS | -10 PTS</span>
