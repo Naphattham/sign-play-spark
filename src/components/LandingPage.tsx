@@ -5,6 +5,7 @@ import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "@/lib/auth";
 import { database } from "@/lib/firebase";
 import { ref as dbRef, get } from "firebase/database";
 import { getVideoUrl } from "@/lib/categories";
+import { VideoPlayer } from "@/components/VideoPlayer";
 
 import generalImg from "@/asset/image/general.webp";
 
@@ -172,7 +173,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
 
         {/* Navigation */}
         <nav className="w-full py-3 px-4 sm:py-4 sm:px-6 md:py-6 md:px-8 flex justify-between items-center border-b-4 border-sq-black bg-white">
-          <div 
+          <div
             className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate("/")}
           >
@@ -290,7 +291,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
               {/* Camera Feed / Video Display */}
               <div className="bg-[#222] rounded-2xl p-2 aspect-square flex flex-col items-center justify-center border-3 border-sq-black overflow-hidden video-container">
                 <div className="w-full h-full relative">
-                  <video
+                  <VideoPlayer
                     key={selectedVideo}
                     src={selectedVideo}
                     autoPlay
@@ -317,7 +318,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
             </div>
 
             {/* Floating Achievement Tag */}
-            <div className="absolute -bottom-5 -left-5 bg-sq-pink text-white p-2 sm:p-3 rounded-xl sq-border rotate-[-5deg] flex items-center gap-1.5 sm:gap-2 hidden sm:flex">
+            <div className="absolute -bottom-5 -left-5 bg-sq-pink text-white p-2 sm:p-3 rounded-xl sq-border rotate-[-5deg] items-center gap-1.5 sm:gap-2 hidden sm:flex">
               <div className="bg-white/20 p-1.5 rounded-lg text-lg">🏆</div>
               <div>
                 <p className="text-[10px] font-bold uppercase">Daily Streak</p>
@@ -331,7 +332,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
         <footer className="bg-sq-pink py-6 px-4 sm:py-8 sm:px-6 md:py-12 md:px-8 border-t-4 border-sq-black mt-auto">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 md:gap-8">
 
-            <div 
+            <div
               className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => {
                 navigate("/");

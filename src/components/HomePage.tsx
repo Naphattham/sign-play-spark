@@ -1,4 +1,5 @@
 import { Category, getPhrasesByCategory, isPhraseCompletedCheck, getVideoUrl } from "@/lib/categories";
+import { VideoPlayer } from "@/components/VideoPlayer";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { getAvatarUrl } from "@/lib/avatar";
 import { useState, useEffect } from "react";
@@ -176,7 +177,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
             </div>
             <div className="brutal-card bg-card p-3 sm:p-4 md:p-6 rounded-xl flex flex-col md:flex-row gap-3 sm:gap-4 md:gap-6 items-center animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: '100ms' }}>
               <div className="w-full md:w-40 lg:w-48 aspect-video md:aspect-square bg-muted rounded-lg border-2 border-foreground overflow-hidden">
-                <video
+                <VideoPlayer
                   key={getVideoSrc()}
                   autoPlay
                   loop

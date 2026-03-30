@@ -14,6 +14,7 @@ import SignMasterMemoryPage from "@/pages/SignMasterMemoryPage";
 import { AudioProvider, useAudio } from "@/lib/audioContext";
 import { Volume2, VolumeX } from "lucide-react";
 import { getVideoUrl } from "@/lib/categories";
+import { VideoPlayer } from "@/components/VideoPlayer";
 
 const queryClient = new QueryClient();
 
@@ -46,7 +47,7 @@ function GlobalVideoPreloader({ videoFiles }: { videoFiles: { category: string, 
   return (
     <div style={{ display: "none" }} aria-hidden="true">
       {videoFiles.map((v, index) => (
-        <video
+        <VideoPlayer
           key={index}
           src={getVideoUrl(v.category, v.file)}
           preload="auto"

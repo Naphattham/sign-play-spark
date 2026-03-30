@@ -5,6 +5,7 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { auth } from "@/lib/firebase";
 import { addUserPoints } from "@/lib/auth";
 import { getVideoUrl } from "@/lib/categories";
+import { VideoPlayer } from "@/components/VideoPlayer";
 import { Star, Video, CheckCircle2, XCircle, SkipForward } from "lucide-react";
 
 
@@ -328,7 +329,7 @@ export default function SignAndMatchPage() {
                 ดูภาษามือแล้วเลือกคำที่ถูก
               </div>
 
-              <video
+              <VideoPlayer
                 key={currentQ.videoUrl}
                 src={currentQ.videoUrl}
                 autoPlay

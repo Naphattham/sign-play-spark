@@ -5,6 +5,7 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { auth } from "@/lib/firebase";
 import { addUserPoints } from "@/lib/auth";
 import { getVideoUrl } from "@/lib/categories";
+import { VideoPlayer } from "@/components/VideoPlayer";
 import { Star, Quote, CheckCircle2, XCircle, SkipForward } from "lucide-react";
 
 
@@ -349,7 +350,7 @@ export default function MatchAndSignPage() {
                 className={`group relative flex flex-col neo-brutalism rounded-2xl overflow-hidden transition-all duration-300 transform ${buttonClass} ${selectedOption === null ? 'hover:translate-x-[-2px] hover:translate-y-[-2px]' : ''}`}
               >
                 <div className="aspect-square w-full bg-black/5 flex items-center justify-center relative overflow-hidden">
-                  <video
+                  <VideoPlayer
                     key={opt}
                     src={opt}
                     autoPlay

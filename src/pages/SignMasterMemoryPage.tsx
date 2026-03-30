@@ -6,6 +6,7 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { auth } from "@/lib/firebase";
 import { addUserPoints } from "@/lib/auth";
 import { getVideoUrl } from "@/lib/categories";
+import { VideoPlayer } from "@/components/VideoPlayer";
 import { useAudio } from "@/lib/audioContext";
 
 // ─── Types ──────────────────────────────────────────────────────────────
@@ -180,7 +181,7 @@ function MemoryCardTile({ card, isFlipping, onClick, isLocked, isMatchGlowing }:
         >
           {shouldRenderContent ? (
             card.type === "video" ? (
-              <video
+              <VideoPlayer
                 key={`${card.uid}-${playKey}`}
                 src={card.videoUrl}
                 title={card.term}

@@ -1,5 +1,6 @@
 import type { Category } from "@/lib/categories";
 import { getVideoUrl } from "@/lib/categories";
+import { VideoPlayer } from "@/components/VideoPlayer";
 
 interface VideoCardProps {
   phrase: string;
@@ -90,7 +91,7 @@ export function VideoCard({ phrase, category, variant, byeStep, eatStep, isLive 
   const srcUrl = getVideoSrc();
 
   return (
-    <video
+    <VideoPlayer
       key={srcUrl}
       src={srcUrl}
       className="w-full h-full object-cover rounded-xl"
