@@ -5,6 +5,7 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { auth } from "@/lib/firebase";
 import { addUserPoints } from "@/lib/auth";
 import { getVideoUrl } from "@/lib/categories";
+import { Star, Video, CheckCircle2, XCircle, SkipForward } from "lucide-react";
 
 
 // Small helper to shuffle arrays
@@ -307,7 +308,7 @@ export default function SignAndMatchPage() {
           </div>
           <div className="flex-1 flex justify-end">
             <div className="neo-brutalism bg-white px-3 sm:px-4 py-2 rounded-xl flex items-center gap-2 font-black text-lg sm:text-xl text-primary">
-              <span className="material-symbols-outlined">stars</span>
+              <Star className="w-6 h-6" fill="currentColor" />
               {score}
             </div>
           </div>
@@ -323,7 +324,7 @@ export default function SignAndMatchPage() {
               <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10
               bg-black text-white text-xs font-black uppercase px-3 py-1 rounded-full tracking-widest
               flex items-center gap-1 whitespace-nowrap"> {/* 🚨 เติม whitespace-nowrap ตรงนี้ */}
-                <span className="material-symbols-outlined text-sm">videocam</span>
+                <Video className="w-4 h-4" />
                 ดูภาษามือแล้วเลือกคำที่ถูก
               </div>
 
@@ -390,15 +391,11 @@ export default function SignAndMatchPage() {
                   <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-20 rounded-2xl transition-opacity">
                     {term === currentQ.term && (
                       // 🚨 แก้ไขตรงนี้: จาก text-green-600 เป็น text-white 🚨
-                      <span className="material-symbols-outlined text-6xl sm:text-7xl text-white drop-shadow-md">
-                        check_circle
-                      </span>
+                      <CheckCircle2 className="text-6xl sm:text-7xl text-white drop-shadow-md w-14 h-14 sm:w-16 sm:h-16" />
                     )}
                     {term === selectedOption && !isCorrect && (
                       // 🚨 แก้ไขตรงนี้: จาก text-red-600 เป็น text-white 🚨
-                      <span className="material-symbols-outlined text-6xl sm:text-7xl text-white drop-shadow-md">
-                        cancel
-                      </span>
+                      <XCircle className="text-6xl sm:text-7xl text-white drop-shadow-md w-14 h-14 sm:w-16 sm:h-16" />
                     )}
                   </div>
                 )}
@@ -418,7 +415,7 @@ export default function SignAndMatchPage() {
                 : "shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
               }`}
           >
-            <span className="material-symbols-outlined">skip_next</span>
+            <SkipForward className="w-5 h-5" />
             SKIP
           </button>
         </div>

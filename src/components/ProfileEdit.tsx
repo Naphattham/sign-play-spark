@@ -45,10 +45,8 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
 
     // Set initial data immediately from auth.currentUser (no await, instant!)
     setUsername(user.displayName || "");
-    // อัปเดต photoURL อีกรอบเผื่อกรณี LocalStorage ว่าง
-    if (user.photoURL && !photoURL) setPhotoURL(user.photoURL);
-
-
+    // อัปเดต photoURL อีกรอบเผื่อกรณี LocalStorage ว่างและ Auth เพิ่งมา
+    setPhotoURL(prev => prev || user.photoURL);
 
     // Load additional data from database asynchronously (non-blocking)
     const loadDatabaseData = async () => {
@@ -59,11 +57,11 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
         if (snapshot.exists()) {
           const userData = snapshot.val();
 
-
           // Update with database values if available
           if (userData.bio !== undefined) setBio(userData.bio);
           if (userData.points !== undefined) setPoints(userData.points);
-          if (userData.photoURL && !photoURL) setPhotoURL(userData.photoURL);
+          // อัปเดต photoURL จาก DB ถ้าใน State ยังไม่มีค่า
+          setPhotoURL(prev => prev || userData.photoURL);
         }
       } catch (error) {
         console.error("Error loading database data:", error);
@@ -71,7 +69,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
     };
 
     loadDatabaseData();
-  }, [photoURL]);
+  }, []); // 🚨 แก้ไข: ปล่อย Dependency ว่างไว้ เพื่อให้ดึงข้อมูลจาก DB แค่ครั้งเดียวตอนโหลดหน้า
 
   const createCroppedImage = async (
     imageSrc: string,
@@ -112,7 +110,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
         } else {
           reject(new Error("Failed to create blob"));
         }
-      }, "image/jpeg", 1.0); // ใช้ Quality 1.0 ตรงนี้เพราะเดี๋ยวเราไปบีบอัดต่อ
+      }, "image/webp", 1.0); // ใช้ Quality 1.0 ตรงนี้เพราะเดี๋ยวเราไปบีบอัดต่อ
     });
   };
 
@@ -141,7 +139,6 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
       setPhotoURL(croppedUrl);
       setImageError(false); // Reset error state
       setShowCropper(false);
-
     } catch (error) {
       console.error("Error cropping image:", error);
       toast({
@@ -170,26 +167,28 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
 
       // ถ้ามีการอัปโหลดและ Crop รูปใหม่
       if (imageSrc && croppedArea && photoURL?.startsWith("blob:")) {
-        const croppedBlob = await createCroppedImage(imageSrc, croppedArea);
+        // 🚨 ใช้ fetch ดึง Blob จาก Object URL ที่เรามีอยู่แล้ว ไม่ต้องไป Render Canvas ใหม่
+        const croppedBlob = await fetch(photoURL).then(r => r.blob());
 
-        // 🚨 2. บีบอัดรูปภาพให้เล็กสุดๆ ก่อนอัปโหลด (ประมาณไม่เกิน 50KB) 🚨
+        // 🚨 2. บีบอัดและแปลงรูปภาพให้เป็น WebP ขนาดไม่เกิน 50KB
         const compressionOptions = {
-          maxSizeMB: 0.05,        // 🚨 ลดขนาดให้ไม่เกิน 0.05 MB (50 KB)
-          maxWidthOrHeight: 200,  // 🚨 ลดความละเอียดกว้าง/ยาวสูงสุดแค่ 200px
+          maxSizeMB: 0.05,        // ลดขนาดให้ไม่เกิน 0.05 MB (50 KB)
+          maxWidthOrHeight: 200,  // ลดความละเอียดกว้าง/ยาวสูงสุดแค่ 200px
           useWebWorker: true,
-          initialQuality: 0.6,    // 🚨 ลดคุณภาพเริ่มต้นลงเหลือ 60%
+          initialQuality: 0.8,    // ปรับ Quality เป็น 80% สำหรับ WebP
+          fileType: "image/webp", // 🚨 สั่งให้แปลงเป็นนามสกุล WebP
         };
 
         // แปลง Blob ที่ผ่านการบีบอัดแล้ว
         const compressedBlob = await imageCompression(croppedBlob as File, compressionOptions);
 
-        const fileName = `profile-photos/${user.uid}/${Date.now()}.jpg`;
+        // 🚨 3. ตั้งชื่อไฟล์เป็น .webp และเปลี่ยน contentType
+        const fileName = `profile-photos/${user.uid}/${Date.now()}.webp`;
         const imageRef = storageRef(storage, fileName);
 
-        // 🚨 3. ตั้งค่า Cache ให้เบราว์เซอร์จำรูปนี้ไว้ 1 ปี 🚨
         const metadata = {
           cacheControl: 'public,max-age=31536000',
-          contentType: 'image/jpeg',
+          contentType: 'image/webp', // 🚨 บันทึกเป็น WebP
         };
 
         // อัปโหลดไฟล์ที่โดนบีบอัดพร้อมยัด Metadata เข้าไป
@@ -217,7 +216,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
         setPhotoURL(uploadedPhotoURL);
         setImageError(false); // Reset error state
 
-        // 🚨 แอบจำ URL รูปใหม่ไว้ในเครื่อง เวลากดเข้ามาคราวหน้าจะได้โหลดทันที 🚨
+        // 🚨 แอบจำ URL รูปใหม่ไว้ในเครื่อง เวลากดเข้ามาคราวหน้าจะได้โหลดทันที
         localStorage.setItem("cached_avatar", uploadedPhotoURL);
       }
 
@@ -232,7 +231,6 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
         variant: "success",
         duration: 3000,
       });
-
 
     } catch (error) {
       console.error("Error saving profile:", error);

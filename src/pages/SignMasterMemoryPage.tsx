@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Star, HelpCircle, Smile, Meh, Frown, Play, RotateCcw, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LoadingScreen } from "@/components/LoadingScreen";
@@ -165,12 +166,7 @@ function MemoryCardTile({ card, isFlipping, onClick, isLocked, isMatchGlowing }:
             shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}
           style={{ backfaceVisibility: "hidden" }}
         >
-          <span
-            className="material-symbols-outlined text-white text-4xl md:text-5xl"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            star
-          </span>
+          <Star className="text-white w-10 h-10 md:w-12 md:h-12" fill="currentColor" />
         </div>
 
         {/* Front (revealed) */}
@@ -231,6 +227,7 @@ export default function SignMasterMemoryPage() {
   const [lastMatchAnim, setLastMatchAnim] = useState<string | null>(null);
   const [showMismatch, setShowMismatch] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
+  const [previewCounter, setPreviewCounter] = useState(3);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pointsAddedRef = useRef(false);
@@ -298,8 +295,14 @@ export default function SignMasterMemoryPage() {
     // Start 3s Preview Phase
     setIsPreviewing(true);
     setIsLocked(true);
+    setPreviewCounter(3);
+
+    const countInterval = setInterval(() => {
+      setPreviewCounter((prev) => Math.max(0, prev - 1));
+    }, 1000);
 
     setTimeout(() => {
+      clearInterval(countInterval);
       setIsPreviewing(false);
       setIsLocked(false);
       startTimer();
@@ -447,7 +450,7 @@ export default function SignMasterMemoryPage() {
             <section className="bg-surface-container-low border-4 border-on-primary-fixed rounded-xl p-3 neo-shadow">
               <h2 className="text-sm font-black uppercase tracking-tight mb-2 flex items-center gap-2">
                 <span className="bg-primary text-on-primary p-0.5 rounded-md">
-                  <span className="material-symbols-outlined text-base leading-none">help</span>
+                  <HelpCircle className="w-4 h-4" />
                 </span>
                 How to play
               </h2>
@@ -482,9 +485,7 @@ export default function SignMasterMemoryPage() {
                       : "bg-green-100 text-green-900 neo-shadow hover:-translate-y-0.5"
                     }`}
                 >
-                  <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    sentiment_satisfied
-                  </span>
+                  <Smile className="w-8 h-8" fill="currentColor" />
                   <span className="text-lg uppercase">EASY</span>
                   <div className="flex flex-col items-center opacity-90 text-[10px] sm:text-[11px] leading-tight mt-1">
                     <span>50 PTS | -5 PTS</span>
@@ -501,9 +502,7 @@ export default function SignMasterMemoryPage() {
                       : "bg-yellow-100 text-yellow-900 neo-shadow hover:-translate-y-0.5"
                     }`}
                 >
-                  <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    sentiment_neutral
-                  </span>
+                  <Meh className="w-8 h-8" fill="currentColor" />
                   <span className="text-lg uppercase">MEDIUM</span>
                   <div className="flex flex-col items-center opacity-90 text-[10px] sm:text-[11px] leading-tight mt-1">
                     <span>100 PTS | -10 PTS</span>
@@ -520,9 +519,7 @@ export default function SignMasterMemoryPage() {
                       : "bg-red-100 text-red-900 neo-shadow hover:-translate-y-0.5"
                     }`}
                 >
-                  <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    sentiment_extremely_dissatisfied
-                  </span>
+                  <Frown className="w-8 h-8" fill="currentColor" />
                   <span className="text-lg uppercase">HARD</span>
                   <div className="flex flex-col items-center opacity-90 text-[10px] sm:text-[11px] leading-tight mt-1">
                     <span>200 PTS | -10 PTS</span>
@@ -541,7 +538,7 @@ export default function SignMasterMemoryPage() {
                 className="bg-secondary-container text-on-secondary-container border-4 border-on-primary-fixed py-4 px-10 rounded-xl flex items-center justify-center gap-3 text-2xl font-black uppercase italic tracking-tighter neo-shadow-lg hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:translate-x-[4px] active:translate-y-[4px] active:shadow-none disabled:opacity-50"
               >
                 START GAME
-                <span className="material-symbols-outlined text-3xl fill-icon">play_arrow</span>
+                <Play className="w-7 h-7" fill="currentColor" />
               </button>
             </div>
 
@@ -630,12 +627,7 @@ export default function SignMasterMemoryPage() {
           <div className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-orange-400 rounded-full neo-shadow opacity-20 -z-10 pointer-events-none" />
 
           <div className="bg-white dark:bg-slate-800 border-4 border-black p-8 md:p-12 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center max-w-lg w-full flex flex-col items-center z-10">
-            <span
-              className="material-symbols-outlined text-red-500 text-[100px] mb-4 drop-shadow-md"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              sentiment_extremely_dissatisfied
-            </span>
+            <Frown className="text-red-500 w-24 h-24 mb-4 drop-shadow-md" fill="currentColor" />
             <h1 className="text-6xl md:text-7xl font-black uppercase italic tracking-tighter text-red-600 mb-2">
               YOU LOSE
             </h1>
@@ -649,7 +641,7 @@ export default function SignMasterMemoryPage() {
               onClick={() => setPhase("idle")}
               className="w-full neo-brutalism bg-primary text-white border-4 border-black text-xl md:text-2xl font-black py-4 px-6 rounded-xl hover:-translate-y-1 hover:shadow-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase flex justify-center items-center gap-2"
             >
-              <span className="material-symbols-outlined font-black text-2xl">refresh</span>
+              <RotateCcw className="w-6 h-6" />
               TRY AGAIN
             </button>
           </div>
@@ -666,7 +658,21 @@ export default function SignMasterMemoryPage() {
   return (
     <>
       {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
-      <main className="h-screen overflow-hidden flex flex-col items-center bg-[hsl(44,95%,96%)] dark:bg-slate-900">
+      <main className="h-screen overflow-hidden flex flex-col items-center bg-[hsl(44,95%,96%)] dark:bg-slate-900 relative">
+
+        {/* Preview Overlay */}
+        {isPreviewing && (
+          <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="flex flex-col items-center animate-bounce mt-[-10vh]">
+              <span className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter text-primary drop-shadow-lg">
+                ให้เวลาจำ!
+              </span>
+              <span className="mt-4 text-5xl md:text-7xl font-black text-slate-800 dark:text-white drop-shadow-lg">
+                {previewCounter} วินาที
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* HUD Header */}
         <header className="w-full p-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4 border-b-4 border-black bg-white dark:bg-slate-800 shrink-0 z-10">
@@ -674,7 +680,7 @@ export default function SignMasterMemoryPage() {
             onClick={() => setPhase("idle")}
             className="flex items-center gap-2 bg-white dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 px-6 py-2 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform active:translate-y-1 active:shadow-none"
           >
-            <span className="material-symbols-outlined font-bold">arrow_back</span>
+            <ArrowLeft className="w-5 h-5" />
             <span className="font-bold text-lg tracking-wide uppercase">Exit</span>
           </button>
 

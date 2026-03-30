@@ -20,31 +20,31 @@ const sizeClasses = {
  * Avatar component that displays user profile photo or generated avatar
  * Supports Google profile photos and fallback avatar generation
  */
-export function Avatar({ 
-  photoURL, 
-  displayName, 
+export function Avatar({
+  photoURL,
+  displayName,
   email,
-  size = "md", 
-  className = "" 
+  size = "md",
+  className = ""
 }: AvatarProps) {
   const [imageError, setImageError] = useState(false);
-  
+
   // Get fallback seed for avatar generation
   const seed = displayName || email || "user";
   const avatarUrl = getAvatarUrl(photoURL, seed);
   const initials = getInitials(displayName);
-  
+
   // If image fails to load or no photo URL, show generated avatar or initials
   const shouldShowGeneratedAvatar = !photoURL || imageError;
 
   return (
-    <div 
+    <div
       className={`${sizeClasses[size]} rounded-full border-[3px] border-foreground bg-secondary flex items-center justify-center font-display text-secondary-foreground overflow-hidden ${className}`}
       style={{ boxShadow: "3px 3px 0px 0px hsl(0 0% 0%)" }}
     >
       {shouldShowGeneratedAvatar ? (
         // Use DiceBear generated avatar as background
-        <div 
+        <div
           className="w-full h-full bg-cover bg-center"
           style={{ backgroundImage: `url(${generateAvatarUrl(seed)})` }}
           title={displayName || email || "User"}
@@ -57,9 +57,9 @@ export function Avatar({
           </div>
         </div>
       ) : (
-        <img 
-          src={avatarUrl} 
-          alt={displayName || "User avatar"} 
+        <img
+          src={avatarUrl}
+          alt={displayName || "User avatar"}
           className="w-full h-full object-cover"
           onError={() => setImageError(true)}
         />

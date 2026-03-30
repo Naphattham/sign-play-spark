@@ -1,4 +1,4 @@
-import { X, Check } from "lucide-react";
+import { X, Check, AlertTriangle } from "lucide-react";
 import { Phrase, checkPhraseMatch, isPhraseCompletedCheck } from "@/lib/categories";
 import { VideoCard } from "@/components/VideoCard";
 import { WebcamView } from "@/components/WebcamView";
@@ -629,9 +629,7 @@ export const PredictionOverlay = ({
                               {signRecognition.error && (
                                 <div className="bg-red-500/95 backdrop-blur-sm border-[2px] border-foreground rounded-lg px-3 py-2 font-bold text-xs text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] max-w-[180px]">
                                   <div className="flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-[14px]">
-                                      warning
-                                    </span>
+                                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                                     <span>ไม่พบกล้อง / เกิดข้อผิดพลาด</span>
                                   </div>
                                 </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Star, CheckCircle2, Gift, CalendarDays, Timer, BookOpen, BookMarked } from "lucide-react";
 import { auth, database } from "@/lib/firebase";
 import { ref, get, set } from "firebase/database";
 
@@ -230,9 +231,7 @@ export function QuestView({ streak }: QuestViewProps) {
 
         <section className="mb-8 sm:mb-12 md:mb-16">
           <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mb-3 sm:mb-4 md:mb-6">
-            <span className="material-symbols-outlined text-2xl sm:text-3xl md:text-4xl text-primary font-bold">
-              hotel_class
-            </span>
+            <Star className="text-2xl sm:text-3xl md:text-4xl text-primary w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10" fill="currentColor" />
             <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black uppercase">
               ALL QUESTS
             </h3>
@@ -256,9 +255,7 @@ export function QuestView({ streak }: QuestViewProps) {
                   </p>
                 </div>
                 <div className={`${welcomeClaimed ? "bg-green-200" : "bg-secondary"} p-2 border-[3px] border-foreground rounded-lg flex flex-col items-center shrink-0`}>
-                  <span className="material-symbols-outlined font-bold">
-                    {welcomeClaimed ? "check_circle" : "card_giftcard"}
-                  </span>
+                  {welcomeClaimed ? <CheckCircle2 className="w-6 h-6" /> : <Gift className="w-6 h-6" />}
                   <span className="text-xs font-black">100 PTS</span>
                 </div>
               </div>
@@ -281,7 +278,7 @@ export function QuestView({ streak }: QuestViewProps) {
                   disabled
                   className="w-full py-3 bg-green-200 border-[3px] border-foreground rounded-lg font-black uppercase cursor-not-allowed mt-2 flex items-center justify-center gap-2"
                 >
-                  <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                  <CheckCircle2 className="w-5 h-5" />
                   รับรางวัลแล้ว!
                 </button>
               ) : (
@@ -311,9 +308,7 @@ export function QuestView({ streak }: QuestViewProps) {
                   </p>
                 </div>
                 <div className={`${dailyLoginClaimed ? "bg-green-200" : "bg-primary text-white"} p-2 border-[3px] border-foreground rounded-lg flex flex-col items-center shrink-0`}>
-                  <span className="material-symbols-outlined font-bold">
-                    {dailyLoginClaimed ? "check_circle" : "event"}
-                  </span>
+                  {dailyLoginClaimed ? <CheckCircle2 className="w-6 h-6" /> : <CalendarDays className="w-6 h-6" />}
                   <span className="text-xs font-black">50 PTS</span>
                 </div>
               </div>
@@ -336,7 +331,7 @@ export function QuestView({ streak }: QuestViewProps) {
                   disabled
                   className="w-full py-3 bg-green-200 border-[3px] border-foreground rounded-lg font-black uppercase cursor-not-allowed mt-2 flex items-center justify-center gap-2"
                 >
-                  <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                  <CheckCircle2 className="w-5 h-5" />
                   รับรางวัลแล้ว!
                 </button>
               ) : (
@@ -366,9 +361,7 @@ export function QuestView({ streak }: QuestViewProps) {
                   </p>
                 </div>
                 <div className={`${dailyPracticeClaimed ? "bg-green-200" : "bg-primary text-white"} p-2 border-[3px] border-foreground rounded-lg flex flex-col items-center shrink-0`}>
-                  <span className="material-symbols-outlined font-bold">
-                    {dailyPracticeClaimed ? "check_circle" : "timer"}
-                  </span>
+                  {dailyPracticeClaimed ? <CheckCircle2 className="w-6 h-6" /> : <Timer className="w-6 h-6" />}
                   <span className="text-xs font-black">100 PTS</span>
                 </div>
               </div>
@@ -391,7 +384,7 @@ export function QuestView({ streak }: QuestViewProps) {
                   disabled
                   className="w-full py-3 bg-green-200 border-[3px] border-foreground rounded-lg font-black uppercase cursor-not-allowed mt-2 flex items-center justify-center gap-2"
                 >
-                  <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                  <CheckCircle2 className="w-5 h-5" />
                   รับรางวัลแล้ว!
                 </button>
               ) : practiceMinutes >= 30 ? (
@@ -428,9 +421,7 @@ export function QuestView({ streak }: QuestViewProps) {
                   </p>
                 </div>
                 <div className={`${learn5WordsClaimed ? "bg-green-200" : "bg-primary text-white"} p-2 border-[3px] border-foreground rounded-lg flex flex-col items-center shrink-0`}>
-                  <span className="material-symbols-outlined font-bold">
-                    {learn5WordsClaimed ? "check_circle" : "menu_book"}
-                  </span>
+                  {learn5WordsClaimed ? <CheckCircle2 className="w-6 h-6" /> : <BookOpen className="w-6 h-6" />}
                   <span className="text-xs font-black">30 PTS</span>
                 </div>
               </div>
@@ -453,7 +444,7 @@ export function QuestView({ streak }: QuestViewProps) {
                   disabled
                   className="w-full py-3 bg-green-200 border-[3px] border-foreground rounded-lg font-black uppercase cursor-not-allowed mt-2 flex items-center justify-center gap-2"
                 >
-                  <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                  <CheckCircle2 className="w-5 h-5" />
                   รับรางวัลแล้ว!
                 </button>
               ) : completedPhrasesCount >= 5 ? (
@@ -490,9 +481,7 @@ export function QuestView({ streak }: QuestViewProps) {
                   </p>
                 </div>
                 <div className={`${learn10WordsClaimed ? "bg-green-200" : "bg-primary text-white"} p-2 border-[3px] border-foreground rounded-lg flex flex-col items-center shrink-0`}>
-                  <span className="material-symbols-outlined font-bold">
-                    {learn10WordsClaimed ? "check_circle" : "auto_stories"}
-                  </span>
+                  {learn10WordsClaimed ? <CheckCircle2 className="w-6 h-6" /> : <BookMarked className="w-6 h-6" />}
                   <span className="text-xs font-black">100 PTS</span>
                 </div>
               </div>
@@ -515,7 +504,7 @@ export function QuestView({ streak }: QuestViewProps) {
                   disabled
                   className="w-full py-3 bg-green-200 border-[3px] border-foreground rounded-lg font-black uppercase cursor-not-allowed mt-2 flex items-center justify-center gap-2"
                 >
-                  <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                  <CheckCircle2 className="w-5 h-5" />
                   รับรางวัลแล้ว!
                 </button>
               ) : completedPhrasesCount >= 10 ? (

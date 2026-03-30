@@ -15,47 +15,8 @@ const rankIcon = (rank: number) => {
 
 export function LeaderboardView() {
   const { leaderboardData, loading: dataLoading } = useLeaderboard();
-  
-  // 🚨 State ใหม่สำหรับเช็คว่าโหลดรูปเสร็จหรือยัง
-  const [imagesPreloaded, setImagesPreloaded] = useState(false);
 
-  useEffect(() => {
-    // ถ้าข้อมูล Firebase ยังมาไม่ถึง ให้รอไปก่อน
-    if (dataLoading) return;
-
-    // ถ้าไม่มีข้อมูลผู้เล่นเลย ก็ไม่ต้องรอโหลดรูป
-    if (leaderboardData.length === 0) {
-      setImagesPreloaded(true);
-      return;
-    }
-
-    // 🚨 เริ่มกระบวนการ Preload รูปภาพทั้งหมด
-    let loadedCount = 0;
-    
-    // ดึง URL ทั้งหมดออกมา (ถ้ารูปโปรไฟล์ไม่มี ให้ดึงรูป Default Avatar แทน)
-    const urlsToLoad = leaderboardData.map(
-      (entry) => entry.photoURL || getAvatarUrl(null, entry.username || "user")
-    );
-    const totalUrls = urlsToLoad.length;
-
-    urlsToLoad.forEach((url) => {
-      const img = new Image();
-      img.src = url;
-
-      // นับจำนวนรูปที่โหลดเสร็จ (ไม่ว่าจะสำเร็จหรือ Error ก็ให้นับ เพื่อไม่ให้หน้าจอค้าง)
-      img.onload = () => {
-        loadedCount++;
-        if (loadedCount === totalUrls) setImagesPreloaded(true);
-      };
-      img.onerror = () => {
-        loadedCount++;
-        if (loadedCount === totalUrls) setImagesPreloaded(true);
-      };
-    });
-  }, [leaderboardData, dataLoading]);
-
-  // 🚨 เช็ค Loading ควบ 2 เงื่อนไข (รอข้อมูล + รอกระบวนการ Preload รูปเสร็จ)
-  if (dataLoading || !imagesPreloaded) {
+  if (dataLoading) {
     return (
       <div className="max-w-4xl mx-auto flex items-center justify-center h-64">
         <div className="text-center">

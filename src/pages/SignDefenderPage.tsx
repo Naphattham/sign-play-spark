@@ -22,6 +22,14 @@ import heartImg from "@/asset/image/monster/heart.webp";
 
 const MONSTER_IMAGES = [m1, m2, m3, m4, m5, m6, m7, m8, m9];
 
+// ─── Shared Camera Constraints ────────────────────────────────────────────────
+const VIDEO_CONSTRAINTS = {
+  facingMode: "user",
+  width: { ideal: 640 },
+  height: { ideal: 480 },
+  frameRate: { ideal: 30 },
+};
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Monster {
   id: number;
@@ -90,7 +98,6 @@ function randBetween(min: number, max: number) {
 }
 
 function spawnMonster(id: number, mode: "easy" | "medium" | "hard"): Monster {
-  // Exclude bottom edge (y=100) to prevent overlapping with bottom UI/Webcam
   const edge = Math.floor(Math.random() * 3);
   let x = 50, y = 50;
   if (edge === 0) { x = randBetween(5, 95); y = 0; }
@@ -197,28 +204,33 @@ export default function SignDefenderPage() {
   }, []);
 
   // ── Webcam / MediaPipe refs ──────────────────────────────────────────────
-  // 🔑 Webcam is always mounted (hidden when not playing) so refs are stable
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [webcamVideo, setWebcamVideo] = useState<HTMLVideoElement | null>(null);
   const [webcamCanvas, setWebcamCanvas] = useState<HTMLCanvasElement | null>(null);
 
-  // Poll for the video element and synchronize refs when phase changes
+  // 🚨 1. แก้ไขระบบ Polling กล้องให้แม่นยำขึ้น
   useEffect(() => {
+    // ล้างค่าเก่าทิ้งทุกครั้งที่สลับ Phase เพื่อป้องกันการถือ Ref ค้าง
+    setWebcamVideo(null);
+    setWebcamCanvas(null);
+
+    if (!cameraPermissionGranted) return;
+
     const interval = setInterval(() => {
       const video = webcamRef.current?.video;
       const canvas = canvasRef.current;
 
-      // Wait for HAVE_ENOUGH_DATA (4) before locking in the refs
-      if (video && video.readyState === 4 && canvas) {
+      // ต้องมั่นใจว่า readyState >= 2 (เบราว์เซอร์รับสตรีมและทราบขนาดวิดีโอแล้ว)
+      if (video && video.readyState >= 2 && canvas) {
         setWebcamVideo(video);
         setWebcamCanvas(canvas);
         clearInterval(interval);
       }
-    }, 200);
+    }, 150);
 
     return () => clearInterval(interval);
-  }, [phase]);
+  }, [phase, cameraPermissionGranted]);
 
   // ── Game state refs ──────────────────────────────────────────────────────
   const phaseRef = useRef<"idle" | "playing" | "gameover">("idle");
@@ -229,21 +241,21 @@ export default function SignDefenderPage() {
 
   useEffect(() => { phaseRef.current = phase; }, [phase]);
 
-
-
   // ── onPrediction (stable ref to avoid recreating hook deps) ─────────────
   const onPredictionRef = useRef<(p: any) => void>(() => { });
-  // Stable ref so onPredictionRef can call clearBuffer without a stale closure
   const clearBufferRef = useRef<() => void>(() => { });
+  
   onPredictionRef.current = (prediction: any) => {
+    // ป้องกันไม่ให้ Game Logic ทำงานถ้ายังไม่เริ่มเล่น
     if (phaseRef.current !== "playing" || isPausedRef.current) return;
+    
     if (!prediction.success) return;
     if (prediction.confidence < CONFIDENCE_THRESHOLD) return;
 
     const pred: string = prediction.prediction ? prediction.prediction.trim().toLowerCase() : "";
     const now = Date.now();
 
-    // Debounce — same sign within 1 s won't re-fire
+    // Debounce
     if (pred === lastKilledRef.current.pred && now - lastKilledRef.current.time < 1000) return;
 
     setMonsters(prev => {
@@ -255,24 +267,22 @@ export default function SignDefenderPage() {
       const points = mode === "easy" ? 5 : mode === "hard" ? 15 : 10;
       setScore(s => s + points);
       setTimeout(() => setPowPos(null), 700);
-      // 🔑 Flush stale buffer so AI starts fresh for the next gesture
+      
       clearBufferRef.current();
       return prev.filter((_, i) => i !== idx);
     });
   };
 
-  // Stable wrapper so the hook never gets a new function reference
   const stableOnPrediction = useCallback((p: any) => onPredictionRef.current(p), []);
 
   // ── MediaPipe Holistic ───────────────────────────────────────────────────
-  // enabled = true only while playing; MediaPipe runs background buffering always
   const signRecognition = useSignAndDistance({
     videoElement: webcamVideo,
     canvasElement: webcamCanvas,
-    enabled: phase === "playing" && cameraPermissionGranted,
+    // 🚨 2. เปิดใช้งานตลอดเวลาเพื่อให้โมเดล Buffer ไว้ล่วงหน้าตั้งแต่หน้า Idle!
+    enabled: cameraPermissionGranted, 
     onPrediction: stableOnPrediction,
   });
-  // Keep clearBufferRef in sync with the latest hook reference
   clearBufferRef.current = signRecognition.clearBuffer;
 
   // ── Game Loop ─────────────────────────────────────────────────────────────
@@ -307,8 +317,6 @@ export default function SignDefenderPage() {
 
     frameRef.current = requestAnimationFrame(tick);
   }, []);
-
-
 
   // ── Spawner ───────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -374,50 +382,24 @@ export default function SignDefenderPage() {
     setPhase("gameover");
   };
 
-  const renderHearts = () =>
-    Array.from({ length: 3 }, (_, i) => (
-      <img key={i} src={heartImg} alt="Heart" className={`w-6 h-6 object-contain ${i < hp ? "opacity-100" : "opacity-20 grayscale"}`} draggable={false} />
-    ));
-
   const currentPred = signRecognition.currentPrediction;
   const currentConf = signRecognition.currentConfidence;
   const bufferPct = Math.round((signRecognition.bufferLength / 40) * 100);
   const isReady = signRecognition.bufferLength >= 40;
-
-  // ─── Shared Webcam Strip (always mounted) ─────────────────────────────────
-  // 🔑 Always in DOM so refs are available immediately after mount
-  // Hidden webcam elements – always mounted, out of visual flow
-  const HiddenWebcam = cameraPermissionGranted ? (
-    <div className="fixed" style={{ width: 1, height: 1, opacity: 0, pointerEvents: "none", top: 0, left: 0 }}>
-      <Webcam
-        ref={webcamRef}
-        audio={false}
-        mirrored
-        onUserMediaError={handleUserMediaError}
-        videoConstraints={{
-          facingMode: "user",
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          frameRate: { ideal: 30 },
-        }}
-        style={{ width: 1, height: 1 }}
-      />
-      <canvas ref={canvasRef} style={{ width: 1, height: 1 }} />
-    </div>
-  ) : null;
 
   // ─── GAME OVER ────────────────────────────────────────────────────────────
   if (phase === "gameover") {
     return (
       <>
         {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
-        <main className="min-h-screen flex flex-col bg-background">
+        <main className="min-h-screen flex flex-col bg-background relative">
           <div className="flex-1 flex items-center justify-center p-6">
-            <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-[2rem] p-10 text-center w-full max-w-md">
+            <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-[2rem] p-10 text-center w-full max-w-md z-10">
               <p className="text-xs font-black uppercase tracking-widest mb-1 text-muted-foreground">WAVE {wave}</p>
               <h2 className="text-6xl font-black uppercase tracking-tighter mb-6 text-foreground whitespace-nowrap">
                 GAME <span className="text-primary">OVER</span>
-              </h2>              <div className="neo-brutalism bg-secondary rounded-2xl px-8 py-4 mb-8 inline-block">
+              </h2>              
+              <div className="neo-brutalism bg-secondary rounded-2xl px-8 py-4 mb-8 inline-block">
                 <p className="text-xs font-black uppercase tracking-wider text-foreground opacity-70">Final Score</p>
                 <p className="text-5xl font-black text-foreground">{score}</p>
               </div>
@@ -441,8 +423,14 @@ export default function SignDefenderPage() {
               </div>
             </div>
           </div>
-          {/* 🔑 Keep webcam mounted even on game-over so MediaPipe stays warm */}
-          {HiddenWebcam}
+          
+          {/* ซ่อนกล้องไว้เพื่อให้สตรีมไม่ถูกตัดตอนสลับ Phase */}
+          {cameraPermissionGranted && (
+            <div className="fixed top-0 left-0 w-1 h-1 opacity-0 pointer-events-none overflow-hidden">
+              <Webcam ref={webcamRef} audio={false} videoConstraints={VIDEO_CONSTRAINTS} />
+              <canvas ref={canvasRef} />
+            </div>
+          )}
         </main>
       </>
     );
@@ -553,7 +541,7 @@ export default function SignDefenderPage() {
                         audio={false}
                         mirrored
                         onUserMediaError={handleUserMediaError}
-                        videoConstraints={{ facingMode: "user" }}
+                        videoConstraints={VIDEO_CONSTRAINTS}
                         className="w-full h-full object-cover opacity-80"
                         style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}
                       />
@@ -653,12 +641,10 @@ export default function SignDefenderPage() {
     );
   }
 
-
   // ─── PLAYING SCREEN ───────────────────────────────────────────────────────
   return (
     <>
       {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
-      {HiddenWebcam}
 
       {/* ── Exit Modal ── */}
       {showExitModal && (
@@ -846,12 +832,7 @@ export default function SignDefenderPage() {
                   audio={false}
                   mirrored
                   onUserMediaError={handleUserMediaError}
-                  videoConstraints={{
-                    facingMode: "user",
-                    width: { ideal: 640 },
-                    height: { ideal: 480 },
-                    frameRate: { ideal: 30 },
-                  }}
+                  videoConstraints={VIDEO_CONSTRAINTS}
                   className="w-full h-full object-cover opacity-90"
                   style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}
                 />

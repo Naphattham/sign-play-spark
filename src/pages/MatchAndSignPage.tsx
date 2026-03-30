@@ -5,6 +5,7 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { auth } from "@/lib/firebase";
 import { addUserPoints } from "@/lib/auth";
 import { getVideoUrl } from "@/lib/categories";
+import { Star, Quote, CheckCircle2, XCircle, SkipForward } from "lucide-react";
 
 
 // A small helper to shuffle arrays
@@ -301,7 +302,7 @@ export default function MatchAndSignPage() {
           </div>
           <div className="flex-1 flex justify-end">
             <div className="neo-brutalism bg-white px-3 sm:px-4 py-2 rounded-xl flex items-center gap-2 font-black text-lg sm:text-xl text-primary">
-              <span className="material-symbols-outlined">stars</span>
+              <Star className="w-6 h-6" fill="currentColor" />
               {score}
             </div>
           </div>
@@ -312,8 +313,9 @@ export default function MatchAndSignPage() {
             <div className="absolute inset-0 bg-black rounded-[2rem] translate-x-2 translate-y-2 sm:translate-x-3 sm:translate-y-3"></div>
             <div className="relative bg-primary text-white border-4 border-black rounded-[2rem] p-8 sm:p-12 text-center overflow-hidden">
               <div className="absolute top-4 left-6 opacity-20 transform -rotate-12">
-                <span className="material-symbols-outlined text-6xl" data-icon="format_quote">format_quote</span>
+                <Quote className="w-14 h-14" />
               </div>
+
 
               <h3 className="text-5xl sm:text-7xl md:text-8xl font-black mb-2 tracking-tighter">{currentQ?.term}</h3>
               <p className="text-lg sm:text-xl md:text-2xl font-bold opacity-90 uppercase tracking-[0.2em]">{currentQ?.translation}</p>
@@ -361,10 +363,10 @@ export default function MatchAndSignPage() {
                   {selectedOption !== null && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-20 transition-opacity">
                       {opt === currentQ?.correct && (
-                        <span className="material-symbols-outlined text-5xl sm:text-6xl text-green-500 bg-white rounded-full drop-shadow-md p-2">check_circle</span>
+                        <CheckCircle2 className="text-5xl sm:text-6xl text-green-500 bg-white rounded-full drop-shadow-md p-2 w-14 h-14 sm:w-16 sm:h-16" />
                       )}
                       {opt === selectedOption && !isCorrect && (
-                        <span className="material-symbols-outlined text-5xl sm:text-6xl text-red-500 bg-white rounded-full drop-shadow-md p-2">cancel</span>
+                        <XCircle className="text-5xl sm:text-6xl text-red-500 bg-white rounded-full drop-shadow-md p-2 w-14 h-14 sm:w-16 sm:h-16" />
                       )}
                     </div>
                   )}
@@ -386,7 +388,7 @@ export default function MatchAndSignPage() {
             onClick={handleSkip}
             className={`neo-brutalism bg-white border-4 border-black px-6 py-3 rounded-xl font-black text-base transition-all flex items-center gap-2 ${selectedOption !== null ? 'opacity-50 cursor-not-allowed' : 'shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none'}`}
           >
-            <span className="material-symbols-outlined" data-icon="skip_next">skip_next</span>
+            <SkipForward className="w-5 h-5" />
             SKIP WORD
           </button>
         </div>

@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { Puzzle, FileSearch, Brain, Shield } from "lucide-react";
 
 const gameCards = [
   {
@@ -40,7 +41,16 @@ const gameCards = [
   },
 ];
 
+const iconMap: Record<number, React.ReactNode> = {
+  1: <Puzzle className="text-black w-12 h-12 transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3" />,
+  2: <FileSearch className="text-black w-12 h-12 transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3" />,
+  3: <Brain className="text-black w-12 h-12 transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3" />,
+  4: <Shield className="text-black w-12 h-12 transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3" />,
+};
+
+
 export function GameSetupPage() {
+
   const navigate = useNavigate();
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
 
@@ -85,11 +95,7 @@ export function GameSetupPage() {
                     className={`aspect-square w-full neo-brutalism-sm ${card.color} flex items-center justify-center rounded-lg overflow-hidden relative
                       transition-all duration-300 ease-in-out group-hover:scale-[1.03]`}
                   >
-                    <span
-                      className="material-symbols-outlined text-6xl text-black transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3"
-                    >
-                      {card.icon}
-                    </span>
+                    {iconMap[card.id]}
                     {!card.available && (
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                         <span className="bg-white/90 text-black text-[10px] font-black uppercase px-2 py-0.5 rounded tracking-wider">
