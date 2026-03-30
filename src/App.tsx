@@ -42,15 +42,16 @@ const PRELOAD_VIDEOS = [
 ];
 
 function GlobalVideoPreloader({ videoFiles }: { videoFiles: { category: string, file: string }[] }) {
-  // Preload animated WebP images via hidden img tags
+  // Preload animated WebM videos via hidden video tags
   return (
     <div style={{ display: "none" }} aria-hidden="true">
       {videoFiles.map((v, index) => (
-        <img
+        <video
           key={index}
           src={getVideoUrl(v.category, v.file)}
-          loading="eager"
-          alt=""
+          preload="auto"
+          muted
+          playsInline
         />
       ))}
     </div>

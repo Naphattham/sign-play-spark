@@ -290,10 +290,14 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
               {/* Camera Feed / Video Display */}
               <div className="bg-[#222] rounded-2xl p-2 aspect-square flex flex-col items-center justify-center border-3 border-sq-black overflow-hidden video-container">
                 <div className="w-full h-full relative">
-                  <img
+                  <video
                     key={selectedVideo}
                     src={selectedVideo}
-                    loading="eager"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="auto"
                     className="w-full h-full object-cover rounded-xl video-fade-in absolute inset-0"
                   />
                 </div>

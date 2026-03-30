@@ -309,10 +309,14 @@ export function CategoryBrowsePage() {
             {/* Video Player */}
             <div className="p-4 flex flex-col items-center justify-center flex-shrink-0">
               <div className="bg-[#222] rounded-2xl overflow-hidden sq-border aspect-square w-full max-w-md">
-                <img
+                <video
                   key={getVideoSrc(selectedVideo.phrase, selectedVideo.category)}
                   src={getVideoSrc(selectedVideo.phrase, selectedVideo.category)}
-                  loading="eager"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="auto"
                   className="w-full h-full object-cover"
                 />
               </div>

@@ -327,10 +327,14 @@ export default function SignAndMatchPage() {
                 ดูภาษามือแล้วเลือกคำที่ถูก
               </div>
 
-              <img
+              <video
                 key={currentQ.videoUrl}
                 src={currentQ.videoUrl}
-                loading="eager"
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
                 className="w-full aspect-square object-cover"
               />
 

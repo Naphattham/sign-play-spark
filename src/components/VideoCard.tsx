@@ -90,10 +90,15 @@ export function VideoCard({ phrase, category, variant, byeStep, eatStep, isLive 
   const srcUrl = getVideoSrc();
 
   return (
-    <img
+    <video
+      key={srcUrl}
       src={srcUrl}
-      loading="eager"
       className="w-full h-full object-cover rounded-xl"
+      autoPlay
+      loop
+      muted
+      playsInline
+      preload="auto"
     />
   );
 }

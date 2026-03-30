@@ -184,13 +184,16 @@ function MemoryCardTile({ card, isFlipping, onClick, isLocked, isMatchGlowing }:
         >
           {shouldRenderContent ? (
             card.type === "video" ? (
-              <img
+              <video
                 key={`${card.uid}-${playKey}`}
                 src={card.videoUrl}
-                alt={card.term}
+                title={card.term}
                 className="w-full h-full object-cover rounded-md"
-                loading="eager"
-                decoding="async"
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
               />
             ) : (
               <div className="flex flex-col items-center justify-center px-1 gap-1">
