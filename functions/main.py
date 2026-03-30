@@ -11,10 +11,6 @@ import os
 import json
 import base64
 import pickle
-import numpy as np
-import cv2
-import mediapipe as mp
-import tensorflow as tf
 
 # Initialize Firebase Admin
 initialize_app()
@@ -75,7 +71,6 @@ def get_tf():
     global _tf
     if _tf is None:
         import tensorflow as tf
-        # ตั้งค่าให้ GPU คืน Memory (ถ้ามี)
         gpus = tf.config.list_physical_devices('GPU')
         if gpus:
             try:
@@ -128,17 +123,24 @@ def get_holistic():
 def normalize_frame(frame):
     np = get_np()
     frame = frame.copy()
+    
     nose_x, nose_y = frame[0], frame[1]
     ls_x = frame[11*4]; ls_y = frame[11*4+1]
     rs_x = frame[12*4]; rs_y = frame[12*4+1]
+    
     shoulder_dist = np.sqrt((ls_x-rs_x)**2 + (ls_y-rs_y)**2)
-    if shoulder_dist == 0:
-        shoulder_dist = 1.0
-    for i in range(len(frame)):
-        if i % 3 == 0:
-            frame[i] = (frame[i] - nose_x) / shoulder_dist
-        elif i % 3 == 1:
-            frame[i] = (frame[i] - nose_y) / shoulder_dist
+    if shoulder_dist == 0: shoulder_dist = 1.0
+
+    for i in range(POSE_POINTS):
+        idx = i * 4
+        frame[idx] = (frame[idx] - nose_x) / shoulder_dist
+        frame[idx+1] = (frame[idx+1] - nose_y) / shoulder_dist
+
+    start_face_hand = POSE_POINTS * 4
+    for i in range(start_face_hand, len(frame), 3):
+        frame[i] = (frame[i] - nose_x) / shoulder_dist
+        frame[i+1] = (frame[i+1] - nose_y) / shoulder_dist
+        
     return frame
 
 def hand_relative(frame):
@@ -180,18 +182,25 @@ def extract_frame(frame_bgr, holistic):
     else:
         kp.extend([0.0] * (FACE_POINTS * 3))
 
-    for hand in [results.left_hand_landmarks, results.right_hand_landmarks]:
-        if hand:
-            for lm in hand.landmark:
-                kp.extend([lm.x, lm.y, lm.z])
-        else:
-            kp.extend([0.0] * (HAND_POINTS * 3))
+    if results.left_hand_landmarks:
+        for lm in results.left_hand_landmarks.landmark:
+            kp.extend([lm.x, lm.y, lm.z])
+    else:
+        kp.extend([0.0] * (HAND_POINTS * 3))
+
+    if results.right_hand_landmarks:
+        for lm in results.right_hand_landmarks.landmark:
+            kp.extend([lm.x, lm.y, lm.z])
+    else:
+        kp.extend([0.0] * (HAND_POINTS * 3))
 
     return np.array(kp, dtype=np.float32), results
 
 def process_buffer(raw_buf):
     np = get_np()
+    # ── แก้ไข: รับ np.array โดยตรง ไม่ต้องแปลงจาก list ──────────────────
     seq = np.array(raw_buf, dtype=np.float32)
+    # ─────────────────────────────────────────────────────────────────────
     seq = np.array([normalize_frame(f) for f in seq])
     seq = np.array([hand_relative(f) for f in seq])
 
@@ -280,17 +289,19 @@ def predict_sign(req: https_fn.Request) -> https_fn.Response:
         
         raw_buffer = np.array(data["keypoints_buffer"], dtype=np.float32)
         
-        if len(raw_buffer) != SEQUENCE_LENGTH:
-            return https_fn.Response(
-                json.dumps({"error": f"Expected {SEQUENCE_LENGTH} frames, got {len(raw_buffer)}"}), 
-                status=400, 
-                mimetype="application/json"
-            )
+        if len(raw_buffer) > SEQUENCE_LENGTH:
+            idx = np.linspace(0, len(raw_buffer)-1, SEQUENCE_LENGTH, dtype=int)
+            raw_buffer = raw_buffer[idx]
+        elif len(raw_buffer) < SEQUENCE_LENGTH:
+            pad_width = SEQUENCE_LENGTH - len(raw_buffer)
+            raw_buffer = np.pad(raw_buffer, ((0, pad_width), (0, 0)), mode='edge')
         
         model = get_model()
         classes = get_classes()
         
-        seq = process_buffer(list(raw_buffer))
+        # ── แก้ไข: ส่ง raw_buffer (np.array) ตรงๆ แทนการแปลงเป็น list ──
+        seq = process_buffer(raw_buffer)
+        # ─────────────────────────────────────────────────────────────────
         probs = model.predict(np.expand_dims(seq, 0), verbose=0)[0]
         top3_idx = np.argsort(probs)[-3:][::-1]
         
@@ -314,16 +325,13 @@ def predict_sign(req: https_fn.Request) -> https_fn.Response:
 # ============================================================
 @https_fn.on_request(
     cors=options.CorsOptions(cors_origins="*", cors_methods=["GET", "OPTIONS"]),
-    memory=options.MemoryOption.GB_4  # 🚨 เพิ่ม RAM เป็น 4GB เพราะฟังก์ชันนี้ต้องโหลด Model แล้ว
+    memory=options.MemoryOption.GB_4
 )
 def get_model_info(req: https_fn.Request) -> https_fn.Response:
     if req.method == "OPTIONS":
         return https_fn.Response(status=204)
 
     classes = get_classes()
-    
-    # 🚨 บังคับโหลด TensorFlow Model ขึ้นมาบน RAM ทันที
-    # ทำให้ตอนผู้ใช้กด Predict ครั้งแรก จะไม่มีอาการค้าง (Cold Start)
     get_model()
 
     return https_fn.Response(

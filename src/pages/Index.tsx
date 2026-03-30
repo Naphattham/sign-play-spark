@@ -8,11 +8,12 @@ import { AuthModal } from "@/components/AuthModal";
 import { ProfileEdit } from "@/components/ProfileEdit";
 import { LandingPage } from "@/components/LandingPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { PredictionOverlay } from "@/components/PredictionOverlay";
 import { HomePage } from "@/components/HomePage";
 import { LessonsPage } from "@/components/LessonsPage";
 import { QuestView } from "@/components/QuestView";
 import { GameSetupPage } from "@/components/GameSetupPage";
-import { Category, Phrase, getPhrasesByCategory, categories, isPhraseCompletedCheck, checkPhraseMatch } from "@/lib/categories";
+import { Category, Phrase, getPhrasesByCategory, categories, isPhraseCompletedCheck } from "@/lib/categories";
 import { LogOut, X, Camera, Home, User, ArrowLeft, Check } from "lucide-react";
 import { useSignAndDistance, DistanceStatus } from "@/hooks/useSignAndDistance";
 import { auth, database } from "@/lib/firebase";
@@ -37,16 +38,9 @@ import emotionalImg from "@/asset/image/emotional.webp";
 import qaImg from "@/asset/image/qa.webp";
 import illnessImg from "@/asset/image/illness.webp";
 import trophyImg from "@/asset/image/Trophy.webp";
-import guideHumanImg from "@/asset/image/guide_human.webp";
 import questImg from "@/asset/image/quest.webp";
 import challengeImg from "@/asset/image/challenge.webp";
 import lessonImg from "@/asset/image/lesson.webp";
-import arrowLeftImg from "@/asset/image/arrow_left.webp";
-import arrowRightImg from "@/asset/image/arrow_right.webp";
-import collectPointsImg from "@/asset/image/CollectPoints.webp";
-import hintImg from "@/asset/image/Hint.webp";
-import hintboxImg from "@/asset/image/Hintbox.webp";
-import tipsImg from "@/asset/image/tips.webp";
 import alreadyAteImg from "@/asset/image/Already ate | Not yet.webp";
 import feverImg from "@/asset/image/fever.webp";
 import goodbyeImg from "@/asset/image/Goodbye.webp";
@@ -164,7 +158,9 @@ const Index = () => {
   const [webcamCanvas, setWebcamCanvas] = useState<HTMLCanvasElement | null>(null);
   const [isDetecting, setIsDetecting] = useState(false);
   const [scanningLocked, setScanningLocked] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const goodPositionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Guard: ป้องกัน Auto-Collect double-fire
   const isCollectingRef = useRef(false);
   // Track ว่า Session เริ่มไปแล้วหรือยัง (One-Time Start)
@@ -330,7 +326,7 @@ const Index = () => {
   const signRecognition = useSignAndDistance({
     videoElement: webcamVideo,
     canvasElement: webcamCanvas,
-    enabled: isLive && gameOpen,
+    enabled: (isLive || isDetecting) && gameOpen && !isPhraseCompleted && !isTransitioning,
     targetPhrase: effectivePhrase,
     tooCloseThreshold: 0.15,
     distanceThreshold: 0.05,
@@ -432,38 +428,42 @@ const Index = () => {
     }
   }, [isDetecting]);
 
-  // 🚨 3. โค้ดพระเอก: ปรับ Logic การแสดงหน้า Success ให้เสถียร ไม่เคลียร์ทิ้งมั่วซั่ว
+  // 🚨 3. โค้ดพระเอก: ปรับ Logic แตะปุ๊บล็อกปั๊บ (ไม่รีเซ็ตเวลาเมื่อหน้าหลุด)
   useEffect(() => {
     if (!isDetecting) return;
 
+    // 🔑 ล็อกคิว: ถ้าเวลาหน่วง 1 วิเริ่มเดินแล้ว หรือกำลังโชว์ Success อยู่
+    // ให้ "เพิกเฉย" ต่อการเปลี่ยนแปลงระยะห่างไปเลย (หน้าหลุดก็ไม่ต้องสน)
+    if (goodPositionTimerRef.current || successTimerRef.current) return;
+
     if (distanceStatus === "too_close") {
       setTutorialStep("too_close");
-      // ถ้าเข้ามาใกล้เกินไป ค่อยยกเลิกเวลา Success
-      if (successTimerRef.current) {
-        clearTimeout(successTimerRef.current);
-        successTimerRef.current = null;
-      }
     } else if (distanceStatus === "good") {
       if (scanningLocked) {
         setTutorialStep("scanning");
       } else {
-        setTutorialStep("success");
-        // ถ้าเวลายังไม่เดิน ค่อยให้เริ่มเดิน (ป้องกันมันทับซ้อนกัน)
-        if (!successTimerRef.current) {
+        // ✅ พอเข้าระยะ Good ปุ๊บ ล็อกคิวทันที!
+        setTutorialStep("scanning"); // ค้างหน้าสแกนไว้แป๊บนึงให้ดูเนียน
+        
+        goodPositionTimerRef.current = setTimeout(() => {
+          // โชว์หน้า Success หลังผ่านไป 1 วิ
+          setTutorialStep("success");
+          
+          // นับต่ออีก 2.5 วิ ค่อยเข้าเกม
           successTimerRef.current = setTimeout(() => {
             setIsLive(true);
             setTutorialStep("initial");
             setIsDetecting(false);
+            
+            // เคลียร์คิวทั้งหมดเมื่อจบ Process
             successTimerRef.current = null;
-          }, 3000); // แสดงหน้า Success แค่ 3 วิพอแล้วเริ่มเกมเลย
-        }
+            goodPositionTimerRef.current = null; 
+          }, 2500); 
+        }, 1000); // ⏳ หน่วงเวลา 1 วินาที (1000ms)
       }
     } else {
-      // กรณี "no_face"
-      // ถ้าเรากำลังขึ้นจอ Success อยู่ แล้วหน้าหลุดไปแว๊บเดียว ไม่ต้องเปลี่ยนกลับไปสแกน (ปล่อยเนียนไป)
-      if (!successTimerRef.current) {
-        setTutorialStep("scanning");
-      }
+      // กรณี "no_face" หรือกำลังหามุม (ถ้ายังไม่ถูกล็อกคิว)
+      setTutorialStep("scanning");
     }
   }, [isDetecting, distanceStatus, scanningLocked]);
 
@@ -636,8 +636,10 @@ const Index = () => {
     // ถ้ากล้อง live อยู่แล้ว ให้ยังคง live อยู่ต่อ (เปลี่ยนแค่ variant)
     if (isLive || isDetecting) {
       setButtonState("stop");
+      // 🚨 เพิ่ม: สับสวิตช์ปิด-เปิด API เพื่อล้าง Cache ทิ้งตอนเปลี่ยน Variant
+      setIsTransitioning(true);
+      setTimeout(() => setIsTransitioning(false), 150);
     }
-    // ถ้ายังไม่เริ่ม ก็ยังคงเป็น start
   };
 
   const handlePhraseCompletion = (confidence?: number) => {
@@ -746,6 +748,10 @@ const Index = () => {
     // กล้องยังคงทำงานอยู่ (isLive = true, isDetecting = true stay)
     // แค่เปลี่ยนปุ่มให้กลับไปเป็น "stop" (กำลัง live อยู่)
     setButtonState("stop");
+
+    // 🚨 เพิ่ม: สับสวิตช์ปิด-เปิด API เพื่อล้าง Cache ทิ้งตอนกด Try Again
+    setIsTransitioning(true);
+    setTimeout(() => setIsTransitioning(false), 150);
   };
 
   const handleConfirmHint = async () => {
@@ -814,7 +820,12 @@ const Index = () => {
     setShowHintModal(false);
     // ถ้าเคย start กล้องแล้ว ให้ยังคง detect ต่อ (One-Time Start)
     if (sessionStartedRef.current) {
-      setButtonState("stop"); // แสดง Stop เพราะกำลัง live
+      setButtonState("stop");
+      // 🚨 3. สับสวิตช์ปิด-เปิด API (150ms) เพื่อล้าง Cache ทิ้ง
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 150);
     } else {
       setButtonState("start");
     }
@@ -1069,583 +1080,86 @@ const Index = () => {
             </div>
           )}
         </div>
-
-        {gameOpen && (
-          <>
-            <div
-              className={`fixed inset-0 z-50 bg-foreground/30 backdrop-blur-sm ${isClosingModal ? "animate-backdrop-out" : "animate-backdrop-in"
-                }`}
-              onClick={handleCloseModal}
-            />
-
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-              <div className={`bg-white dark:bg-slate-900 border-[2px] sm:border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col max-w-7xl w-full h-[95vh] sm:h-[90vh] pointer-events-auto ${isClosingModal ? "animate-modal-out" : "animate-modal-in"
-                }`}>
-                <header className="flex items-center justify-end p-2 sm:p-3 md:p-4 lg:p-6 border-b-[3px] border-foreground bg-yellow-400">
-                  <div className="flex items-center gap-3 lg:gap-4">
-                    <div className="hidden md:flex items-center px-3 lg:px-4 py-1.5 lg:py-2 bg-pink-400 border-[3px] border-foreground rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                      <span className="text-white font-black text-xs lg:text-sm">
-                        UNIT {category === "general" ? "1" : category === "emotions" ? "2" : category === "qa" ? "3" : "4"}: {category.toUpperCase()}
-                      </span>
-                    </div>
-                    <button
-                      onClick={handleCloseModal}
-                      className="flex items-center justify-center w-10 h-10 bg-white border-[3px] border-foreground rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 transition-transform"
-                    >
-                      <X size={20} className="text-slate-900" />
-                    </button>
-                  </div>
-                </header>
-
-                <div className="flex flex-1 flex-col overflow-hidden relative">
-                  <button
-                    onClick={handlePrevPhrase}
-                    disabled={isFirstPhrase}
-                    className={`absolute left-0 sm:left-2 md:left-4 lg:left-6 top-1/2 -translate-y-1/2 z-50 w-10 sm:w-14 md:w-20 lg:w-24 hover:-translate-x-2 transition-transform cursor-pointer ${isFirstPhrase ? 'opacity-30 pointer-events-none' : ''}`}
-                  >
-                    <img src={arrowLeftImg} alt="Previous" className="w-full h-full object-contain drop-shadow-[2px_2px_0px_rgba(0,0,0,0.2)]" />
-                  </button>
-
-                  <button
-                    onClick={handleNextPhrase}
-                    disabled={isLastPhrase}
-                    className={`absolute right-0 sm:right-2 md:right-4 lg:right-6 top-1/2 -translate-y-1/2 z-50 w-10 sm:w-14 md:w-20 lg:w-24 hover:translate-x-2 transition-transform cursor-pointer ${isLastPhrase ? 'opacity-30 pointer-events-none' : ''}`}
-                  >
-                    <img src={arrowRightImg} alt="Next" className="w-full h-full object-contain drop-shadow-[2px_2px_0px_rgba(0,0,0,0.2)]" />
-                  </button>
-
-                  <main className="flex-1 p-1 sm:p-2 lg:p-3 xl:p-4 px-8 sm:px-12 md:px-4 bg-[#f8f6f6] dark:bg-[#221610] overflow-hidden flex flex-col justify-between">
-                    <div className="flex-1 flex flex-col justify-center">
-                      <div className="flex items-center justify-center mb-1.5 sm:mb-3 lg:mb-4 pt-1 sm:pt-0">
-                        {activePhrase?.id === "g2" ? (
-                          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
-                            <span className="text-slate-900 dark:text-white">ลาก่อน</span>
-                            <span className="text-slate-900 dark:text-white mx-1">|</span>
-                            <span
-                              className={`transition-colors duration-300 ${(isLive || isDetecting) && byeStep === 1
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
-                                }`}
-                            >
-                              ฉัน
-                            </span>
-                            <span
-                              className={`transition-colors duration-300 ${(isLive || isDetecting) && byeStep === 2
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
-                                }`}
-                            >
-                              ไป
-                            </span>
-                          </h2>
-                        ) : activePhrase?.id === "g3" ? (
-                          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
-                            <span className="text-slate-900 dark:text-white">กินข้าวหรือยัง?</span>
-                            <span className="text-slate-900 dark:text-white mx-1">|</span>
-                            <span
-                              className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 1
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
-                                }`}
-                            >
-                              ข้าว
-                            </span>
-                            <span
-                              className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 2
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
-                                }`}
-                            >
-                              กิน
-                            </span>
-                            <span
-                              className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 3
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
-                                }`}
-                            >
-                              หรือยัง?
-                            </span>
-                          </h2>
-                        ) : activePhrase?.id === "g4" ? (
-                          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
-                            <span className="text-slate-900 dark:text-white">
-                              {selectedVariant === "adult" ? "กินแล้ว" : "ยังไม่ได้กิน"}
-                            </span>
-                            <span className="text-slate-900 dark:text-white mx-1">|</span>
-                            <span
-                              className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 1
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
-                                }`}
-                            >
-                              กิน
-                            </span>
-                            <span
-                              className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 2
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
-                                }`}
-                            >
-                              {selectedVariant === "adult" ? "แล้ว" : "ยัง"}
-                            </span>
-                          </h2>
-                        ) : (
-                          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
-                            {activePhrase?.id === "g1"
-                              ? (selectedVariant === "adult" ? "สวัสดีผู้ใหญ่" : "สวัสดีเพื่อน")
-                              : activePhrase?.id === "g6"
-                                ? (selectedVariant === "adult" ? "สบายดี" : "ไม่สบายใจ")
-                                : (activePhrase?.text ?? "Hello")
-                            }
-                          </h2>
-                        )}
-                      </div>
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5 sm:gap-2 lg:gap-3 items-start max-w-[740px] mx-auto w-full">
-                        <div className="relative flex flex-col gap-1 sm:gap-1.5 lg:gap-2 w-full items-center lg:items-end">
-                          <div className="relative aspect-square w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mr-0 bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-                            <VideoCard
-                              phrase={activePhrase?.text ?? "Hello"}
-                              category={activePhrase?.category ?? "general"}
-                              variant={(activePhrase?.id === "g1" || activePhrase?.id === "g4" || activePhrase?.id === "g6") ? selectedVariant : undefined}
-                              byeStep={activePhrase?.id === "g2" ? byeStep : undefined}
-                              eatStep={(activePhrase?.id === "g3" || activePhrase?.id === "g4") ? eatStep : undefined}
-                              isLive={isLive || isDetecting}
-                            />
-                            <div className="absolute inset-0 bg-black/10 flex items-center justify-center pointer-events-none">
-                              <div className="bg-white/90 px-2 py-1 border-[3px] border-foreground rounded-full font-black text-xs absolute top-3 left-3">
-                                TUTORIAL
-                              </div>
-                              <img
-                                src={hintImg}
-                                alt="Hint"
-                                onClick={() => {
-                                  if (hintUnlocked.has(getCurrentHintKey())) {
-                                    setShowHintContent(true);
-                                  } else {
-                                    setShowHintModal(true);
-                                  }
-                                }}
-                                className="absolute bottom-2 right-2 sm:bottom-2.5 sm:right-2.5 w-6 h-6 sm:w-8 sm:h-8 lg:w-9 lg:h-9 object-contain opacity-90 drop-shadow-md pointer-events-auto cursor-pointer hover:scale-110 transition-transform"
-                              />
-                            </div>
-                          </div>
-
-                          {activePhrase?.id === "g1" && (
-                            <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
-                              <button
-                                onClick={() => handleVariantChange("adult")}
-                                className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
-                                  ? "bg-yellow-400 text-slate-900"
-                                  : "bg-white text-slate-900 hover:bg-slate-50"
-                                  }`}
-                              >
-                                สวัสดีผู้ใหญ่
-                              </button>
-                              <button
-                                onClick={() => handleVariantChange("friend")}
-                                className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
-                                  ? "bg-yellow-400 text-slate-900"
-                                  : "bg-white text-slate-900 hover:bg-slate-50"
-                                  }`}
-                              >
-                                สวัสดีเพื่อน
-                              </button>
-                            </div>
-                          )}
-                          {activePhrase?.id === "g4" && (
-                            <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
-                              <button
-                                onClick={() => handleVariantChange("adult")}
-                                className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
-                                  ? "bg-yellow-400 text-slate-900"
-                                  : "bg-white text-slate-900 hover:bg-slate-50"
-                                  }`}
-                              >
-                                กินแล้ว
-                              </button>
-                              <button
-                                onClick={() => handleVariantChange("friend")}
-                                className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
-                                  ? "bg-yellow-400 text-slate-900"
-                                  : "bg-white text-slate-900 hover:bg-slate-50"
-                                  }`}
-                              >
-                                ยังไม่ได้กิน
-                              </button>
-                            </div>
-                          )}
-                          {activePhrase?.id === "g6" && (
-                            <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
-                              <button
-                                onClick={() => handleVariantChange("adult")}
-                                className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
-                                  ? "bg-yellow-400 text-slate-900"
-                                  : "bg-white text-slate-900 hover:bg-slate-50"
-                                  }`}
-                              >
-                                สบายดี
-                              </button>
-                              <button
-                                onClick={() => handleVariantChange("friend")}
-                                className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
-                                  ? "bg-yellow-400 text-slate-900"
-                                  : "bg-white text-slate-900 hover:bg-slate-50"
-                                  }`}
-                              >
-                                ไม่สบายใจ
-                              </button>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex flex-col gap-1 sm:gap-1.5 lg:gap-2 w-full items-center lg:items-start">
-                          <div className="relative aspect-square w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-                            <WebcamView
-                              onNextLevel={() => setIsPhraseCompleted(true)}
-                              cameraEnabled={cameraPermissionGranted}
-                              onVideoReady={(video) => setWebcamVideo(video)}
-                              onCanvasReady={(canvas) => setWebcamCanvas(canvas)}
-                            />
-
-                            {(tutorialStep === "scanning" || tutorialStep === "too_close") && (
-                              <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center z-20 transition-all">
-                                <img src={guideHumanImg} alt="Guide" className="w-full h-full object-cover opacity-80" />
-                                <div className={`absolute bottom-6 bg-white/95 border-[3px] border-foreground rounded-full px-4 py-2 font-black text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${tutorialStep === "too_close" ? "text-red-500 animate-pulse border-red-500 scale-105 transition-transform" : "animate-bounce"}`}>
-                                  {tutorialStep === "too_close" ? "ขยับถอยห่างไปอีกหน่อย" : "ถอยหลังออกไปให้มีระยะห่างจากกล้อง"}
-                                </div>
-                              </div>
-                            )}
-
-                            {tutorialStep === "success" && (
-                              <div className="absolute inset-0 bg-green-500/80 flex flex-col items-center justify-center backdrop-blur-sm z-30 animate-in fade-in zoom-in duration-300">
-                                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 border-[4px] border-foreground shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                                  <span className="text-4xl flex items-center justify-center w-full h-full pt-1">✓</span>
-                                </div>
-                                <h3 className="text-white font-black text-2xl drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">Success!</h3>
-                                <p className="text-white font-bold drop-shadow-[1px_1px_0px_rgba(0,0,0,1)] mt-2">คุณอยู่ในตำแหน่งที่เหมาะสมแล้ว</p>
-                              </div>
-                            )}
-
-                            <div className="absolute inset-0 border-4 border-dashed border-[#ec5b13]/50 m-3 rounded-lg pointer-events-none"></div>
-
-                            <div className="absolute top-3 right-3 animate-bounce z-10">
-                              <div className="bg-pink-500 text-white border-[3px] border-foreground rounded-xl px-2 lg:px-3 py-1 font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1 text-xs">
-                                {(() => {
-                                  const score = getScoreFromConfidence(bestConfidence);
-                                  return score > 0 ? `+ ${score} PTS` : '+ ? PTS';
-                                })()}
-                              </div>
-                            </div>
-
-                            <div className="absolute bottom-3 left-3 z-10">
-                              <div className={`px-2 py-1 border-[3px] border-foreground rounded-full font-black text-xs flex items-center gap-1.5 ${isLive
-                                ? 'bg-red-500 text-white animate-pulse'
-                                : 'bg-gray-400 text-white'
-                                }`}>
-                                <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-white animate-pulse' : 'bg-white/50'
-                                  }`}></span>
-                                LIVE
-                              </div>
-                            </div>
-
-                            {isLive && (
-                              <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
-
-                                {/* กล่องแสดงคำทำนาย (ค้างไว้ตลอดตราบใดที่มีข้อมูล) - ปรับขนาดให้เล็กลง */}
-                                <div className={`bg-white/95 backdrop-blur-sm border-[2px] ${signRecognition.isMatched ? 'border-green-500 bg-green-50/95' : 'border-foreground'} rounded-md px-2 py-1 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] min-w-[110px] transition-colors duration-300`}>
-
-                                  {/* คำที่ทาย + เปอร์เซ็นต์ */}
-                                  <div className="flex items-end justify-between gap-2">
-                                    <span className={`text-sm leading-none ${signRecognition.isMatched ? 'text-green-700' : 'text-slate-800'} truncate max-w-[90px]`}>
-                                      {targetDisplayWord}
-                                    </span>
-                                    <span className={`text-xs leading-none ${signRecognition.isMatched ? 'text-green-600' : 'text-primary'}`}>
-                                      {(() => {
-                                        const top3 = signRecognition.top3Predictions || [];
-                                        const found = effectivePhrase ? top3.find(p => checkPhraseMatch(effectivePhrase, p.class, selectedVariant)) : null;
-                                        return found ? (found.confidence * 100).toFixed(0) : "0";
-                                      })()}%
-                                    </span>
-                                  </div>
-                                </div>
-
-                                {/* กล่องแจ้งเตือน Error */}
-                                {signRecognition.error && (
-                                  <div className="bg-red-500/95 backdrop-blur-sm border-[2px] border-foreground rounded-lg px-3 py-2 font-bold text-xs text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] max-w-[180px]">
-                                    <div className="flex items-center gap-1">
-                                      <span className="material-symbols-outlined text-[14px]">warning</span>
-                                      <span>ไม่พบกล้อง / เกิดข้อผิดพลาด</span>
-                                    </div>
-                                  </div>
-                                )}
-
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Multi-state button: Start → Stop → Collect Point → Try Again */}
-                          {(() => {
-                            // Camera permission button
-                            if (!cameraPermissionGranted) {
-                              return (
-                                <button
-                                  onClick={() => setShowCameraPermission(true)}
-                                  className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-blue-500 hover:bg-blue-600 text-white"
-                                >
-                                  📹 อนุญาตการเข้าถึงกล้อง
-                                </button>
-                              );
-                            }
-
-                            const currentScore = getScoreFromConfidence(bestConfidence); // tier: 40, 70, 100
-                            const isLocked = bestConfidence < 0.5;
-                            const phraseKey = (activePhrase?.id === "g1" || activePhrase?.id === "g4" || activePhrase?.id === "g6")
-                              ? `${activePhrase.id}_${selectedVariant}`
-                              : activePhrase?.id;
-                            // คะแนนที่สะสมไว้แล้วสำหรับคำนี้
-                            const earnedForPhrase = phraseKey ? (phrasePoints[phraseKey] || 0) : 0;
-                            // delta = คะแนนที่จะได้เพิ่มถ้ากด Collect ตอนนี้
-                            const deltaPoints = Math.max(0, currentScore - earnedForPhrase);
-
-                            // Try Again state
-                            if (buttonState === "tryagain") {
-                              return (
-                                <button
-                                  onClick={handleTryAgain}
-                                  className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-purple-500 hover:bg-purple-600 text-white"
-                                >
-                                  🔄 TRY AGAIN
-                                </button>
-                              );
-                            }
-
-                            // Collect Point state
-                            if (buttonState === "collect" && isPhraseCompleted) {
-                              return (
-                                <div className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 flex flex-col gap-1.5">
-                                  <button
-                                    onClick={() => {
-                                      if (isLocked) return;
-                                      if (deltaPoints <= 0) {
-                                        handleTryAgain();
-                                      } else {
-                                        handleCollectPoints();
-                                      }
-                                    }}
-                                    disabled={isLocked}
-                                    className={`w-full h-12 lg:h-14 flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm ${isLocked
-                                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-70'
-                                      : deltaPoints <= 0
-                                        ? 'bg-purple-500 hover:bg-purple-600 text-white'
-                                        : 'bg-yellow-400 hover:bg-yellow-500 text-slate-900 hover:translate-y-0.5'
-                                      }`}
-                                  >
-                                    {isLocked
-                                      ? `🔒 ต้องถึง 50% (ตอนนี้ ${(bestConfidence * 100).toFixed(0)}%)`
-                                      : deltaPoints <= 0
-                                        ? `🔄 TRY AGAIN`
-                                        : (
-                                          <>
-                                            <img src={collectPointsImg} alt="Collect points" className="w-14 h-14 object-contain" />
-                                            <span className="text-white">COLLECT +{deltaPoints} PTS</span>
-                                          </>
-                                        )
-                                    }
-                                  </button>
-                                </div>
-                              );
-                            }
-
-                            // Stop state (กล้องกำลัง live หรือ detecting)
-                            if (buttonState === "stop" || isDetecting || isLive) {
-                              return (
-                                <button
-                                  onClick={() => {
-                                    // กด Stop = หยุด session ทั้งหมด รีเซ็ตกล้อง
-                                    setIsLive(false);
-                                    setIsDetecting(false);
-                                    setTutorialStep("initial");
-                                    setIsPhraseCompleted(false);
-                                    setBestConfidence(0);
-                                    setButtonState("start");
-                                    setByeStep(1);
-                                    setEatStep(1);
-                                    isCollectingRef.current = false;
-                                    sessionStartedRef.current = false; // Reset session
-                                    if (successTimerRef.current) {
-                                      clearTimeout(successTimerRef.current);
-                                      successTimerRef.current = null;
-                                    }
-                                  }}
-                                  className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-red-500 hover:bg-red-600 text-white"
-                                >
-                                  ⏹ STOP
-                                </button>
-                              );
-                            }
-
-                            // Default: Start state
-                            return (
-                              <button
-                                onClick={() => {
-                                  // 🔑 One-Time Start — set sessionStartedRef
-                                  sessionStartedRef.current = true;
-                                  setTutorialStep("scanning");
-                                  setIsDetecting(true);
-                                  setBestConfidence(0);
-                                  setButtonState("stop");
-                                }}
-                                className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-green-500 hover:bg-green-600 text-white"
-                              >
-                                ▶ START
-                              </button>
-                            );
-                          })()}
-                        </div>
-                      </div>
-                    </div>
-
-                    <footer className="mt-1 sm:mt-2 pt-1 sm:pt-2 border-t-[2px] border-slate-200 dark:border-slate-800 w-full">
-                      <div className="flex justify-start lg:justify-center gap-2 sm:gap-4 pb-2 pt-3 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                        {currentCategoryPhrases.map((phrase) => {
-                          const isActive = phrase.id === activePhrase?.id;
-                          const isCompleted = isPhraseCompletedCheck(phrase.id, completedPhrases);
-                          return (
-                            <div
-                              key={phrase.id}
-                              onClick={() => {
-                                handlePhraseSelect(phrase);
-                                // 🔑 One-Time Start: ไม่ปิดกล้อง — แค่รีเซ็ต state ของ phrase
-                                resetPhraseState();
-                              }}
-                              className={`relative border-[2px] border-foreground rounded-lg flex items-center py-1 px-2 sm:py-2 sm:px-3 cursor-pointer flex-none w-[120px] sm:w-[140px] md:w-[160px] min-h-[48px] sm:min-h-[56px] transition-all ${isActive
-                                ? 'shadow-[0px_0px_0px_3px_rgba(253,224,71,1)] scale-[1.02] z-10'
-                                : 'opacity-70 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:opacity-100 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]'
-                                } ${isCompleted ? 'bg-green-50' : 'bg-white'}`}
-                            >
-                              {isCompleted ? (
-                                <div className="absolute -top-2 -right-2 bg-green-500 text-white font-black text-[7px] sm:text-[9px] px-1.5 py-0.5 rounded-full border-[1.5px] border-foreground z-10 flex items-center gap-1">
-                                  <Check size={10} className="shrink-0" strokeWidth={4} /> <span className="hidden sm:inline">{phrase.id === "g1" || phrase.id === "g4" || phrase.id === "g6" ? "200" : "100"} pts</span>
-                                </div>
-                              ) : (
-                                <div className="absolute -top-2 -right-2 bg-[#f94fa4] text-white font-black text-[7px] sm:text-[9px] px-1.5 py-0.5 rounded-full border-[1.5px] border-foreground z-10">
-                                  +{phrase.id === "g1" || phrase.id === "g4" || phrase.id === "g6" ? "200" : "100"} pts
-                                </div>
-                              )}
-
-                              {/* ไอคอน */}
-                              <div className={`w-7 h-7 sm:w-9 sm:h-9 border-[1.5px] border-foreground rounded-md flex items-center justify-center text-sm sm:text-base shrink-0 mr-2 sm:mr-3 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] bg-pink-300 p-0.5`}>
-                                {phraseIconMap[phrase.id] ? (
-                                  <img src={phraseIconMap[phrase.id]} alt={phrase.text} className="w-full h-full object-contain" />
-                                ) : (
-                                  phrase.emoji || '✋'
-                                )}
-                              </div>
-
-                              {/* ข้อความ */}
-                              <div className="flex flex-col flex-1 overflow-hidden justify-center">
-                                <h3 className="font-black text-[9px] sm:text-[11px] md:text-[12px] text-slate-800 truncate leading-tight mb-0.5">
-                                  {phrase.text}
-                                </h3>
-                                <p className="text-gray-500 font-bold text-[7px] sm:text-[8px] md:text-[9px] truncate">
-                                  {phrase.english || phrase.text}
-                                </p>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </footer>
-                  </main>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
       </main>
 
-      {/* Hint Confirm Modal (-25 pts) */}
-      {showHintModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setShowHintModal(false)}
-          />
-          <div className="relative bg-slate-100 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-full max-w-[200px] sm:max-w-[240px] p-4 animate-in zoom-in duration-200">
-            <h2 className="text-lg sm:text-xl font-black text-center text-foreground uppercase tracking-wider mb-1">Hint!</h2>
-            <p className="text-center font-bold text-red-500 text-sm sm:text-base mb-4">-25 pts</p>
-            <div className="flex flex-col gap-2 sm:gap-2.5">
-              <button
-                onClick={handleConfirmHint}
-                className="w-full bg-yellow-400 hover:bg-yellow-500 text-slate-900 border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-lg sm:rounded-xl py-1.5 sm:py-2 font-black text-xs sm:text-sm transition-all"
-              >
-                Confirm
-              </button>
-              <button
-                onClick={() => setShowHintModal(false)}
-                className="w-full bg-white hover:bg-slate-50 border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-lg sm:rounded-xl py-1.5 sm:py-2 font-black text-slate-900 text-xs sm:text-sm transition-all"
-              >
-                Not now
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Hint Content Modal — Pro Tip video player with step-by-step instructions */}
-      {showHintContent && (() => {
-        const hintVideos = getCurrentHintVideos();
-        const activeVideo = hintVideos[0];
-        return (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-            <div
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-              onClick={() => setShowHintContent(false)}
-            />
-            <div className="relative bg-white border-4 border-black rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] w-full max-w-[340px] sm:max-w-[400px] overflow-hidden animate-in zoom-in duration-200 flex flex-col">
-              {/* Modal Header */}
-              <div className="bg-primary p-4 border-b-4 border-black flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <div className="bg-white p-1.5 border-2 border-black rounded-lg flex items-center justify-center">
-                    <img src={tipsImg} alt="Tips" className="w-5 h-5 object-contain" />
-                  </div>
-                  <h2 className="text-xl font-black text-white uppercase tracking-wider italic">Pro Tips!</h2>
-                </div>
-                <button
-                  onClick={() => setShowHintContent(false)}
-                  className="w-8 h-8 bg-white border-2 border-black rounded-lg flex items-center justify-center hover:translate-y-0.5 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                >
-                  <X size={16} strokeWidth={3} />
-                </button>
-              </div>
-
-              {/* Video Player Area (1:1 Aspect Ratio) */}
-              {activeVideo && (
-                <div className="p-4 pb-0">
-                  <div className="relative aspect-square w-full bg-slate-100 border-4 border-black rounded-2xl overflow-hidden">
-                    <img
-                      key={activeVideo.url}
-                      src={activeVideo.url}
-                      className="w-full h-full object-cover"
-                      loading="eager"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Instruction Section */}
-              <div className="p-4">
-                <div className="bg-slate-100 border-4 border-black rounded-2xl p-4">
-                  <p className="font-bold leading-relaxed text-sm text-center whitespace-pre-line">
-                    {activeVideo?.text || getCurrentHintText()}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+      {/* Game Modal + Hint Modals */}
+      <PredictionOverlay
+        gameOpen={gameOpen}
+        isClosingModal={isClosingModal}
+        category={category}
+        activePhrase={activePhrase}
+        currentCategoryPhrases={currentCategoryPhrases}
+        completedPhrases={completedPhrases}
+        isFirstPhrase={isFirstPhrase}
+        isLastPhrase={isLastPhrase}
+        onPrevPhrase={handlePrevPhrase}
+        onNextPhrase={handleNextPhrase}
+        onCloseModal={handleCloseModal}
+        onPhraseSelect={handlePhraseSelect}
+        onResetPhraseState={resetPhraseState}
+        selectedVariant={selectedVariant}
+        byeStep={byeStep}
+        eatStep={eatStep}
+        onVariantChange={handleVariantChange}
+        isLive={isLive}
+        isDetecting={isDetecting}
+        tutorialStep={tutorialStep}
+        cameraPermissionGranted={cameraPermissionGranted}
+        webcamVideo={webcamVideo}
+        onShowCameraPermission={() => setShowCameraPermission(true)}
+        onVideoReady={(video) => setWebcamVideo(video)}
+        onCanvasReady={(canvas) => setWebcamCanvas(canvas)}
+        onSetIsPhraseCompleted={setIsPhraseCompleted}
+        buttonState={buttonState}
+        bestConfidence={bestConfidence}
+        isPhraseCompleted={isPhraseCompleted}
+        phrasePoints={phrasePoints}
+        onTryAgain={handleTryAgain}
+        onCollectPoints={handleCollectPoints}
+        onStop={() => {
+          setIsLive(false);
+          setIsDetecting(false);
+          setTutorialStep("initial");
+          setIsPhraseCompleted(false);
+          setBestConfidence(0);
+          setButtonState("start");
+          setByeStep(1);
+          setEatStep(1);
+          isCollectingRef.current = false;
+          sessionStartedRef.current = false;
+          if (successTimerRef.current) {
+            clearTimeout(successTimerRef.current);
+            successTimerRef.current = null;
+          }
+        }}
+        onStart={() => {
+          if (!webcamVideo || webcamVideo.readyState < 2) {
+            toast({
+              title: "รอสักครู่",
+              description: "กำลังเปิดกล้อง กรุณารอสักครู่...",
+              variant: "default",
+            });
+            return;
+          }
+          sessionStartedRef.current = true;
+          setTutorialStep("scanning");
+          setIsDetecting(true);
+          setBestConfidence(0);
+          setButtonState("stop");
+        }}
+        signRecognition={signRecognition}
+        effectivePhrase={effectivePhrase}
+        targetDisplayWord={targetDisplayWord}
+        hintUnlocked={hintUnlocked}
+        showHintModal={showHintModal}
+        showHintContent={showHintContent}
+        onSetShowHintModal={setShowHintModal}
+        onSetShowHintContent={setShowHintContent}
+        onConfirmHint={handleConfirmHint}
+        getCurrentHintKey={getCurrentHintKey}
+        getCurrentHintVideos={getCurrentHintVideos}
+        getCurrentHintText={getCurrentHintText}
+      />
 
 
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />

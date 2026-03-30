@@ -114,6 +114,21 @@ function MemoryCardTile({ card, isFlipping, onClick, isLocked, isMatchGlowing }:
   const isMatched = card.status === "matched";
 
   const [playKey, setPlayKey] = useState(0);
+  const [shouldRenderContent, setShouldRenderContent] = useState(isVisible);
+
+  useEffect(() => {
+    if (isVisible) {
+      setShouldRenderContent(true);
+    } else {
+      // Delay unmounting the content until the 500ms 3D flip animation has completed.
+      // This immediately drastically reduces iPad memory usage because 
+      // inactive animated WebPs are completely removed from the DOM.
+      const timer = setTimeout(() => {
+        setShouldRenderContent(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible]);
 
   useEffect(() => {
     if (isVisible && card.type === "video") {
@@ -167,24 +182,27 @@ function MemoryCardTile({ card, isFlipping, onClick, isLocked, isMatchGlowing }:
             }`}
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
         >
-          {card.type === "video" ? (
-            <img
-              key={`${card.uid}-${playKey}`}
-              src={card.videoUrl}
-              alt={card.term}
-              className="w-full h-full object-cover rounded-md"
-              loading="eager"
-            />
-          ) : (
-            <div className="flex flex-col items-center justify-center px-1 gap-1">
-              <span className="text-xs sm:text-sm md:text-base font-black text-center leading-tight text-gray-900">
-                {card.term}
-              </span>
-              <span className="text-[9px] sm:text-[10px] font-medium text-gray-500 text-center">
-                {card.translation}
-              </span>
-            </div>
-          )}
+          {shouldRenderContent ? (
+            card.type === "video" ? (
+              <img
+                key={`${card.uid}-${playKey}`}
+                src={card.videoUrl}
+                alt={card.term}
+                className="w-full h-full object-cover rounded-md"
+                loading="eager"
+                decoding="async"
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center px-1 gap-1">
+                <span className="text-xs sm:text-sm md:text-base font-black text-center leading-tight text-gray-900">
+                  {card.term}
+                </span>
+                <span className="text-[9px] sm:text-[10px] font-medium text-gray-500 text-center">
+                  {card.translation}
+                </span>
+              </div>
+            )
+          ) : null}
         </div>
       </div>
     </div>
@@ -344,10 +362,10 @@ export default function SignMasterMemoryPage() {
       if (newMisses >= maxMisses) {
         stopTimer();
         setIsLocked(true);
-        // Leave the final mismatched cards face-up for 3 seconds before Game Over Loss
+        // Show the mismatched cards briefly before going to the You Lose screen immediately
         setTimeout(() => {
           setPhase("gameover_lose");
-        }, 3000);
+        }, 800);
       } else {
         const delayMs = (cardA.type === "video" || cardB.type === "video") ? 2500 : 1200;
 
@@ -568,13 +586,22 @@ export default function SignMasterMemoryPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <Button
-                className="neo-brutalism bg-primary text-white py-6 text-xl font-black uppercase"
-                onClick={() => startGame(difficulty)}
-                disabled={isReturningHome}
-              >
-                Play Again
-              </Button>
+              <div className="grid grid-cols-2 gap-4">
+                <Button
+                  className="neo-brutalism bg-primary text-white py-6 text-lg sm:text-xl font-black uppercase"
+                  onClick={() => startGame(difficulty)}
+                  disabled={isReturningHome}
+                >
+                  Play Again
+                </Button>
+                <Button
+                  className="neo-brutalism bg-yellow-400 text-slate-900 py-6 text-lg sm:text-xl font-black uppercase"
+                  onClick={() => setPhase("idle")}
+                  disabled={isReturningHome}
+                >
+                  Choose Level
+                </Button>
+              </div>
               <Button
                 className="neo-brutalism bg-surface text-black py-6 text-xl font-black uppercase"
                 onClick={handleBackToHome}
