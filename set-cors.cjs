@@ -1,6 +1,6 @@
 // set-cors.js
 const admin = require("firebase-admin");
-const serviceAccount = require("./signmate-cbe60-firebase-adminsdk-fbsvc-32174884d6.json"); // 👈 เปลี่ยนชื่อไฟล์ให้ตรง
+const serviceAccount = require("./signmate-cbe60-firebase-adminsdk-fbsvc-10c3dafbe2.json"); // 👈 เปลี่ยนชื่อไฟล์ให้ตรง
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),

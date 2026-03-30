@@ -30,6 +30,12 @@ public/hls/
 # =========================
 .firebase/
 
+# =========================
+# Security & Scripts (เพิ่มใหม่)
+# =========================
+set-cors.cjs
+signmate-cbe60-firebase-adminsdk-fbsvc-*.json
+
 # Environment variables
 .env
 .env.local
