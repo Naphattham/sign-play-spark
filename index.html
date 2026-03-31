@@ -1,44 +1,47 @@
 <!doctype html>
 <html lang="th">
-  <head>
-    <meta charset="UTF-8" />
-    
-    <link rel="icon" type="image/png" href="/LOGO_SignMate.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <title>SignMate - ฝึกภาษามือไทยด้วย AI</title>
-    <meta name="description" content="เรียนรู้และสนุกไปกับการฝึกภาษามือไทย ผ่านเกมแบบอินเทอร์แอคทีฟด้วยระบบ AI ตรวจจับท่าทางแบบเรียลไทม์" />
-    <meta name="author" content="SignMate Team" />
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <!-- Preconnect สำหรับ Firebase Storage วิดีโอเพื่อลด Latency (DNS/TCP/SSL handshake) -->
-    <link rel="preconnect" href="https://storage.googleapis.com" crossorigin />
-    <link rel="dns-prefetch" href="https://storage.googleapis.com" />
+
+<head>
+  <meta charset="UTF-8" />
+
+  <link rel="icon" type="image/png" href="/LOGO_SignMate.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>SignMate - ฝึกภาษามือไทยด้วย AI</title>
+  <meta name="description"
+    content="เรียนรู้และสนุกไปกับการฝึกภาษามือไทย ผ่านเกมแบบอินเทอร์แอคทีฟด้วยระบบ AI ตรวจจับท่าทางแบบเรียลไทม์" />
+  <meta name="author" content="SignMate Team" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Preconnect สำหรับ Firebase Storage วิดีโอเพื่อลด Latency (DNS/TCP/SSL handshake) -->
+  <link rel="preconnect" href="https://storage.googleapis.com" crossorigin />
+  <link rel="dns-prefetch" href="https://storage.googleapis.com" />
 
 
 
 
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="SignMate - ฝึกภาษามือไทยด้วย AI" />
-    <meta property="og:description" content="เรียนรู้และสนุกไปกับการฝึกภาษามือไทย ผ่านเกมแบบอินเทอร์แอคทีฟด้วยระบบ AI" />
-    <meta property="og:image" content="/LOGO_SignMate.png" />
-    
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="SignMate - ฝึกภาษามือไทยด้วย AI" />
-    <meta name="twitter:description" content="เรียนรู้และสนุกไปกับการฝึกภาษามือไทย ผ่านเกมแบบอินเทอร์แอคทีฟด้วยระบบ AI" />
-    <meta name="twitter:image" content="/LOGO_SignMate.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="SignMate - ฝึกภาษามือไทยด้วย AI" />
+  <meta property="og:description" content="เรียนรู้และสนุกไปกับการฝึกภาษามือไทย ผ่านเกมแบบอินเทอร์แอคทีฟด้วยระบบ AI" />
+  <meta property="og:image" content="/LOGO_SignMate.png" />
 
-    <!-- MediaPipe dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js" crossorigin="anonymous"></script>
-  </head>
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="SignMate - ฝึกภาษามือไทยด้วย AI" />
+  <meta name="twitter:description" content="เรียนรู้และสนุกไปกับการฝึกภาษามือไทย ผ่านเกมแบบอินเทอร์แอคทีฟด้วยระบบ AI" />
+  <meta name="twitter:image" content="/LOGO_SignMate.png" />
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+  <!-- MediaPipe dependencies (pinned version — ป้องกัน 302 redirect บน Safari) -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.6.1629159505/control_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1675466124/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1675471629/holistic.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

@@ -46,6 +46,8 @@ export interface SignRecognitionState {
   isMatched: boolean;
   top3Predictions: Top3Prediction[] | null;
   error: string | null;
+  /** จำนวน keypoint frames ที่ buffer ไว้แล้ว (max 40) — เหมือน SignDefenderPage */
+  bufferLength?: number;
 }
 
 type ButtonState = "start" | "stop" | "collect" | "tryagain";
@@ -224,6 +226,19 @@ export const PredictionOverlay = ({
   getCurrentHintVideos,
   getCurrentHintText,
 }: PredictionOverlayProps) => {
+  // ⏳ Timeout fallback: ถ้า 8 วินาทียัง buffer ไม่ครบ ให้กด START ได้เลย
+  // ป้องกัน Safari ค้างที่ 0% เมื่อ MediaPipe WASM โหลดช้าใน first visit
+  const [loadingTimeoutReached, setLoadingTimeoutReached] = useState(false);
+
+  useEffect(() => {
+    if (!gameOpen) {
+      setLoadingTimeoutReached(false);
+      return;
+    }
+    const timer = setTimeout(() => setLoadingTimeoutReached(true), 8000);
+    return () => clearTimeout(timer);
+  }, [gameOpen]);
+
   return (
     <>
       {/* ══════════════════════════════════════
@@ -519,86 +534,86 @@ export const PredictionOverlay = ({
 
                           {/* Dashed border guide */}
                           <div className="absolute inset-0 border-4 border-dashed border-[#ec5b13]/50 m-3 rounded-lg pointer-events-none" />
-                              {/* PTS badge */}
-                              <div className="absolute top-3 right-3 animate-bounce z-10">
-                                <div className="bg-pink-500 text-white border-[3px] border-foreground rounded-xl px-2 lg:px-3 py-1 font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1 text-xs">
-                                  {(() => {
-                                    const score = getScoreFromConfidence(bestConfidence);
-                                    return score > 0 ? `+ ${score} PTS` : "+ ? PTS";
-                                  })()}
-                                </div>
-                              </div>
+                          {/* PTS badge */}
+                          <div className="absolute top-3 right-3 animate-bounce z-10">
+                            <div className="bg-pink-500 text-white border-[3px] border-foreground rounded-xl px-2 lg:px-3 py-1 font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1 text-xs">
+                              {(() => {
+                                const score = getScoreFromConfidence(bestConfidence);
+                                return score > 0 ? `+ ${score} PTS` : "+ ? PTS";
+                              })()}
+                            </div>
+                          </div>
 
-                              {/* LIVE indicator */}
-                              <div className="absolute bottom-3 left-3 z-10">
-                                <div
-                                  className={`px-2 py-1 border-[3px] border-foreground rounded-full font-black text-xs flex items-center gap-1.5 ${isLive
-                                    ? "bg-red-500 text-white animate-pulse"
-                                    : "bg-gray-400 text-white"
-                                    }`}
-                                >
+                          {/* LIVE indicator */}
+                          <div className="absolute bottom-3 left-3 z-10">
+                            <div
+                              className={`px-2 py-1 border-[3px] border-foreground rounded-full font-black text-xs flex items-center gap-1.5 ${isLive
+                                ? "bg-red-500 text-white animate-pulse"
+                                : "bg-gray-400 text-white"
+                                }`}
+                            >
+                              <span
+                                className={`w-2 h-2 rounded-full ${isLive ? "bg-white animate-pulse" : "bg-white/50"
+                                  }`}
+                              />
+                              LIVE
+                            </div>
+                          </div>
+
+                          {/* Prediction box (isLive) */}
+                          {isLive && (
+                            <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+                              <div
+                                className={`bg-white/95 backdrop-blur-sm border-[2px] ${signRecognition.isMatched
+                                  ? "border-green-500 bg-green-50/95"
+                                  : "border-foreground"
+                                  } rounded-md px-2 py-1 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] min-w-[110px] transition-colors duration-300`}
+                              >
+                                <div className="flex items-end justify-between gap-2">
                                   <span
-                                    className={`w-2 h-2 rounded-full ${isLive ? "bg-white animate-pulse" : "bg-white/50"
+                                    className={`text-sm leading-none ${signRecognition.isMatched
+                                      ? "text-green-700"
+                                      : "text-slate-800"
+                                      } truncate max-w-[90px]`}
+                                  >
+                                    {targetDisplayWord}
+                                  </span>
+                                  <span
+                                    className={`text-xs leading-none ${signRecognition.isMatched
+                                      ? "text-green-600"
+                                      : "text-primary"
                                       }`}
-                                  />
-                                  LIVE
+                                  >
+                                    {(() => {
+                                      const top3 = signRecognition.top3Predictions || [];
+                                      const found = effectivePhrase
+                                        ? top3.find((p) =>
+                                          checkPhraseMatch(
+                                            effectivePhrase,
+                                            p.class,
+                                            selectedVariant
+                                          )
+                                        )
+                                        : null;
+                                      return found
+                                        ? (found.confidence * 100).toFixed(0)
+                                        : "0";
+                                    })()}
+                                    %
+                                  </span>
                                 </div>
                               </div>
 
-                              {/* Prediction box (isLive) */}
-                              {isLive && (
-                                <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
-                                  <div
-                                    className={`bg-white/95 backdrop-blur-sm border-[2px] ${signRecognition.isMatched
-                                      ? "border-green-500 bg-green-50/95"
-                                      : "border-foreground"
-                                      } rounded-md px-2 py-1 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] min-w-[110px] transition-colors duration-300`}
-                                  >
-                                    <div className="flex items-end justify-between gap-2">
-                                      <span
-                                        className={`text-sm leading-none ${signRecognition.isMatched
-                                          ? "text-green-700"
-                                          : "text-slate-800"
-                                          } truncate max-w-[90px]`}
-                                      >
-                                        {targetDisplayWord}
-                                      </span>
-                                      <span
-                                        className={`text-xs leading-none ${signRecognition.isMatched
-                                          ? "text-green-600"
-                                          : "text-primary"
-                                          }`}
-                                      >
-                                        {(() => {
-                                          const top3 = signRecognition.top3Predictions || [];
-                                          const found = effectivePhrase
-                                            ? top3.find((p) =>
-                                              checkPhraseMatch(
-                                                effectivePhrase,
-                                                p.class,
-                                                selectedVariant
-                                              )
-                                            )
-                                            : null;
-                                          return found
-                                            ? (found.confidence * 100).toFixed(0)
-                                            : "0";
-                                        })()}
-                                        %
-                                      </span>
-                                    </div>
+                              {signRecognition.error && (
+                                <div className="bg-red-500/95 backdrop-blur-sm border-[2px] border-foreground rounded-lg px-3 py-2 font-bold text-xs text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] max-w-[180px]">
+                                  <div className="flex items-center gap-1">
+                                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                                    <span>ไม่พบกล้อง / เกิดข้อผิดพลาด</span>
                                   </div>
-
-                                  {signRecognition.error && (
-                                    <div className="bg-red-500/95 backdrop-blur-sm border-[2px] border-foreground rounded-lg px-3 py-2 font-bold text-xs text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] max-w-[180px]">
-                                      <div className="flex items-center gap-1">
-                                        <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                                        <span>ไม่พบกล้อง / เกิดข้อผิดพลาด</span>
-                                      </div>
-                                    </div>
-                                  )}
                                 </div>
                               )}
+                            </div>
+                          )}
                         </div>
 
                         {/* ── Multi-state action button ── */}
@@ -691,10 +706,32 @@ export const PredictionOverlay = ({
                             );
                           }
 
+                          // 🚨 3 states เหมือน SignDefenderPage + Safari fallback
+                          const bufLen = signRecognition.bufferLength ?? 0;
+                          const bufferPct = Math.min(100, Math.round((bufLen / 40) * 100));
+                          // Camera ready = webcamVideo ถูก set โดย onVideoReady (แปลว่าสตรีมพร้อมแล้ว)
+                          const isCameraReady = !!webcamVideo;
+                          // Model ready = buffer ครบ 40 frames OR timeout 8 วิ
+                          const isModelReady = bufLen >= 40 || loadingTimeoutReached;
+
+                          // State 1: กล้องยังไม่พร้อม
+                          if (!isCameraReady) {
+                            return (
+                              <button
+                                disabled
+                                className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1.5 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-sky-400 text-white opacity-75 cursor-wait"
+                              >
+                                <span className="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full" />
+                                กำลังเปิดกล้อง...
+                              </button>
+                            );
+                          }
+
+                          // State 2 & 3: โมเดลกำลังโหลด vs พร้อม
                           return (
                             <button
                               onClick={onStart}
-                              className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-green-500 hover:bg-green-600 text-white"
+                              className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-green-500 hover:bg-green-600 text-white hover:translate-y-0.5"
                             >
                               ▶ START
                             </button>

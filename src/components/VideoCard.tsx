@@ -94,12 +94,15 @@ export function VideoCard({ phrase, category, variant, byeStep, eatStep, isLive 
     <VideoPlayer
       key={srcUrl}
       src={srcUrl}
-      className="w-full h-full object-cover rounded-xl"
+      className="w-full h-full object-cover rounded-xl pointer-events-none" // 🚨 เพิ่ม pointer-events-none ตรงนี้
       autoPlay
       loop
       muted
       playsInline
       preload="auto"
+      // 👇 เพิ่ม attributes เหล่านี้ด้วยเพื่อความชัวร์ (บางที VideoPlayer ของคุณอาจจะไม่ได้ส่งผ่านไปหมด)
+      disablePictureInPicture // ป้องกัน Safari ย่อวิดีโอเป็นกรอบเล็ก
+      disableRemotePlayback   // ป้องกันการแชร์ขึ้น AirPlay
     />
   );
 }

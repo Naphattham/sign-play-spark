@@ -14,8 +14,9 @@ const VIDEO_CONSTRAINTS = {
 };
 
 interface CameraPermissionProps {
-  onAllow: () => void;
+  onAllow: (fromCalibration?: boolean) => void;
   onSkip: () => void;
+  skipCalibration?: boolean;
 }
 
 // ─── Calibration Modal ──────────────────────────────────
@@ -41,21 +42,32 @@ function CalibrationModal({ onClose, onPlay }: CalibrationModalProps) {
     enabled: isStarted && !!videoEl && !!canvasEl,
   });
 
-  // พอล็อคเป็น Success แล้วโชว์ Success ค้างไว้ 1.5 วินาที แล้วเล่น Animation ออก
+  // 1️⃣ 🚨 สร้าง Ref มาเก็บ onPlay เพื่อป้องกันการสร้างฟังก์ชันใหม่แล้วทำให้ Timer โดนรีเซ็ต
+  const onPlayRef = useRef(onPlay);
+  useEffect(() => {
+    onPlayRef.current = onPlay;
+  }, [onPlay]);
+
+  // พอล็อคเป็น Success แล้วโชว์ Success ค้างไว้ 0.5 วินาที แล้วเล่น Animation ออก
+  // 2️⃣ 🚨 อัปเดต useEffect ตัวนี้ให้เรียกใช้ onPlayRef.current() และลบ onPlay ออกจาก []
   useEffect(() => {
     if (tutorialStep === "success") {
       const exitTimer = setTimeout(() => {
         setIsExiting(true); // เริ่ม Animation ออก
 
-        // รอ Animation 500ms เสร็จแล้วค่อยเปลี่ยนหน้าจริงๆ
-        setTimeout(() => {
-          onPlay();
-        }, 500);
+        // รอ Animation 300ms เสร็จแล้วค่อยเปลี่ยนหน้าจริงๆ
+        const innerTimer = setTimeout(() => {
+          onPlayRef.current(); // เรียกผ่าน Ref แทน
+        }, 300);
+
+        // (เผื่อไว้) คลีนอัป inner timer 
+        return () => clearTimeout(innerTimer);
       }, 1500);
 
       return () => clearTimeout(exitTimer);
     }
-  }, [tutorialStep, onPlay]);
+    // ใช้แค่ tutorialStep เป็นเงื่อนไขเดียวพอ
+  }, [tutorialStep]);
 
   // ตรวจจับระยะห่าง รอ 3 วิรวดถึงจะ Success!
   useEffect(() => {
@@ -66,12 +78,12 @@ function CalibrationModal({ onClose, onPlay }: CalibrationModalProps) {
         setTutorialStep("holding");
       }
 
-      // ถ้าจับคู่ Good แล้วให้เริ่มนับ 3 วิ
+      // ถ้าจับคู่ Good แล้วให้เริ่มนับ 1 วิ (เพื่อความรวดเร็ว)
       if (!holdTimerRef.current) {
         holdTimerRef.current = setTimeout(() => {
           setTutorialStep("success");
           holdTimerRef.current = null;
-        }, 2000);
+        }, 1000);
       }
     } else {
       // ถ้าระยะเพี้ยน ไม่นิ่ง ให้ลบ Timer และให้คำแนะนำใหม่
@@ -201,7 +213,7 @@ function CalibrationModal({ onClose, onPlay }: CalibrationModalProps) {
 
 // ─── Camera Permission Screen หลัก ─────────────────────────────────────────────
 
-export function CameraPermission({ onAllow, onSkip }: CameraPermissionProps) {
+export function CameraPermission({ onAllow, onSkip, skipCalibration }: CameraPermissionProps) {
   const [showTutorial, setShowTutorial] = useState(false);
 
   return (
@@ -269,7 +281,13 @@ export function CameraPermission({ onAllow, onSkip }: CameraPermissionProps) {
 
             <div className="flex flex-col gap-3 mt-2">
               <button
-                onClick={() => setShowTutorial(true)}
+                onClick={() => {
+                  if (skipCalibration) {
+                    onAllow(false);
+                  } else {
+                    setShowTutorial(true);
+                  }
+                }}
                 className="group relative w-full bg-[#c11660] hover:bg-[#af0054] text-white border-[4px] border-black rounded-2xl py-4 transition-all shadow-[6px_6px_0_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0_0_#000] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2 font-black text-lg uppercase tracking-wide">
@@ -303,7 +321,7 @@ export function CameraPermission({ onAllow, onSkip }: CameraPermissionProps) {
           onClose={() => setShowTutorial(false)}
           onPlay={() => {
             setShowTutorial(false);
-            onAllow(); // กลับหน้า Home หรือเริ่มเกม
+            onAllow(true); // กลับหน้า Home หรือเริ่มเกม (ผ่าน Calibration แล้ว ไม่ต้องขอ getUserMedia ซ้ำ)
           }}
         />
       )}

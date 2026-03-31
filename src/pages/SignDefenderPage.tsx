@@ -599,6 +599,7 @@ export default function SignDefenderPage() {
           {showCameraPermission && (
             <CameraPermission
               onAllow={requestCameraPermission}
+              skipCalibration={true}
               onSkip={() => {
                 setShowCameraPermission(false);
                 setCameraSkipped(true);

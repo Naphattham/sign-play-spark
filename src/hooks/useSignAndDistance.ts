@@ -11,43 +11,68 @@ type ResultsCallback = (results: any) => void;
 
 let _holisticInstance: any = null;
 let _holisticPromise: Promise<any> | null = null;
-let _activeResultsCallback: ResultsCallback | null = null;
+// 🔱 Set สำหรับทุก hook ที่ mounted ให้รับ results พร้อมกัน
+// แก้ปัญหา CalibrationModal unmount แล้ว set callback เป็น null ทำให้ Index.tsx hook เสียผล
+const _resultCallbacks = new Set<ResultsCallback>();
+// 🔒 Global send lock — ป้องกัน concurrent holistic.send() จากหลาย hook
+let _globalIsSending = false;
 
 function getOrCreateHolistic(): Promise<any> {
   if (_holisticPromise) return _holisticPromise;
 
   _holisticPromise = new Promise((resolve, reject) => {
-    const mpHolistic = (window as any);
-    const HolisticConstructor = mpHolistic.Holistic;
+    // Poll รอ window.Holistic สูงสุด 10 วินาที
+    // Safari อาจโหลด holistic.js script ช้ากว่า React bundle ถ้าเน็ตช้า
+    let attempts = 0;
+    const MAX_ATTEMPTS = 20; // 20 × 500ms = 10 วินาที
 
-    if (!HolisticConstructor) {
-      console.error('[Holistic Singleton] MediaPipe Holistic Constructor not found!');
-      reject(new Error('HolisticConstructor not available'));
-      return;
-    }
+    const tryInit = () => {
+      const HolisticConstructor = (window as any).Holistic;
 
-    const holistic = new HolisticConstructor({
-      locateFile: (file: string) =>
-        `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`,
-    });
+      if (!HolisticConstructor) {
+        attempts++;
+        if (attempts >= MAX_ATTEMPTS) {
+          console.error('[Holistic Singleton] MediaPipe Holistic Constructor not found after 10s — resetting for retry');
+          _holisticPromise = null; // ← reset ให้ retry ได้ในครั้งถัดไป
+          reject(new Error('HolisticConstructor not available after 10s'));
+          return;
+        }
+        // รอแล้วลองใหม่
+        setTimeout(tryInit, 500);
+        return;
+      }
 
-    holistic.setOptions({
-      modelComplexity: 0,
-      smoothLandmarks: true,
-      enableSegmentation: false,
-      smoothSegmentation: false,
-      refineFaceLandmarks: false,
-      minDetectionConfidence: 0.5,
-      minTrackingConfidence: 0.5,
-    });
+      try {
+        const holistic = new HolisticConstructor({
+          locateFile: (file: string) =>
+            `https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1675471629/${file}`,
+        });
 
-    // Route results to whichever hook is currently active
-    holistic.onResults((res: any) => {
-      if (_activeResultsCallback) _activeResultsCallback(res);
-    });
+        holistic.setOptions({
+          modelComplexity: 0,
+          smoothLandmarks: true,
+          enableSegmentation: false,
+          smoothSegmentation: false,
+          refineFaceLandmarks: false,
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5,
+        });
 
-    _holisticInstance = holistic;
-    resolve(holistic);
+        // Route results to ALL registered hooks
+        holistic.onResults((res: any) => {
+          _resultCallbacks.forEach(cb => cb(res));
+        });
+
+        _holisticInstance = holistic;
+        resolve(holistic);
+      } catch (err) {
+        console.error('[Holistic Singleton] Failed to instantiate Holistic:', err);
+        _holisticPromise = null; // reset ให้ retry ได้
+        reject(err);
+      }
+    };
+
+    tryInit();
   });
 
   return _holisticPromise;
@@ -310,59 +335,70 @@ export function useSignAndDistance({
   useEffect(() => {
     let cancelled = false;
 
-    // Create a stable wrapper so we can identify & remove this hook's callback later
+    // ลงทะเบียน callback นี้เข้า Set — ทุก hook ที่ mounted จะรับ results พร้อมกัน
     const myCallback: ResultsCallback = (res: any) => onResultsRef.current(res);
-    _activeResultsCallback = myCallback;
+    _resultCallbacks.add(myCallback);
 
     const startLoop = async () => {
-      let holistic: any;
-      try {
-        holistic = await getOrCreateHolistic();
-      } catch (e) {
-        console.error('[useSignAndDistance] Failed to get Holistic:', e);
-        return;
-      }
-      if (cancelled) return;
-
-      holisticRef.current = holistic;
-
-      const detectFrame = async () => {
-        if (cancelled) return;
-        const video = videoRef.current;
-        const canvas = canvasRef.current;
-
-        // 🛑 Guard Clause: ดักเช็คไม่ให้วิดีโอที่มีขนาด 0x0 หลุดเข้าไปที่ MediaPipe
-        if (
-          !video ||
-          !canvas ||
-          video.readyState < 2 || // ต้องเริ่มเล่นแล้วเท่านั้น
-          video.videoWidth === 0 || // ความกว้างต้องมากกว่า 0
-          video.videoHeight === 0 || // ความสูงต้องมากกว่า 0
-          isSendingRef.current
-        ) {
-          // ถ้ายังไม่พร้อม ให้รอรอบถัดไปเงียบๆ (ไม่เกิด Error)
-          requestRef.current = requestAnimationFrame(detectFrame);
-          return;
-        }
-
-        // ✅ ถ้าผ่าน Guard Clause แปลว่าวิดีโอพร้อม 100%
-        isSendingRef.current = true;
+      // 🔄 Retry สูงสุด 3 ครั้ง ก่อนยอมแพ้ (รองรับ Safari first-load fail)
+      for (let attempt = 1; attempt <= 3; attempt++) {
         try {
-          // ปรับขนาด Canvas ให้ตรงกับวิดีโอ
-          if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth;
-          if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight;
-          
-          await holistic.send({ image: video });
-        } catch (error) {
-          console.error('[useSignAndDistance] MediaPipe send error:', error);
-        } finally {
-          isSendingRef.current = false;
-        }
-        
-        requestRef.current = requestAnimationFrame(detectFrame);
-      };
+          const holistic = await getOrCreateHolistic();
+          if (cancelled) return;
 
-      requestRef.current = requestAnimationFrame(detectFrame);
+          holisticRef.current = holistic;
+
+          const detectFrame = async () => {
+            if (cancelled) return;
+            const video = videoRef.current;
+            const canvas = canvasRef.current;
+
+            // 🛑 Guard Clause: ดักเช็คไม่ให้วิดีโอที่มีขนาด 0x0 หลุดเข้าไปที่ MediaPipe
+            if (
+              !video ||
+              !canvas ||
+              video.readyState < 2 ||
+              video.videoWidth === 0 ||
+              video.videoHeight === 0 ||
+              isSendingRef.current ||
+              _globalIsSending  // ← ป้องกัน hook อื่นส่งพร้อมกัน
+            ) {
+              // ถ้ายังไม่พร้อม ให้รอรอบถัดไปเงียบๆ (ไม่เกิด Error)
+              requestRef.current = requestAnimationFrame(detectFrame);
+              return;
+            }
+
+            // ✅ ถ้าผ่าน Guard Clause แปลว่าวิดีโอพร้อม 100%
+            isSendingRef.current = true;
+            _globalIsSending = true;
+            try {
+              // ปรับขนาด Canvas ให้ตรงกับวิดีโอ
+              if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth;
+              if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight;
+
+              await holistic.send({ image: video });
+            } catch (error) {
+              console.error('[useSignAndDistance] MediaPipe send error:', error);
+            } finally {
+              isSendingRef.current = false;
+              _globalIsSending = false;
+            }
+
+            requestRef.current = requestAnimationFrame(detectFrame);
+          };
+
+          requestRef.current = requestAnimationFrame(detectFrame);
+          return; // ← สำเร็จ ออกจาก loop
+        } catch (e) {
+          console.warn(`[useSignAndDistance] Holistic init attempt ${attempt}/3 failed:`, e);
+          if (attempt < 3) {
+            // รอก่อน retry (exponential backoff: 1s, 2s)
+            await new Promise(r => setTimeout(r, attempt * 1000));
+          } else {
+            console.error('[useSignAndDistance] All 3 attempts failed — giving up');
+          }
+        }
+      }
     };
 
     const timeoutId = setTimeout(startLoop, 100);
@@ -374,12 +410,10 @@ export function useSignAndDistance({
         cancelAnimationFrame(requestRef.current);
         requestRef.current = null;
       }
-      // ❌ ห้าม close() Holistic singleton — แค่หยุด rAF loop ของ hook นี้เท่านั้น
+      // ❌ ห้าม close() Holistic singleton
       holisticRef.current = null;
-      // ถ้า hook นี้เป็น active consumer อยู่ ให้ยกเลิก callback
-      if (_activeResultsCallback === myCallback) {
-        _activeResultsCallback = null;
-      }
+      // ลบเฉพาะ callback ของ hook นี้ออกจาก Set — ไม่กระทบ hook อื่นที่ยัง mounted
+      _resultCallbacks.delete(myCallback);
     };
   }, []);
 

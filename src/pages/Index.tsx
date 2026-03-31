@@ -141,9 +141,10 @@ const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [cameraPermissionGranted, setCameraPermissionGranted] = useState(() => {
-    return localStorage.getItem('cameraPermissionGranted') === 'true';
+    return sessionStorage.getItem('cameraPermissionGranted') === 'true';
   });
   const [showCameraPermission, setShowCameraPermission] = useState(false);
+  const [skipCameraCalibration, setSkipCameraCalibration] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [userStreak, setUserStreak] = useState(0);
   const [userLevel, setUserLevel] = useState(1);
@@ -327,12 +328,17 @@ const Index = () => {
   const signRecognition = useSignAndDistance({
     videoElement: webcamVideo,
     canvasElement: webcamCanvas,
-    enabled: (isLive || isDetecting) && gameOpen && !isPhraseCompleted && !isTransitioning,
-    targetPhrase: effectivePhrase,
+    // 🚨 เหมือน SignDefenderPage: enabled ตลอดทันทีที่กล้องพร้อมและ modal เปิด
+    // ทำให้โมเดล buffer keypoints ไว้ล่วงหน้า พร้อมใช้ทันทีเมื่อ user กด START
+    enabled: cameraPermissionGranted && gameOpen && !isTransitioning,
+    targetPhrase: (isLive || isDetecting) && !isPhraseCompleted ? effectivePhrase : undefined,
     tooCloseThreshold: 0.15,
     distanceThreshold: 0.05,
     variant: (activePhrase?.id === "g1" || activePhrase?.id === "g4" || activePhrase?.id === "g6") ? selectedVariant : undefined,
     onPhraseMatch: (prediction, confidence) => {
+      // ยิง onPhraseMatch เฉพาะตอนที่ผู้ใช้กด START แล้วเท่านั้น
+      if (!isLive && !isDetecting) return;
+      if (isPhraseCompleted) return;
       // Track best confidence
       setBestConfidence(prev => Math.max(prev, confidence));
       if (activePhrase?.id === "g2") {
@@ -369,7 +375,7 @@ const Index = () => {
     },
     onPrediction: (prediction) => {
       // Update best confidence if it matches target
-      if (signRecognition.isMatched) {
+      if ((isLive || isDetecting) && signRecognition.isMatched) {
         setBestConfidence(prev => Math.max(prev, prediction.confidence));
       }
     },
@@ -377,6 +383,14 @@ const Index = () => {
 
   // Proxy the distanceStatus state for the original Index logic
   const distanceStatus = signRecognition.distanceStatus;
+
+  // 🧹 Clear stale keypoints จาก CalibrationModal ทุกครั้งที่เปิด modal ใหม่
+  // ป้องกัน keypoints จาก calibration webcam ปนใน buffer ของ lesson
+  useEffect(() => {
+    if (gameOpen) {
+      signRecognition.clearBuffer();
+    }
+  }, [gameOpen, signRecognition.clearBuffer]);
 
   // 🚨 ตรวจจับการเปลี่ยนแปลงสิทธิ์กล้อง (เช่น ผู้ใช้กด Reset หรือ Block บน Browser ระหว่างใช้งาน)
   useEffect(() => {
@@ -532,17 +546,17 @@ const Index = () => {
         setTimeout(() => {
           setIsAuthenticated(nowAuthenticated);
           setIsAuthTransitioning(false);
-          if (nowAuthenticated && !cameraPermissionGranted && !localStorage.getItem('hasShownCameraModal')) {
+          if (nowAuthenticated && !sessionStorage.getItem('hasShownCameraModal')) {
             setShowCameraPermission(true);
-            localStorage.setItem('hasShownCameraModal', 'true');
+            sessionStorage.setItem('hasShownCameraModal', 'true');
           }
         }, 3500);
       } else {
         setIsAuthenticated(nowAuthenticated);
         setIsCheckingAuth(false);
-        if (nowAuthenticated && !cameraPermissionGranted && !localStorage.getItem('hasShownCameraModal')) {
+        if (nowAuthenticated && !sessionStorage.getItem('hasShownCameraModal')) {
           setShowCameraPermission(true);
-          localStorage.setItem('hasShownCameraModal', 'true');
+          sessionStorage.setItem('hasShownCameraModal', 'true');
         }
       }
     });
@@ -602,26 +616,30 @@ const Index = () => {
     localStorage.setItem('lastPhraseId', phrase.id);
   };
 
-  const requestCameraPermission = async () => {
+  const requestCameraPermission = async (fromCalibration = false) => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "user",
-          width: { ideal: 1280 },
-          height: { ideal: 1280 },
-          frameRate: { ideal: 30 }
-        }
-      });
-      stream.getTracks().forEach(track => track.stop());
+      if (!fromCalibration) {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "user",
+            width: { ideal: 1280 },
+            height: { ideal: 1280 },
+            frameRate: { ideal: 30 }
+          }
+        });
+        stream.getTracks().forEach(track => track.stop());
+      }
       setCameraPermissionGranted(true);
-      localStorage.setItem('cameraPermissionGranted', 'true');
+      sessionStorage.setItem('cameraPermissionGranted', 'true');
       setShowCameraPermission(false);
+      setSkipCameraCalibration(false);
       setTutorialStep("initial");
     } catch (err) {
       console.error("Camera permission denied:", err);
       setCameraPermissionGranted(false);
-      localStorage.removeItem('cameraPermissionGranted');
+      sessionStorage.removeItem('cameraPermissionGranted');
       setShowCameraPermission(false);
+      setSkipCameraCalibration(false);
       alert("ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตสิทธิ์กล้องในการตั้งค่าเบราว์เซอร์");
     }
   };
@@ -732,9 +750,17 @@ const Index = () => {
       setIsPhraseCompleted(false);
       isCollectingRef.current = false;
       sessionStartedRef.current = false;
+      // 🚨 Reset webcam refs เหมือน SignDefenderPage ตอนเปลี่ยน phase
+      // ป้องกัน stale video element ถูกส่งให้ MediaPipe เมื่อเปิด modal ใหม่
+      setWebcamVideo(null);
+      setWebcamCanvas(null);
       if (successTimerRef.current) {
         clearTimeout(successTimerRef.current);
         successTimerRef.current = null;
+      }
+      if (goodPositionTimerRef.current) {
+        clearTimeout(goodPositionTimerRef.current);
+        goodPositionTimerRef.current = null;
       }
     }, 240);
   };
@@ -858,8 +884,8 @@ const Index = () => {
       setSidebarOpen(false);
       setGameOpen(false);
       setCameraPermissionGranted(false);
-      localStorage.removeItem('hasShownCameraModal');
-      localStorage.removeItem('cameraPermissionGranted');
+      sessionStorage.removeItem('hasShownCameraModal');
+      sessionStorage.removeItem('cameraPermissionGranted');
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
@@ -1107,7 +1133,10 @@ const Index = () => {
         tutorialStep={tutorialStep}
         cameraPermissionGranted={cameraPermissionGranted}
         webcamVideo={webcamVideo}
-        onShowCameraPermission={() => setShowCameraPermission(true)}
+        onShowCameraPermission={() => {
+          setSkipCameraCalibration(true);
+          setShowCameraPermission(true);
+        }}
         onVideoReady={(video) => setWebcamVideo(video)}
         onCanvasReady={(canvas) => setWebcamCanvas(canvas)}
         onSetIsPhraseCompleted={setIsPhraseCompleted}
@@ -1144,6 +1173,8 @@ const Index = () => {
           }
           sessionStartedRef.current = true;
           setTutorialStep("initial");
+          // 🚨 เหมือน SignDefenderPage: set isLive=true โดยตรงเลย ไม่ต้องผ่าน isDetecting
+          // เนื่องจาก hook รันและ buffer ข้อมูลไว้แล้ว พร้อมทันที
           setIsLive(true);
           setIsDetecting(false);
           setBestConfidence(0);
@@ -1169,8 +1200,10 @@ const Index = () => {
       {showCameraPermission && (
         <CameraPermission
           onAllow={requestCameraPermission}
+          skipCalibration={skipCameraCalibration}
           onSkip={() => {
             setShowCameraPermission(false);
+            setSkipCameraCalibration(false);
             setCameraPermissionGranted(false);
           }}
         />
