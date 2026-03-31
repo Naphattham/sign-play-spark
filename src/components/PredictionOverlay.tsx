@@ -517,50 +517,8 @@ export const PredictionOverlay = ({
                             onCanvasReady={onCanvasReady}
                           />
 
-                          {/* Tutorial scanning / too_close overlay */}
-                          {(tutorialStep === "scanning" || tutorialStep === "too_close") && (
-                            <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center z-20 transition-all">
-                              <img
-                                src={guideHumanImg}
-                                alt="Guide"
-                                className="w-full h-full object-cover opacity-80"
-                              />
-                              <div
-                                className={`absolute bottom-6 bg-white/95 border-[3px] border-foreground rounded-full px-4 py-2 font-black text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${tutorialStep === "too_close"
-                                  ? "text-red-500 animate-pulse border-red-500 scale-105 transition-transform"
-                                  : "animate-bounce"
-                                  }`}
-                              >
-                                {tutorialStep === "too_close"
-                                  ? "ขยับถอยห่างไปอีกหน่อย"
-                                  : "ถอยหลังออกไปให้มีระยะห่างจากกล้อง"}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Success overlay */}
-                          {tutorialStep === "success" && (
-                            <div className="absolute inset-0 bg-green-500/80 flex flex-col items-center justify-center backdrop-blur-sm z-30 animate-in fade-in zoom-in duration-300">
-                              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 border-[4px] border-foreground shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                                <span className="text-4xl flex items-center justify-center w-full h-full pt-1">
-                                  ✓
-                                </span>
-                              </div>
-                              <h3 className="text-white font-black text-2xl drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                                Success!
-                              </h3>
-                              <p className="text-white font-bold drop-shadow-[1px_1px_0px_rgba(0,0,0,1)] mt-2">
-                                คุณอยู่ในตำแหน่งที่เหมาะสมแล้ว
-                              </p>
-                            </div>
-                          )}
-
                           {/* Dashed border guide */}
                           <div className="absolute inset-0 border-4 border-dashed border-[#ec5b13]/50 m-3 rounded-lg pointer-events-none" />
-
-                          {/* 🚨 ซ่อน UI การ Predict ทั้งหมด ถ้ายังอยู่ในโหมดจัดระเบียบร่างกายหรือ Success */}
-                          {tutorialStep !== "scanning" && tutorialStep !== "too_close" && tutorialStep !== "success" && (
-                            <>
                               {/* PTS badge */}
                               <div className="absolute top-3 right-3 animate-bounce z-10">
                                 <div className="bg-pink-500 text-white border-[3px] border-foreground rounded-xl px-2 lg:px-3 py-1 font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1 text-xs">
@@ -641,8 +599,6 @@ export const PredictionOverlay = ({
                                   )}
                                 </div>
                               )}
-                            </>
-                          )}
                         </div>
 
                         {/* ── Multi-state action button ── */}

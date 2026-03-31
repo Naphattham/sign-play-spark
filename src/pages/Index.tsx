@@ -13,6 +13,7 @@ import { HomePage } from "@/components/HomePage";
 import { LessonsPage } from "@/components/LessonsPage";
 import { QuestView } from "@/components/QuestView";
 import { GameSetupPage } from "@/components/GameSetupPage";
+import { CameraPermission } from "@/components/CameraPermission";
 import { Category, Phrase, getPhrasesByCategory, categories, isPhraseCompletedCheck } from "@/lib/categories";
 import { LogOut, X, Camera, Home, User, ArrowLeft, Check } from "lucide-react";
 import { useSignAndDistance, DistanceStatus } from "@/hooks/useSignAndDistance";
@@ -1142,8 +1143,9 @@ const Index = () => {
             return;
           }
           sessionStartedRef.current = true;
-          setTutorialStep("scanning");
-          setIsDetecting(true);
+          setTutorialStep("initial");
+          setIsLive(true);
+          setIsDetecting(false);
           setBestConfidence(0);
           setButtonState("stop");
         }}
@@ -1165,54 +1167,13 @@ const Index = () => {
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
 
       {showCameraPermission && (
-        <>
-          <div
-            className="fixed inset-0 z-50 bg-foreground/50 backdrop-blur-sm"
-            onClick={() => { }}
-          />
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="brutal-card-lg max-w-md w-full bg-background">
-              <div className="border-b-[3px] border-foreground bg-secondary px-6 py-4">
-                <h2 className="font-display text-xl text-secondary-foreground text-center">
-                  📹 อนุญาตการเข้าถึงกล้อง
-                </h2>
-              </div>
-              <div className="p-6 space-y-6">
-                <div className="flex justify-center">
-                  <div className="w-24 h-24 rounded-full bg-accent/20 flex items-center justify-center border-[3px] border-foreground">
-                    <Camera size={48} className="text-accent" />
-                  </div>
-                </div>
-                <div className="text-center space-y-2">
-                  <p className="font-body text-foreground font-bold text-lg">
-                    SignMate ต้องการใช้กล้องของคุณ
-                  </p>
-                  <p className="font-body text-muted-foreground text-sm">
-                    เราใช้กล้องเพื่อตรวจจับท่าทางภาษามือของคุณแบบเรียลไทม์
-                    ข้อมูลวิดีโอจะไม่ถูกบันทึกหรือส่งออกไปจากอุปกรณ์ของคุณ
-                  </p>
-                </div>
-                <div className="space-y-3">
-                  <button
-                    onClick={requestCameraPermission}
-                    className="w-full brutal-btn-primary font-bold"
-                  >
-                    อนุญาตการเข้าถึงกล้อง
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowCameraPermission(false);
-                      setCameraPermissionGranted(false);
-                    }}
-                    className="w-full brutal-btn-secondary text-sm"
-                  >
-                    ข้าม (เล่นโดยไม่มีกล้อง)
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
+        <CameraPermission
+          onAllow={requestCameraPermission}
+          onSkip={() => {
+            setShowCameraPermission(false);
+            setCameraPermissionGranted(false);
+          }}
+        />
       )}
     </div>
   );

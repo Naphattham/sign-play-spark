@@ -107,7 +107,7 @@ export function useSignAndDistance({
   targetPhrase,
   variant,
   distanceThreshold = 0.01, // <--- ปรับให้ใจดีขึ้นมาก
-  tooCloseThreshold = 0.30, // <--- ปรับให้เข้าใกล้กล้องได้มากขึ้น
+  tooCloseThreshold = 0.18, // <--- เพิ่มความไวในการตรวจจับ too_close (0.30 ลึกเกินไป)
   onPhraseMatch,
   onPrediction,
   onDistanceChange
@@ -253,17 +253,13 @@ export function useSignAndDistance({
 
           const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-          if (distanceStatusRef.current === "good") {
-             currentStatus = "good";
+          // 🚨 ประเมินระยะห่างตลอดเวลา ลบ State lock เดิมออก ताकि UI ตอบสนองได้ทันที
+          if (distance < distanceThreshold) {
+            currentStatus = "too_far";
+          } else if (distance > tooCloseThreshold) {
+            currentStatus = "too_close";
           } else {
-             // ถ้ายังไม่เคยมองเห็นว่า Good ค่อยคำนวณระยะห่าง
-             if (distance < distanceThreshold) {
-               currentStatus = "too_far";
-             } else if (distance > tooCloseThreshold) {
-               currentStatus = "too_close";
-             } else {
-               currentStatus = "good";
-             }
+            currentStatus = "good";
           }
         }
       }

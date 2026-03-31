@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Webcam from "react-webcam";
 import { Camera, Pause } from "lucide-react";
+import { CameraPermission } from "@/components/CameraPermission";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { useSignAndDistance } from "@/hooks/useSignAndDistance";
 import { auth } from "@/lib/firebase";
@@ -596,49 +597,14 @@ export default function SignDefenderPage() {
 
           {/* Camera Permission Modal */}
           {showCameraPermission && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-              <div className="brutal-card-lg max-w-md w-full bg-background neo-brutalism rounded-xl border-[4px] border-black shadow-[8px_8px_0_0_#000] overflow-hidden">
-                <div className="border-b-[4px] border-black bg-secondary px-6 py-4">
-                  <h2 className="font-display font-black text-xl text-secondary-foreground text-center">
-                    📹 อนุญาตการเข้าถึงกล้อง
-                  </h2>
-                </div>
-                <div className="p-6 space-y-6">
-                  <div className="flex justify-center">
-                    <div className="w-24 h-24 rounded-full bg-accent/20 flex items-center justify-center border-[4px] border-black shadow-[4px_4px_0_0_#000]">
-                      <Camera size={48} className="text-accent" />
-                    </div>
-                  </div>
-                  <div className="text-center space-y-2">
-                    <p className="font-body text-foreground font-black text-lg">
-                      SignQuest ต้องการใช้กล้องของคุณ
-                    </p>
-                    <p className="font-body text-muted-foreground font-bold text-sm">
-                      เราใช้กล้องเพื่อตรวจจับท่าทางภาษามือของคุณแบบเรียลไทม์
-                      ข้อมูลวิดีโอจะไม่ถูกบันทึกหรือส่งออกไปจากอุปกรณ์ของคุณ
-                    </p>
-                  </div>
-                  <div className="space-y-3">
-                    <button
-                      onClick={requestCameraPermission}
-                      className="w-full neo-brutalism brutal-btn-primary bg-primary text-white font-black py-3 rounded-xl border-[3px] border-black shadow-[4px_4px_0_0_#000] hover:-translate-y-1 transition-all"
-                    >
-                      อนุญาตการเข้าถึงกล้อง
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowCameraPermission(false);
-                        setCameraSkipped(true);
-                        setCameraPermissionGranted(false);
-                      }}
-                      className="w-full neo-brutalism brutal-btn-secondary bg-white dark:bg-slate-700 text-foreground font-black py-3 rounded-xl border-[3px] border-black shadow-[4px_4px_0_0_#000] hover:-translate-y-1 transition-all text-sm"
-                    >
-                      ข้าม (เล่นโดยไม่มีกล้อง)
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <CameraPermission
+              onAllow={requestCameraPermission}
+              onSkip={() => {
+                setShowCameraPermission(false);
+                setCameraSkipped(true);
+                setCameraPermissionGranted(false);
+              }}
+            />
           )}
         </main>
       </>

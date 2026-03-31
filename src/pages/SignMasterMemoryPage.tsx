@@ -227,8 +227,10 @@ export default function SignMasterMemoryPage() {
   const [isReturningHome, setIsReturningHome] = useState(false);
   const [lastMatchAnim, setLastMatchAnim] = useState<string | null>(null);
   const [showMismatch, setShowMismatch] = useState(false);
+  const [isPreviewReady, setIsPreviewReady] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
-  const [previewCounter, setPreviewCounter] = useState(3);
+  const [previewCounter, setPreviewCounter] = useState(5);
+  const [showExitModal, setShowExitModal] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pointsAddedRef = useRef(false);
@@ -246,6 +248,23 @@ export default function SignMasterMemoryPage() {
   }, []);
 
   useEffect(() => () => stopTimer(), [stopTimer]);
+
+  const startPreviewCountdown = useCallback(() => {
+    setIsPreviewReady(false);
+    setIsPreviewing(true);
+    setPreviewCounter(5);
+
+    const countInterval = setInterval(() => {
+      setPreviewCounter((prev) => Math.max(0, prev - 1));
+    }, 1000);
+
+    setTimeout(() => {
+      clearInterval(countInterval);
+      setIsPreviewing(false);
+      setIsLocked(false);
+      startTimer();
+    }, 5000);
+  }, [startTimer]);
 
   // ── Sounds ──────────────────────────────────────────────────────────────
   const playMatchSound = useCallback(() => {
@@ -293,22 +312,12 @@ export default function SignMasterMemoryPage() {
     setPhase("playing");
     pointsAddedRef.current = false;
 
-    // Start 3s Preview Phase
-    setIsPreviewing(true);
+    // Start Ready Phase
+    setIsPreviewReady(true);
+    setIsPreviewing(false);
     setIsLocked(true);
-    setPreviewCounter(3);
-
-    const countInterval = setInterval(() => {
-      setPreviewCounter((prev) => Math.max(0, prev - 1));
-    }, 1000);
-
-    setTimeout(() => {
-      clearInterval(countInterval);
-      setIsPreviewing(false);
-      setIsLocked(false);
-      startTimer();
-    }, 3000);
-  }, [difficulty, startTimer]);
+    setPreviewCounter(5);
+  }, [difficulty]);
 
   // ── Card Click ──────────────────────────────────────────────────────────
   const handleCardClick = useCallback((uid: string) => {
@@ -664,16 +673,50 @@ export default function SignMasterMemoryPage() {
       {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
       <main className="h-screen overflow-hidden flex flex-col items-center bg-[hsl(44,95%,96%)] dark:bg-slate-900 relative">
 
-        {/* Preview Overlay */}
-        {isPreviewing && (
-          <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
-            <div className="flex flex-col items-center animate-bounce mt-[-10vh]">
-              <span className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter text-primary drop-shadow-lg">
-                ให้เวลาจำ!
-              </span>
-              <span className="mt-4 text-5xl md:text-7xl font-black text-slate-800 dark:text-white drop-shadow-lg">
-                {previewCounter} วินาที
-              </span>
+        {/* Ready Modal */}
+        {isPreviewReady && (
+          <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-800 border-4 border-black p-8 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center max-w-sm w-full flex flex-col items-center animate-in zoom-in duration-300 mx-4">
+              <h2 className="text-4xl font-black uppercase text-primary mb-2 drop-shadow-sm">เตรียมตัว!</h2>
+              <p className="text-xl font-bold text-slate-700 dark:text-slate-300 mb-8">
+                คุณมีเวลาจำ <span className="text-3xl font-black text-red-500">5</span> วินาที
+              </p>
+              <button
+                className="w-full neo-brutalism bg-green-400 text-white border-4 border-black text-2xl font-black py-4 px-6 rounded-xl hover:-translate-y-1 hover:shadow-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase flex justify-center items-center gap-2"
+                onClick={startPreviewCountdown}
+              >
+                Ready
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Exit Confirmation Modal */}
+        {showExitModal && (
+          <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-800 border-4 border-black p-8 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center max-w-sm w-full flex flex-col items-center animate-in zoom-in duration-200 mx-4">
+              <h2 className="text-3xl font-black uppercase text-red-600 mb-4 drop-shadow-sm">เกมยังไม่จบ</h2>
+              <p className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-8">
+                ต้องการจะออกใช่ไหม? <br />
+                <span className="text-red-500">หากออกจะไม่ได้รับคะแนนใดๆ ทั้งสิ้น</span>
+              </p>
+              <div className="flex gap-4 w-full">
+                <button
+                  className="flex-1 neo-brutalism bg-surface text-black border-4 border-black text-xl font-black py-3 px-4 rounded-xl hover:-translate-y-1 hover:shadow-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase"
+                  onClick={() => setShowExitModal(false)}
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  className="flex-1 neo-brutalism bg-red-500 text-white border-4 border-black text-xl font-black py-3 px-4 rounded-xl hover:-translate-y-1 hover:shadow-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase"
+                  onClick={() => {
+                    setShowExitModal(false);
+                    setPhase("idle");
+                  }}
+                >
+                  ยืนยัน
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -681,7 +724,7 @@ export default function SignMasterMemoryPage() {
         {/* HUD Header */}
         <header className="w-full p-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4 border-b-4 border-black bg-white dark:bg-slate-800 shrink-0 z-10">
           <button
-            onClick={() => setPhase("idle")}
+            onClick={() => setShowExitModal(true)}
             className="flex items-center gap-2 bg-white dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 px-6 py-2 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform active:translate-y-1 active:shadow-none"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -707,7 +750,18 @@ export default function SignMasterMemoryPage() {
         </header>
 
         {/* Card Grid Area */}
-        <div className="w-full flex-1 min-h-0 flex items-center justify-center p-2 md:p-4 overflow-hidden">
+        <div className="w-full flex-1 min-h-0 flex items-center justify-center p-2 md:p-4 overflow-hidden relative">
+
+          {isPreviewing && (
+            <div className={`absolute top-1/2 -translate-y-1/2 flex flex-col items-center z-40 pointer-events-none animate-pulse ${difficulty === "hard" ? "left-10 md:left-16" : "left-10 md:left-24"}`}>
+              <span
+                className="text-[6rem] md:text-[12rem] font-black text-red-500 leading-none drop-shadow-[0_4px_10px_rgba(0,0,0,0.3)]"
+              >
+                {previewCounter}
+              </span>
+            </div>
+          )}
+
           <div
             style={{
               display: "grid",

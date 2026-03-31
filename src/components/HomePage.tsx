@@ -155,7 +155,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
                 onClick={onLessons}
                 className="brutal-btn-primary px-4 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-xl font-black text-sm sm:text-base md:text-xl uppercase  transition-all duration-300 ease-in-out hover:brightness-110"
               >
-                Quick Play
+                Start Lesson
               </button>
             </div>
             {/* Abstract patterns in background */}
