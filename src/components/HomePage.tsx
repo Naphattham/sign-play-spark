@@ -153,9 +153,9 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
             <div className="relative z-10">
               <button
                 onClick={onLessons}
-                className="brutal-btn-primary px-4 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-xl font-black text-sm sm:text-base md:text-xl uppercase tracking-tighter transition-all duration-300 ease-in-out hover:brightness-110"
+                className="brutal-btn-primary px-4 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-xl font-black text-sm sm:text-base md:text-xl uppercase  transition-all duration-300 ease-in-out hover:brightness-110"
               >
-                Keep Learning
+                Quick Play
               </button>
             </div>
             {/* Abstract patterns in background */}

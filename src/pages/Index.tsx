@@ -444,21 +444,21 @@ const Index = () => {
       } else {
         // ✅ พอเข้าระยะ Good ปุ๊บ ล็อกคิวทันที!
         setTutorialStep("scanning"); // ค้างหน้าสแกนไว้แป๊บนึงให้ดูเนียน
-        
+
         goodPositionTimerRef.current = setTimeout(() => {
           // โชว์หน้า Success หลังผ่านไป 1 วิ
           setTutorialStep("success");
-          
+
           // นับต่ออีก 2.5 วิ ค่อยเข้าเกม
           successTimerRef.current = setTimeout(() => {
             setIsLive(true);
             setTutorialStep("initial");
             setIsDetecting(false);
-            
+
             // เคลียร์คิวทั้งหมดเมื่อจบ Process
             successTimerRef.current = null;
-            goodPositionTimerRef.current = null; 
-          }, 2500); 
+            goodPositionTimerRef.current = null;
+          }, 2500);
         }, 1000); // ⏳ หน่วงเวลา 1 วินาที (1000ms)
       }
     } else {

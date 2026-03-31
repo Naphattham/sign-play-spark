@@ -310,16 +310,16 @@ export const PredictionOverlay = ({
                           <span className="text-slate-900 dark:text-white mx-1">|</span>
                           <span
                             className={`transition-colors duration-300 ${(isLive || isDetecting) && byeStep === 1
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
+                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                              : "text-slate-400"
                               }`}
                           >
                             ฉัน
                           </span>
                           <span
                             className={`transition-colors duration-300 ${(isLive || isDetecting) && byeStep === 2
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
+                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                              : "text-slate-400"
                               }`}
                           >
                             ไป
@@ -331,24 +331,24 @@ export const PredictionOverlay = ({
                           <span className="text-slate-900 dark:text-white mx-1">|</span>
                           <span
                             className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 1
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
+                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                              : "text-slate-400"
                               }`}
                           >
                             ข้าว
                           </span>
                           <span
                             className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 2
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
+                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                              : "text-slate-400"
                               }`}
                           >
                             กิน
                           </span>
                           <span
                             className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 3
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
+                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                              : "text-slate-400"
                               }`}
                           >
                             หรือยัง?
@@ -362,16 +362,16 @@ export const PredictionOverlay = ({
                           <span className="text-slate-900 dark:text-white mx-1">|</span>
                           <span
                             className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 1
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
+                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                              : "text-slate-400"
                               }`}
                           >
                             กิน
                           </span>
                           <span
                             className={`transition-colors duration-300 ${(isLive || isDetecting) && eatStep === 2
-                                ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
-                                : "text-slate-400"
+                              ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+                              : "text-slate-400"
                               }`}
                           >
                             {selectedVariant === "adult" ? "แล้ว" : "ยัง"}
@@ -440,8 +440,8 @@ export const PredictionOverlay = ({
                             <button
                               onClick={() => onVariantChange("adult")}
                               className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
-                                  ? "bg-yellow-400 text-slate-900"
-                                  : "bg-white text-slate-900 hover:bg-slate-50"
+                                ? "bg-yellow-400 text-slate-900"
+                                : "bg-white text-slate-900 hover:bg-slate-50"
                                 }`}
                             >
                               สวัสดีผู้ใหญ่
@@ -449,8 +449,8 @@ export const PredictionOverlay = ({
                             <button
                               onClick={() => onVariantChange("friend")}
                               className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
-                                  ? "bg-yellow-400 text-slate-900"
-                                  : "bg-white text-slate-900 hover:bg-slate-50"
+                                ? "bg-yellow-400 text-slate-900"
+                                : "bg-white text-slate-900 hover:bg-slate-50"
                                 }`}
                             >
                               สวัสดีเพื่อน
@@ -464,8 +464,8 @@ export const PredictionOverlay = ({
                             <button
                               onClick={() => onVariantChange("adult")}
                               className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
-                                  ? "bg-yellow-400 text-slate-900"
-                                  : "bg-white text-slate-900 hover:bg-slate-50"
+                                ? "bg-yellow-400 text-slate-900"
+                                : "bg-white text-slate-900 hover:bg-slate-50"
                                 }`}
                             >
                               กินแล้ว
@@ -473,8 +473,8 @@ export const PredictionOverlay = ({
                             <button
                               onClick={() => onVariantChange("friend")}
                               className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
-                                  ? "bg-yellow-400 text-slate-900"
-                                  : "bg-white text-slate-900 hover:bg-slate-50"
+                                ? "bg-yellow-400 text-slate-900"
+                                : "bg-white text-slate-900 hover:bg-slate-50"
                                 }`}
                             >
                               ยังไม่ได้กิน
@@ -488,8 +488,8 @@ export const PredictionOverlay = ({
                             <button
                               onClick={() => onVariantChange("adult")}
                               className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
-                                  ? "bg-yellow-400 text-slate-900"
-                                  : "bg-white text-slate-900 hover:bg-slate-50"
+                                ? "bg-yellow-400 text-slate-900"
+                                : "bg-white text-slate-900 hover:bg-slate-50"
                                 }`}
                             >
                               สบายดี
@@ -497,8 +497,8 @@ export const PredictionOverlay = ({
                             <button
                               onClick={() => onVariantChange("friend")}
                               className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "friend"
-                                  ? "bg-yellow-400 text-slate-900"
-                                  : "bg-white text-slate-900 hover:bg-slate-50"
+                                ? "bg-yellow-400 text-slate-900"
+                                : "bg-white text-slate-900 hover:bg-slate-50"
                                 }`}
                             >
                               ไม่สบายใจ
@@ -527,8 +527,8 @@ export const PredictionOverlay = ({
                               />
                               <div
                                 className={`absolute bottom-6 bg-white/95 border-[3px] border-foreground rounded-full px-4 py-2 font-black text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${tutorialStep === "too_close"
-                                    ? "text-red-500 animate-pulse border-red-500 scale-105 transition-transform"
-                                    : "animate-bounce"
+                                  ? "text-red-500 animate-pulse border-red-500 scale-105 transition-transform"
+                                  : "animate-bounce"
                                   }`}
                               >
                                 {tutorialStep === "too_close"
@@ -558,85 +558,90 @@ export const PredictionOverlay = ({
                           {/* Dashed border guide */}
                           <div className="absolute inset-0 border-4 border-dashed border-[#ec5b13]/50 m-3 rounded-lg pointer-events-none" />
 
-                          {/* PTS badge */}
-                          <div className="absolute top-3 right-3 animate-bounce z-10">
-                            <div className="bg-pink-500 text-white border-[3px] border-foreground rounded-xl px-2 lg:px-3 py-1 font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1 text-xs">
-                              {(() => {
-                                const score = getScoreFromConfidence(bestConfidence);
-                                return score > 0 ? `+ ${score} PTS` : "+ ? PTS";
-                              })()}
-                            </div>
-                          </div>
-
-                          {/* LIVE indicator */}
-                          <div className="absolute bottom-3 left-3 z-10">
-                            <div
-                              className={`px-2 py-1 border-[3px] border-foreground rounded-full font-black text-xs flex items-center gap-1.5 ${isLive
-                                  ? "bg-red-500 text-white animate-pulse"
-                                  : "bg-gray-400 text-white"
-                                }`}
-                            >
-                              <span
-                                className={`w-2 h-2 rounded-full ${isLive ? "bg-white animate-pulse" : "bg-white/50"
-                                  }`}
-                              />
-                              LIVE
-                            </div>
-                          </div>
-
-                          {/* Prediction box (isLive) */}
-                          {isLive && (
-                            <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
-                              <div
-                                className={`bg-white/95 backdrop-blur-sm border-[2px] ${signRecognition.isMatched
-                                    ? "border-green-500 bg-green-50/95"
-                                    : "border-foreground"
-                                  } rounded-md px-2 py-1 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] min-w-[110px] transition-colors duration-300`}
-                              >
-                                <div className="flex items-end justify-between gap-2">
-                                  <span
-                                    className={`text-sm leading-none ${signRecognition.isMatched
-                                        ? "text-green-700"
-                                        : "text-slate-800"
-                                      } truncate max-w-[90px]`}
-                                  >
-                                    {targetDisplayWord}
-                                  </span>
-                                  <span
-                                    className={`text-xs leading-none ${signRecognition.isMatched
-                                        ? "text-green-600"
-                                        : "text-primary"
-                                      }`}
-                                  >
-                                    {(() => {
-                                      const top3 = signRecognition.top3Predictions || [];
-                                      const found = effectivePhrase
-                                        ? top3.find((p) =>
-                                          checkPhraseMatch(
-                                            effectivePhrase,
-                                            p.class,
-                                            selectedVariant
-                                          )
-                                        )
-                                        : null;
-                                      return found
-                                        ? (found.confidence * 100).toFixed(0)
-                                        : "0";
-                                    })()}
-                                    %
-                                  </span>
+                          {/* 🚨 ซ่อน UI การ Predict ทั้งหมด ถ้ายังอยู่ในโหมดจัดระเบียบร่างกายหรือ Success */}
+                          {tutorialStep !== "scanning" && tutorialStep !== "too_close" && tutorialStep !== "success" && (
+                            <>
+                              {/* PTS badge */}
+                              <div className="absolute top-3 right-3 animate-bounce z-10">
+                                <div className="bg-pink-500 text-white border-[3px] border-foreground rounded-xl px-2 lg:px-3 py-1 font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1 text-xs">
+                                  {(() => {
+                                    const score = getScoreFromConfidence(bestConfidence);
+                                    return score > 0 ? `+ ${score} PTS` : "+ ? PTS";
+                                  })()}
                                 </div>
                               </div>
 
-                              {signRecognition.error && (
-                                <div className="bg-red-500/95 backdrop-blur-sm border-[2px] border-foreground rounded-lg px-3 py-2 font-bold text-xs text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] max-w-[180px]">
-                                  <div className="flex items-center gap-1">
-                                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                                    <span>ไม่พบกล้อง / เกิดข้อผิดพลาด</span>
+                              {/* LIVE indicator */}
+                              <div className="absolute bottom-3 left-3 z-10">
+                                <div
+                                  className={`px-2 py-1 border-[3px] border-foreground rounded-full font-black text-xs flex items-center gap-1.5 ${isLive
+                                    ? "bg-red-500 text-white animate-pulse"
+                                    : "bg-gray-400 text-white"
+                                    }`}
+                                >
+                                  <span
+                                    className={`w-2 h-2 rounded-full ${isLive ? "bg-white animate-pulse" : "bg-white/50"
+                                      }`}
+                                  />
+                                  LIVE
+                                </div>
+                              </div>
+
+                              {/* Prediction box (isLive) */}
+                              {isLive && (
+                                <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+                                  <div
+                                    className={`bg-white/95 backdrop-blur-sm border-[2px] ${signRecognition.isMatched
+                                      ? "border-green-500 bg-green-50/95"
+                                      : "border-foreground"
+                                      } rounded-md px-2 py-1 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] min-w-[110px] transition-colors duration-300`}
+                                  >
+                                    <div className="flex items-end justify-between gap-2">
+                                      <span
+                                        className={`text-sm leading-none ${signRecognition.isMatched
+                                          ? "text-green-700"
+                                          : "text-slate-800"
+                                          } truncate max-w-[90px]`}
+                                      >
+                                        {targetDisplayWord}
+                                      </span>
+                                      <span
+                                        className={`text-xs leading-none ${signRecognition.isMatched
+                                          ? "text-green-600"
+                                          : "text-primary"
+                                          }`}
+                                      >
+                                        {(() => {
+                                          const top3 = signRecognition.top3Predictions || [];
+                                          const found = effectivePhrase
+                                            ? top3.find((p) =>
+                                              checkPhraseMatch(
+                                                effectivePhrase,
+                                                p.class,
+                                                selectedVariant
+                                              )
+                                            )
+                                            : null;
+                                          return found
+                                            ? (found.confidence * 100).toFixed(0)
+                                            : "0";
+                                        })()}
+                                        %
+                                      </span>
+                                    </div>
                                   </div>
+
+                                  {signRecognition.error && (
+                                    <div className="bg-red-500/95 backdrop-blur-sm border-[2px] border-foreground rounded-lg px-3 py-2 font-bold text-xs text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] max-w-[180px]">
+                                      <div className="flex items-center gap-1">
+                                        <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                                        <span>ไม่พบกล้อง / เกิดข้อผิดพลาด</span>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               )}
-                            </div>
+                            </>
                           )}
                         </div>
 
@@ -692,10 +697,10 @@ export const PredictionOverlay = ({
                                   }}
                                   disabled={isLocked}
                                   className={`w-full h-12 lg:h-14 flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm ${isLocked
-                                      ? "bg-gray-400 text-gray-200 cursor-not-allowed opacity-70"
-                                      : deltaPoints <= 0
-                                        ? "bg-purple-500 hover:bg-purple-600 text-white"
-                                        : "bg-yellow-400 hover:bg-yellow-500 text-slate-900 hover:translate-y-0.5"
+                                    ? "bg-gray-400 text-gray-200 cursor-not-allowed opacity-70"
+                                    : deltaPoints <= 0
+                                      ? "bg-purple-500 hover:bg-purple-600 text-white"
+                                      : "bg-yellow-400 hover:bg-yellow-500 text-slate-900 hover:translate-y-0.5"
                                     }`}
                                 >
                                   {isLocked
@@ -757,8 +762,8 @@ export const PredictionOverlay = ({
                               onResetPhraseState();
                             }}
                             className={`relative border-[2px] border-foreground rounded-lg flex items-center py-1 px-2 sm:py-2 sm:px-3 cursor-pointer flex-none w-[120px] sm:w-[140px] md:w-[160px] min-h-[48px] sm:min-h-[56px] transition-all ${isActive
-                                ? "shadow-[0px_0px_0px_3px_rgba(253,224,71,1)] scale-[1.02] z-10"
-                                : "opacity-70 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:opacity-100 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                              ? "shadow-[0px_0px_0px_3px_rgba(253,224,71,1)] scale-[1.02] z-10"
+                              : "opacity-70 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:opacity-100 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                               } ${isCompleted ? "bg-green-50" : "bg-white"}`}
                           >
                             {isCompleted ? (

@@ -12,7 +12,7 @@ import illnessImg from "@/asset/image/illness.webp";
 import trophyImg from "@/asset/image/Trophy.webp";
 import questImg from "@/asset/image/quest.webp";
 import challengeImg from "@/asset/image/challenge.webp";
-import playImg from "@/asset/image/Play.webp";
+import lessonImg from "@/asset/image/lesson.webp";
 
 const iconMap: Record<string, string> = {
   Hand: generalImg,
@@ -142,6 +142,18 @@ export function GameSidebar({
             </button>
 
             <button
+              onClick={onLessons}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${showLessons
+                  ? "bg-secondary text-secondary-foreground"
+                  : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
+                }`}
+              style={showLessons ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
+            >
+              <img src={lessonImg} alt="Lesson" className="w-[18px] h-[18px] object-contain" />
+              Lesson
+            </button>
+
+            <button
               onClick={handlePlayGame}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border-[2px] border-foreground font-semibold text-sm transition-all font-body ${showPlayGame
                   ? "bg-secondary text-secondary-foreground"
@@ -178,12 +190,7 @@ export function GameSidebar({
             </button>
           </div>
 
-          <button
-            onClick={onLessons}
-            className="w-full mt-auto transition-transform hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <img src={playImg} alt="Play" className="w-full h-auto" />
-          </button>
+
         </nav>
 
         <div className="p-4 border-t-[3px] border-foreground">

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Webcam from "react-webcam";
-import { Camera } from "lucide-react";
+import { Camera, Pause } from "lucide-react";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { useSignAndDistance } from "@/hooks/useSignAndDistance";
 import { auth } from "@/lib/firebase";
@@ -90,7 +90,7 @@ const WORD_LABELS: Record<string, string> = {
 };
 
 const ARENA_CENTER = { x: 50, y: 50 };
-const CONFIDENCE_THRESHOLD = 0.2;
+const CONFIDENCE_THRESHOLD = 0.4;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function randBetween(min: number, max: number) {
@@ -244,31 +244,35 @@ export default function SignDefenderPage() {
   // ── onPrediction (stable ref to avoid recreating hook deps) ─────────────
   const onPredictionRef = useRef<(p: any) => void>(() => { });
   const clearBufferRef = useRef<() => void>(() => { });
-  
+
   onPredictionRef.current = (prediction: any) => {
     // ป้องกันไม่ให้ Game Logic ทำงานถ้ายังไม่เริ่มเล่น
     if (phaseRef.current !== "playing" || isPausedRef.current) return;
-    
+
     if (!prediction.success) return;
     if (prediction.confidence < CONFIDENCE_THRESHOLD) return;
 
     const pred: string = prediction.prediction ? prediction.prediction.trim().toLowerCase() : "";
     const now = Date.now();
 
-    // Debounce
-    if (pred === lastKilledRef.current.pred && now - lastKilledRef.current.time < 1000) return;
+    // 🚨 1. ลดเวลา Cooldown (Debounce) จาก 1000ms เหลือ 400ms ให้เกมลื่นไหลขึ้น
+    if (pred === lastKilledRef.current.pred && now - lastKilledRef.current.time < 400) return;
 
     setMonsters(prev => {
       const idx = prev.findIndex(m => m.label === pred);
-      if (idx === -1) return prev;
+      if (idx === -1) return prev; // ท่าทางถูก แต่ไม่มีมอนสเตอร์ตัวนี้บนจอ
+
       const hit = prev[idx];
       lastKilledRef.current = { pred, time: now };
       setPowPos({ x: hit.x, y: hit.y, word: WORD_LABELS[pred] ?? pred });
+
       const points = mode === "easy" ? 5 : mode === "hard" ? 15 : 10;
       setScore(s => s + points);
       setTimeout(() => setPowPos(null), 700);
-      
-      clearBufferRef.current();
+
+      // 🚨 2. ปิดการ Clear Buffer เพื่อให้ AI ไม่ต้องรอเก็บเฟรมภาพ 1.3 วินาทีใหม่ทุกครั้งที่โจมตี
+      // clearBufferRef.current(); 
+
       return prev.filter((_, i) => i !== idx);
     });
   };
@@ -280,7 +284,7 @@ export default function SignDefenderPage() {
     videoElement: webcamVideo,
     canvasElement: webcamCanvas,
     // 🚨 2. เปิดใช้งานตลอดเวลาเพื่อให้โมเดล Buffer ไว้ล่วงหน้าตั้งแต่หน้า Idle!
-    enabled: cameraPermissionGranted, 
+    enabled: cameraPermissionGranted,
     onPrediction: stableOnPrediction,
   });
   clearBufferRef.current = signRecognition.clearBuffer;
@@ -398,7 +402,7 @@ export default function SignDefenderPage() {
               <p className="text-xs font-black uppercase tracking-widest mb-1 text-muted-foreground">WAVE {wave}</p>
               <h2 className="text-6xl font-black uppercase tracking-tighter mb-6 text-foreground whitespace-nowrap">
                 GAME <span className="text-primary">OVER</span>
-              </h2>              
+              </h2>
               <div className="neo-brutalism bg-secondary rounded-2xl px-8 py-4 mb-8 inline-block">
                 <p className="text-xs font-black uppercase tracking-wider text-foreground opacity-70">Final Score</p>
                 <p className="text-5xl font-black text-foreground">{score}</p>
@@ -423,7 +427,7 @@ export default function SignDefenderPage() {
               </div>
             </div>
           </div>
-          
+
           {/* ซ่อนกล้องไว้เพื่อให้สตรีมไม่ถูกตัดตอนสลับ Phase */}
           {cameraPermissionGranted && (
             <div className="fixed top-0 left-0 w-1 h-1 opacity-0 pointer-events-none overflow-hidden">
@@ -650,26 +654,31 @@ export default function SignDefenderPage() {
       {showExitModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm pointer-events-auto">
           <div className="brutal-card-lg max-w-sm w-full bg-white dark:bg-slate-800 neo-brutalism rounded-2xl border-[4px] border-black shadow-[8px_8px_0_0_#000] p-6 text-center animate-in fade-in zoom-in duration-200">
-            <h2 className="text-3xl font-black uppercase tracking-tighter mb-2 text-foreground">Exit Game?</h2>
+            <h2 className="text-3xl font-black uppercase tracking-tighter mb-2 text-foreground">Game Paused</h2>
             <p className="font-bold text-muted-foreground mb-6">
               คุณต้องการออกจากเกมใช่หรือไม่?<br />ความคืบหน้าจะหายไป
             </p>
             <div className="flex gap-4">
-              <button
-                onClick={closeExitModal}
-                className="flex-1 neo-brutalism bg-white dark:bg-slate-700 text-foreground font-black uppercase py-3 rounded-xl border-[3px] border-black shadow-[4px_4px_0_0_#000] hover:-translate-y-1 transition-all"
-              >
-                CANCEL
-              </button>
+
+              {/* 📍 ปุ่มซ้าย: ออกจากเกม (เรียก handleEndGame) */}
               <button
                 onClick={() => {
                   closeExitModal();
                   handleEndGame();
                 }}
-                className="flex-1 neo-brutalism bg-rose-500 text-white font-black uppercase py-3 rounded-xl border-[3px] border-black shadow-[4px_4px_0_0_#000] hover:-translate-y-1 hover:brightness-110 transition-all"
+                className="flex-1 neo-brutalism bg-white dark:bg-slate-700 text-rose-600 font-black uppercase py-3 rounded-xl border-[3px] border-black shadow-[4px_4px_0_0_#000] hover:-translate-y-1 transition-all"
               >
-                CONFIRM
+                ออกจากเกม
               </button>
+
+              {/* 📍 ปุ่มขวา: เล่นต่อ (แค่ปิด Modal เพื่อให้เกมเดินต่อ) */}
+              <button
+                onClick={closeExitModal}
+                className="flex-1 neo-brutalism bg-primary text-white font-black uppercase py-3 rounded-xl border-[3px] border-black shadow-[4px_4px_0_0_#000] hover:-translate-y-1 hover:brightness-110 transition-all"
+              >
+                เล่นต่อ
+              </button>
+
             </div>
           </div>
         </div>
@@ -680,57 +689,62 @@ export default function SignDefenderPage() {
         style={{ background: "hsl(44 95% 96%)", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
       >
         {/* ── Fixed Top HUD ────────────────────────────────────────────── */}
-        <header className="fixed top-0 left-0 w-full px-6 py-4 z-50 flex justify-between items-start pointer-events-none">
-          {/* Exit Button */}
+        <header className="fixed top-0 left-0 w-full px-6 py-4 z-50 flex flex-row justify-between items-center pointer-events-none gap-4">
+
+          {/* 📍 ฝั่งซ้ายสุด: Pause Button */}
           <button
             onClick={openExitModal}
-            className="pointer-events-auto bg-white border-[3px] border-black px-5 py-2 rounded-xl flex items-center gap-2 transition-all hover:translate-x-[1px] hover:translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px]"
+            className="pointer-events-auto shrink-0 bg-white border-[3px] border-black px-4 md:px-6 py-2 rounded-2xl flex items-center justify-center gap-1.5 md:gap-2 transition-all hover:translate-x-[1px] hover:translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px]"
             style={{ boxShadow: "4px 4px 0px 0px #000", transition: "box-shadow 0.1s, transform 0.1s" }}
             onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px 0px #000"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "4px 4px 0px 0px #000"; }}
           >
-            <span style={{ fontSize: 20 }}>←</span>
-            <span className="font-black uppercase tracking-tight text-sm text-black">EXIT</span>
+            {/* ปรับขนาดไอคอนให้สมดุลกับตัวหนังสือ */}
+            <Pause className="w-5 h-5 md:w-6 md:h-6 text-black" strokeWidth={3} />
+            {/* ปรับขนาดตัวหนังสือให้เท่ากับปุ่มอื่น (text-base md:text-lg) */}
+            <span className="font-black uppercase tracking-tighter text-base md:text-lg text-black">PAUSE</span>
           </button>
 
-          {/* Right HUD Cluster */}
-          <div className="pointer-events-auto flex gap-3">
+          {/* 📍 ฝั่งขวาสุด: Right HUD Cluster */}
+          <div className="pointer-events-auto flex flex-row flex-wrap justify-end items-center gap-3">
+
             {/* Mode */}
             <div
-              className={`border-[3px] border-black px-6 py-2 rounded-2xl flex items-center justify-center
-                ${mode === 'easy' ? 'bg-green-400' : mode === 'medium' ? 'bg-yellow-400' : 'bg-red-500'}`}
+              className={`border-[3px] border-black px-4 md:px-6 py-2 rounded-2xl flex items-center justify-center
+        ${mode === 'easy' ? 'bg-green-400' : mode === 'medium' ? 'bg-yellow-400' : 'bg-red-500'}`}
               style={{ boxShadow: "4px 4px 0px 0px #000" }}
             >
-              <p className="font-black uppercase text-lg text-black tracking-tighter italic">
+              <p className="font-black uppercase text-base md:text-lg text-black tracking-tighter italic">
                 {mode === 'easy' ? 'EASY' : mode === 'medium' ? 'Medium' : 'HARD'}
               </p>
             </div>
 
             {/* Wave */}
             <div
-              className="bg-yellow-300 border-[3px] border-black px-6 py-2 rounded-2xl"
+              className="bg-yellow-300 border-[3px] border-black px-4 md:px-6 py-2 rounded-2xl"
               style={{ boxShadow: "4px 4px 0px 0px #000" }}
             >
-              <p className="font-black uppercase text-lg text-black tracking-tighter italic">WAVE {wave}</p>
+              <p className="font-black uppercase text-base md:text-lg text-black tracking-tighter italic">WAVE {wave}</p>
             </div>
 
             {/* Score */}
             <div
-              className="bg-white border-[3px] border-black px-6 py-2 rounded-2xl min-w-[160px]"
+              className="bg-white border-[3px] border-black px-4 md:px-6 py-2 rounded-2xl min-w-[120px] md:min-w-[160px]"
               style={{ boxShadow: "4px 4px 0px 0px #000" }}
             >
-              <p className="font-black uppercase text-lg text-black tracking-tighter">SCORE: {score} PTS</p>
+              <p className="font-black uppercase text-base md:text-lg text-black tracking-tighter">SCORE: {score} PTS</p>
             </div>
 
             {/* Hearts */}
             <div
-              className="bg-white border-[3px] border-black px-5 py-2 rounded-2xl flex gap-1.5 items-center"
+              className="bg-white border-[3px] border-black px-3 md:px-5 py-2 rounded-2xl flex gap-1.5 items-center"
               style={{ boxShadow: "4px 4px 0px 0px #000" }}
             >
               {Array.from({ length: 3 }, (_, i) => (
-                <img key={i} src={heartImg} alt="Heart" className={`w-7 h-7 object-contain ${i < hp ? "opacity-100" : "opacity-20 grayscale"}`} draggable={false} />
+                <img key={i} src={heartImg} alt="Heart" className={`w-6 h-6 md:w-7 md:h-7 object-contain ${i < hp ? "opacity-100" : "opacity-20 grayscale"}`} draggable={false} />
               ))}
             </div>
+
           </div>
         </header>
 

@@ -567,17 +567,17 @@ export default function SignMasterMemoryPage() {
               You <span className="text-primary">Win!</span>
             </h2>
 
-            <div className="grid grid-cols-3 gap-3">
-              <div className="neo-brutalism bg-primary/10 rounded-xl p-3 flex flex-col items-center">
-                <span className="text-xs font-black uppercase text-muted-foreground">Score</span>
+            <div className="grid grid-cols-3 gap-4 md:gap-6">
+              <div className="neo-brutalism bg-primary/10 rounded-xl p-4 flex flex-col items-center justify-center">
+                <span className="text-xs font-black uppercase text-muted-foreground mb-1">Score</span>
                 <span className="text-3xl font-black text-primary">{score.toLocaleString()}</span>
               </div>
-              <div className="neo-brutalism bg-secondary/10 rounded-xl p-3 flex flex-col items-center">
-                <span className="text-xs font-black uppercase text-muted-foreground">Moves</span>
+              <div className="neo-brutalism bg-secondary/10 rounded-xl p-4 flex flex-col items-center justify-center">
+                <span className="text-xs font-black uppercase text-muted-foreground mb-1">Moves</span>
                 <span className="text-3xl font-black">{moves}</span>
               </div>
-              <div className="neo-brutalism bg-green-100 rounded-xl p-3 flex flex-col items-center">
-                <span className="text-xs font-black uppercase text-muted-foreground">Time</span>
+              <div className="neo-brutalism bg-green-100 rounded-xl p-4 flex flex-col items-center justify-center">
+                <span className="text-xs font-black uppercase text-muted-foreground mb-1">Time</span>
                 <span className="text-3xl font-black">{formatTime(elapsed)}</span>
               </div>
             </div>
@@ -629,13 +629,15 @@ export default function SignMasterMemoryPage() {
           <div className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-orange-400 rounded-full neo-shadow opacity-20 -z-10 pointer-events-none" />
 
           <div className="bg-white dark:bg-slate-800 border-4 border-black p-8 md:p-12 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center max-w-lg w-full flex flex-col items-center z-10">
-            <Frown className="text-red-500 w-24 h-24 mb-4 drop-shadow-md" fill="currentColor" />
+            {/* 🚨 ลบ fill ออก และใส่ strokeWidth แทน เพื่อให้ไอคอนดูหนาและชัดเจนขึ้น */}
+            <Frown className="text-red-500 w-24 h-24 mb-4 drop-shadow-md" strokeWidth={2.5} />
+
             <h1 className="text-6xl md:text-7xl font-black uppercase italic tracking-tighter text-red-600 mb-2">
               YOU LOSE
             </h1>
             <div className="bg-red-100 border-2 border-red-500 px-6 py-2 rounded-full mb-8">
               <p className="font-bold text-xl uppercase tracking-widest text-red-900">
-                Out of mistakes
+                Out of moves
               </p>
             </div>
 
@@ -643,7 +645,7 @@ export default function SignMasterMemoryPage() {
               onClick={() => setPhase("idle")}
               className="w-full neo-brutalism bg-primary text-white border-4 border-black text-xl md:text-2xl font-black py-4 px-6 rounded-xl hover:-translate-y-1 hover:shadow-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase flex justify-center items-center gap-2"
             >
-              <RotateCcw className="w-6 h-6" />
+              <RotateCcw className="w-6 h-6" strokeWidth={2.5} />
               TRY AGAIN
             </button>
           </div>
@@ -698,8 +700,8 @@ export default function SignMasterMemoryPage() {
             </div>
 
             <div className="flex items-center bg-tertiary-container px-4 py-2 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-on-tertiary-container">
-              <span className="text-sm font-semibold uppercase opacity-90 mr-2">Moves</span>
-              <span className="text-2xl font-black tabular-nums">{moves}</span>
+              <span className="text-sm font-semibold uppercase opacity-90 mr-2">Mistakes Left</span>
+              <span className="text-2xl font-black tabular-nums">{Math.max(0, cfg.maxMisses - misses)}</span>
             </div>
           </div>
         </header>
