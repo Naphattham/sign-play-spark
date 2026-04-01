@@ -260,12 +260,25 @@ export default function SignDefenderPage() {
     if (pred === lastKilledRef.current.pred && now - lastKilledRef.current.time < 400) return;
 
     setMonsters(prev => {
-      const idx = prev.findIndex(m => m.label === pred);
-      if (idx === -1) return prev; // ท่าทางถูก แต่ไม่มีมอนสเตอร์ตัวนี้บนจอ
+      // 🚨 ปรับเงื่อนไขการค้นหามอนสเตอร์ ให้รองรับคำที่ใช้แทนกันได้
+      const idx = prev.findIndex(m => {
+        // 1. ถ้าคำตรงกันเป๊ะๆ ให้ผ่าน
+        if (m.label === pred) return true;
+
+        // 2. กรณีพิเศษ: อนุโลมให้ "สบายดี" (fine) และ "สบายดีไหม" (how_are_you) ตีแทนกันได้
+        if (m.label === "fine" && pred === "how_are_you") return true;
+        if (m.label === "how_are_you" && pred === "fine") return true;
+
+        return false;
+      });
+
+      if (idx === -1) return prev; // ท่าทางถูก แต่ไม่มีมอนสเตอร์เป้าหมายบนจอ
 
       const hit = prev[idx];
       lastKilledRef.current = { pred, time: now };
-      setPowPos({ x: hit.x, y: hit.y, word: WORD_LABELS[pred] ?? pred });
+
+      // 💡 เปลี่ยนจาก pred เป็น hit.label เพื่อให้เอฟเฟกต์ระเบิดโชว์คำของมอนสเตอร์ที่ตายจริงๆ
+      setPowPos({ x: hit.x, y: hit.y, word: WORD_LABELS[hit.label] ?? hit.label });
 
       const points = mode === "easy" ? 5 : mode === "hard" ? 15 : 10;
       setScore(s => s + points);
