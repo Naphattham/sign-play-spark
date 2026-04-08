@@ -270,7 +270,8 @@ def process_frame(req: https_fn.Request) -> https_fn.Response:
 # ============================================================
 @https_fn.on_request(
     cors=options.CorsOptions(cors_origins="*", cors_methods=["POST", "OPTIONS"]),
-    memory=options.MemoryOption.GB_4
+    memory=options.MemoryOption.GB_4,
+    min_instances=1
 )
 def predict_sign(req: https_fn.Request) -> https_fn.Response:
     if req.method == "OPTIONS":

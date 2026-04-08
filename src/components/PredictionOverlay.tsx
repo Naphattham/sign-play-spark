@@ -320,7 +320,7 @@ export const PredictionOverlay = ({
                     {/* ── Phrase title ── */}
                     <div className="flex items-center justify-center mb-1.5 sm:mb-3 lg:mb-4 pt-1 sm:pt-0">
                       {activePhrase?.id === "g2" ? (
-                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
+                        <h2 className="relative text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
                           <span className="text-slate-900 dark:text-white">ลาก่อน</span>
                           <span className="text-slate-900 dark:text-white mx-1">|</span>
                           <span
@@ -339,9 +339,12 @@ export const PredictionOverlay = ({
                           >
                             ไป
                           </span>
+                          <span className="absolute left-full ml-3 text-slate-500 dark:text-slate-400 text-xs sm:text-sm md:text-base font-medium whitespace-nowrap">
+                            (ไวยากรณ์ภาษามือ)
+                          </span>
                         </h2>
                       ) : activePhrase?.id === "g3" ? (
-                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
+                        <h2 className="relative text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
                           <span className="text-slate-900 dark:text-white">กินข้าวหรือยัง?</span>
                           <span className="text-slate-900 dark:text-white mx-1">|</span>
                           <span
@@ -368,9 +371,12 @@ export const PredictionOverlay = ({
                           >
                             หรือยัง?
                           </span>
+                          <span className="absolute left-full ml-3 text-slate-500 dark:text-slate-400 text-xs sm:text-sm md:text-base font-medium whitespace-nowrap">
+                            (ไวยากรณ์ภาษามือ)
+                          </span>
                         </h2>
                       ) : activePhrase?.id === "g4" ? (
-                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
+                        <h2 className="relative text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight flex items-center gap-1 sm:gap-2">
                           <span className="text-slate-900 dark:text-white">
                             {selectedVariant === "adult" ? "กินแล้ว" : "ยังไม่ได้กิน"}
                           </span>
@@ -390,6 +396,9 @@ export const PredictionOverlay = ({
                               }`}
                           >
                             {selectedVariant === "adult" ? "แล้ว" : "ยัง"}
+                          </span>
+                          <span className="absolute left-full ml-3 text-slate-500 dark:text-slate-400 text-xs sm:text-sm md:text-base font-medium whitespace-nowrap">
+                            (ไวยากรณ์ภาษามือ)
                           </span>
                         </h2>
                       ) : (
