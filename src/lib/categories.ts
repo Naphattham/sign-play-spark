@@ -204,6 +204,21 @@ export const phrases: Phrase[] = [
 export const getPhrasesByCategory = (category: Category) =>
   phrases.filter((p) => p.category === category);
 
+/**
+ * Resolves the primary model class name for a phrase, used for logging.
+ * Respects variantModelMapping > modelClass > first of modelClasses.
+ */
+export function resolveTargetClass(phrase: Phrase, variant?: "adult" | "friend"): string {
+  if (phrase.variantModelMapping && variant) {
+    const mapping = phrase.variantModelMapping[variant];
+    if (typeof mapping === 'string') return mapping;
+    if (Array.isArray(mapping) && mapping.length > 0) return mapping[0];
+  }
+  if (phrase.modelClass) return phrase.modelClass;
+  if (phrase.modelClasses && phrase.modelClasses.length > 0) return phrase.modelClasses[0];
+  return '';
+}
+
 // Helper function to find phrase by model class prediction
 export const getPhraseByModelClass = (modelClass: string): Phrase | undefined => {
   return phrases.find(

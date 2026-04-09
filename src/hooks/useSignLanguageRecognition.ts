@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { processFrame, predictSign, videoFrameToDataUrl, PredictionResponse } from '@/lib/signLanguageAPI';
-import { Phrase, checkPhraseMatch } from '@/lib/categories';
+import { Phrase, checkPhraseMatch, resolveTargetClass } from '@/lib/categories';
 
 const SEQUENCE_LENGTH = 40;
 const PREDICTION_INTERVAL = 2; // Predict every N frames
@@ -132,8 +132,7 @@ export function useSignLanguageRecognition({
       const prediction = await predictSign({
         keypointsBuffer: keypointsBufferRef.current,
         userId,
-        targetWord: targetPhrase?.text ?? '',
-        attemptNumber: attemptRef.current,
+        targetWord: targetPhrase ? resolveTargetClass(targetPhrase, variant) : '',
       });
 
       if (prediction.success) {

@@ -14,7 +14,7 @@ import { LessonsPage } from "@/components/LessonsPage";
 import { QuestView } from "@/components/QuestView";
 import { GameSetupPage } from "@/components/GameSetupPage";
 import { CameraPermission } from "@/components/CameraPermission";
-import { Category, Phrase, getPhrasesByCategory, categories, isPhraseCompletedCheck } from "@/lib/categories";
+import { Category, Phrase, getPhrasesByCategory, categories, isPhraseCompletedCheck, resolveTargetClass } from "@/lib/categories";
 import { LogOut, X, Camera, Home, User, ArrowLeft, Check } from "lucide-react";
 import { useSignAndDistance, DistanceStatus } from "@/hooks/useSignAndDistance";
 import { auth, database } from "@/lib/firebase";
@@ -332,6 +332,8 @@ const Index = () => {
     // ทำให้โมเดล buffer keypoints ไว้ล่วงหน้า พร้อมใช้ทันทีเมื่อ user กด START
     enabled: cameraPermissionGranted && gameOpen && !isTransitioning,
     targetPhrase: (isLive || isDetecting) && !isPhraseCompleted ? effectivePhrase : undefined,
+    userId: auth.currentUser?.uid,
+    logTargetWord: effectivePhrase ? resolveTargetClass(effectivePhrase, selectedVariant) : undefined,
     tooCloseThreshold: 0.15,
     distanceThreshold: 0.05,
     variant: (activePhrase?.id === "g1" || activePhrase?.id === "g4" || activePhrase?.id === "g6") ? selectedVariant : undefined,

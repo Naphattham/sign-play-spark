@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { predictSign, PredictionResponse } from '@/lib/signLanguageAPI';
-import { Phrase, checkPhraseMatch } from '@/lib/categories';
+import { Phrase, checkPhraseMatch, resolveTargetClass } from '@/lib/categories';
 
 // ----------------------------------------------------------------------
 // 🔑 Module-level Holistic Singleton
@@ -99,6 +99,8 @@ export interface UseSignAndDistanceProps {
   targetPhrase?: Phrase;
   variant?: "adult" | "friend";
   userId?: string;
+  /** คำโจทย์สำหรับ log เท่านั้น — ใช้เมื่อ targetPhrase ถูก set เป็น undefined ช่วง pre-buffer */
+  logTargetWord?: string;
   // 🚨 ปรับลดค่า Threshold ลงให้ใจดีขึ้น (0.02 = คนอยู่ไกลก็ยังอนุโลมให้ผ่าน)
   distanceThreshold?: number;
   tooCloseThreshold?: number;
@@ -133,6 +135,7 @@ export function useSignAndDistance({
   targetPhrase,
   variant,
   userId = 'guest',
+  logTargetWord,
   distanceThreshold = 0.01, // <--- ปรับให้ใจดีขึ้นมาก
   tooCloseThreshold = 0.18, // <--- เพิ่มความไวในการตรวจจับ too_close (0.30 ลึกเกินไป)
   onPhraseMatch,
@@ -242,8 +245,7 @@ export function useSignAndDistance({
       const prediction = await predictSign({
         keypointsBuffer: bufferToPredict,
         userId,
-        targetWord: targetPhrase?.text ?? '',
-        attemptNumber: attemptRef.current,
+        targetWord: targetPhrase ? resolveTargetClass(targetPhrase, variant) : (logTargetWord ?? ''),
       });
 
       if (prediction.success) {
@@ -278,7 +280,7 @@ export function useSignAndDistance({
     } finally {
       isPredictingRef.current = false;
     }
-  }, [targetPhrase, variant, onPhraseMatch, onPrediction]);
+  }, [targetPhrase, logTargetWord, userId, variant, onPhraseMatch, onPrediction]);
 
   // Handle Mediapipe callback
   const onResultsRef = useRef((results: any) => { });

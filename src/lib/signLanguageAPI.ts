@@ -80,18 +80,16 @@ export interface PredictSignOptions {
   keypointsBuffer: number[][];
   userId?: string;
   targetWord?: string;
-  attemptNumber?: number;
 }
 
 /**
  * Predict sign language from a sequence of keypoints.
- * Optionally pass userId, targetWord, and attemptNumber for server-side usage logging.
+ * Optionally pass userId and targetWord for server-side usage logging.
  */
 export async function predictSign({
   keypointsBuffer,
   userId = 'guest',
   targetWord = '',
-  attemptNumber = 1,
 }: PredictSignOptions): Promise<PredictionResponse> {
   try {
     const response = await fetch(PREDICT_SIGN_URL, {
@@ -104,7 +102,6 @@ export async function predictSign({
         keypoints_buffer: keypointsBuffer,
         userId,
         targetWord,
-        attemptNumber,
       }),
     });
 

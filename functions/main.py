@@ -299,9 +299,8 @@ def predict_sign(req: https_fn.Request) -> https_fn.Response:
                 mimetype="application/json"
             )
 
-        user_id      = data.get("userId", "guest")
-        target_word  = data.get("targetWord", "")
-        attempt_num  = data.get("attemptNumber", 1)
+        user_id     = data.get("userId", "guest")
+        target_word = data.get("targetWord", "")
 
         raw_buffer = np.array(data["keypoints_buffer"], dtype=np.float32)
 
@@ -333,7 +332,6 @@ def predict_sign(req: https_fn.Request) -> https_fn.Response:
                 "predictedWord": predicted_word,
                 "isCorrect":     predicted_word == target_word,
                 "confidence":    confidence,
-                "attemptNumber": attempt_num,
                 "timestamp":     firestore.SERVER_TIMESTAMP,
             })
         except Exception as log_err:
