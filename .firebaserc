@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "signmate-cbe60"
-  }
+  },
+  "targets": {
+    "signmate-cbe60": {
+      "hosting": {
+        "temporary-site": [
+          "signmate-test"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

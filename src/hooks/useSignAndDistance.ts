@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { predictSign, PredictionResponse } from '@/lib/signLanguageAPI';
-import { Phrase, checkPhraseMatch, resolveTargetClass } from '@/lib/categories';
+import { Phrase, checkPhraseMatch } from '@/lib/categories';
 
 // ----------------------------------------------------------------------
 // 🔑 Module-level Holistic Singleton
@@ -245,7 +245,7 @@ export function useSignAndDistance({
       const prediction = await predictSign({
         keypointsBuffer: bufferToPredict,
         userId,
-        targetWord: targetPhrase ? resolveTargetClass(targetPhrase, variant) : (logTargetWord ?? ''),
+        targetWord: targetPhrase?.id ?? logTargetWord ?? '',
       });
 
       if (prediction.success) {
@@ -280,7 +280,7 @@ export function useSignAndDistance({
     } finally {
       isPredictingRef.current = false;
     }
-  }, [targetPhrase, logTargetWord, userId, variant, onPhraseMatch, onPrediction]);
+  }, [targetPhrase, variant, onPhraseMatch, onPrediction]);
 
   // Handle Mediapipe callback
   const onResultsRef = useRef((results: any) => { });
@@ -344,6 +344,7 @@ export function useSignAndDistance({
         // 🚨 แก้ไขจุดนี้: อนุญาตให้ยิง API ได้แม้สถานะเป็น no_face หรือ too_far เพื่อให้เกมไม่ค้าง!
         // const canPredict = distanceStatusRef.current !== "too_close"; // แค่อย่าอยู่ชิดจอเกินไปก็พอ
         const canPredict = true;
+
 
         if (isBufferFull && isTimeForPrediction && !isPredictingRef.current) {
           makePrediction([...keypointsBufferRef.current]);

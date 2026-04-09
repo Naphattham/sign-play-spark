@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Star, CheckCircle2, Gift, CalendarDays, Timer, BookOpen, BookMarked } from "lucide-react";
 import { auth, database } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import { ref, get, set } from "firebase/database";
 
 interface QuestViewProps {
@@ -8,6 +9,15 @@ interface QuestViewProps {
 }
 
 export function QuestView({ streak }: QuestViewProps) {
+  const [userId, setUserId] = useState<string | null>(() => auth.currentUser?.uid ?? null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUserId(user?.uid ?? null);
+    });
+    return () => unsubscribe();
+  }, []);
+
   // Pre-loading
   const [dataLoading, setDataLoading] = useState(true);
 
@@ -31,8 +41,17 @@ export function QuestView({ streak }: QuestViewProps) {
   const [practiceSeconds, setPracticeSeconds] = useState(0);
   const [completedPhrasesCount, setCompletedPhrasesCount] = useState(0);
 
-  // ตรวจสอบว่าเคยกดรับรางวัลแล้วหรือยัง
+  // Reset และโหลดข้อมูลใหม่ทุกครั้งที่ user เปลี่ยน
   useEffect(() => {
+    setDataLoading(true);
+    setWelcomeClaimed(false);
+    setDailyLoginClaimed(false);
+    setDailyPracticeClaimed(false);
+    setLearn5WordsClaimed(false);
+    setLearn10WordsClaimed(false);
+    setPracticeSeconds(0);
+    setCompletedPhrasesCount(0);
+
     const checkClaimed = async () => {
       const user = auth.currentUser;
       if (!user) {
@@ -85,7 +104,7 @@ export function QuestView({ streak }: QuestViewProps) {
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [userId]);
 
   // ฟังก์ชันกดรับโบนัสต้อนรับ 100 คะแนน
   const handleClaimWelcomeBonus = async () => {

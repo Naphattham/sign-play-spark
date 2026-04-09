@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { auth, database, storage } from "@/lib/firebase";
 import { ref as dbRef, update, get } from "firebase/database";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
-import { updateProfile } from "firebase/auth";
+import { updateProfile, onAuthStateChanged } from "firebase/auth";
 import { getAvatarUrl } from "@/lib/avatar";
 
 // 🚨 1. Import Library สำหรับบีบอัดรูปภาพ
@@ -18,6 +18,7 @@ interface ProfileEditProps {
 
 export function ProfileEdit({ onBack }: ProfileEditProps) {
   const { toast } = useToast();
+  const [userId, setUserId] = useState<string | null>(() => auth.currentUser?.uid ?? null);
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
 
@@ -38,15 +39,29 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
   const [imageError, setImageError] = useState(false);
   const [points, setPoints] = useState(0);
 
-  // Load user data on mount - Optimized for fast profile photo display
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUserId(user?.uid ?? null);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Reset form และโหลดข้อมูลใหม่ทุกครั้งที่ user เปลี่ยน
   useEffect(() => {
     const user = auth.currentUser;
-    if (!user) return;
 
-    // Set initial data immediately from auth.currentUser (no await, instant!)
-    setUsername(user.displayName || "");
-    // อัปเดต photoURL อีกรอบเผื่อกรณี LocalStorage ว่างและ Auth เพิ่งมา
-    setPhotoURL(prev => prev || user.photoURL);
+    // Reset form state
+    setUsername(user?.displayName || "");
+    setBio("");
+    setPhotoURL(user?.photoURL || localStorage.getItem("cached_avatar"));
+    setImageSrc(null);
+    setShowCropper(false);
+    setCroppedArea(null);
+    setIsSaving(false);
+    setImageError(false);
+    setPoints(0);
+
+    if (!user) return;
 
     // Load additional data from database asynchronously (non-blocking)
     const loadDatabaseData = async () => {
@@ -57,10 +72,8 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
         if (snapshot.exists()) {
           const userData = snapshot.val();
 
-          // Update with database values if available
           if (userData.bio !== undefined) setBio(userData.bio);
           if (userData.points !== undefined) setPoints(userData.points);
-          // อัปเดต photoURL จาก DB ถ้าใน State ยังไม่มีค่า
           setPhotoURL(prev => prev || userData.photoURL);
         }
       } catch (error) {
@@ -69,7 +82,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
     };
 
     loadDatabaseData();
-  }, []); // 🚨 แก้ไข: ปล่อย Dependency ว่างไว้ เพื่อให้ดึงข้อมูลจาก DB แค่ครั้งเดียวตอนโหลดหน้า
+  }, [userId]);
 
   const createCroppedImage = async (
     imageSrc: string,

@@ -299,6 +299,7 @@ export default function SignDefenderPage() {
     canvasElement: webcamCanvas,
     // 🚨 2. เปิดใช้งานตลอดเวลาเพื่อให้โมเดล Buffer ไว้ล่วงหน้าตั้งแต่หน้า Idle!
     enabled: cameraPermissionGranted,
+    predictEnabled: phase === "playing" && !isPausedRef.current,
     onPrediction: stableOnPrediction,
   });
   clearBufferRef.current = signRecognition.clearBuffer;

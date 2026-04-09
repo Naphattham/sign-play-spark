@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { User, Home, ChevronRight, ChevronLeft } from "lucide-react";
 import { auth, database } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import { ref as dbRef, get, onValue } from "firebase/database";
 import { getAvatarUrl } from "@/lib/avatar";
 
@@ -59,6 +60,7 @@ export function GameSidebar({
   onToggle,
 }: GameSidebarProps) {
 
+  const [userId, setUserId] = useState<string | null>(() => auth.currentUser?.uid ?? null);
   const [username, setUsername] = useState("User");
   const [photoURL, setPhotoURL] = useState<string | null>(() => {
     if (auth.currentUser?.photoURL) return auth.currentUser.photoURL;
@@ -67,11 +69,22 @@ export function GameSidebar({
   const [points, setPoints] = useState(0);
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUserId(user?.uid ?? null);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    // Reset state เมื่อ user เปลี่ยน
+    setUsername("User");
+    setPhotoURL(auth.currentUser?.photoURL || localStorage.getItem("cached_avatar"));
+    setPoints(0);
+
     const user = auth.currentUser;
     if (!user) return;
 
     setUsername(user.displayName || "User");
-    if (user.photoURL && !photoURL) setPhotoURL(user.photoURL);
 
     const userRef = dbRef(database, `users/${user.uid}`);
 
@@ -80,7 +93,7 @@ export function GameSidebar({
       if (snapshot.exists()) {
         const userData = snapshot.val();
         if (userData.points !== undefined) setPoints(userData.points);
-        if (userData.photoURL && !photoURL) setPhotoURL(userData.photoURL);
+        if (userData.photoURL) setPhotoURL(userData.photoURL);
         if (userData.username || userData.displayName) {
           setUsername(userData.username || userData.displayName);
         }
@@ -90,7 +103,7 @@ export function GameSidebar({
     });
 
     return () => unsubscribe();
-  }, [photoURL]);
+  }, [userId]);
 
   const handlePlayGame = () => {
     onPlayGame();

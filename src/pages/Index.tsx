@@ -14,6 +14,7 @@ import { LessonsPage } from "@/components/LessonsPage";
 import { QuestView } from "@/components/QuestView";
 import { GameSetupPage } from "@/components/GameSetupPage";
 import { CameraPermission } from "@/components/CameraPermission";
+import { TutorialModal } from "@/components/TutorialModal";
 import { Category, Phrase, getPhrasesByCategory, categories, isPhraseCompletedCheck, resolveTargetClass } from "@/lib/categories";
 import { LogOut, X, Camera, Home, User, ArrowLeft, Check } from "lucide-react";
 import { useSignAndDistance, DistanceStatus } from "@/hooks/useSignAndDistance";
@@ -145,6 +146,7 @@ const Index = () => {
   });
   const [showCameraPermission, setShowCameraPermission] = useState(false);
   const [skipCameraCalibration, setSkipCameraCalibration] = useState(false);
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [userStreak, setUserStreak] = useState(0);
   const [userLevel, setUserLevel] = useState(1);
@@ -331,6 +333,7 @@ const Index = () => {
     // 🚨 เหมือน SignDefenderPage: enabled ตลอดทันทีที่กล้องพร้อมและ modal เปิด
     // ทำให้โมเดล buffer keypoints ไว้ล่วงหน้า พร้อมใช้ทันทีเมื่อ user กด START
     enabled: cameraPermissionGranted && gameOpen && !isTransitioning,
+    predictEnabled: isLive || isDetecting,
     targetPhrase: (isLive || isDetecting) && !isPhraseCompleted ? effectivePhrase : undefined,
     userId: auth.currentUser?.uid,
     logTargetWord: effectivePhrase ? resolveTargetClass(effectivePhrase, selectedVariant) : undefined,
@@ -636,6 +639,8 @@ const Index = () => {
       setShowCameraPermission(false);
       setSkipCameraCalibration(false);
       setTutorialStep("initial");
+      // 🎓 แสดง How-to-Play modal หลังจาก Calibration เสร็จ
+      setShowHowToPlay(true);
     } catch (err) {
       console.error("Camera permission denied:", err);
       setCameraPermissionGranted(false);
@@ -1198,6 +1203,11 @@ const Index = () => {
 
 
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
+
+      {/* 🎓 How-to-Play Tutorial Modal */}
+      {showHowToPlay && (
+        <TutorialModal onClose={() => setShowHowToPlay(false)} />
+      )}
 
       {showCameraPermission && (
         <CameraPermission
