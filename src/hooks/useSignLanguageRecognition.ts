@@ -16,6 +16,7 @@ interface UseSignLanguageRecognitionProps {
   enabled: boolean;
   targetPhrase?: Phrase;
   variant?: "adult" | "friend";
+  userId?: string;
   onPhraseMatch?: (prediction: string, confidence: number) => void;
   onPrediction?: (prediction: PredictionResponse) => void;
 }
@@ -35,6 +36,7 @@ export function useSignLanguageRecognition({
   enabled,
   targetPhrase,
   variant,
+  userId = 'guest',
   onPhraseMatch,
   onPrediction,
 }: UseSignLanguageRecognitionProps): SignLanguageRecognitionState {
@@ -52,6 +54,11 @@ export function useSignLanguageRecognition({
   const frameCountRef = useRef(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isProcessingRef = useRef(false);
+  const attemptRef = useRef(1);
+
+  useEffect(() => {
+    attemptRef.current = 1;
+  }, [targetPhrase?.id]);
 
   // Process a single video frame
   const processVideoFrame = useCallback(async () => {
@@ -122,13 +129,24 @@ export function useSignLanguageRecognition({
     try {
       setState((prev) => ({ ...prev, isProcessing: true }));
 
-      const prediction = await predictSign(keypointsBufferRef.current);
+      const prediction = await predictSign({
+        keypointsBuffer: keypointsBufferRef.current,
+        userId,
+        targetWord: targetPhrase?.text ?? '',
+        attemptNumber: attemptRef.current,
+      });
 
       if (prediction.success) {
         const isMatched =
           targetPhrase &&
           prediction.confidence >= 0.5 &&
           checkPhraseMatch(targetPhrase, prediction.prediction, variant);
+
+        if (isMatched) {
+          attemptRef.current = 1;
+        } else {
+          attemptRef.current += 1;
+        }
 
         setState((prev) => ({
           ...prev,

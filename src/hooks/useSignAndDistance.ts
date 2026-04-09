@@ -98,6 +98,7 @@ export interface UseSignAndDistanceProps {
   enabled: boolean;
   targetPhrase?: Phrase;
   variant?: "adult" | "friend";
+  userId?: string;
   // 🚨 ปรับลดค่า Threshold ลงให้ใจดีขึ้น (0.02 = คนอยู่ไกลก็ยังอนุโลมให้ผ่าน)
   distanceThreshold?: number;
   tooCloseThreshold?: number;
@@ -131,6 +132,7 @@ export function useSignAndDistance({
   enabled,
   targetPhrase,
   variant,
+  userId = 'guest',
   distanceThreshold = 0.01, // <--- ปรับให้ใจดีขึ้นมาก
   tooCloseThreshold = 0.18, // <--- เพิ่มความไวในการตรวจจับ too_close (0.30 ลึกเกินไป)
   onPhraseMatch,
@@ -154,6 +156,7 @@ export function useSignAndDistance({
   const keypointsBufferRef = useRef<number[][]>([]);
   const frameCountRef = useRef(0);
   const requestRef = useRef<number | null>(null);
+  const attemptRef = useRef(1);
 
   const distanceStatusRef = useRef<DistanceStatus>("no_face");
   const isSendingRef = useRef(false);
@@ -166,6 +169,11 @@ export function useSignAndDistance({
     videoRef.current = videoElement;
     canvasRef.current = canvasElement;
   }, [videoElement, canvasElement]);
+
+  // Reset attempt counter when the target word changes
+  useEffect(() => {
+    attemptRef.current = 1;
+  }, [targetPhrase?.id]);
 
   // 1. Extract Keypoints into a flat normalized array
   const extractKeypoints = useCallback((results: any): number[] => {
@@ -231,11 +239,22 @@ export function useSignAndDistance({
       isPredictingRef.current = true;
       setState((prev) => ({ ...prev, isProcessing: true }));
 
-      const prediction = await predictSign(bufferToPredict);
+      const prediction = await predictSign({
+        keypointsBuffer: bufferToPredict,
+        userId,
+        targetWord: targetPhrase?.text ?? '',
+        attemptNumber: attemptRef.current,
+      });
 
       if (prediction.success) {
 
         const isMatched = targetPhrase && prediction.confidence >= 0.5 && checkPhraseMatch(targetPhrase, prediction.prediction, variant);
+
+        if (isMatched) {
+          attemptRef.current = 1;
+        } else {
+          attemptRef.current += 1;
+        }
 
         setState((prev) => ({
           ...prev,

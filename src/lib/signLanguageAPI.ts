@@ -76,10 +76,23 @@ export async function processFrame(frameDataUrl: string): Promise<KeypointsRespo
   }
 }
 
+export interface PredictSignOptions {
+  keypointsBuffer: number[][];
+  userId?: string;
+  targetWord?: string;
+  attemptNumber?: number;
+}
+
 /**
- * Predict sign language from a sequence of keypoints
+ * Predict sign language from a sequence of keypoints.
+ * Optionally pass userId, targetWord, and attemptNumber for server-side usage logging.
  */
-export async function predictSign(keypointsBuffer: number[][]): Promise<PredictionResponse> {
+export async function predictSign({
+  keypointsBuffer,
+  userId = 'guest',
+  targetWord = '',
+  attemptNumber = 1,
+}: PredictSignOptions): Promise<PredictionResponse> {
   try {
     const response = await fetch(PREDICT_SIGN_URL, {
       method: 'POST',
@@ -87,7 +100,12 @@ export async function predictSign(keypointsBuffer: number[][]): Promise<Predicti
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ keypoints_buffer: keypointsBuffer }),
+      body: JSON.stringify({
+        keypoints_buffer: keypointsBuffer,
+        userId,
+        targetWord,
+        attemptNumber,
+      }),
     });
 
     if (!response.ok) {
