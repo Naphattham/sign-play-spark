@@ -104,6 +104,7 @@ export interface UseSignAndDistanceProps {
   // 🚨 ปรับลดค่า Threshold ลงให้ใจดีขึ้น (0.02 = คนอยู่ไกลก็ยังอนุโลมให้ผ่าน)
   distanceThreshold?: number;
   tooCloseThreshold?: number;
+  predictEnabled?: boolean;
   onPhraseMatch?: (prediction: string, confidence: number) => void;
   onPrediction?: (prediction: PredictionResponse) => void;
   onDistanceChange?: (status: DistanceStatus) => void;
@@ -136,6 +137,7 @@ export function useSignAndDistance({
   variant,
   userId = 'guest',
   logTargetWord,
+  predictEnabled = true,
   distanceThreshold = 0.01, // <--- ปรับให้ใจดีขึ้นมาก
   tooCloseThreshold = 0.18, // <--- เพิ่มความไวในการตรวจจับ too_close (0.30 ลึกเกินไป)
   onPhraseMatch,
@@ -346,12 +348,12 @@ export function useSignAndDistance({
         const canPredict = true;
 
 
-        if (isBufferFull && isTimeForPrediction && !isPredictingRef.current) {
+        if (predictEnabled && isBufferFull && isTimeForPrediction && !isPredictingRef.current) {
           makePrediction([...keypointsBufferRef.current]);
         }
       }
     };
-  }, [enabled, distanceThreshold, tooCloseThreshold, drawLandmarksOnCanvas, extractKeypoints, makePrediction, onDistanceChange]);
+  }, [enabled, predictEnabled, distanceThreshold, tooCloseThreshold, drawLandmarksOnCanvas, extractKeypoints, makePrediction, onDistanceChange]);
 
   // 🔑 Use the module-level Holistic singleton — never recreate it
   useEffect(() => {
