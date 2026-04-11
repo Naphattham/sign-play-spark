@@ -1,4 +1,4 @@
-import { X, Check, AlertTriangle } from "lucide-react";
+import { X, Check, AlertTriangle, RotateCcw } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Phrase, checkPhraseMatch, isPhraseCompletedCheck } from "@/lib/categories";
 import { VideoCard } from "@/components/VideoCard";
@@ -148,12 +148,9 @@ export interface PredictionOverlayProps {
   targetDisplayWord: string;
 
   // ── Hint state ──
-  hintUnlocked: Set<string>;
-  showHintModal: boolean;
   showHintContent: boolean;
-  onSetShowHintModal: (v: boolean) => void;
+  onHintClick: () => void;
   onSetShowHintContent: (v: boolean) => void;
-  onConfirmHint: () => void;
   getCurrentHintKey: () => string;
   getCurrentHintVideos: () => { url: string; label: string; text: string }[];
   getCurrentHintText: () => string;
@@ -216,12 +213,9 @@ export const PredictionOverlay = ({
   targetDisplayWord,
 
   // Hint
-  hintUnlocked,
-  showHintModal,
   showHintContent,
-  onSetShowHintModal,
+  onHintClick,
   onSetShowHintContent,
-  onConfirmHint,
   getCurrentHintKey,
   getCurrentHintVideos,
   getCurrentHintText,
@@ -314,7 +308,7 @@ export const PredictionOverlay = ({
                   />
                 </button>
 
-                <main className="flex-1 p-1 sm:p-2 lg:p-3 xl:p-4 px-8 sm:px-12 md:px-4 bg-[#f8f6f6] dark:bg-[#221610] overflow-hidden flex flex-col justify-between">
+                <main className="flex-1 p-1 sm:p-2 lg:p-3 xl:p-4 px-8 sm:px-12 md:px-4 bg-[#f8f6f6] dark:bg-[#221610] overflow-y-auto flex flex-col justify-between">
                   <div className="flex-1 flex flex-col justify-center">
 
                     {/* ── Phrase title ── */}
@@ -339,7 +333,7 @@ export const PredictionOverlay = ({
                           >
                             ไป
                           </span>
-                          <span className="absolute left-full ml-3 text-slate-500 dark:text-slate-400 text-xs sm:text-sm md:text-base font-medium whitespace-nowrap">
+                          <span className="absolute left-full ml-1.5 sm:ml-3 text-slate-500 dark:text-slate-400 text-[9px] sm:text-xs md:text-sm font-medium whitespace-nowrap">
                             (ไวยากรณ์ภาษามือ)
                           </span>
                         </h2>
@@ -371,7 +365,7 @@ export const PredictionOverlay = ({
                           >
                             หรือยัง?
                           </span>
-                          <span className="absolute left-full ml-3 text-slate-500 dark:text-slate-400 text-xs sm:text-sm md:text-base font-medium whitespace-nowrap">
+                          <span className="absolute left-full ml-1.5 sm:ml-3 text-slate-500 dark:text-slate-400 text-[9px] sm:text-xs md:text-sm font-medium whitespace-nowrap">
                             (ไวยากรณ์ภาษามือ)
                           </span>
                         </h2>
@@ -397,7 +391,7 @@ export const PredictionOverlay = ({
                           >
                             {selectedVariant === "adult" ? "แล้ว" : "ยัง"}
                           </span>
-                          <span className="absolute left-full ml-3 text-slate-500 dark:text-slate-400 text-xs sm:text-sm md:text-base font-medium whitespace-nowrap">
+                          <span className="absolute left-full ml-1.5 sm:ml-3 text-slate-500 dark:text-slate-400 text-[9px] sm:text-xs md:text-sm font-medium whitespace-nowrap">
                             (ไวยากรณ์ภาษามือ)
                           </span>
                         </h2>
@@ -446,13 +440,7 @@ export const PredictionOverlay = ({
                             <img
                               src={hintImg}
                               alt="Hint"
-                              onClick={() => {
-                                if (hintUnlocked.has(getCurrentHintKey())) {
-                                  onSetShowHintContent(true);
-                                } else {
-                                  onSetShowHintModal(true);
-                                }
-                              }}
+                              onClick={onHintClick}
                               className="absolute bottom-2 right-2 sm:bottom-2.5 sm:right-2.5 w-6 h-6 sm:w-8 sm:h-8 lg:w-9 lg:h-9 object-contain opacity-90 drop-shadow-md pointer-events-auto cursor-pointer hover:scale-110 transition-transform"
                             />
                           </div>
@@ -658,7 +646,7 @@ export const PredictionOverlay = ({
                                 onClick={onTryAgain}
                                 className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-purple-500 hover:bg-purple-600 text-white"
                               >
-                                🔄 TRY AGAIN
+                                <RotateCcw size={14} className="shrink-0" /> TRY AGAIN
                               </button>
                             );
                           }
@@ -686,7 +674,8 @@ export const PredictionOverlay = ({
                                   {isLocked
                                     ? `🔒 ต้องถึง 50% (ตอนนี้ ${(bestConfidence * 100).toFixed(0)}%)`
                                     : deltaPoints <= 0
-                                      ? "🔄 TRY AGAIN"
+                                      ? <><RotateCcw size={14} className="shrink-0" /> TRY AGAIN</>
+
                                       : (
                                         <>
                                           <img
@@ -827,41 +816,7 @@ export const PredictionOverlay = ({
       )}
 
       {/* ══════════════════════════════════════
-          2. Hint Confirm Modal
-          ══════════════════════════════════════ */}
-      {showHintModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => onSetShowHintModal(false)}
-          />
-          <div className="relative bg-slate-100 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-full max-w-[200px] sm:max-w-[240px] p-4 animate-in zoom-in duration-200">
-            <h2 className="text-lg sm:text-xl font-black text-center text-foreground uppercase tracking-wider mb-1">
-              Hint!
-            </h2>
-            <p className="text-center font-bold text-red-500 text-sm sm:text-base mb-4">
-              -25 pts
-            </p>
-            <div className="flex flex-col gap-2 sm:gap-2.5">
-              <button
-                onClick={onConfirmHint}
-                className="w-full bg-yellow-400 hover:bg-yellow-500 text-slate-900 border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-lg sm:rounded-xl py-1.5 sm:py-2 font-black text-xs sm:text-sm transition-all"
-              >
-                Confirm
-              </button>
-              <button
-                onClick={() => onSetShowHintModal(false)}
-                className="w-full bg-white hover:bg-slate-50 border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-lg sm:rounded-xl py-1.5 sm:py-2 font-black text-slate-900 text-xs sm:text-sm transition-all"
-              >
-                Not now
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════
-          3. Hint Content Modal (Pro Tips)
+          2. Hint Content Modal (Pro Tips)
           ══════════════════════════════════════ */}
       {showHintContent &&
         (() => {

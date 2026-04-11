@@ -198,8 +198,8 @@ export default function MatchAndSignPage() {
           </div>
 
           <div className="max-w-6xl mx-auto flex flex-col items-center w-full">
-            <div className="text-center mb-8 mt-12 md:mt-24">
-              <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-2 whitespace-nowrap">
+            <div className="text-center mb-8 mt-20 sm:mt-16 md:mt-24">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-2">
                 Match & <span className="text-primary">Sign</span>
               </h1>
               <div className="h-2 bg-foreground w-20 mx-auto mt-4 rounded-full neo-brutalism-sm"></div>
@@ -253,11 +253,11 @@ export default function MatchAndSignPage() {
       <>
         {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
         <main className="flex-1 overflow-y-auto p-6 md:p-12 flex items-center justify-center min-h-screen bg-[hsl(44,95%,96%)] dark:bg-slate-900">
-          <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-[2rem] p-12 text-center max-w-lg w-full">
-            <h2 className="text-4xl sm:text-6xl font-black uppercase mb-4 tracking-tighter text-foreground">
+          <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-[2rem] p-6 sm:p-12 text-center max-w-lg w-full">
+            <h2 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase mb-4 tracking-tighter text-foreground">
               GAME <span className="text-primary">OVER</span>
-            </h2>            
-            <p className="text-2xl font-bold mb-8">Score: {score} / {currentQuestions.length * 10}</p>
+            </h2>
+            <p className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8">Score: {score} / {currentQuestions.length * 10}</p>
             <div className="flex flex-col gap-4">
               <Button
                 className="neo-brutalism bg-primary text-white py-6 text-xl font-black uppercase"
@@ -318,8 +318,8 @@ export default function MatchAndSignPage() {
               </div>
 
 
-              <h3 className="text-5xl sm:text-7xl md:text-8xl font-black mb-2 tracking-tighter">{currentQ?.term}</h3>
-              <p className="text-lg sm:text-xl md:text-2xl font-bold opacity-90 uppercase tracking-[0.2em]">{currentQ?.translation}</p>
+              <h3 className="text-4xl sm:text-5xl md:text-7xl font-black mb-2 tracking-tighter break-words">{currentQ?.term}</h3>
+              <p className="text-base sm:text-lg md:text-2xl font-bold opacity-90 uppercase tracking-[0.15em] sm:tracking-[0.2em]">{currentQ?.translation}</p>
 
               <div className="absolute bottom-4 right-6 bg-secondary text-white border-2 border-black px-4 py-1 rounded-full font-black text-sm rotate-6">
                 Match It!
@@ -328,7 +328,7 @@ export default function MatchAndSignPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full max-w-5xl px-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 w-full max-w-5xl px-2 sm:px-4">
           {options.map((opt, i) => {
 
             let buttonClass = "bg-white dark:bg-slate-800";

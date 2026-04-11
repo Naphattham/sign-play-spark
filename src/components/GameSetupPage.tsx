@@ -79,7 +79,7 @@ export function GameSetupPage() {
         <section>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
             {gameCards.map((card) => {
-              const isLocked = !card.available || (card.id === 4 && !isDesktop);
+              const isLocked = !card.available || ((card.id === 3 || card.id === 4) && !isDesktop);
 
               return (
                 <div
@@ -103,7 +103,7 @@ export function GameSetupPage() {
                         </span>
                       </div>
                     )}
-                    {(card.id === 4 && !isDesktop) && (
+                    {((card.id === 3 || card.id === 4) && !isDesktop) && (
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                         <span className="bg-white/90 text-black text-[10px] font-black uppercase px-2 py-0.5 rounded tracking-wider">
                           Desktop Only

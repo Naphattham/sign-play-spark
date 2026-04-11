@@ -29,12 +29,10 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
   useEffect(() => {
     const fetchTotalUsers = async () => {
       try {
-        const statsRef = dbRef(database, 'stats/totalUsers');
-        const snapshot = await get(statsRef);
+        const usersRef = dbRef(database, 'users');
+        const snapshot = await get(usersRef);
         if (snapshot.exists()) {
-          setTotalUsers(snapshot.val());
-        } else {
-          setTotalUsers(0);
+          setTotalUsers(Object.keys(snapshot.val()).length);
         }
       } catch (error) {
         console.error("Error fetching total users:", error);
@@ -203,7 +201,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
         </nav>
 
         {/* Main Content */}
-        <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 md:py-8 lg:py-12 flex-1 flex flex-col-reverse md:flex-row items-center gap-8 sm:gap-12 md:gap-16 lg:gap-24">
+        <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 md:py-8 lg:py-12 flex-1 flex flex-col md:flex-row items-center gap-8 sm:gap-12 md:gap-16 lg:gap-24">
           {/* Hero Text Section */}
           <div className="flex-1 space-y-5 sm:space-y-6 flex flex-col items-center md:items-start text-center md:text-left pb-4 md:pb-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="inline-block bg-sq-pink text-white px-3 py-1 rounded-full text-xs sm:text-sm font-bold uppercase tracking-widest sq-border">
@@ -215,7 +213,8 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
             <p className="text-sm sm:text-base md:text-lg lg:text-xl font-medium text-sq-black/70 max-w-lg md:max-w-xl">
               วิธีเรียนรู้ภาษามือไทยที่สนุก ฟรี และมีประสิทธิภาพ พัฒนาทักษะของคุณด้วยการตอบรับแบบเรียลไทม์และมินิเกมที่น่าสนใจ
             </p>
-            <div className="flex flex-wrap justify-center md:justify-start gap-3 sm:gap-4 pt-2 sm:pt-4">
+            {/* Desktop-only buttons */}
+            <div className="hidden md:flex flex-wrap justify-start gap-3 sm:gap-4 pt-2 sm:pt-4">
               <button
                 onClick={() => setShowLoginModal(true)}
                 className="bg-sq-yellow text-base sm:text-lg md:text-xl px-6 py-3 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-2xl sq-border-lg sq-button-hover font-bold brand-font hover:bg-sq-dark-yellow transition-all duration-300 ease-in-out w-full sm:w-auto"
@@ -229,13 +228,14 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
                 สำรวจบทเรียน
               </button>
             </div>
-            <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2 sm:gap-3 pt-6 sm:pt-4">
+            {/* Desktop-only users */}
+            <div className="hidden md:flex flex-col sm:flex-row items-center justify-start gap-2 sm:gap-3 pt-6 sm:pt-4">
               <div className="flex -space-x-3">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-blue-400 flex items-center justify-center text-white font-bold text-xs sm:text-sm">JD</div>
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-green-400 flex items-center justify-center text-white font-bold text-xs sm:text-sm">AS</div>
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-sq-pink flex items-center justify-center text-white font-bold text-xs sm:text-sm">MK</div>
               </div>
-              <p className="font-bold text-sq-black/60 text-xs sm:text-sm">มีผู้เรียนลงทะเบียนทั้งหมด {totalUsers} คน!</p>
+              <p className="font-bold text-sq-black/60 text-xs sm:text-sm">มีผู้เรียนลงทะเบียนทั้งหมด 50 คน!</p>
             </div>
           </div>
 
@@ -324,6 +324,32 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
                 <p className="text-[10px] font-bold uppercase">Daily Streak</p>
                 <p className="brand-font text-base leading-none">15 DAYS!</p>
               </div>
+            </div>
+          </div>
+
+          {/* Mobile-only buttons + users (shown after visual section) */}
+          <div className="md:hidden w-full flex flex-col items-center gap-3 pt-2">
+            <div className="flex gap-3 w-full max-w-sm sm:max-w-md mx-auto">
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="flex-1 bg-sq-yellow text-base sm:text-lg px-6 py-3 rounded-2xl sq-border-lg sq-button-hover font-bold brand-font hover:bg-sq-dark-yellow transition-all duration-300 ease-in-out"
+              >
+                เริ่มเกม
+              </button>
+              <button
+                onClick={() => navigate("/categories")}
+                className="flex-1 bg-white text-sm sm:text-base px-6 py-3 rounded-2xl sq-border sq-button-hover font-bold flex items-center justify-center gap-2 transition-all duration-300 ease-in-out hover:bg-gray-50"
+              >
+                สำรวจบทเรียน
+              </button>
+            </div>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 pt-2">
+              <div className="flex -space-x-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-blue-400 flex items-center justify-center text-white font-bold text-xs sm:text-sm">JD</div>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-green-400 flex items-center justify-center text-white font-bold text-xs sm:text-sm">AS</div>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-sq-pink flex items-center justify-center text-white font-bold text-xs sm:text-sm">MK</div>
+              </div>
+              <p className="font-bold text-sq-black/60 text-xs sm:text-sm">มีผู้เรียนลงทะเบียนทั้งหมด 50 คน!</p>
             </div>
           </div>
         </main>

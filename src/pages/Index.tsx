@@ -16,7 +16,7 @@ import { GameSetupPage } from "@/components/GameSetupPage";
 import { CameraPermission } from "@/components/CameraPermission";
 import { TutorialModal } from "@/components/TutorialModal";
 import { Category, Phrase, getPhrasesByCategory, categories, isPhraseCompletedCheck, resolveTargetClass } from "@/lib/categories";
-import { LogOut, X, Camera, Home, User, ArrowLeft, Check } from "lucide-react";
+import { LogOut, X, Camera, Home, User, ArrowLeft, Check, Menu } from "lucide-react";
 import { useSignAndDistance, DistanceStatus } from "@/hooks/useSignAndDistance";
 import { auth, database } from "@/lib/firebase";
 import { ref as dbRef, get, update } from "firebase/database";
@@ -810,11 +810,6 @@ const Index = () => {
       // Save unlocked hint to Firebase so it persists across refreshes
       await saveUnlockedHint(user.uid, hintKey);
 
-      toast({
-        title: "Success",
-        description: "ใช้ Hint สำเร็จ! (ใช้ฟรีชั่วคราว)",
-        variant: "success",
-      });
       setHintUnlocked(prev => new Set([...prev, hintKey]));
       setShowHintModal(false);
       setShowHintContent(true); // show hintbox right after confirming
@@ -937,68 +932,78 @@ const Index = () => {
         onToggle={() => setSidebarOpen(!sidebarOpen)}
       />
 
-      <main className="flex-1 min-h-screen">
-        <header className="border-b-[3px] border-foreground bg-card px-3 py-2 sm:px-4 sm:py-2.5 md:px-6 md:py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3 pl-2 lg:pl-0">
+      <main className="flex-1 min-h-screen overflow-x-hidden">
+        <header className="border-b-[3px] border-foreground bg-card px-3 py-2 sm:px-4 sm:py-2.5 md:px-6 md:py-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            {/* Hamburger — mobile only */}
+            <button
+              className="lg:hidden shrink-0 p-1.5 -ml-1 rounded-md touch-manipulation active:bg-foreground/10 hover:bg-foreground/10 transition-colors"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open menu"
+            >
+              <Menu size={20} />
+            </button>
+
             {view === "home" && (
               <>
-                <Home size={20} className="text-foreground" />
-                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground">Home</h2>
+                <Home size={18} className="text-foreground shrink-0 sm:w-5 sm:h-5" />
+                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground truncate">Home</h2>
               </>
             )}
             {view === "lessons" && (
               <>
-                <img src={lessonImg} alt="Lessons" className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] object-contain" />
-                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground">Lessons</h2>
+                <img src={lessonImg} alt="Lessons" className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] object-contain shrink-0" />
+                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground truncate">Lessons</h2>
               </>
             )}
             {view === "leaderboard" && (
               <>
-                <img src={trophyImg} alt="Leaderboard" className="w-4 h-4 sm:w-5 sm:h-5 object-contain" />
-                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground">Leaderboard</h2>
+                <img src={trophyImg} alt="Leaderboard" className="w-4 h-4 sm:w-5 sm:h-5 object-contain shrink-0" />
+                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground truncate">Leaderboard</h2>
               </>
             )}
             {view === "quest" && (
               <>
-                <img src={questImg} alt="Quest" className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] object-contain" />
-                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground">Quest</h2>
+                <img src={questImg} alt="Quest" className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] object-contain shrink-0" />
+                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground truncate">Quest</h2>
               </>
             )}
             {view === "profile" && (
               <>
-                <User size={18} className="text-foreground sm:hidden" />
-                <User size={20} className="text-foreground hidden sm:block" />
-                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground">Profile</h2>
+                <User size={18} className="text-foreground shrink-0 sm:w-5 sm:h-5" />
+                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground truncate">Profile</h2>
               </>
             )}
             {view === "gamesetup" && (
               <>
-                <img src={challengeImg} alt="Play Game" className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] object-contain" />
-                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground">Challenge</h2>
+                <img src={challengeImg} alt="Play Game" className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] object-contain shrink-0" />
+                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground truncate">Challenge</h2>
               </>
             )}
             {view === "game" && (
               <>
-                <img src={categoryIconMap[category]} alt={category} className="w-4 h-4 sm:w-5 sm:h-5 object-contain" />
-                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground">
+                <img src={categoryIconMap[category]} alt={category} className="w-4 h-4 sm:w-5 sm:h-5 object-contain shrink-0" />
+                <h2 className="font-display text-sm sm:text-base md:text-xl text-foreground truncate">
                   {categories.find(c => c.id === category)?.label || category}
                 </h2>
               </>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={handleLogout} className="brutal-btn-secondary flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-body">
-              <LogOut size={14} className="sm:hidden" />
-              <LogOut size={16} className="hidden sm:block" />
-              <span className="hidden sm:inline">Logout</span>
-              <span className="sm:hidden">Logout</span>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={handleLogout}
+              className="brutal-btn-secondary flex items-center gap-1.5 text-xs sm:text-sm font-body touch-manipulation min-h-[36px] px-2.5 sm:px-4"
+            >
+              <LogOut size={15} className="shrink-0" />
+              <span>Logout</span>
             </button>
           </div>
         </header>
 
-        <div className="h-[calc(100vh-3rem)] sm:h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4.5rem)] flex flex-col">
+        <div className="h-[calc(100vh-2.75rem)] sm:h-[calc(100vh-3.25rem)] md:h-[calc(100vh-4rem)] flex flex-col overflow-hidden">
           {view === "home" && (
-            <div className="p-4 lg:p-6 h-full">
+            <div className="p-3 sm:p-4 lg:p-6 h-full overflow-y-auto">
               <HomePage
                 onCategorySelect={(cat) => {
                   setCategory(cat);
@@ -1028,7 +1033,7 @@ const Index = () => {
             </div>
           )}
           {view === "lessons" && (
-            <div className="p-4 lg:p-6 h-full">
+            <div className="p-3 sm:p-4 lg:p-6 h-full overflow-y-auto">
               <LessonsPage
                 onCategorySelect={(cat) => {
                   setCategory(cat);
@@ -1043,7 +1048,7 @@ const Index = () => {
             </div>
           )}
           {view === "leaderboard" && (
-            <div className="p-4 lg:p-6 h-full">
+            <div className="p-3 sm:p-4 lg:p-6 h-full overflow-y-auto">
               <LeaderboardView />
             </div>
           )}
@@ -1058,54 +1063,57 @@ const Index = () => {
             </div>
           )}
           {view === "profile" && (
-            <div className="p-4 lg:p-6 h-full">
+            <div className="p-3 sm:p-4 lg:p-6 h-full overflow-y-auto">
               <ProfileEdit onBack={() => setView("home")} />
             </div>
           )}
           {view === "game" && (
-            <div className="flex-1 overflow-y-auto p-3 sm:p-5 md:p-8 lg:p-12 relative pb-20 sm:pb-32">
-              <div className="relative flex items-center justify-center mb-6 sm:mb-8 md:mb-10 mt-1 sm:mt-2">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-5 md:p-8 lg:p-10 pb-24 sm:pb-32">
+              {/* Title row */}
+              <div className="flex items-center gap-2 sm:gap-3 mb-5 sm:mb-7 md:mb-10 mt-1">
                 <button
                   onClick={() => setView("lessons")}
-                  className="absolute left-0 flex items-center gap-1.5 sm:gap-2 text-foreground font-black brutal-btn-secondary w-fit px-2.5 py-1.5 sm:px-4 sm:py-2 hover:-translate-x-1 transition-transform z-10 text-xs sm:text-sm"
+                  className="shrink-0 flex items-center gap-1 sm:gap-1.5 font-black brutal-btn-secondary px-2.5 py-1.5 sm:px-3 sm:py-2 touch-manipulation active:translate-x-0 hover:-translate-x-0.5 transition-transform text-xs sm:text-sm"
                 >
-                  <ArrowLeft size={16} className="sm:hidden" />
-                  <ArrowLeft size={20} className="hidden sm:block" />
-                  กลับ
+                  <ArrowLeft size={15} className="sm:w-4 sm:h-4 shrink-0" />
+                  <span>กลับ</span>
                 </button>
-                <p className="text-slate-800 dark:text-white font-black uppercase tracking-widest text-base sm:text-xl md:text-2xl lg:text-3xl text-center drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)] pl-16 sm:pl-0">
+                <p className="flex-1 text-slate-800 dark:text-white font-black uppercase tracking-wide sm:tracking-widest text-sm sm:text-lg md:text-2xl lg:text-3xl text-center drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)] truncate">
                   UNIT {category === "general" ? "1" : category === "emotions" ? "2" : category === "qa" ? "3" : "4"}: {category.toUpperCase()}
                 </p>
+                {/* Spacer mirrors button width so title stays centered */}
+                <div className="shrink-0 w-[60px] sm:w-[72px]" aria-hidden />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3 sm:gap-x-6 sm:gap-y-4 md:gap-x-8 md:gap-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                 {getPhrasesByCategory(category).map((phrase) => {
                   const isCompleted = isPhraseCompletedCheck(phrase.id, completedPhrases);
                   return (
                     <div
                       key={phrase.id}
                       onClick={() => handlePhraseSelect(phrase)}
-                      className={`relative brutal-card flex items-center p-2.5 pr-8 sm:p-3 sm:pr-10 md:p-4 md:pr-12 cursor-pointer hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all ${isCompleted ? 'bg-green-50' : 'bg-white'}`}
+                      className={`relative brutal-card flex items-center gap-3 sm:gap-4 p-3 sm:p-3.5 md:p-4 pr-8 sm:pr-10 cursor-pointer active:scale-[0.98] hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation ${isCompleted ? 'bg-green-50 dark:bg-green-900/20' : 'bg-white dark:bg-slate-800'}`}
                     >
                       {isCompleted ? (
-                        <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-green-500 text-white font-black text-[10px] sm:text-xs md:text-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10 flex items-center gap-1">
-                          <Check size={14} className="shrink-0" strokeWidth={4} /> <span className="hidden sm:inline">{phrase.id === "g1" || phrase.id === "g4" || phrase.id === "g6" ? "200" : "100"} pts</span>
+                        <div className="absolute -top-2 -right-2 sm:-top-2.5 sm:-right-2.5 bg-green-500 text-white font-black text-[10px] sm:text-xs px-2 py-0.5 sm:px-2.5 rounded-full border-[2px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10 flex items-center gap-1">
+                          <Check size={11} strokeWidth={4} className="shrink-0" />
+                          <span>{phrase.id === "g1" || phrase.id === "g4" || phrase.id === "g6" ? "200" : "100"} pts</span>
                         </div>
                       ) : (
-                        <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-[#f94fa4] text-white font-black text-[10px] sm:text-xs md:text-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full border-[2px] sm:border-[3px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10">
+                        <div className="absolute -top-2 -right-2 sm:-top-2.5 sm:-right-2.5 bg-[#f94fa4] text-white font-black text-[10px] sm:text-xs px-2 py-0.5 sm:px-2.5 rounded-full border-[2px] border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10">
                           +{phrase.id === "g1" || phrase.id === "g4" || phrase.id === "g6" ? "200" : "100"} pts
                         </div>
                       )}
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-accent/20 brutal-card flex items-center justify-center text-xl sm:text-2xl md:text-3xl mr-3 sm:mr-4 md:mr-6 shrink-0 p-1">
+                      <div className="w-11 h-11 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-accent/20 brutal-card flex items-center justify-center shrink-0 p-1">
                         {phraseIconMap[phrase.id] ? (
                           <img src={phraseIconMap[phrase.id]} alt={phrase.text} className="w-full h-full object-contain drop-shadow-sm" />
                         ) : (
-                          phrase.emoji || "✋"
+                          <span className="text-2xl">{phrase.emoji || "✋"}</span>
                         )}
                       </div>
-                      <div>
-                        <h3 className="font-black text-base sm:text-lg md:text-2xl mb-0.5 sm:mb-1">{phrase.text}</h3>
-                        <p className="text-gray-500 font-bold text-[11px] sm:text-xs md:text-sm">{phrase.english || phrase.text}</p>
+                      <div className="min-w-0">
+                        <h3 className="font-black text-sm sm:text-base md:text-lg lg:text-xl leading-tight truncate">{phrase.text}</h3>
+                        <p className="text-gray-500 dark:text-slate-400 font-bold text-[11px] sm:text-xs md:text-sm mt-0.5 truncate">{phrase.english || phrase.text}</p>
                       </div>
                     </div>
                   )
@@ -1190,12 +1198,9 @@ const Index = () => {
         signRecognition={signRecognition}
         effectivePhrase={effectivePhrase}
         targetDisplayWord={targetDisplayWord}
-        hintUnlocked={hintUnlocked}
-        showHintModal={showHintModal}
         showHintContent={showHintContent}
-        onSetShowHintModal={setShowHintModal}
+        onHintClick={handleConfirmHint}
         onSetShowHintContent={setShowHintContent}
-        onConfirmHint={handleConfirmHint}
         getCurrentHintKey={getCurrentHintKey}
         getCurrentHintVideos={getCurrentHintVideos}
         getCurrentHintText={getCurrentHintText}

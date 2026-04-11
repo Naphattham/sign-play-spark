@@ -167,25 +167,25 @@ export function CategoryBrowsePage() {
         </style>
 
         {/* Navigation */}
-        <nav className="w-full py-6 px-8 flex justify-between items-center border-b-4 border-sq-black bg-white">
-          <div 
-            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+        <nav className="w-full py-3 px-4 sm:py-6 sm:px-8 flex justify-between items-center border-b-4 border-sq-black bg-white">
+          <div
+            className="flex items-center gap-2 sm:gap-3 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate("/")}
           >
-            <div className="bg-sq-pink p-2 rounded-xl sq-border">
-              <img src="/LOGO_SignMate.png" alt="SignMate Logo" className="w-8 h-8 object-contain" />
+            <div className="bg-sq-pink p-1.5 sm:p-2 rounded-xl sq-border">
+              <img src="/LOGO_SignMate.png" alt="SignMate Logo" className="w-6 h-6 sm:w-8 sm:h-8 object-contain" />
             </div>
             <div>
-              <span className="brand-font text-3xl tracking-tight text-sq-pink">SignMate</span>
-              <p className="text-xs font-bold uppercase tracking-wider text-sq-pink/70">Learn. Sign. Level Up!</p>
+              <span className="brand-font text-xl sm:text-3xl tracking-tight text-sq-pink">SignMate</span>
+              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-sq-pink/70">Learn. Sign. Level Up!</p>
             </div>
           </div>
           <div className="flex items-center gap-6">
             <button
               onClick={() => setShowLoginModal(true)}
-              className="bg-sq-yellow px-6 py-2 rounded-xl sq-border sq-button-hover flex items-center gap-2 font-bold transition-all duration-300 ease-in-out hover:brightness-105"
+              className="bg-sq-yellow px-3 py-1.5 sm:px-6 sm:py-2 rounded-xl sq-border sq-button-hover flex items-center gap-1.5 sm:gap-2 font-bold text-sm sm:text-base transition-all duration-300 ease-in-out hover:brightness-105"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" viewBox="0 0 24 24">
                 <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
                 <polyline points="10 17 15 12 10 7"></polyline>
                 <line x1="15" x2="3" y1="12" y2="12"></line>
@@ -196,29 +196,41 @@ export function CategoryBrowsePage() {
         </nav>
 
         {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-6 py-8 md:py-12 flex-1">
-          <div className="text-center mb-12 relative animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <button
-              onClick={() => navigate(-1)}
-              className="absolute right-0 top-0 bg-sq-yellow px-6 py-2 rounded-xl sq-border sq-button-hover flex items-center gap-2 font-bold transition-all duration-300 ease-in-out hover:brightness-105"
-            >
-              ← กลับ
-            </button>
-            <h1 className="text-4xl md:text-5xl leading-tight brand-font mb-4">
-              สำรวจ<span className="text-sq-pink">บทเรียน</span>ภาษามือ
-            </h1>
-            <p className="text-lg md:text-xl font-medium text-sq-black/70">
-              เลือกหมวดหมู่และคำศัพท์ที่ต้องการเรียนรู้
-            </p>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-8 md:py-12 flex-1">
+          <div className="mb-6 sm:mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Mobile: back button row above title */}
+            <div className="flex justify-end mb-3 sm:hidden">
+              <button
+                onClick={() => navigate(-1)}
+                className="bg-sq-yellow px-4 py-1.5 rounded-xl sq-border sq-button-hover flex items-center gap-2 font-bold text-sm transition-all duration-300 ease-in-out hover:brightness-105"
+              >
+                ← กลับ
+              </button>
+            </div>
+            <div className="text-center sm:relative">
+              {/* Desktop: back button absolute */}
+              <button
+                onClick={() => navigate(-1)}
+                className="hidden sm:flex absolute right-0 top-0 bg-sq-yellow px-6 py-2 rounded-xl sq-border sq-button-hover items-center gap-2 font-bold transition-all duration-300 ease-in-out hover:brightness-105"
+              >
+                ← กลับ
+              </button>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl leading-tight brand-font mb-2 sm:mb-4">
+                สำรวจ<span className="text-sq-pink">บทเรียน</span>ภาษามือ
+              </h1>
+              <p className="text-base sm:text-lg md:text-xl font-medium text-sq-black/70">
+                เลือกหมวดหมู่และคำศัพท์ที่ต้องการเรียนรู้
+              </p>
+            </div>
           </div>
 
           {/* Categories Grid */}
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
             {categories.map((category) => {
               const categoryPhrases = getPhrasesByCategory(category.id);
 
               return (
-                <div key={category.id} className="bg-white p-6 rounded-3xl sq-border-lg">
+                <div key={category.id} className="bg-white p-4 sm:p-6 rounded-3xl sq-border-lg">
                   <div className="flex items-center gap-3 mb-6">
                     <div className={`${categoryColors[category.id]} p-3 rounded-xl sq-border`}>
                       <span className="text-2xl">
@@ -258,8 +270,8 @@ export function CategoryBrowsePage() {
         </main>
 
         {/* Footer */}
-        <footer className="bg-sq-pink py-12 px-8 border-t-4 border-sq-black mt-auto">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+        <footer className="bg-sq-pink py-6 px-4 sm:py-12 sm:px-8 border-t-4 border-sq-black mt-auto">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-8">
             <div 
               className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => {
@@ -269,7 +281,7 @@ export function CategoryBrowsePage() {
             >
               <span className="brand-font text-2xl tracking-tight text-sq-cream">SignMate</span>
             </div>
-            <p className="font-bold text-sq-black/40">© 2026 SignMate Interactive. All rights reserved.</p>
+            <p className="font-bold text-sq-black/40 text-xs sm:text-sm text-center">© 2026 SignMate Interactive. All rights reserved.</p>
           </div>
         </footer>
       </div>
@@ -360,7 +372,7 @@ export function CategoryBrowsePage() {
             </div>
 
             {/* Modal Body */}
-            <div className="p-8">
+            <div className="p-4 sm:p-8">
               {error && (
                 <div className="bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg mb-6 font-bold text-sm">
                   {error}

@@ -229,23 +229,21 @@ export function GameSidebar({
         </div>
       </aside>
 
-        {/* Arrow toggle tab — sticks to the right edge of the sidebar */}
-        <button
-          onClick={onToggle}
-          className="absolute top-1/2 -translate-y-1/2 -right-5 z-50 lg:hidden
-            w-5 h-14 bg-primary border-[2px] border-l-0 border-foreground
-            rounded-r-lg flex items-center justify-center
-            shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
-            hover:bg-primary/90 active:shadow-none active:translate-x-[1px]
-            transition-all"
-          aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
-        >
-          {isOpen ? (
+        {/* Close tab — only shown when sidebar is open */}
+        {isOpen && (
+          <button
+            onClick={onToggle}
+            className="absolute top-1/2 -translate-y-1/2 -right-5 z-50 lg:hidden
+              w-5 h-14 bg-primary border-[2px] border-l-0 border-foreground
+              rounded-r-lg flex items-center justify-center
+              shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
+              hover:bg-primary/90 active:shadow-none active:translate-x-[1px]
+              transition-all"
+            aria-label="Close sidebar"
+          >
             <ChevronLeft size={16} className="text-primary-foreground" />
-          ) : (
-            <ChevronRight size={16} className="text-primary-foreground" />
-          )}
-        </button>
+          </button>
+        )}
       </div>
     </>
   );

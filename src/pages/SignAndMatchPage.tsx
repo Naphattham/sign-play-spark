@@ -195,8 +195,8 @@ export default function SignAndMatchPage() {
 
           <div className="max-w-6xl mx-auto flex flex-col items-center w-full">
             {/* Centered Title */}
-            <div className="text-center mb-8 mt-12 md:mt-24">
-              <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-2 whitespace-nowrap">
+            <div className="text-center mb-8 mt-20 sm:mt-16 md:mt-24">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-2">
                 Sign & <span className="text-primary">Match</span>
               </h1>
               <div className="h-2 bg-foreground w-20 mx-auto mt-4 rounded-full neo-brutalism-sm"></div>
@@ -256,11 +256,11 @@ export default function SignAndMatchPage() {
       <>
         {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
         <main className="flex-1 overflow-y-auto p-6 md:p-12 flex items-center justify-center min-h-screen bg-[hsl(44,95%,96%)] dark:bg-slate-900">
-          <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-[2rem] p-12 text-center max-w-lg w-full">
-            <h2 className="text-4xl sm:text-6xl font-black uppercase mb-4 tracking-tighter text-foreground">
+          <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-[2rem] p-6 sm:p-12 text-center max-w-lg w-full">
+            <h2 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase mb-4 tracking-tighter text-foreground">
               GAME <span className="text-primary">OVER</span>
             </h2>
-            <p className="text-2xl font-bold mb-8">Score: {score} / {currentQuestions.length * 10}</p>
+            <p className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8">Score: {score} / {currentQuestions.length * 10}</p>
             <div className="flex flex-col gap-4">
               <Button
                 className="neo-brutalism bg-primary text-white py-6 text-xl font-black uppercase"
@@ -349,7 +349,7 @@ export default function SignAndMatchPage() {
         </div>
 
         {/* Answer Choices */}
-        <div className="grid grid-cols-4 gap-4 w-full max-w-5xl px-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full max-w-5xl px-2 sm:px-4">
           {options.map((term, i) => {
             let btnClass = "bg-white dark:bg-slate-800 hover:translate-x-[-2px] hover:translate-y-[-2px]";
 
@@ -383,7 +383,7 @@ export default function SignAndMatchPage() {
                 </div>
 
                 {/* Text span */}
-                <span className="text-xl sm:text-2xl font-black text-center leading-tight">
+                <span className="text-base sm:text-xl font-black text-center leading-tight break-words w-full">
                   {term}
                 </span>
 
