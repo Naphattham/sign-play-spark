@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { predictSign, PredictionResponse } from '@/lib/signLanguageAPI';
-import { Phrase, checkPhraseMatch } from '@/lib/categories';
+import { Phrase, checkPhraseMatch, resolveTargetClass } from '@/lib/categories';
 
 // ----------------------------------------------------------------------
 // 🔑 Module-level Holistic Singleton
@@ -247,7 +247,7 @@ export function useSignAndDistance({
       const prediction = await predictSign({
         keypointsBuffer: bufferToPredict,
         userId,
-        targetWord: targetPhrase?.id ?? logTargetWord ?? '',
+        targetWord: targetPhrase ? resolveTargetClass(targetPhrase, variant) : (logTargetWord ?? ''),
       });
 
       if (prediction.success) {

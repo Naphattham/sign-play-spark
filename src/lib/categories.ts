@@ -2,6 +2,7 @@ export type Category = "general" | "emotions" | "qa" | "illness";
 
 export interface Phrase {
   id: string;
+  slug: string; // English slug key for logging (e.g. "hello", "sore_throat")
   text: string;
   category: Category;
   videoUrl?: string;
@@ -26,6 +27,7 @@ export const phrases: Phrase[] = [
   // General (บทสนทนาทั่วไป)
   {
     id: "g1",
+    slug: "hello",
     text: "สวัสดี (ผู้ใหญ่ | เพื่อน)",
     category: "general",
     emoji: "👋",
@@ -38,6 +40,7 @@ export const phrases: Phrase[] = [
   },
   {
     id: "g2",
+    slug: "goodbye",
     text: "ลาก่อน",
     category: "general",
     emoji: "👋",
@@ -46,6 +49,7 @@ export const phrases: Phrase[] = [
   },
   {
     id: "g3",
+    slug: "have_you_eaten",
     text: "กินข้าวหรือยัง?",
     category: "general",
     emoji: "🍚",
@@ -54,6 +58,7 @@ export const phrases: Phrase[] = [
   },
   {
     id: "g4",
+    slug: "already_ate_or_not",
     text: "กินแล้ว | ยังไม่ได้กิน",
     category: "general",
     emoji: "✅",
@@ -62,6 +67,7 @@ export const phrases: Phrase[] = [
   },
   {
     id: "g5",
+    slug: "how_are_you",
     text: "สบายดีไหม?",
     category: "general",
     emoji: "😊",
@@ -70,6 +76,7 @@ export const phrases: Phrase[] = [
   },
   {
     id: "g6",
+    slug: "fine_or_unhappy",
     text: "สบายดี | ไม่สบายใจ",
     category: "general",
     emoji: "👍",
@@ -84,6 +91,7 @@ export const phrases: Phrase[] = [
   // Emotions (อารมณ์)
   {
     id: "e1",
+    slug: "angry",
     text: "โกรธ",
     category: "emotions",
     emoji: "😡",
@@ -92,6 +100,7 @@ export const phrases: Phrase[] = [
   },
   {
     id: "e2",
+    slug: "fear",
     text: "กลัว",
     category: "emotions",
     emoji: "😨",
@@ -100,6 +109,7 @@ export const phrases: Phrase[] = [
   },
   {
     id: "e3",
+    slug: "love",
     text: "รัก",
     category: "emotions",
     emoji: "❤️",
@@ -108,7 +118,8 @@ export const phrases: Phrase[] = [
   },
 
   {
-    id: "e5",
+    id: "e4",
+    slug: "tired",
     text: "เหนื่อย",
     category: "emotions",
     emoji: "😩",
@@ -119,6 +130,7 @@ export const phrases: Phrase[] = [
   // Q&A (คำถาม-คำตอบ)
   {
     id: "q1",
+    slug: "what",
     text: "อะไร?",
     category: "qa",
     emoji: "❓",
@@ -127,6 +139,7 @@ export const phrases: Phrase[] = [
   },
   {
     id: "q2",
+    slug: "why",
     text: "ทำไม?",
     category: "qa",
     emoji: "🤔",
@@ -135,6 +148,7 @@ export const phrases: Phrase[] = [
   },
   {
     id: "q3",
+    slug: "how_much",
     text: "เท่าไหร่?",
     category: "qa",
     emoji: "💰",
@@ -143,6 +157,7 @@ export const phrases: Phrase[] = [
   },
   {
     id: "q4",
+    slug: "yes",
     text: "ใช่",
     category: "qa",
     emoji: "✅",
@@ -151,6 +166,7 @@ export const phrases: Phrase[] = [
   },
   {
     id: "q5",
+    slug: "no",
     text: "ไม่",
     category: "qa",
     emoji: "❌",
@@ -161,6 +177,7 @@ export const phrases: Phrase[] = [
   // Illness (อาการเจ็บป่วย)
   {
     id: "i1",
+    slug: "cold",
     text: "เป็นหวัด",
     category: "illness",
     emoji: "🤧",
@@ -169,6 +186,7 @@ export const phrases: Phrase[] = [
   },
   {
     id: "i2",
+    slug: "sore_throat",
     text: "เจ็บคอ",
     category: "illness",
     emoji: "😷",
@@ -177,6 +195,7 @@ export const phrases: Phrase[] = [
   },
   {
     id: "i3",
+    slug: "stomachache",
     text: "ปวดท้อง",
     category: "illness",
     emoji: "🤰",
@@ -185,6 +204,7 @@ export const phrases: Phrase[] = [
   },
   {
     id: "i4",
+    slug: "headache",
     text: "ปวดหัว",
     category: "illness",
     emoji: "🤕",
@@ -193,6 +213,7 @@ export const phrases: Phrase[] = [
   },
   {
     id: "i5",
+    slug: "fever",
     text: "เป็นไข้",
     category: "illness",
     emoji: "🌡️",
