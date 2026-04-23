@@ -23,7 +23,6 @@ export function CategoryBrowsePage() {
     e.preventDefault();
     setError("");
 
-    // Validate signup fields
     if (isSignup) {
       if (!username.trim()) {
         setError("กรุณากรอก Username");
@@ -55,7 +54,6 @@ export function CategoryBrowsePage() {
         return;
       }
 
-      // Success
       setShowLoginModal(false);
       setIsLoginTransitioning(true);
       setTimeout(() => {
@@ -81,7 +79,6 @@ export function CategoryBrowsePage() {
         return;
       }
 
-      // Success
       setShowLoginModal(false);
       setIsLoginTransitioning(true);
       setTimeout(() => {
@@ -97,7 +94,6 @@ export function CategoryBrowsePage() {
   const getVideoSrc = (phrase: string, category: Category) => {
     let videoFileName = phrase;
 
-    // Handle phrases with multiple options
     if (category === "general") {
       if (phrase.includes("สวัสดี") && phrase.includes("|")) {
         videoFileName = "สวัสดี (ผู้ใหญ่)";
@@ -106,7 +102,6 @@ export function CategoryBrowsePage() {
       } else if (phrase.includes("สบายดี") && phrase.includes("|")) {
         videoFileName = "สบายดี";
       }
-      // Handle phrases with question marks
       if (phrase === "กินข้าวหรือยัง?") {
         videoFileName = "กินข้าวแล้วหรือยัง";
       } else if (phrase === "สบายดีไหม?") {
@@ -114,7 +109,6 @@ export function CategoryBrowsePage() {
       }
     }
 
-    // Remove question marks from Q&A category video filenames
     if (category === "qa") {
       videoFileName = videoFileName.replace("?", "");
     }
@@ -136,7 +130,6 @@ export function CategoryBrowsePage() {
   return (
     <>
       <div className="min-h-screen text-sq-black bg-sq-cream flex flex-col">
-        {/* Custom Styles */}
         <style>
           {`
             @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@100;200;300;400;500&display=swap');
@@ -166,7 +159,6 @@ export function CategoryBrowsePage() {
           `}
         </style>
 
-        {/* Navigation */}
         <nav className="w-full py-3 px-4 sm:py-6 sm:px-8 flex justify-between items-center border-b-4 border-sq-black bg-white">
           <div
             className="flex items-center gap-2 sm:gap-3 cursor-pointer hover:opacity-80 transition-opacity"
@@ -198,7 +190,6 @@ export function CategoryBrowsePage() {
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-8 md:py-12 flex-1">
           <div className="mb-6 sm:mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Mobile: back button row above title */}
             <div className="flex justify-end mb-3 sm:hidden">
               <button
                 onClick={() => navigate(-1)}
@@ -208,7 +199,6 @@ export function CategoryBrowsePage() {
               </button>
             </div>
             <div className="text-center sm:relative">
-              {/* Desktop: back button absolute */}
               <button
                 onClick={() => navigate(-1)}
                 className="hidden sm:flex absolute right-0 top-0 bg-sq-yellow px-6 py-2 rounded-xl sq-border sq-button-hover items-center gap-2 font-bold transition-all duration-300 ease-in-out hover:brightness-105"
@@ -252,7 +242,6 @@ export function CategoryBrowsePage() {
                       <button
                         key={phrase.id}
                         onMouseEnter={() => {
-                          // Prefetch m3u8 playlist on hover so video is ready (stand by) when clicked
                           const url = getVideoSrc(phrase.text, category.id);
                           fetch(url).catch(() => { });
                         }}
@@ -272,7 +261,7 @@ export function CategoryBrowsePage() {
         {/* Footer */}
         <footer className="bg-sq-pink py-6 px-4 sm:py-12 sm:px-8 border-t-4 border-sq-black mt-auto">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-8">
-            <div 
+            <div
               className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => {
                 navigate("/");

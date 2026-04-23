@@ -5,7 +5,6 @@ import Webcam from "react-webcam";
 import guideHumanImg from '@/asset/image/guide_human.webp';
 import { useSignAndDistance } from '@/hooks/useSignAndDistance';
 
-// ─── 🚨 ตั้งค่ากล้องให้เป็น HD และเฟรมเรตสูง ──────────────────────────────────
 const VIDEO_CONSTRAINTS = {
   facingMode: "user",
   width: { ideal: 1280 },
@@ -19,11 +18,10 @@ interface CameraPermissionProps {
   skipCalibration?: boolean;
 }
 
-// ─── Calibration Modal ──────────────────────────────────
 
 interface CalibrationModalProps {
   onClose: () => void;
-  onPlay: () => void; // ฟังก์ชันที่จะพากลับหน้า Home
+  onPlay: () => void;
 }
 
 function CalibrationModal({ onClose, onPlay }: CalibrationModalProps) {
@@ -42,34 +40,27 @@ function CalibrationModal({ onClose, onPlay }: CalibrationModalProps) {
     enabled: isStarted && !!videoEl && !!canvasEl,
   });
 
-  // 1️⃣ 🚨 สร้าง Ref มาเก็บ onPlay เพื่อป้องกันการสร้างฟังก์ชันใหม่แล้วทำให้ Timer โดนรีเซ็ต
   const onPlayRef = useRef(onPlay);
   useEffect(() => {
     onPlayRef.current = onPlay;
   }, [onPlay]);
 
-  // พอล็อคเป็น Success แล้วโชว์ Success ค้างไว้ 0.5 วินาที แล้วเล่น Animation ออก
-  // 2️⃣ 🚨 อัปเดต useEffect ตัวนี้ให้เรียกใช้ onPlayRef.current() และลบ onPlay ออกจาก []
   useEffect(() => {
     if (tutorialStep === "success") {
       const exitTimer = setTimeout(() => {
-        setIsExiting(true); // เริ่ม Animation ออก
+        setIsExiting(true);
 
-        // รอ Animation 300ms เสร็จแล้วค่อยเปลี่ยนหน้าจริงๆ
         const innerTimer = setTimeout(() => {
-          onPlayRef.current(); // เรียกผ่าน Ref แทน
+          onPlayRef.current();
         }, 300);
 
-        // (เผื่อไว้) คลีนอัป inner timer 
         return () => clearTimeout(innerTimer);
       }, 1500);
 
       return () => clearTimeout(exitTimer);
     }
-    // ใช้แค่ tutorialStep เป็นเงื่อนไขเดียวพอ
   }, [tutorialStep]);
 
-  // ตรวจจับระยะห่าง รอ 3 วิรวดถึงจะ Success!
   useEffect(() => {
     if (!isStarted || tutorialStep === "success" || !videoEl) return;
 
@@ -78,7 +69,6 @@ function CalibrationModal({ onClose, onPlay }: CalibrationModalProps) {
         setTutorialStep("holding");
       }
 
-      // ถ้าจับคู่ Good แล้วให้เริ่มนับ 1 วิ (เพื่อความรวดเร็ว)
       if (!holdTimerRef.current) {
         holdTimerRef.current = setTimeout(() => {
           setTutorialStep("success");
@@ -86,7 +76,6 @@ function CalibrationModal({ onClose, onPlay }: CalibrationModalProps) {
         }, 1000);
       }
     } else {
-      // ถ้าระยะเพี้ยน ไม่นิ่ง ให้ลบ Timer และให้คำแนะนำใหม่
       if (holdTimerRef.current) {
         clearTimeout(holdTimerRef.current);
         holdTimerRef.current = null;
@@ -95,7 +84,7 @@ function CalibrationModal({ onClose, onPlay }: CalibrationModalProps) {
       if (distanceStatus === "too_close") {
         setTutorialStep("too_close");
       } else {
-        setTutorialStep("scanning"); // too_far or no_face
+        setTutorialStep("scanning");
       }
     }
   }, [distanceStatus, isStarted, tutorialStep, videoEl]);
@@ -122,17 +111,13 @@ function CalibrationModal({ onClose, onPlay }: CalibrationModalProps) {
       className={`fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md pointer-events-auto transition-opacity duration-500 ease-in-out ${isExiting ? "opacity-0" : "opacity-100"
         }`}
     >
-      {/* 🃏 Modal Container — 1:1 square, ไม่มี header กล้องเต็ม */}
       <div
         className={`relative w-full max-w-xl aspect-square bg-black border-[4px] border-black rounded-[2rem] shadow-[12px_12px_0_0_#000] overflow-hidden transition-all duration-500 ease-in-out ${isExiting
           ? "scale-90 opacity-0 shadow-none translate-y-4"
           : "animate-in zoom-in-95"
           }`}
       >
-
-
         {!isStarted ? (
-          // หน้าก่อนกด Start — พื้นหลังสีตาม theme
           <div className="absolute inset-0 bg-[#fefcf4] flex flex-col items-center justify-center gap-6 animate-in fade-in duration-300">
             <div className="bg-[#efeee5] p-6 rounded-full border-[4px] border-black shadow-[6px_6px_0_0_#000]">
               <Video size={64} className="text-[#c11660]" strokeWidth={2} />
@@ -145,35 +130,28 @@ function CalibrationModal({ onClose, onPlay }: CalibrationModalProps) {
             </button>
           </div>
         ) : (
-          // กล้องเต็ม modal — ไม่มี div ซ้อน
           <>
             <Webcam
               audio={false}
               mirrored
               ref={webcamRef}
-              videoConstraints={VIDEO_CONSTRAINTS} // 🚨 ใส่ Props เพื่อให้กล้องชัด
+              videoConstraints={VIDEO_CONSTRAINTS}
               onUserMedia={handleUserMedia}
               className="absolute inset-0 w-full h-full object-cover"
             />
-            {/* ซ่อน Canvas ไว้เพื่อตอบสนอง Guard Clause ใน Hook */}
             <canvas
               ref={setCanvasEl}
               className="absolute inset-0 w-full h-full pointer-events-none opacity-0"
             />
 
-            {/* ── โค้ด Overlays ต่างๆ ── */}
-
-            {/* Tutorial scanning / too_close / holding overlay — แสดงรูป guide_human พร้อมข้อความ */}
             {(tutorialStep === "scanning" || tutorialStep === "too_close" || tutorialStep === "holding") && (
               <div className="absolute inset-0 z-20 flex flex-col items-center justify-end">
-                {/* รูป guide_human โชว์เต็มกรอบ (mix-blend-screen ทำให้พื้นหลังดำโปร่งใส) */}
                 <img
                   src={guideHumanImg}
                   alt="Guide"
                   className={`absolute inset-0 w-full h-full object-contain mix-blend-screen pointer-events-none select-none transition-opacity duration-300 ${tutorialStep === "holding" ? "opacity-50" : "opacity-80"
                     }`}
                 />
-                {/* ป้ายข้อความด้านล่าง จะแสดงเฉพาะตอนที่ยังจัดท่าไม่ตรง (scanning/too_close) เท่านั้น */}
                 {tutorialStep !== "holding" && (
                   <div
                     className={`relative z-10 mb-6 bg-white/95 border-[3px] rounded-full px-6 py-3 font-black text-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${tutorialStep === "too_close"
@@ -189,7 +167,6 @@ function CalibrationModal({ onClose, onPlay }: CalibrationModalProps) {
               </div>
             )}
 
-            {/* Success overlay (จะโชว์ค้าง 1.5 วิ ตาม Logic useEffect ด้านบน) */}
             {tutorialStep === "success" && (
               <div className="absolute inset-0 bg-green-500/80 flex flex-col items-center justify-center backdrop-blur-sm z-30 animate-in fade-in zoom-in duration-300">
                 <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 border-[4px] border-foreground shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
@@ -211,14 +188,11 @@ function CalibrationModal({ onClose, onPlay }: CalibrationModalProps) {
   );
 }
 
-// ─── Camera Permission Screen หลัก ─────────────────────────────────────────────
-
 export function CameraPermission({ onAllow, onSkip, skipCalibration }: CameraPermissionProps) {
   const [showTutorial, setShowTutorial] = useState(false);
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      {/* Background */}
       <div
         className="absolute inset-0"
         style={{
@@ -237,7 +211,6 @@ export function CameraPermission({ onAllow, onSkip, skipCalibration }: CameraPer
         </div>
       </div>
 
-      {/* Main content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen px-4 sm:px-6 bg-black/40 backdrop-blur-sm">
         <div className="relative w-full max-w-lg bg-white border-[4px] border-black rounded-3xl shadow-[8px_8px_0_0_#000] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
 
@@ -315,13 +288,12 @@ export function CameraPermission({ onAllow, onSkip, skipCalibration }: CameraPer
       <div className="fixed bottom-0 left-0 right-0 h-4" style={{ backgroundColor: "#b13e00" }} />
       <div className="fixed bottom-4 left-0 right-0 h-2 opacity-50" style={{ backgroundColor: "#7d6000" }} />
 
-      {/* 🎓 Calibration Modal — ขยายใหญ่สุด จบในหน้าเดียว */}
       {showTutorial && (
         <CalibrationModal
           onClose={() => setShowTutorial(false)}
           onPlay={() => {
             setShowTutorial(false);
-            onAllow(true); // กลับหน้า Home หรือเริ่มเกม (ผ่าน Calibration แล้ว ไม่ต้องขอ getUserMedia ซ้ำ)
+            onAllow(true);
           }}
         />
       )}

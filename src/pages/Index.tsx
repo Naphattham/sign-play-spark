@@ -25,7 +25,6 @@ import { signOutUser, updateStreakOnLogin, getUserData, addUserPoints, increment
 import { useToast } from "@/hooks/use-toast";
 import { warmUpModel } from "@/lib/signLanguageAPI";
 
-// Helper: calculate score from confidence percentage
 const getScoreFromConfidence = (confidence: number): number => {
   if (confidence >= 0.80) return 100;
   if (confidence >= 0.65) return 70;
@@ -98,7 +97,6 @@ const categoryIconMap: Record<string, string> = {
 
 const preloadAllAvatars = async () => {
   try {
-
     const usersRef = dbRef(database, 'users');
     const snapshot = await get(usersRef);
 
@@ -110,7 +108,6 @@ const preloadAllAvatars = async () => {
           img.src = user.photoURL;
         }
       });
-
     }
   } catch (error) {
     console.error("Error preloading avatars:", error);
@@ -133,7 +130,6 @@ const Index = () => {
   const [view, setView] = useState<View>(((location.state as any)?.view as View) || "home");
 
   useEffect(() => {
-    // Clear the router state on mount so that a hard refresh defaults back to "home" instead of persisting "gamesetup"
     if ((location.state as any)?.view) {
       navigate(location.pathname, { replace: true, state: {} });
     }
@@ -165,18 +161,14 @@ const Index = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const goodPositionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Guard: ป้องกัน Auto-Collect double-fire
   const isCollectingRef = useRef(false);
-  // Track ว่า Session เริ่มไปแล้วหรือยัง (One-Time Start)
   const sessionStartedRef = useRef(false);
 
   const { toast } = useToast();
   const [showHintModal, setShowHintModal] = useState(false);
-  // hintUnlocked tracks which phrase+variant keys have been paid for (e.g. "g1_adult", "g1_friend", "e1")
   const [hintUnlocked, setHintUnlocked] = useState<Set<string>>(new Set());
   const [showHintContent, setShowHintContent] = useState(false);
 
-  // Hint text per modelClass — two sentences separated by \n for line-breaking
   const phraseHintMap: Record<string, string> = {
     already: "ค่อยๆแบมือ -> สะบัดออกจากตัวช้าๆ -> ค้างไว้บริเวณเอว",
     angry: "ค่อยๆงอนิ้วมือ -> ดึงออกจากหน้าผาก -> ค้างไว้",
@@ -205,17 +197,12 @@ const Index = () => {
     yet: "ค่อยๆกางนิ้วก้อยและนิ้วโป้งออก -> ขยับส่ายไปมา -> ระยะเดียวกันกับหน้าอก -> ค้างไว้",
   };
 
-  // New states for confidence scoring & button flow
   const [bestConfidence, setBestConfidence] = useState(0);
   const [buttonState, setButtonState] = useState<ButtonState>("start");
   const [collectedPhrases, setCollectedPhrases] = useState<Set<string>>(new Set());
-  // คะแนนสะสมต่อคำ (0-100) key = phraseKey
   const [phrasePoints, setPhrasePoints] = useState<Record<string, number>>({});
 
-  // 🚨 1. ปรับลดเวลาที่บังคับสแกนจาก 3 วิ เหลือ 1.5 วินาที
   const MIN_SCANNING_DURATION = 1500;
-
-
 
   const byeTargetClass = activePhrase?.id === "g2" ? (byeStep === 1 ? "bye_me" : "bye_go") : undefined;
   const eatTargetClass = activePhrase?.id === "g3" ? (eatStep === 1 ? "rice" : eatStep === 2 ? "eat" : "yet") : undefined;
@@ -254,17 +241,14 @@ const Index = () => {
           ? { ...activePhrase, modelClass: g6TargetClass, modelClasses: undefined }
           : activePhrase;
 
-  // Helper: unique key per phrase+variant for tracking which hints are unlocked
   const getCurrentHintKey = (): string => {
     if (!activePhrase) return "";
-    // These phrases have two separately-paid variants
     if (activePhrase.id === "g1" || activePhrase.id === "g4" || activePhrase.id === "g6") {
       return `${activePhrase.id}_${selectedVariant}`;
     }
     return activePhrase.id;
   };
 
-  // Helper: get hint text for the active phrase/step/variant as a single string
   const getCurrentHintText = (): string => {
     if (!activePhrase) return "";
     if (activePhrase.id === "g1") return phraseHintMap[selectedVariant === "adult" ? "hello_adult" : "hello_friend"] || "";
@@ -280,7 +264,6 @@ const Index = () => {
     return "";
   };
 
-  // Helper: get video URLs for current phrase/variant (for tip modal)
   const getCurrentHintVideos = (): { url: string; label: string; text: string }[] => {
     if (!activePhrase) return [];
     const base = "/videos/Tips_video/";
@@ -315,7 +298,6 @@ const Index = () => {
       const key = selectedVariant === "adult" ? "fine" : "unhappy";
       return [{ url: `${base}${key}-tip.mp4`, label: selectedVariant === "adult" ? "สบายดี" : "ไม่สบายใจ", text: phraseHintMap[key] || "" }];
     }
-    // Other phrases — map from modelClass
     const mc = effectivePhrase?.modelClass;
     if (mc) return [{ url: `${base}${mc}-tip.mp4`, label: activePhrase.text, text: phraseHintMap[mc] || "" }];
     return [];
@@ -330,8 +312,6 @@ const Index = () => {
   const signRecognition = useSignAndDistance({
     videoElement: webcamVideo,
     canvasElement: webcamCanvas,
-    // 🚨 เหมือน SignDefenderPage: enabled ตลอดทันทีที่กล้องพร้อมและ modal เปิด
-    // ทำให้โมเดล buffer keypoints ไว้ล่วงหน้า พร้อมใช้ทันทีเมื่อ user กด START
     enabled: cameraPermissionGranted && gameOpen && !isTransitioning,
     predictEnabled: isLive || isDetecting,
     targetPhrase: (isLive || isDetecting) && !isPhraseCompleted ? effectivePhrase : undefined,
@@ -341,10 +321,8 @@ const Index = () => {
     distanceThreshold: 0.05,
     variant: (activePhrase?.id === "g1" || activePhrase?.id === "g4" || activePhrase?.id === "g6") ? selectedVariant : undefined,
     onPhraseMatch: (prediction, confidence) => {
-      // ยิง onPhraseMatch เฉพาะตอนที่ผู้ใช้กด START แล้วเท่านั้น
       if (!isLive && !isDetecting) return;
       if (isPhraseCompleted) return;
-      // Track best confidence
       setBestConfidence(prev => Math.max(prev, confidence));
       if (activePhrase?.id === "g2") {
         if (byeStep === 1 && prediction === "bye_me" && confidence >= 0.5) {
@@ -379,25 +357,20 @@ const Index = () => {
       }
     },
     onPrediction: (prediction) => {
-      // Update best confidence if it matches target
       if ((isLive || isDetecting) && signRecognition.isMatched) {
         setBestConfidence(prev => Math.max(prev, prediction.confidence));
       }
     },
   });
 
-  // Proxy the distanceStatus state for the original Index logic
   const distanceStatus = signRecognition.distanceStatus;
 
-  // 🧹 Clear stale keypoints จาก CalibrationModal ทุกครั้งที่เปิด modal ใหม่
-  // ป้องกัน keypoints จาก calibration webcam ปนใน buffer ของ lesson
   useEffect(() => {
     if (gameOpen) {
       signRecognition.clearBuffer();
     }
   }, [gameOpen, signRecognition.clearBuffer]);
 
-  // 🚨 ตรวจจับการเปลี่ยนแปลงสิทธิ์กล้อง (เช่น ผู้ใช้กด Reset หรือ Block บน Browser ระหว่างใช้งาน)
   useEffect(() => {
     let permissionStatus: PermissionStatus | null = null;
     const checkPermission = async () => {
@@ -419,10 +392,7 @@ const Index = () => {
           }
         };
 
-        // ตรวจสอบทันทีตอนโหลด
         updatePermissionState();
-
-        // ตั้ง listener รับการเปลี่ยนแปลงสิทธิ์
         permissionStatus.onchange = updatePermissionState;
       } catch (error) {
         console.warn("Permission API not supported", error);
@@ -448,12 +418,9 @@ const Index = () => {
     }
   }, [isDetecting]);
 
-  // 🚨 3. โค้ดพระเอก: ปรับ Logic แตะปุ๊บล็อกปั๊บ (ไม่รีเซ็ตเวลาเมื่อหน้าหลุด)
   useEffect(() => {
     if (!isDetecting) return;
 
-    // 🔑 ล็อกคิว: ถ้าเวลาหน่วง 1 วิเริ่มเดินแล้ว หรือกำลังโชว์ Success อยู่
-    // ให้ "เพิกเฉย" ต่อการเปลี่ยนแปลงระยะห่างไปเลย (หน้าหลุดก็ไม่ต้องสน)
     if (goodPositionTimerRef.current || successTimerRef.current) return;
 
     if (distanceStatus === "too_close") {
@@ -462,27 +429,22 @@ const Index = () => {
       if (scanningLocked) {
         setTutorialStep("scanning");
       } else {
-        // ✅ พอเข้าระยะ Good ปุ๊บ ล็อกคิวทันที!
-        setTutorialStep("scanning"); // ค้างหน้าสแกนไว้แป๊บนึงให้ดูเนียน
+        setTutorialStep("scanning");
 
         goodPositionTimerRef.current = setTimeout(() => {
-          // โชว์หน้า Success หลังผ่านไป 1 วิ
           setTutorialStep("success");
 
-          // นับต่ออีก 2.5 วิ ค่อยเข้าเกม
           successTimerRef.current = setTimeout(() => {
             setIsLive(true);
             setTutorialStep("initial");
             setIsDetecting(false);
 
-            // เคลียร์คิวทั้งหมดเมื่อจบ Process
             successTimerRef.current = null;
             goodPositionTimerRef.current = null;
           }, 2500);
-        }, 1000); // ⏳ หน่วงเวลา 1 วินาที (1000ms)
+        }, 1000);
       }
     } else {
-      // กรณี "no_face" หรือกำลังหามุม (ถ้ายังไม่ถูกล็อกคิว)
       setTutorialStep("scanning");
     }
   }, [isDetecting, distanceStatus, scanningLocked]);
@@ -517,27 +479,30 @@ const Index = () => {
           localStorage.setItem("cached_avatar", user.photoURL);
         }
 
+        setCompletedPhrases(new Set());
+        setCollectedPhrases(new Set());
+        setPhrasePoints({});
+        setUserStreak(0);
+        setUserLevel(1);
+        setHintUnlocked(new Set());
+
         try {
           const streakResult = await updateStreakOnLogin(user.uid);
           if (streakResult.streak !== undefined) {
             setUserStreak(streakResult.streak);
           }
 
-          // Load completed phrases from Firebase
           const userData = await getUserData(user.uid);
           if (userData.data?.completedPhrases && Array.isArray(userData.data.completedPhrases)) {
             setCompletedPhrases(new Set(userData.data.completedPhrases));
             setCollectedPhrases(new Set(userData.data.completedPhrases));
           }
-          // Load user level
           if (userData.data?.level) {
             setUserLevel(userData.data.level);
           }
-          // Load per-phrase cumulative points
           if (userData.data?.phrasePoints && typeof userData.data.phrasePoints === "object") {
             setPhrasePoints(userData.data.phrasePoints as Record<string, number>);
           }
-          // Load unlocked hints from Firebase
           if (userData.data?.unlockedHints && Array.isArray(userData.data.unlockedHints)) {
             setHintUnlocked(new Set(userData.data.unlockedHints as string[]));
           }
@@ -581,7 +546,6 @@ const Index = () => {
     }
   }, [isLive, isDetecting, webcamCanvas]);
 
-  // 🚨 Track daily practice time (Quest: Practice 30 mins)
   useEffect(() => {
     if (!isAuthenticated) return;
     const interval = setInterval(() => {
@@ -639,7 +603,6 @@ const Index = () => {
       setShowCameraPermission(false);
       setSkipCameraCalibration(false);
       setTutorialStep("initial");
-      // 🎓 แสดง How-to-Play modal หลังจาก Calibration เสร็จ
       setShowHowToPlay(true);
     } catch (err) {
       console.error("Camera permission denied:", err);
@@ -653,16 +616,13 @@ const Index = () => {
 
   const handleVariantChange = (variant: "adult" | "friend") => {
     setSelectedVariant(variant);
-    // 🔑 One-Time Start: ไม่ปิดกล้อง — รีเซ็ตแค่ confidence และ phrase state
     setIsPhraseCompleted(false);
-    setBestConfidence(0);  // รีเซ็ต confidence เป็น 0% เสมอเมื่อเปลี่ยน variant
+    setBestConfidence(0);
     isCollectingRef.current = false;
     setByeStep(1);
     setEatStep(1);
-    // ถ้ากล้อง live อยู่แล้ว ให้ยังคง live อยู่ต่อ (เปลี่ยนแค่ variant)
     if (isLive || isDetecting) {
       setButtonState("stop");
-      // 🚨 เพิ่ม: สับสวิตช์ปิด-เปิด API เพื่อล้าง Cache ทิ้งตอนเปลี่ยน Variant
       setIsTransitioning(true);
       setTimeout(() => setIsTransitioning(false), 150);
     }
@@ -673,21 +633,17 @@ const Index = () => {
     const newBest = Math.max(bestConfidence, finalConfidence);
     setBestConfidence(newBest);
     setIsPhraseCompleted(true);
-
-
-
-    // ไม่ Auto-Collect — ให้ผู้ใช้กดเองทุกครั้ง
     setButtonState("collect");
   };
 
   const handleCollectPoints = async () => {
-    const tierScore = getScoreFromConfidence(bestConfidence); // 40 / 70 / 100
+    const tierScore = getScoreFromConfidence(bestConfidence);
     if (tierScore <= 0) return;
 
     const user = auth.currentUser;
     if (!user) return;
 
-    if (isCollectingRef.current) return; // ป้องกัน double-click
+    if (isCollectingRef.current) return;
     isCollectingRef.current = true;
 
     const phraseKey = (activePhrase.id === "g1" || activePhrase.id === "g4" || activePhrase.id === "g6")
@@ -695,46 +651,37 @@ const Index = () => {
       : activePhrase.id;
 
     const currentEarned = phrasePoints[phraseKey] || 0;
-    const delta = tierScore - currentEarned; // คะแนนที่จะได้เพิ่ม (0 ถ้าไม่มีเพิ่ม)
+    const delta = tierScore - currentEarned;
 
     if (delta <= 0) {
-      // ไม่มีคะแนนใหม่ให้เพิ่ม — แสดง Try Again
       isCollectingRef.current = false;
       setButtonState("tryagain");
       return;
     }
 
     try {
-      // บันทึก delta เข้า phrasePoints ใน Firebase
       const result = await updatePhrasePoints(user.uid, phraseKey, tierScore);
       if (result.error) throw new Error(result.error);
 
-      const newTotal = result.totalForPhrase; // 0-100
+      const newTotal = result.totalForPhrase;
 
-      // เพิ่ม delta เข้า total points ของ user
       await addUserPoints(user.uid, result.delta);
 
-      // อัปเดต local state
       setPhrasePoints(prev => ({ ...prev, [phraseKey]: newTotal }));
-      setCollectedPhrases(prev => new Set([...prev, phraseKey])); // mark ว่าเคย collect แล้ว
+      setCollectedPhrases(prev => new Set([...prev, phraseKey]));
 
-      // ถ้าถึง 100 คะแนน → ถือว่าทำเสร็จเต็ม
       if (newTotal >= 100) {
         await addCompletedPhrase(user.uid, phraseKey);
         setCompletedPhrases(prev => new Set([...prev, phraseKey]));
 
-        // ตรวจว่าท้าย category สำเร็จทั้งหมด → Level Up
         const categoryPhrases = getPhrasesByCategory(category);
         const newCompleted = new Set([...completedPhrases, phraseKey]);
         const allCategoryDone = categoryPhrases.every(p => isPhraseCompletedCheck(p.id, newCompleted));
         if (allCategoryDone) {
-
           await incrementUserLevel(user.uid);
         }
       }
 
-
-      // แสดง Try Again เสมอ (ทำซ้ำได้จนแตะ 100 คะแนน)
       setButtonState("tryagain");
     } catch (error) {
       console.error("Error collecting points:", error);
@@ -743,7 +690,6 @@ const Index = () => {
     }
   };
 
-  // 🔑 ปิด Modal พร้อม smooth animation
   const handleCloseModal = () => {
     setIsClosingModal(true);
     setTimeout(() => {
@@ -757,8 +703,6 @@ const Index = () => {
       setIsPhraseCompleted(false);
       isCollectingRef.current = false;
       sessionStartedRef.current = false;
-      // 🚨 Reset webcam refs เหมือน SignDefenderPage ตอนเปลี่ยน phase
-      // ป้องกัน stale video element ถูกส่งให้ MediaPipe เมื่อเปิด modal ใหม่
       setWebcamVideo(null);
       setWebcamCanvas(null);
       if (successTimerRef.current) {
@@ -773,17 +717,13 @@ const Index = () => {
   };
 
   const handleTryAgain = () => {
-    // 🔑 One-Time Start: ไม่ปิดกล้อง — รีเซ็ตแค่ state ของ phrase เท่านั้น
     setIsPhraseCompleted(false);
-    setBestConfidence(0);  // รีเซ็ต confidence เป็น 0%
+    setBestConfidence(0);
     isCollectingRef.current = false;
     setByeStep(1);
     setEatStep(1);
-    // กล้องยังคงทำงานอยู่ (isLive = true, isDetecting = true stay)
-    // แค่เปลี่ยนปุ่มให้กลับไปเป็น "stop" (กำลัง live อยู่)
     setButtonState("stop");
 
-    // 🚨 เพิ่ม: สับสวิตช์ปิด-เปิด API เพื่อล้าง Cache ทิ้งตอนกด Try Again
     setIsTransitioning(true);
     setTimeout(() => setIsTransitioning(false), 150);
   };
@@ -793,38 +733,11 @@ const Index = () => {
     if (!user) return;
 
     try {
-      // 🚨 ปิดการเช็คและตัดคะแนนชั่วคราว (คอมเมนต์ไว้)
-      /*
-      const userRef = dbRef(database, `users/${user.uid}`);
-      const snapshot = await get(userRef);
-      if (snapshot.exists()) {
-        const currentPoints = snapshot.val().points || 0;
-
-        if (currentPoints >= 25) {
-          await update(userRef, { points: currentPoints - 25 });
-      */
-
-      // ปล่อยให้ทำงานส่วนนี้ทันที (ปลดล็อก Hint ฟรี)
       const hintKey = getCurrentHintKey();
-
-      // Save unlocked hint to Firebase so it persists across refreshes
       await saveUnlockedHint(user.uid, hintKey);
-
       setHintUnlocked(prev => new Set([...prev, hintKey]));
       setShowHintModal(false);
-      setShowHintContent(true); // show hintbox right after confirming
-
-      /*
-        } else {
-          toast({
-            title: "Error",
-            description: "คะแนนไม่พอ! คุณต้องมีอย่างน้อย 25 pts",
-            variant: "destructive",
-          });
-          setShowHintModal(false);
-        }
-      }
-      */
+      setShowHintContent(true);
     } catch (error) {
       console.error("Error using hint:", error);
       toast({
@@ -835,22 +748,16 @@ const Index = () => {
     }
   };
 
-
-
-  // Helper: รีเซ็ต phrase state โดยไม่ปิดกล้อง
   const resetPhraseState = () => {
     setIsPhraseCompleted(false);
-    setBestConfidence(0);  // รีเซ็ต confidence เป็น 0% เสมอเมื่อเปลี่ยนคำ
+    setBestConfidence(0);
     isCollectingRef.current = false;
     setByeStep(1);
     setEatStep(1);
-    // Close hint modals when switching phrases (hintUnlocked persists — key differs per phrase)
     setShowHintContent(false);
     setShowHintModal(false);
-    // ถ้าเคย start กล้องแล้ว ให้ยังคง detect ต่อ (One-Time Start)
     if (sessionStartedRef.current) {
       setButtonState("stop");
-      // 🚨 3. สับสวิตช์ปิด-เปิด API (150ms) เพื่อล้าง Cache ทิ้ง
       setIsTransitioning(true);
       setTimeout(() => {
         setIsTransitioning(false);
@@ -880,14 +787,33 @@ const Index = () => {
     setIsLoggingOut(true);
     try {
       await signOutUser();
+
+      setCompletedPhrases(new Set());
+      setCollectedPhrases(new Set());
+      setPhrasePoints({});
+      setUserStreak(0);
+      setUserLevel(1);
+      setHintUnlocked(new Set());
+      setBestConfidence(0);
+      setButtonState("start");
+      setIsPhraseCompleted(false);
+      setIsLive(false);
+      setIsDetecting(false);
+
       localStorage.removeItem("cached_avatar");
+      localStorage.removeItem("lastCategory");
+      localStorage.removeItem("lastPhraseId");
+      localStorage.removeItem("cameraPermissionGranted");
+      sessionStorage.removeItem('hasShownCameraModal');
+      sessionStorage.removeItem('cameraPermissionGranted');
+
       await new Promise(resolve => setTimeout(resolve, 3500));
       setView("home");
       setSidebarOpen(false);
       setGameOpen(false);
       setCameraPermissionGranted(false);
-      sessionStorage.removeItem('hasShownCameraModal');
-      sessionStorage.removeItem('cameraPermissionGranted');
+      setCategory("general");
+      setActivePhrase(getPhrasesByCategory("general")[0]);
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
@@ -935,7 +861,6 @@ const Index = () => {
       <main className="flex-1 min-h-screen overflow-x-hidden">
         <header className="border-b-[3px] border-foreground bg-card px-3 py-2 sm:px-4 sm:py-2.5 md:px-6 md:py-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            {/* Hamburger — mobile only */}
             <button
               className="lg:hidden shrink-0 p-1.5 -ml-1 rounded-md touch-manipulation active:bg-foreground/10 hover:bg-foreground/10 transition-colors"
               onClick={() => setSidebarOpen(true)}
@@ -1069,7 +994,6 @@ const Index = () => {
           )}
           {view === "game" && (
             <div className="flex-1 overflow-y-auto p-3 sm:p-5 md:p-8 lg:p-10 pb-24 sm:pb-32">
-              {/* Title row */}
               <div className="flex items-center gap-2 sm:gap-3 mb-5 sm:mb-7 md:mb-10 mt-1">
                 <button
                   onClick={() => setView("lessons")}
@@ -1081,7 +1005,6 @@ const Index = () => {
                 <p className="flex-1 text-slate-800 dark:text-white font-black uppercase tracking-wide sm:tracking-widest text-sm sm:text-lg md:text-2xl lg:text-3xl text-center drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)] truncate">
                   UNIT {category === "general" ? "1" : category === "emotions" ? "2" : category === "qa" ? "3" : "4"}: {category.toUpperCase()}
                 </p>
-                {/* Spacer mirrors button width so title stays centered */}
                 <div className="shrink-0 w-[60px] sm:w-[72px]" aria-hidden />
               </div>
 
@@ -1124,7 +1047,6 @@ const Index = () => {
         </div>
       </main>
 
-      {/* Game Modal + Hint Modals */}
       <PredictionOverlay
         gameOpen={gameOpen}
         isClosingModal={isClosingModal}
@@ -1188,8 +1110,6 @@ const Index = () => {
           }
           sessionStartedRef.current = true;
           setTutorialStep("initial");
-          // 🚨 เหมือน SignDefenderPage: set isLive=true โดยตรงเลย ไม่ต้องผ่าน isDetecting
-          // เนื่องจาก hook รันและ buffer ข้อมูลไว้แล้ว พร้อมทันที
           setIsLive(true);
           setIsDetecting(false);
           setBestConfidence(0);
@@ -1209,7 +1129,6 @@ const Index = () => {
 
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
 
-      {/* 🎓 How-to-Play Tutorial Modal */}
       {showHowToPlay && (
         <TutorialModal onClose={() => setShowHowToPlay(false)} />
       )}
