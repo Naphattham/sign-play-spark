@@ -284,7 +284,7 @@ export const PredictionOverlay = ({
                 <button
                   onClick={onPrevPhrase}
                   disabled={isFirstPhrase}
-                  className={`absolute left-0 sm:left-2 md:left-4 lg:left-6 top-1/2 -translate-y-1/2 z-50 w-10 sm:w-14 md:w-20 lg:w-24 hover:-translate-x-2 transition-transform cursor-pointer ${isFirstPhrase ? "opacity-30 pointer-events-none" : ""
+                  className={`absolute left-2 sm:left-4 md:left-6 lg:left-8 top-1/2 -translate-y-1/2 z-50 w-10 sm:w-14 md:w-20 lg:w-24 hover:-translate-x-2 transition-transform cursor-pointer ${isFirstPhrase ? "opacity-30 pointer-events-none" : ""
                     }`}
                 >
                   <img
@@ -298,7 +298,7 @@ export const PredictionOverlay = ({
                 <button
                   onClick={onNextPhrase}
                   disabled={isLastPhrase}
-                  className={`absolute right-0 sm:right-2 md:right-4 lg:right-6 top-1/2 -translate-y-1/2 z-50 w-10 sm:w-14 md:w-20 lg:w-24 hover:translate-x-2 transition-transform cursor-pointer ${isLastPhrase ? "opacity-30 pointer-events-none" : ""
+                  className={`absolute right-2 sm:right-4 md:right-6 lg:right-8 top-1/2 -translate-y-1/2 z-50 w-10 sm:w-14 md:w-20 lg:w-24 hover:translate-x-2 transition-transform cursor-pointer ${isLastPhrase ? "opacity-30 pointer-events-none" : ""
                     }`}
                 >
                   <img
@@ -333,7 +333,7 @@ export const PredictionOverlay = ({
                           >
                             ไป
                           </span>
-                          <span className="absolute left-full ml-1.5 sm:ml-3 text-slate-500 dark:text-slate-400 text-[9px] sm:text-xs md:text-sm font-medium whitespace-nowrap">
+                          <span className="hidden sm:block absolute left-full ml-1.5 sm:ml-3 text-slate-500 dark:text-slate-400 text-[9px] sm:text-xs md:text-sm font-medium whitespace-nowrap">
                             (ไวยากรณ์ภาษามือ)
                           </span>
                         </h2>
@@ -365,7 +365,7 @@ export const PredictionOverlay = ({
                           >
                             หรือยัง?
                           </span>
-                          <span className="absolute left-full ml-1.5 sm:ml-3 text-slate-500 dark:text-slate-400 text-[9px] sm:text-xs md:text-sm font-medium whitespace-nowrap">
+                          <span className="hidden sm:block absolute left-full ml-1.5 sm:ml-3 text-slate-500 dark:text-slate-400 text-[9px] sm:text-xs md:text-sm font-medium whitespace-nowrap">
                             (ไวยากรณ์ภาษามือ)
                           </span>
                         </h2>
@@ -391,7 +391,7 @@ export const PredictionOverlay = ({
                           >
                             {selectedVariant === "adult" ? "แล้ว" : "ยัง"}
                           </span>
-                          <span className="absolute left-full ml-1.5 sm:ml-3 text-slate-500 dark:text-slate-400 text-[9px] sm:text-xs md:text-sm font-medium whitespace-nowrap">
+                          <span className="hidden sm:block absolute left-full ml-1.5 sm:ml-3 text-slate-500 dark:text-slate-400 text-[9px] sm:text-xs md:text-sm font-medium whitespace-nowrap">
                             (ไวยากรณ์ภาษามือ)
                           </span>
                         </h2>
