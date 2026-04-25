@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { X, Check } from "lucide-react";
+import { X, Check, Zap, Trophy, Gamepad2, BookOpen, Users, Sparkles } from "lucide-react";
+import { Navbar } from "@/components/Navbar";
 import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "@/lib/auth";
 import { database } from "@/lib/firebase";
 import { ref as dbRef, onValue } from "firebase/database";
@@ -12,6 +13,13 @@ import generalImg from "@/asset/image/general.webp";
 interface LandingPageProps {
   onLoginSuccess: () => void;
 }
+
+const FEATURES = [
+  { icon: Gamepad2, title: "มินิเกมสุดมัน", desc: "เรียนรู้ผ่านเกมที่ออกแบบมาเพื่อฝึกฝนทักษะภาษามือ", color: "bg-amber-300" },
+  { icon: Zap, title: "AI แบบเรียลไทม์", desc: "ระบบ AI วิเคราะห์ท่าทางแบบเรียลไทม์ผ่านกล้อง", color: "bg-pink-400" },
+  { icon: Trophy, title: "ระบบ XP & อันดับ", desc: "สะสมคะแนน XP ปีนอันดับ Leaderboard แข่งกับเพื่อน", color: "bg-violet-400" },
+  { icon: BookOpen, title: "บทเรียนครบถ้วน", desc: "ครอบคลุม 4 หมวดหมู่หลัก กว่า 20 ท่าทางภาษามือ", color: "bg-emerald-400" },
+];
 
 export function LandingPage({ onLoginSuccess }: LandingPageProps) {
   const navigate = useNavigate();
@@ -43,44 +51,20 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
-    // Validate signup fields
     if (isSignup) {
-      if (!username.trim()) {
-        setError("กรุณากรอก Username");
-        return;
-      }
-      if (password !== confirmPassword) {
-        setError("รหัสผ่านไม่ตรงกัน");
-        return;
-      }
-      if (password.length < 6) {
-        setError("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
-        return;
-      }
+      if (!username.trim()) { setError("กรุณากรอก Username"); return; }
+      if (password !== confirmPassword) { setError("รหัสผ่านไม่ตรงกัน"); return; }
+      if (password.length < 6) { setError("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"); return; }
     }
-
     setLoading(true);
-
     try {
-      let result;
-      if (isSignup) {
-        result = await signUpWithEmail(email, password, username);
-      } else {
-        result = await signInWithEmail(email, password);
-      }
-
-      if (result.error) {
-        setError(result.error);
-        setLoading(false);
-        return;
-      }
-
-      // Success
+      const result = isSignup
+        ? await signUpWithEmail(email, password, username)
+        : await signInWithEmail(email, password);
+      if (result.error) { setError(result.error); setLoading(false); return; }
       setShowLoginModal(false);
       setLoading(false);
-      // Firebase auth state will handle the transition
-    } catch (err) {
+    } catch {
       setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
       setLoading(false);
     }
@@ -89,380 +73,311 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError("");
-
     try {
       const result = await signInWithGoogle();
-
-      if (result.error) {
-        setError(result.error);
-        setLoading(false);
-        return;
-      }
-
-      // Success
+      if (result.error) { setError(result.error); setLoading(false); return; }
       setShowLoginModal(false);
       setLoading(false);
-      // Firebase auth state will handle the transition
-    } catch (err) {
+    } catch {
       setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
       setLoading(false);
     }
   };
 
+  const videoAdult = getVideoUrl("general", "สวัสดี (ผู้ใหญ่)main");
+  const videoFriend = getVideoUrl("general", "สวัสดี (เพื่อน)main");
+
   return (
     <>
-      <div className="min-h-screen text-sq-black bg-sq-cream flex flex-col">
+      <div className="min-h-screen text-foreground cb-hero-bg dot-grid flex flex-col">
 
+        <Navbar onLoginClick={() => setShowLoginModal(true)} />
 
-        {/* Navigation */}
-        <nav className="w-full py-3 px-4 sm:py-4 sm:px-6 md:py-6 md:px-8 flex justify-between items-center border-b-4 border-sq-black bg-white">
-          <div
-            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => navigate("/")}
-          >
-            <div className="bg-sq-pink p-2 rounded-xl sq-border">
-              <img src="/LOGO_SignMate.png" alt="SignMate Logo" className="w-8 h-8 object-contain" />
-            </div>
-            <div>
-              <span className="brand-font text-xl sm:text-2xl md:text-3xl tracking-tight text-sq-pink">SignMate</span>
-              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-sq-pink/70">Learn. Sign. Level Up!</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-6">
-            {/* <a className="font-bold hover:text-sq-pink transition-colors" href="#">How it works</a>
-          <a className="font-bold hover:text-sq-pink transition-colors" href="#">Courses</a> */}
-            <button
-              onClick={() => setShowLoginModal(true)}
-              className="bg-sq-yellow px-3 py-1.5 sm:px-6 sm:py-2 rounded-xl sq-border sq-button-hover flex items-center gap-1.5 sm:gap-2 font-bold text-sm sm:text-base transition-all duration-300 ease-in-out hover:brightness-105"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" viewBox="0 0 24 24">
-                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                <polyline points="10 17 15 12 10 7"></polyline>
-                <line x1="15" x2="3" y1="12" y2="12"></line>
-              </svg>
-              Login
-            </button>
-          </div>
-        </nav>
+        {/* ── Hero Section ── */}
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16 flex-1 flex flex-col md:flex-row items-center gap-8 md:gap-12 lg:gap-20">
 
-        {/* Main Content */}
-        <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 md:py-8 lg:py-12 flex-1 flex flex-col md:flex-row items-center gap-8 sm:gap-12 md:gap-16 lg:gap-24">
-          {/* Hero Text Section */}
-          <div className="flex-1 space-y-5 sm:space-y-6 flex flex-col items-center md:items-start text-center md:text-left pb-4 md:pb-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="inline-block bg-sq-pink text-white px-3 py-1 rounded-full text-xs sm:text-sm font-bold uppercase tracking-widest sq-border">
+          {/* Hero Text */}
+          <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left space-y-5 sm:space-y-6">
+            <div className="lp-hero-text inline-flex items-center gap-2 bg-pink-500 text-white px-3 py-1.5 rounded-full border-[2px] border-foreground shadow-[2px_2px_0_0_#1a1a1a] text-xs sm:text-sm font-bold uppercase tracking-wider">
+              <Sparkles size={14} strokeWidth={3} />
               เรียนรู้ภาษามือแบบอินเทอร์แอคทีฟ
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight font-black">
-              <span className="whitespace-nowrap">เชี่ยวชาญ<span className="text-sq-pink">ภาษามือ</span></span> <br className="hidden sm:block" /> ผ่านการเล่นเกม!
+
+            <h1 className="lp-hero-text text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] leading-[1.15] font-black tracking-tight" style={{ animationDelay: "0.1s" }}>
+              <span className="whitespace-nowrap">เชี่ยวชาญ<span className="text-pink-500">ภาษามือ</span></span>
+              <br />
+              ผ่านการเล่นเกม!
             </h1>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl font-medium text-sq-black/70 max-w-lg md:max-w-xl">
+
+            <p className="lp-hero-text text-sm sm:text-base md:text-lg font-semibold text-foreground/60 max-w-lg" style={{ animationDelay: "0.2s" }}>
               วิธีเรียนรู้ภาษามือไทยที่สนุก ฟรี และมีประสิทธิภาพ พัฒนาทักษะของคุณด้วยการตอบรับแบบเรียลไทม์และมินิเกมที่น่าสนใจ
             </p>
-            {/* Desktop-only buttons */}
-            <div className="hidden md:flex flex-wrap justify-start gap-3 sm:gap-4 pt-2 sm:pt-4">
+
+            {/* CTA Buttons */}
+            <div className="lp-hero-text flex flex-wrap justify-center md:justify-start gap-3 pt-2 w-full" style={{ animationDelay: "0.3s" }}>
               <button
                 onClick={() => setShowLoginModal(true)}
-                className="bg-sq-yellow text-base sm:text-lg md:text-xl px-6 py-3 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-2xl sq-border-lg sq-button-hover font-bold brand-font hover:bg-sq-dark-yellow transition-all duration-300 ease-in-out w-full sm:w-auto"
+                className="brutal-btn bg-amber-300 font-black text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl lp-cta-glow flex-1 sm:flex-none"
               >
-                เริ่มเกม
+                🎮 เริ่มเกม
               </button>
               <button
                 onClick={() => navigate("/categories")}
-                className="bg-white text-sm sm:text-base md:text-lg px-6 py-3 sm:px-6 sm:py-3 md:px-8 md:py-4 rounded-2xl sq-border sq-button-hover font-bold flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto transition-all duration-300 ease-in-out hover:bg-gray-50"
+                className="brutal-btn bg-white font-bold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl flex items-center justify-center gap-2 flex-1 sm:flex-none hover:bg-gray-50"
               >
-                สำรวจบทเรียน
+                📚 สำรวจบทเรียน
               </button>
             </div>
-            {/* Desktop-only users */}
-            <div className="hidden md:flex flex-col sm:flex-row items-center justify-start gap-2 sm:gap-3 pt-6 sm:pt-4">
-              <div className="flex -space-x-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-blue-400 flex items-center justify-center text-white font-bold text-xs sm:text-sm">JD</div>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-green-400 flex items-center justify-center text-white font-bold text-xs sm:text-sm">AS</div>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-sq-pink flex items-center justify-center text-white font-bold text-xs sm:text-sm">MK</div>
+
+            {/* User count */}
+            <div className="lp-hero-text flex items-center gap-3 pt-2" style={{ animationDelay: "0.4s" }}>
+              <div className="flex -space-x-2.5">
+                {["bg-blue-400", "bg-emerald-400", "bg-pink-400", "bg-amber-400"].map((bg, i) => (
+                  <div key={i} className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border-[2.5px] border-foreground ${bg} flex items-center justify-center text-white font-bold text-[10px] sm:text-xs shadow-[2px_2px_0_0_#1a1a1a]`}>
+                    {["JD", "AS", "MK", "NP"][i]}
+                  </div>
+                ))}
               </div>
-              <p className="font-bold text-sq-black/60 text-xs sm:text-sm">มีผู้เรียนลงทะเบียนทั้งหมด {totalUsers.toLocaleString()} คน!</p>
+              <div>
+                <p className="font-black text-foreground text-sm sm:text-base leading-none">
+                  {totalUsers > 0 ? totalUsers.toLocaleString() : "—"} <span className="font-bold text-foreground/50">คน</span>
+                </p>
+                <p className="font-semibold text-foreground/40 text-[10px] sm:text-xs">ผู้เรียนลงทะเบียนแล้ว</p>
+              </div>
             </div>
           </div>
 
-          {/* Hero Visual Section */}
-          <div className="flex-1 relative hero-visual-section animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="absolute -top-8 -left-8 w-24 h-24 bg-sq-pink/20 rounded-full blur-3xl -z-10"></div>
-            <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-sq-yellow/30 rounded-full blur-3xl -z-10"></div>
+          {/* Hero Visual Card */}
+          <div className="flex-1 relative w-full max-w-sm sm:max-w-md mx-auto md:mx-0 lp-hero-visual" style={{ animationDelay: "0.15s" }}>
+            {/* Decorative blurs */}
+            <div className="absolute -top-10 -left-10 w-28 h-28 bg-pink-300/30 rounded-full blur-3xl -z-10" />
+            <div className="absolute -bottom-10 -right-10 w-36 h-36 bg-amber-300/30 rounded-full blur-3xl -z-10" />
 
-            <div className="bg-white p-3 sm:p-4 md:p-5 rounded-[1.5rem] sm:rounded-[2rem] sq-border-lg w-full max-w-sm sm:max-w-md mx-auto relative overflow-hidden video-display-box">
-              {/* UI Header */}
-              {/* <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">📚</span>
-                <span className="brand-font italic text-base">General</span>
-              </div>
-              <div className="bg-sq-yellow px-2 py-1 rounded-lg sq-border text-xs font-bold">2/7</div>
-            </div> */}
-
-              {/* Phrases Box */}
-              <div className="bg-sq-pink/10 border-sq-pink border-3 rounded-2xl p-3 mb-4">
-                <div className="flex items-center gap-2 mb-3">
+            <div className="bg-white/90 backdrop-blur-sm p-3 sm:p-4 rounded-2xl border-[3px] border-foreground relative overflow-hidden video-display-box" style={{ boxShadow: "6px 6px 0 0 #1a1a1a" }}>
+              {/* Phrase selector */}
+              <div className="bg-pink-50 border-[2.5px] border-pink-400 rounded-xl p-3 mb-3">
+                <div className="flex items-center gap-2 mb-2.5">
                   <img src={generalImg} alt="General" className="w-5 h-5 object-contain" />
-                  <span className="brand-font italic text-sq-pink text-lg">บทสนทนาทั่วไป</span>
+                  <span className="font-bold italic text-pink-500 text-sm sm:text-base">บทสนทนาทั่วไป</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => setSelectedVideo(getVideoUrl("general", "สวัสดี (ผู้ใหญ่)main"))}
-                    className={`p-2 rounded-xl sq-border flex justify-center items-center font-bold text-base relative transition-all duration-300 ease-in-out ${selectedVideo === getVideoUrl("general", "สวัสดี (ผู้ใหญ่)main")
-                      ? "bg-sq-yellow"
-                      : "bg-gray-100 opacity-50 hover:opacity-75"
+                  {[{ label: "สวัสดี(ผู้ใหญ่)", url: videoAdult }, { label: "สวัสดี(เพื่อน)", url: videoFriend }].map((v) => (
+                    <button
+                      key={v.label}
+                      onClick={() => setSelectedVideo(v.url)}
+                      className={`p-2 rounded-lg border-[2.5px] border-foreground flex justify-center items-center font-bold text-xs sm:text-sm relative transition-all duration-200 ${
+                        selectedVideo === v.url
+                          ? "bg-amber-300 shadow-[2px_2px_0_0_#1a1a1a]"
+                          : "bg-gray-100 opacity-60 hover:opacity-80 shadow-[2px_2px_0_0_#1a1a1a]"
                       }`}
-                  >
-                    สวัสดี(ผู้ใหญ่)
-                    {selectedVideo === getVideoUrl("general", "สวัสดี (ผู้ใหญ่)main") && (
-                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-sq-pink rounded-full border-2 border-sq-black"></div>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setSelectedVideo(getVideoUrl("general", "สวัสดี (เพื่อน)main"))}
-                    className={`p-2 rounded-xl sq-border flex justify-center items-center font-bold text-base relative transition-all duration-300 ease-in-out ${selectedVideo === getVideoUrl("general", "สวัสดี (เพื่อน)main")
-                      ? "bg-sq-yellow"
-                      : "bg-gray-100 opacity-50 hover:opacity-75"
-                      }`}
-                  >
-                    สวัสดี(เพื่อน)
-                    {selectedVideo === getVideoUrl("general", "สวัสดี (เพื่อน)main") && (
-                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-sq-pink rounded-full border-2 border-sq-black"></div>
-                    )}
-                  </button>
+                    >
+                      {v.label}
+                      {selectedVideo === v.url && (
+                        <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-pink-500 rounded-full border-2 border-foreground" />
+                      )}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* Camera Feed / Video Display */}
-              <div className="bg-[#222] rounded-2xl p-2 aspect-square flex flex-col items-center justify-center border-3 border-sq-black overflow-hidden video-container">
+              {/* Video display */}
+              <div className="bg-foreground rounded-xl overflow-hidden border-[3px] border-foreground aspect-square video-container cb-border-glow">
                 <div className="w-full h-full relative">
                   <VideoPlayer
                     key={selectedVideo}
                     src={selectedVideo}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    preload="auto"
-                    className="w-full h-full object-cover rounded-xl video-fade-in absolute inset-0"
+                    autoPlay loop muted playsInline preload="auto"
+                    className="w-full h-full object-cover rounded-lg video-fade-in absolute inset-0"
                   />
                 </div>
               </div>
 
-              <div className="mt-3 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <span className="text-yellow-500 text-lg">⭐</span>
-                  <span className="font-bold text-sq-pink text-sm">+10 pts</span>
+              {/* Bottom stats bar */}
+              <div className="mt-2.5 flex justify-between items-center">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-amber-500 text-base">⭐</span>
+                  <span className="font-black text-pink-500 text-sm">+10 pts</span>
                 </div>
-                <div className="flex gap-2">
-                  <div className="w-8 h-8 rounded-full bg-sq-pink sq-border flex items-center justify-center">
-                    <Check className="w-4 h-4 text-white" strokeWidth={3} />
-                  </div>
+                <div className="w-7 h-7 rounded-full bg-pink-500 border-[2.5px] border-foreground flex items-center justify-center shadow-[2px_2px_0_0_#1a1a1a]">
+                  <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
                 </div>
               </div>
             </div>
 
-            {/* Floating Achievement Tag */}
-            <div className="absolute -bottom-5 -left-5 bg-sq-pink text-white p-2 sm:p-3 rounded-xl sq-border rotate-[-5deg] items-center gap-1.5 sm:gap-2 hidden sm:flex">
-              <div className="bg-white/20 p-1.5 rounded-lg text-lg">🏆</div>
+            {/* Floating badges */}
+            <div
+              className="absolute -bottom-4 -left-3 sm:-bottom-5 sm:-left-5 bg-pink-500 text-white p-2 sm:p-2.5 rounded-xl border-[2.5px] border-foreground shadow-[3px_3px_0_0_#1a1a1a] items-center gap-1.5 hidden sm:flex lp-float-badge"
+              style={{ "--badge-rotate": "-5deg" } as React.CSSProperties}
+            >
+              <div className="bg-white/20 p-1 rounded-lg text-base">🏆</div>
               <div>
-                <p className="text-[10px] font-bold uppercase">Daily Streak</p>
-                <p className="brand-font text-base leading-none">15 DAYS!</p>
+                <p className="text-[9px] font-bold uppercase leading-tight">Daily Streak</p>
+                <p className="font-black text-sm leading-none">15 DAYS!</p>
               </div>
             </div>
-          </div>
 
-          {/* Mobile-only buttons + users (shown after visual section) */}
-          <div className="md:hidden w-full flex flex-col items-center gap-3 pt-2">
-            <div className="flex gap-3 w-full max-w-sm sm:max-w-md mx-auto">
-              <button
-                onClick={() => setShowLoginModal(true)}
-                className="flex-1 bg-sq-yellow text-base sm:text-lg px-6 py-3 rounded-2xl sq-border-lg sq-button-hover font-bold brand-font hover:bg-sq-dark-yellow transition-all duration-300 ease-in-out"
-              >
-                เริ่มเกม
-              </button>
-              <button
-                onClick={() => navigate("/categories")}
-                className="flex-1 bg-white text-sm sm:text-base px-6 py-3 rounded-2xl sq-border sq-button-hover font-bold flex items-center justify-center gap-2 transition-all duration-300 ease-in-out hover:bg-gray-50"
-              >
-                สำรวจบทเรียน
-              </button>
-            </div>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 pt-2">
-              <div className="flex -space-x-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-blue-400 flex items-center justify-center text-white font-bold text-xs sm:text-sm">JD</div>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-green-400 flex items-center justify-center text-white font-bold text-xs sm:text-sm">AS</div>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-sq-pink flex items-center justify-center text-white font-bold text-xs sm:text-sm">MK</div>
+            <div
+              className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 bg-amber-300 text-foreground p-2 sm:p-2.5 rounded-xl border-[2.5px] border-foreground shadow-[3px_3px_0_0_#1a1a1a] items-center gap-1.5 hidden sm:flex lp-float-badge"
+              style={{ "--badge-rotate": "4deg", animationDelay: "1.5s" } as React.CSSProperties}
+            >
+              <div className="bg-white/40 p-1 rounded-lg text-base">🎯</div>
+              <div>
+                <p className="text-[9px] font-bold uppercase leading-tight">Accuracy</p>
+                <p className="font-black text-sm leading-none">98%</p>
               </div>
-              <p className="font-bold text-sq-black/60 text-xs sm:text-sm">มีผู้เรียนลงทะเบียนทั้งหมด {totalUsers.toLocaleString()} คน!</p>
             </div>
           </div>
         </main>
 
-        {/* Footer */}
-        <footer className="bg-sq-pink py-6 px-4 sm:py-8 sm:px-6 md:py-12 md:px-8 border-t-4 border-sq-black mt-auto">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 md:gap-8">
+        {/* ── Features Section ── */}
+        <section className="max-w-6xl mx-auto w-full px-4 sm:px-6 pb-10 sm:pb-16">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            {FEATURES.map((f, i) => (
+              <div
+                key={f.title}
+                className="lp-feature-enter bg-white/80 backdrop-blur-sm p-3 sm:p-4 rounded-xl border-[3px] border-foreground shadow-[4px_4px_0_0_#1a1a1a] hover:shadow-[2px_2px_0_0_#1a1a1a] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-200"
+                style={{ animationDelay: `${0.5 + i * 0.1}s` }}
+              >
+                <div className={`${f.color} w-9 h-9 sm:w-10 sm:h-10 rounded-lg border-[2.5px] border-foreground shadow-[2px_2px_0_0_#1a1a1a] flex items-center justify-center mb-2.5`}>
+                  <f.icon size={18} strokeWidth={2.5} className="text-foreground" />
+                </div>
+                <h3 className="font-black text-sm sm:text-base leading-tight mb-1">{f.title}</h3>
+                <p className="font-semibold text-foreground/50 text-[10px] sm:text-xs leading-snug">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-            <div
-              className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => {
-                navigate("/");
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-            >
-              <span className="brand-font text-2xl tracking-tight text-sq-cream">SignMate</span>
+        {/* ── Footer ── */}
+        <footer className="bg-pink-500 py-5 sm:py-8 px-4 sm:px-8 border-t-[3px] border-foreground mt-auto relative overflow-hidden">
+          <div className="absolute inset-0 cb-shimmer-bar pointer-events-none" />
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 relative z-10">
+            <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+              <span className="font-black text-xl tracking-tight text-white">SignMate</span>
             </div>
-
-            <p className="font-bold text-sq-black/40 text-xs sm:text-sm text-center">
-              © 2026 SignMate Interactive. All rights reserved.
-            </p>
-
+            <p className="font-bold text-white/50 text-xs sm:text-sm text-center">© 2026 SignMate Interactive. All rights reserved.</p>
           </div>
         </footer>
+      </div>
 
-        {/* Login Modal */}
-        {showLoginModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowLoginModal(false)}>
-            <div className="bg-white w-full max-w-md rounded-3xl sq-border-lg overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300" onClick={(e) => e.stopPropagation()}>
-              {/* Modal Header */}
-              <div className="bg-sq-pink p-6 relative">
-                <button
-                  onClick={() => {
-                    setShowLoginModal(false);
-                    setError('');
-                    setEmail('');
-                    setPassword('');
-                  }}
-                  className="absolute top-4 right-4 text-white hover:text-white/80 transition-all duration-300 ease-in-out hover:scale-110"
-                >
-                  <X size={24} />
-                </button>
-                <div className="text-center text-white">
-                  <div className="text-5xl mb-4">👋</div>
-                  <h2 className="brand-font text-3xl mb-2">
-                    {isSignup ? "New Player?" : "Welcome Back!"}
-                  </h2>
-                  <p className="font-bold text-white/80 text-sm">
-                    {isSignup ? "Create a profile to start winning." : "Log in to continue your streak."}
-                  </p>
-                </div>
+      {/* ── Login Modal ── */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-end sm:items-center justify-center" onClick={() => setShowLoginModal(false)}>
+          <div
+            className="cb-modal-enter bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border-[3px] border-foreground overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col sm:m-4"
+            style={{ boxShadow: "8px 8px 0 0 #1a1a1a" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="bg-pink-500 p-5 sm:p-6 relative border-b-[3px] border-foreground shrink-0">
+              {/* Drag indicator (mobile) */}
+              <div className="sm:hidden w-10 h-1 bg-white/40 rounded-full mx-auto mb-3" />
+              <button
+                onClick={() => { setShowLoginModal(false); setError(""); setEmail(""); setPassword(""); }}
+                className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white/20 p-1.5 rounded-lg hover:bg-white/40 active:scale-95 transition-all"
+              >
+                <X size={18} strokeWidth={3} className="text-white" />
+              </button>
+              <div className="text-center text-white">
+                <div className="text-4xl sm:text-5xl mb-2.5 cb-float-icon inline-block">👋</div>
+                <h2 className="font-black text-2xl sm:text-3xl mb-1 leading-tight">{isSignup ? "New Player?" : "Welcome Back!"}</h2>
+                <p className="font-semibold text-white/70 text-xs sm:text-sm">{isSignup ? "Create a profile to start winning." : "Log in to continue your streak."}</p>
               </div>
+            </div>
 
-              {/* Modal Body */}
-              <div className="p-8">
-                {error && (
-                  <div className="bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg mb-6 font-bold text-sm">
-                    {error}
+            {/* Body — scrollable on small screens */}
+            <div className="p-4 sm:p-6 overflow-y-auto flex-1">
+              {error && (
+                <div className="bg-red-50 border-[2.5px] border-red-300 text-red-600 px-3 py-2.5 rounded-xl mb-4 font-bold text-sm flex items-center gap-2">
+                  <span className="shrink-0">⚠️</span>
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleAuth} className="space-y-3.5">
+                {isSignup && (
+                  <div>
+                    <label className="block text-xs font-bold text-foreground/60 mb-1.5 uppercase tracking-wide">Username</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/30 text-sm">👤</span>
+                      <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="ชื่อผู้ใช้" disabled={loading} required className="w-full pl-9 pr-4 py-2.5 sm:py-3 border-[2.5px] border-foreground rounded-xl text-sm font-semibold placeholder:text-foreground/30 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-pink-400 disabled:opacity-50 shadow-[2px_2px_0_0_#1a1a1a] transition-all" />
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <label className="block text-xs font-bold text-foreground/60 mb-1.5 uppercase tracking-wide">Email</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/30 text-sm">✉️</span>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" disabled={loading} required className="w-full pl-9 pr-4 py-2.5 sm:py-3 border-[2.5px] border-foreground rounded-xl text-sm font-semibold placeholder:text-foreground/30 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-pink-400 disabled:opacity-50 shadow-[2px_2px_0_0_#1a1a1a] transition-all" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground/60 mb-1.5 uppercase tracking-wide">Password</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/30 text-sm">🔒</span>
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" disabled={loading} required className="w-full pl-9 pr-4 py-2.5 sm:py-3 border-[2.5px] border-foreground rounded-xl text-sm font-semibold placeholder:text-foreground/30 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-pink-400 disabled:opacity-50 shadow-[2px_2px_0_0_#1a1a1a] transition-all" />
+                  </div>
+                </div>
+                {isSignup && (
+                  <div>
+                    <label className="block text-xs font-bold text-foreground/60 mb-1.5 uppercase tracking-wide">Confirm Password</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/30 text-sm">🔒</span>
+                      <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" disabled={loading} required className="w-full pl-9 pr-4 py-2.5 sm:py-3 border-[2.5px] border-foreground rounded-xl text-sm font-semibold placeholder:text-foreground/30 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-pink-400 disabled:opacity-50 shadow-[2px_2px_0_0_#1a1a1a] transition-all" />
+                    </div>
                   </div>
                 )}
 
-                <form onSubmit={handleAuth} className="space-y-4">
-                  {isSignup && (
-                    <div>
-                      <label className="block text-sm font-bold text-sq-black mb-2">Username</label>
-                      <input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        placeholder="ชื่อผู้ใช้"
-                        disabled={loading}
-                        required
-                        className="w-full px-4 py-3 border-3 border-sq-black rounded-xl focus:outline-none focus:ring-2 focus:ring-sq-pink font-bold placeholder-gray-400 disabled:opacity-50"
-                      />
-                    </div>
-                  )}
-                  <div>
-                    <label className="block text-sm font-bold text-sq-black mb-2">Email</label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="your@email.com"
-                      disabled={loading}
-                      required
-                      className="w-full px-4 py-3 border-3 border-sq-black rounded-xl focus:outline-none focus:ring-2 focus:ring-sq-pink font-bold placeholder-gray-400 disabled:opacity-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-sq-black mb-2">Password</label>
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      disabled={loading}
-                      required
-                      className="w-full px-4 py-3 border-3 border-sq-black rounded-xl focus:outline-none focus:ring-2 focus:ring-sq-pink font-bold placeholder-gray-400 disabled:opacity-50"
-                    />
-                  </div>
-                  {isSignup && (
-                    <div>
-                      <label className="block text-sm font-bold text-sq-black mb-2">Confirm Password</label>
-                      <input
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="••••••••"
-                        disabled={loading}
-                        required
-                        className="w-full px-4 py-3 border-3 border-sq-black rounded-xl focus:outline-none focus:ring-2 focus:ring-sq-pink font-bold placeholder-gray-400 disabled:opacity-50"
-                      />
-                    </div>
-                  )}
+                <button
+                  type="submit"
+                  className="w-full bg-amber-300 font-black text-base sm:text-lg rounded-xl py-3 sm:py-3.5 border-[2.5px] border-foreground shadow-[3px_3px_0_0_#1a1a1a] hover:shadow-[1px_1px_0_0_#1a1a1a] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] disabled:opacity-50 transition-all duration-200 flex items-center justify-center gap-2"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <span className="w-5 h-5 border-[2.5px] border-foreground/30 border-t-foreground rounded-full animate-spin" />
+                      Loading...
+                    </>
+                  ) : isSignup ? "🚀 Sign Up" : "🎮 Let's Go!"}
+                </button>
+              </form>
 
+              {!isSignup && (
+                <div className="mt-5">
+                  <div className="flex items-center gap-3 mb-3.5">
+                    <div className="flex-1 h-px bg-foreground/10" />
+                    <span className="text-foreground/35 font-bold text-[10px] sm:text-xs uppercase tracking-wider">Or continue with</span>
+                    <div className="flex-1 h-px bg-foreground/10" />
+                  </div>
                   <button
-                    type="submit"
-                    className="w-full bg-sq-yellow py-4 rounded-xl sq-border sq-button-hover font-bold text-lg brand-font disabled:opacity-50 transition-all duration-300 ease-in-out hover:brightness-105"
+                    onClick={handleGoogleSignIn}
                     disabled={loading}
+                    className="w-full bg-white flex items-center justify-center gap-2.5 py-2.5 sm:py-3 font-bold text-sm rounded-xl border-[2.5px] border-foreground shadow-[3px_3px_0_0_#1a1a1a] hover:shadow-[1px_1px_0_0_#1a1a1a] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] disabled:opacity-50 transition-all duration-200 hover:bg-gray-50"
                   >
-                    {loading ? "Loading..." : (isSignup ? "Sign Up" : "Let's Go!")}
-                  </button>
-                </form>
-
-                {!isSignup && (
-                  <div className="mt-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="flex-1 h-px bg-gray-300"></div>
-                      <span className="text-gray-400 font-bold text-xs uppercase">Or continue with</span>
-                      <div className="flex-1 h-px bg-gray-300"></div>
-                    </div>
-
-                    <button
-                      onClick={handleGoogleSignIn}
-                      disabled={loading}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-3 border-sq-black rounded-xl hover:bg-gray-50 transition-all duration-300 ease-in-out font-bold disabled:opacity-50 sq-border"
-                    >
-                      <svg className="w-5 h-5" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                      </svg>
-                      {loading ? "Loading..." : "Continue with Google"}
-                    </button>
-                  </div>
-                )}
-
-                <div className="text-center mt-6">
-                  <button
-                    onClick={() => {
-                      setIsSignup(!isSignup);
-                      setError('');
-                      setPassword('');
-                      setUsername('');
-                      setConfirmPassword('');
-                    }}
-                    disabled={loading}
-                    className="text-sq-pink hover:text-sq-dark-pink font-bold hover:underline disabled:opacity-50 transition-all duration-300 ease-in-out"
-                  >
-                    {isSignup ? "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ" : "ยังไม่มีบัญชี? สมัครสมาชิก"}
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                    </svg>
+                    {loading ? "Loading..." : "Continue with Google"}
                   </button>
                 </div>
+              )}
+
+              <div className="text-center mt-5 pb-2">
+                <button
+                  onClick={() => { setIsSignup(!isSignup); setError(""); setPassword(""); setUsername(""); setConfirmPassword(""); }}
+                  disabled={loading}
+                  className="text-pink-500 hover:text-pink-600 font-bold text-sm hover:underline disabled:opacity-50 transition-colors"
+                >
+                  {isSignup ? "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ" : "ยังไม่มีบัญชี? สมัครสมาชิก"}
+                </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </>
   );
 }

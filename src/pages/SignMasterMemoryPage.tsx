@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Star, HelpCircle, Smile, Meh, Frown, Play, RotateCcw, ArrowLeft } from "lucide-react";
+import { Star, Zap, Smile, Meh, Frown, RotateCcw, ArrowLeft, Trophy, Swords, Eye, Pause } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { auth } from "@/lib/firebase";
 import { addUserPoints } from "@/lib/auth";
@@ -424,142 +423,104 @@ export default function SignMasterMemoryPage() {
     return (
       <>
         {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
-        <div className="min-h-screen bg-surface font-body text-on-surface dot-grid relative overflow-x-hidden flex flex-col">
+        <main className="min-h-screen text-foreground relative p-3 sm:p-4 md:p-8 flex flex-col items-center overflow-hidden sd-gradient-bg">
+          {/* Dot grid */}
+          <div className="absolute inset-0 opacity-15 pointer-events-none" style={{
+            backgroundImage: "radial-gradient(circle, hsl(342 100% 64% / 0.35) 1.5px, transparent 1.5px)",
+            backgroundSize: "32px 32px",
+          }} />
+          <div className="absolute top-[8%] right-[12%] opacity-[0.07] pointer-events-none sd-float hidden sm:block"><Eye size={90} strokeWidth={1.5} /></div>
+          <div className="absolute bottom-[12%] left-[6%] opacity-[0.07] pointer-events-none sd-float-delay hidden sm:block"><Star size={70} strokeWidth={1.5} /></div>
 
-          {/* Floating Background Shapes */}
-          <div className="absolute top-14 left-6 w-10 h-10 bg-primary-container rotate-12 neo-shadow opacity-30 rounded-lg -z-10 pointer-events-none" />
-          <div className="absolute top-1/2 -right-6 w-16 h-16 bg-secondary-container rounded-full neo-shadow opacity-20 -z-10 pointer-events-none" />
-          <div className="absolute bottom-14 left-1/4 w-8 h-8 bg-tertiary-container rotate-45 neo-shadow opacity-30 -z-10 pointer-events-none" />
-
-          {/* Back button – absolute top-left, matching MatchAndSignPage */}
           <div className="absolute top-4 left-4 md:top-8 md:left-8 z-30">
-            <button
-              onClick={handleBackToHome}
-              className="neo-brutalism bg-white dark:bg-slate-800 text-foreground text-sm md:text-base font-black py-2 px-4 rounded-xl transition-all hover:-translate-y-1 uppercase flex items-center justify-center gap-2"
-            >
-              ← Back to Challenge
+            <button onClick={handleBackToHome}
+              className="bg-white dark:bg-slate-800 text-foreground text-sm md:text-base font-black py-2.5 px-5 rounded-xl transition-all hover:-translate-y-1 uppercase flex items-center gap-2 border-[3px] border-black active:translate-y-0"
+              style={{ boxShadow: "4px 4px 0px 0px #000" }}>
+              <ArrowLeft className="w-4 h-4" /> Back
             </button>
           </div>
 
-          <main className="max-w-2xl mx-auto px-4 pt-14 md:pt-20 pb-6 flex flex-col gap-4 flex-1 w-full">
-
-            {/* Header */}
-            <header className="text-center">
-              <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter uppercase italic text-primary mb-4 leading-none">
-                SIGN MASTER<br />
-                <span className="text-on-surface bg-secondary-container px-4 border-4 border-on-primary-fixed inline-block mt-2">
-                  MEMORY
-                </span>
-              </h1>
-              <p className="font-bold text-xl uppercase tracking-widest text-on-surface-variant">
-                Level Up Your Visual Recall
+          <div className="max-w-2xl mx-auto flex flex-col items-center w-full relative z-10">
+            <div className="text-center mb-4 sm:mb-6 md:mb-8 mt-14 md:mt-0 sd-slide-up">
+              <div className="inline-flex items-center gap-2 bg-primary/10 border-2 border-primary/30 rounded-full px-3 sm:px-4 py-1 mb-3 sm:mb-4">
+                <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary" />
+                <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-primary">Memory Mode</span>
+              </div>
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9] mb-1 sd-title-glitch">Sign Master</h1>
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9] text-primary sd-title-glitch">Memory</h1>
+              <div className="h-1.5 bg-foreground w-16 mx-auto mt-4 rounded-full border-[2px] border-black" style={{ boxShadow: "2px 2px 0 0 #000" }} />
+              <p className="mt-4 font-bold text-sm md:text-base text-muted-foreground max-w-sm mx-auto">
+                จับคู่การ์ดวิดีโอภาษามือกับคำศัพท์ที่ถูกต้อง!
               </p>
-            </header>
-
-            {/* How to Play – compact */}
-            <section className="bg-surface-container-low border-4 border-on-primary-fixed rounded-xl p-3 neo-shadow">
-              <h2 className="text-sm font-black uppercase tracking-tight mb-2 flex items-center gap-2">
-                <span className="bg-primary text-on-primary p-0.5 rounded-md">
-                  <HelpCircle className="w-4 h-4" />
-                </span>
-                How to play
-              </h2>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                {[
-                  { n: "01", text: "แตะเปิดการ์ดเพื่อดูคลิปวิดีโอท่าทาง หรือคำศัพท์ที่ซ่อนอยู่" },
-                  { n: "02", text: "จดจำตำแหน่งของการ์ดแต่ละใบให้แม่นยำ ก่อนที่มันจะคว่ำลง" },
-                  { n: "03", text: "จับคู่การ์ด 'วิดีโอภาษามือ' ให้ตรงกับ 'คำศัพท์' ที่มีความหมายเดียวกัน" },
-                  { n: "04", text: "ใช้จำนวนครั้งให้น้อยและไวที่สุด เพื่อคว้าคะแนนระดับ Master!" },
-                ].map(({ n, text }) => (
-                  <div key={n} className="flex items-start gap-2"> {/* เปลี่ยน items-center เป็น items-start เพราะข้อความยาวขึ้น */}
-                    <div className="flex-shrink-0 w-6 h-6 bg-on-primary-fixed text-surface rounded-full flex items-center justify-center font-black text-[10px] mt-0.5">
-                      {n}
-                    </div>
-                    <p className="font-bold text-[11px] leading-tight uppercase">{text}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Difficulty Selection */}
-            <section>
-              <h2 className="text-lg font-black uppercase tracking-tight mb-3 text-center">SELECT DIFFICULTY</h2>
-              <div className="grid grid-cols-3 gap-3">
-
-                {/* Easy – Green */}
-                <button
-                  onClick={() => setDifficulty("easy")}
-                  className={`border-4 border-on-primary-fixed py-6 px-4 rounded-xl transition-all flex flex-col items-center gap-1 font-black
-        ${difficulty === "easy"
-                      ? "bg-green-400 text-white neo-shadow-lg -translate-y-1 scale-105"
-                      : "bg-green-100 text-green-900 neo-shadow hover:-translate-y-0.5"
-                    }`}
-                >
-                  {/* ลบ fill ออก และเพิ่มความหนาเส้นนิดนึงให้เข้ากับฟอนต์ */}
-                  <Smile className="w-8 h-8" strokeWidth={2.5} />
-                  <span className="text-lg uppercase">EASY</span>
-                  <div className="flex flex-col items-center opacity-90 text-[10px] sm:text-[11px] leading-tight mt-1">
-                    <span>50 PTS | -5 PTS</span>
-                    <span>ผิดได้ 5 ครั้ง</span>
-                  </div>
-                </button>
-
-                {/* Medium – Yellow */}
-                <button
-                  onClick={() => setDifficulty("medium")}
-                  className={`border-4 border-on-primary-fixed py-6 px-4 rounded-xl transition-all flex flex-col items-center gap-1 font-black
-        ${difficulty === "medium"
-                      ? "bg-yellow-400 text-white neo-shadow-lg -translate-y-1 scale-105"
-                      : "bg-yellow-100 text-yellow-900 neo-shadow hover:-translate-y-0.5"
-                    }`}
-                >
-                  <Meh className="w-8 h-8" strokeWidth={2.5} />
-                  <span className="text-lg uppercase">MEDIUM</span>
-                  <div className="flex flex-col items-center opacity-90 text-[10px] sm:text-[11px] leading-tight mt-1">
-                    <span>100 PTS | -10 PTS</span>
-                    <span>ผิดได้ 10 ครั้ง</span>
-                  </div>
-                </button>
-
-                {/* Hard – Red */}
-                <button
-                  onClick={() => setDifficulty("hard")}
-                  className={`border-4 border-on-primary-fixed py-6 px-4 rounded-xl transition-all flex flex-col items-center gap-1 font-black
-        ${difficulty === "hard"
-                      ? "bg-red-500 text-white neo-shadow-lg -translate-y-1 scale-105"
-                      : "bg-red-100 text-red-900 neo-shadow hover:-translate-y-0.5"
-                    }`}
-                >
-                  <Frown className="w-8 h-8" strokeWidth={2.5} />
-                  <span className="text-lg uppercase">HARD</span>
-                  <div className="flex flex-col items-center opacity-90 text-[10px] sm:text-[11px] leading-tight mt-1">
-                    <span>200 PTS | -10 PTS</span>
-                    <span>ผิดได้ 20 ครั้ง</span>
-                  </div>
-                </button>
-
-              </div>
-            </section>
-
-            {/* Start Button */}
-            <div className="flex justify-center">
-              <button
-                onClick={() => startGame(difficulty)}
-                disabled={isReturningHome}
-                className="bg-secondary-container text-on-secondary-container border-4 border-on-primary-fixed py-4 px-10 rounded-xl flex items-center justify-center gap-3 text-2xl font-black uppercase italic tracking-tighter neo-shadow-lg hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:translate-x-[4px] active:translate-y-[4px] active:shadow-none disabled:opacity-50"
-              >
-                START GAME
-                <Play className="w-7 h-7" fill="currentColor" />
-              </button>
             </div>
 
+            <div className="flex flex-col gap-4 md:gap-5 w-full items-stretch">
+              {/* How to Play */}
+              <div className="sd-slide-up" style={{ animationDelay: "0.1s" }}>
+                <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 w-full flex flex-col text-sm border-[3px] border-black"
+                  style={{ boxShadow: "6px 6px 0px 0px #000" }}>
+                  <h2 className="text-lg md:text-xl font-black uppercase mb-4 border-b-[3px] border-foreground pb-2 flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-primary" /> How to Play
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {[
+                      { icon: <Eye className="w-4 h-4" />, text: "แตะเปิดการ์ดเพื่อดูวิดีโอหรือคำศัพท์" },
+                      { icon: <Star className="w-4 h-4" />, text: "จดจำตำแหน่งของการ์ดแต่ละใบ" },
+                      { icon: <Zap className="w-4 h-4" />, text: "จับคู่วิดีโอกับคำศัพท์ที่ตรงกัน" },
+                      { icon: <Trophy className="w-4 h-4" />, text: "ใช้ครั้งน้อยที่สุดเพื่อคะแนนสูงสุด!" },
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex items-start group">
+                        <span className="bg-primary text-white font-black rounded-xl w-8 h-8 flex items-center justify-center shrink-0 mr-3 border-[2px] border-black transition-transform group-hover:scale-110"
+                          style={{ boxShadow: "2px 2px 0 0 #000" }}>{item.icon}</span>
+                        <p className="pt-1.5 text-sm font-bold">{item.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
 
+              {/* Difficulty Selection */}
+              <div className="sd-slide-up" style={{ animationDelay: "0.15s" }}>
+                <div className="relative flex bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-1.5 sm:p-2 w-full border-[3px] border-black"
+                  style={{ boxShadow: "5px 5px 0px 0px #000" }}>
+                  <div className="absolute top-2 bottom-2 left-2 rounded-xl transition-all duration-300 ease-out border-[2px] border-black"
+                    style={{
+                      width: 'calc((100% - 16px) / 3)',
+                      transform: `translateX(calc(${difficulty === 'easy' ? 0 : difficulty === 'medium' ? 1 : 2} * 100%))`,
+                      background: difficulty === 'easy' ? 'hsl(142 70% 49%)' : difficulty === 'medium' ? 'hsl(44 100% 60%)' : 'hsl(0 84% 60%)',
+                      boxShadow: "2px 2px 0px 0px rgba(0,0,0,1)",
+                    }}
+                  />
+                  {(["easy", "medium", "hard"] as const).map((m) => (
+                    <button key={m} onClick={() => setDifficulty(m)}
+                      className={`relative z-10 flex-1 flex flex-col items-center justify-center py-2.5 sm:py-3 md:py-4 rounded-lg sm:rounded-xl font-black uppercase text-xs sm:text-sm tracking-tight transition-colors duration-300 gap-0.5 ${
+                        difficulty === m ? 'text-white' : 'text-muted-foreground hover:text-foreground'
+                      }`}>
+                      <span className="flex items-center gap-1">
+                        {m === 'easy' && <Smile className="w-4 h-4" />}
+                        {m === 'medium' && <Meh className="w-4 h-4" />}
+                        {m === 'hard' && <Frown className="w-4 h-4" />}
+                        {m.toUpperCase()}
+                      </span>
+                      <span className="text-[9px] sm:text-[10px] opacity-80">
+                        {m === 'easy' ? '50 PTS · ผิดได้ 5' : m === 'medium' ? '100 PTS · ผิดได้ 10' : '200 PTS · ผิดได้ 20'}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-          </main>
-
-          {/* Bottom accent bar */}
-          <div className="fixed bottom-0 left-0 w-full h-2 bg-on-primary-fixed z-50" />
-        </div>
+              {/* Start Button */}
+              <div className="sd-slide-up" style={{ animationDelay: "0.2s" }}>
+                <button onClick={() => startGame(difficulty)} disabled={isReturningHome}
+                  className="bg-primary text-white text-base sm:text-lg md:text-xl font-black py-3 sm:py-3.5 rounded-xl sm:rounded-2xl transition-all uppercase w-full border-[3px] border-black hover:-translate-y-1 hover:brightness-110 active:translate-y-0 flex items-center justify-center gap-2 disabled:opacity-50"
+                  style={{ boxShadow: "5px 5px 0px 0px #000" }}>
+                  <Swords className="w-5 h-5" /> START GAME
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
       </>
     );
   }
@@ -570,56 +531,66 @@ export default function SignMasterMemoryPage() {
     return (
       <>
         {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
-        <main className="flex-1 overflow-y-auto p-6 md:p-12 flex items-center justify-center min-h-screen bg-[hsl(44,95%,96%)] dark:bg-slate-900">
-          <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-[2rem] p-10 text-center max-w-lg w-full flex flex-col gap-6">
-            <h2 className="text-4xl sm:text-6xl font-black uppercase tracking-tighter text-foreground">
-              You <span className="text-primary">Win!</span>
-            </h2>
+        <main className="min-h-screen flex flex-col relative overflow-hidden sd-gradient-bg">
+          <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
+            backgroundImage: "radial-gradient(circle, hsl(342 100% 64% / 0.4) 1.5px, transparent 1.5px)",
+            backgroundSize: "32px 32px",
+          }} />
+          <div className="absolute top-[10%] left-[8%] opacity-10 pointer-events-none sd-float"><Eye size={80} strokeWidth={1.5} /></div>
+          <div className="absolute bottom-[15%] right-[10%] opacity-10 pointer-events-none sd-float-delay"><Star size={60} strokeWidth={1.5} /></div>
 
-            <div className="grid grid-cols-3 gap-4 md:gap-6">
-              <div className="neo-brutalism bg-primary/10 rounded-xl p-4 flex flex-col items-center justify-center">
-                <span className="text-xs font-black uppercase text-muted-foreground mb-1">Score</span>
-                <span className="text-3xl font-black text-primary">{score.toLocaleString()}</span>
+          <div className="flex-1 flex items-center justify-center p-4 md:p-6">
+            <div className="sd-slide-up bg-white dark:bg-slate-800 border-[3px] md:border-[4px] border-black rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-10 text-center w-full max-w-md z-10 relative"
+              style={{ boxShadow: "6px 6px 0px 0px #000" }}>
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-green-400 border-[3px] border-black px-5 py-1.5 rounded-full"
+                style={{ boxShadow: "3px 3px 0 0 #000" }}>
+                <p className="font-black uppercase text-xs tracking-widest text-black">{DIFF_CONFIG[difficulty].label}</p>
               </div>
-              <div className="neo-brutalism bg-secondary/10 rounded-xl p-4 flex flex-col items-center justify-center">
-                <span className="text-xs font-black uppercase text-muted-foreground mb-1">Moves</span>
-                <span className="text-3xl font-black">{moves}</span>
+              <div className="mx-auto mb-3 md:mb-4 mt-2 w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary border-[3px] border-black flex items-center justify-center"
+                style={{ boxShadow: "3px 3px 0 0 #000" }}>
+                <Trophy className="w-6 h-6 md:w-8 md:h-8 text-white" strokeWidth={2.5} />
               </div>
-              <div className="neo-brutalism bg-green-100 rounded-xl p-4 flex flex-col items-center justify-center">
-                <span className="text-xs font-black uppercase text-muted-foreground mb-1">Time</span>
-                <span className="text-3xl font-black">{formatTime(elapsed)}</span>
-              </div>
-            </div>
+              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-4 md:mb-6 text-foreground whitespace-nowrap sd-title-glitch">
+                YOU <span className="text-primary">WIN!</span>
+              </h2>
 
-            <div className="text-sm font-bold text-muted-foreground">
-              Efficiency: <span className="text-foreground font-black">{efficiency}%</span>
-              &nbsp;·&nbsp; Difficulty: <span className="text-foreground font-black">{DIFF_CONFIG[difficulty].label}</span>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-4">
-                <Button
-                  className="neo-brutalism bg-primary text-white py-6 text-lg sm:text-xl font-black uppercase"
-                  onClick={() => startGame(difficulty)}
-                  disabled={isReturningHome}
-                >
-                  Play Again
-                </Button>
-                <Button
-                  className="neo-brutalism bg-yellow-400 text-slate-900 py-6 text-lg sm:text-xl font-black uppercase"
-                  onClick={() => setPhase("idle")}
-                  disabled={isReturningHome}
-                >
-                  Choose Level
-                </Button>
+              <div className="grid grid-cols-3 gap-2 md:gap-3 mb-4">
+                {[
+                  { label: "Score", value: score.toLocaleString(), bg: "bg-primary/10" },
+                  { label: "Moves", value: moves, bg: "bg-secondary/20" },
+                  { label: "Time", value: formatTime(elapsed), bg: "bg-green-100" },
+                ].map((s, i) => (
+                  <div key={i} className={`${s.bg} border-[3px] border-black rounded-xl p-3 flex flex-col items-center`}
+                    style={{ boxShadow: "3px 3px 0 0 #000" }}>
+                    <span className="text-[10px] font-black uppercase text-foreground/50 mb-0.5">{s.label}</span>
+                    <span className="text-xl md:text-2xl font-black text-foreground">{s.value}</span>
+                  </div>
+                ))}
               </div>
-              <Button
-                className="neo-brutalism bg-surface text-black py-6 text-xl font-black uppercase"
-                onClick={handleBackToHome}
-                disabled={isReturningHome}
-              >
-                Back to Home
-              </Button>
+
+              <p className="text-xs font-bold text-muted-foreground mb-5">
+                Efficiency: <span className="text-foreground font-black">{efficiency}%</span>
+              </p>
+
+              <div className="flex flex-col gap-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <button disabled={isReturningHome} onClick={() => startGame(difficulty)}
+                    className="bg-primary text-white font-black uppercase text-sm md:text-base py-3 rounded-2xl border-[3px] border-black transition-all hover:-translate-y-1 hover:brightness-110 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    style={{ boxShadow: "4px 4px 0px 0px #000" }}>
+                    <Swords className="w-4 h-4" /> PLAY AGAIN
+                  </button>
+                  <button disabled={isReturningHome} onClick={() => setPhase("idle")}
+                    className="bg-yellow-300 text-black font-black uppercase text-sm md:text-base py-3 rounded-2xl border-[3px] border-black transition-all hover:-translate-y-1 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    style={{ boxShadow: "4px 4px 0px 0px #000" }}>
+                    CHOOSE LEVEL
+                  </button>
+                </div>
+                <button disabled={isReturningHome} onClick={handleBackToHome}
+                  className="bg-white dark:bg-slate-700 text-foreground font-black uppercase text-sm md:text-base py-3 rounded-2xl border-[3px] border-black transition-all hover:-translate-y-1 disabled:opacity-50 flex items-center justify-center gap-2"
+                  style={{ boxShadow: "4px 4px 0px 0px #000" }}>
+                  <ArrowLeft className="w-4 h-4" /> BACK TO CHALLENGE
+                </button>
+              </div>
             </div>
           </div>
         </main>
@@ -632,33 +603,43 @@ export default function SignMasterMemoryPage() {
     return (
       <>
         {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
-        <div className="min-h-screen bg-[hsl(44,95%,96%)] dark:bg-slate-900 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-          {/* Floating Background Shapes */}
-          <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-red-400 rotate-12 neo-shadow opacity-20 rounded-lg -z-10 pointer-events-none" />
-          <div className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-orange-400 rounded-full neo-shadow opacity-20 -z-10 pointer-events-none" />
+        <main className="min-h-screen flex flex-col relative overflow-hidden sd-gradient-bg">
+          <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
+            backgroundImage: "radial-gradient(circle, hsl(342 100% 64% / 0.4) 1.5px, transparent 1.5px)",
+            backgroundSize: "32px 32px",
+          }} />
+          <div className="absolute top-[10%] right-[10%] opacity-10 pointer-events-none sd-float"><Frown size={80} strokeWidth={1.5} /></div>
+          <div className="absolute bottom-[15%] left-[8%] opacity-10 pointer-events-none sd-float-delay"><Eye size={60} strokeWidth={1.5} /></div>
 
-          <div className="bg-white dark:bg-slate-800 border-4 border-black p-8 md:p-12 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center max-w-lg w-full flex flex-col items-center z-10">
-            {/* 🚨 ลบ fill ออก และใส่ strokeWidth แทน เพื่อให้ไอคอนดูหนาและชัดเจนขึ้น */}
-            <Frown className="text-red-500 w-24 h-24 mb-4 drop-shadow-md" strokeWidth={2.5} />
-
-            <h1 className="text-6xl md:text-7xl font-black uppercase italic tracking-tighter text-red-600 mb-2">
-              YOU LOSE
-            </h1>
-            <div className="bg-red-100 border-2 border-red-500 px-6 py-2 rounded-full mb-8">
-              <p className="font-bold text-xl uppercase tracking-widest text-red-900">
-                Out of moves
-              </p>
+          <div className="flex-1 flex items-center justify-center p-4 md:p-6">
+            <div className="sd-slide-up bg-white dark:bg-slate-800 border-[3px] md:border-[4px] border-black rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-10 text-center w-full max-w-md z-10 relative"
+              style={{ boxShadow: "6px 6px 0px 0px #000" }}>
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-red-400 border-[3px] border-black px-5 py-1.5 rounded-full"
+                style={{ boxShadow: "3px 3px 0 0 #000" }}>
+                <p className="font-black uppercase text-xs tracking-widest text-white">OUT OF MOVES</p>
+              </div>
+              <div className="mx-auto mb-3 md:mb-4 mt-2 w-12 h-12 md:w-16 md:h-16 rounded-full bg-rose-500 border-[3px] border-black flex items-center justify-center"
+                style={{ boxShadow: "3px 3px 0 0 #000" }}>
+                <Frown className="w-6 h-6 md:w-8 md:h-8 text-white" strokeWidth={2.5} />
+              </div>
+              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-6 text-foreground whitespace-nowrap sd-title-glitch">
+                YOU <span className="text-rose-500">LOSE</span>
+              </h2>
+              <div className="flex flex-col gap-3">
+                <button onClick={() => setPhase("idle")}
+                  className="bg-primary text-white font-black uppercase text-lg md:text-xl py-4 rounded-2xl border-[3px] border-black transition-all hover:-translate-y-1 hover:brightness-110 flex items-center justify-center gap-2"
+                  style={{ boxShadow: "5px 5px 0px 0px #000" }}>
+                  <RotateCcw className="w-5 h-5" strokeWidth={2.5} /> TRY AGAIN
+                </button>
+                <button onClick={handleBackToHome} disabled={isReturningHome}
+                  className="bg-white dark:bg-slate-700 text-foreground font-black uppercase text-sm md:text-base py-3 rounded-2xl border-[3px] border-black transition-all hover:-translate-y-1 disabled:opacity-50 flex items-center justify-center gap-2"
+                  style={{ boxShadow: "4px 4px 0px 0px #000" }}>
+                  <ArrowLeft className="w-4 h-4" /> BACK TO CHALLENGE
+                </button>
+              </div>
             </div>
-
-            <button
-              onClick={() => setPhase("idle")}
-              className="w-full neo-brutalism bg-primary text-white border-4 border-black text-xl md:text-2xl font-black py-4 px-6 rounded-xl hover:-translate-y-1 hover:shadow-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase flex justify-center items-center gap-2"
-            >
-              <RotateCcw className="w-6 h-6" strokeWidth={2.5} />
-              TRY AGAIN
-            </button>
           </div>
-        </div>
+        </main>
       </>
     );
   }
@@ -671,21 +652,25 @@ export default function SignMasterMemoryPage() {
   return (
     <>
       {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
-      <main className="h-screen overflow-hidden flex flex-col items-center bg-[hsl(44,95%,96%)] dark:bg-slate-900 relative">
+      <main className="h-screen overflow-hidden flex flex-col items-center sd-gradient-bg relative">
 
         {/* Ready Modal */}
         {isPreviewReady && (
-          <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
-            <div className="bg-white dark:bg-slate-800 border-4 border-black p-8 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center max-w-sm w-full flex flex-col items-center animate-in zoom-in duration-300 mx-4">
-              <h2 className="text-4xl font-black uppercase text-primary mb-2 drop-shadow-sm">เตรียมตัว!</h2>
-              <p className="text-xl font-bold text-slate-700 dark:text-slate-300 mb-8">
-                คุณมีเวลาจำ <span className="text-3xl font-black text-red-500">5</span> วินาที
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm pointer-events-auto">
+            <div className="max-w-sm w-full bg-white dark:bg-slate-800 rounded-2xl border-[4px] border-black p-6 text-center sd-slide-up"
+              style={{ boxShadow: "8px 8px 0px 0px #000" }}>
+              <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-green-400 border-[3px] border-black flex items-center justify-center"
+                style={{ boxShadow: "3px 3px 0 0 #000" }}>
+                <Eye className="w-7 h-7 text-white" strokeWidth={3} />
+              </div>
+              <h2 className="text-3xl font-black uppercase tracking-tighter mb-2 text-foreground">เตรียมตัว!</h2>
+              <p className="font-bold text-muted-foreground mb-6 text-sm">
+                คุณมีเวลาจำ <span className="text-2xl font-black text-red-500">5</span> วินาที
               </p>
-              <button
-                className="w-full neo-brutalism bg-green-400 text-white border-4 border-black text-2xl font-black py-4 px-6 rounded-xl hover:-translate-y-1 hover:shadow-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase flex justify-center items-center gap-2"
-                onClick={startPreviewCountdown}
-              >
-                Ready
+              <button onClick={startPreviewCountdown}
+                className="w-full bg-green-400 text-white font-black uppercase text-xl py-3.5 rounded-xl border-[3px] border-black hover:-translate-y-1 hover:brightness-110 transition-all flex items-center justify-center gap-2"
+                style={{ boxShadow: "5px 5px 0px 0px #000" }}>
+                <Swords className="w-5 h-5" /> READY
               </button>
             </div>
           </div>
@@ -693,27 +678,26 @@ export default function SignMasterMemoryPage() {
 
         {/* Exit Confirmation Modal */}
         {showExitModal && (
-          <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
-            <div className="bg-white dark:bg-slate-800 border-4 border-black p-8 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center max-w-sm w-full flex flex-col items-center animate-in zoom-in duration-200 mx-4">
-              <h2 className="text-3xl font-black uppercase text-red-600 mb-4 drop-shadow-sm">เกมยังไม่จบ</h2>
-              <p className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-8">
-                ต้องการจะออกใช่ไหม? <br />
-                <span className="text-red-500">หากออกจะไม่ได้รับคะแนนใดๆ ทั้งสิ้น</span>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm pointer-events-auto">
+            <div className="max-w-sm w-full bg-white dark:bg-slate-800 rounded-2xl border-[4px] border-black p-6 text-center sd-slide-up"
+              style={{ boxShadow: "8px 8px 0px 0px #000" }}>
+              <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-yellow-300 border-[3px] border-black flex items-center justify-center"
+                style={{ boxShadow: "3px 3px 0 0 #000" }}>
+                <Pause className="w-7 h-7 text-black" strokeWidth={3} />
+              </div>
+              <h2 className="text-3xl font-black uppercase tracking-tighter mb-2 text-foreground">เกมยังไม่จบ</h2>
+              <p className="font-bold text-muted-foreground mb-6 text-sm">
+                ต้องการจะออกใช่ไหม?<br /><span className="text-rose-500">หากออกจะไม่ได้รับคะแนนใดๆ ทั้งสิ้น</span>
               </p>
-              <div className="flex gap-4 w-full">
-                <button
-                  className="flex-1 neo-brutalism bg-surface text-black border-4 border-black text-xl font-black py-3 px-4 rounded-xl hover:-translate-y-1 hover:shadow-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase"
-                  onClick={() => setShowExitModal(false)}
-                >
+              <div className="flex gap-3">
+                <button onClick={() => setShowExitModal(false)}
+                  className="flex-1 bg-white dark:bg-slate-700 text-foreground font-black uppercase py-3 rounded-xl border-[3px] border-black hover:-translate-y-1 transition-all"
+                  style={{ boxShadow: "4px 4px 0px 0px #000" }}>
                   ยกเลิก
                 </button>
-                <button
-                  className="flex-1 neo-brutalism bg-red-500 text-white border-4 border-black text-xl font-black py-3 px-4 rounded-xl hover:-translate-y-1 hover:shadow-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase"
-                  onClick={() => {
-                    setShowExitModal(false);
-                    setPhase("idle");
-                  }}
-                >
+                <button onClick={() => { setShowExitModal(false); setPhase("idle"); }}
+                  className="flex-1 bg-rose-500 text-white font-black uppercase py-3 rounded-xl border-[3px] border-black hover:-translate-y-1 transition-all"
+                  style={{ boxShadow: "4px 4px 0px 0px #000" }}>
                   ยืนยัน
                 </button>
               </div>
@@ -722,29 +706,33 @@ export default function SignMasterMemoryPage() {
         )}
 
         {/* HUD Header */}
-        <header className="w-full p-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4 border-b-4 border-black bg-white dark:bg-slate-800 shrink-0 z-10">
-          <button
-            onClick={() => setShowExitModal(true)}
-            className="flex items-center gap-2 bg-white dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 px-6 py-2 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform active:translate-y-1 active:shadow-none"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-bold text-lg tracking-wide uppercase">Exit</span>
+        <header className="w-full px-3 md:px-6 py-3 md:py-4 flex flex-row justify-between items-center pointer-events-none gap-2 md:gap-4 shrink-0 z-10">
+          <button onClick={() => setShowExitModal(true)}
+            className="pointer-events-auto shrink-0 bg-white dark:bg-slate-800 border-[3px] border-black px-3 md:px-5 py-2 rounded-2xl flex items-center justify-center gap-1.5 md:gap-2 transition-all hover:-translate-y-0.5 active:translate-y-0.5"
+            style={{ boxShadow: "4px 4px 0px 0px #000" }}>
+            <Pause className="w-5 h-5 text-black" strokeWidth={3} />
+            <span className="font-black uppercase tracking-tighter text-sm md:text-base text-black hidden sm:inline">EXIT</span>
           </button>
 
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <div className="flex items-center bg-primary px-4 py-2 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-white">
-              <span className="text-sm font-semibold uppercase opacity-90 mr-2">Score</span>
-              <span className="text-2xl font-black">{calcScore(cfg.bonusBase, misses, cfg.penalty).toLocaleString()}</span>
+          <div className="pointer-events-auto flex flex-row flex-wrap justify-end items-center gap-2 md:gap-3">
+            {/* Score */}
+            <div className="bg-primary text-white border-[3px] border-black px-3 md:px-5 py-1.5 md:py-2 rounded-2xl flex items-center gap-1.5"
+              style={{ boxShadow: "4px 4px 0px 0px #000" }}>
+              <Star className="w-3.5 h-3.5 text-yellow-200" />
+              <p className="font-black uppercase text-sm md:text-base tracking-tighter">{calcScore(cfg.bonusBase, misses, cfg.penalty)}</p>
             </div>
-
-            <div className="flex items-center bg-secondary-container px-4 py-2 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-on-secondary-container">
-              <span className="text-sm font-semibold uppercase opacity-90 mr-2">Time</span>
-              <span className="text-2xl font-black tabular-nums">{formatTime(elapsed)}</span>
+            {/* Time */}
+            <div className="bg-yellow-300 border-[3px] border-black px-3 md:px-5 py-1.5 md:py-2 rounded-2xl flex items-center gap-1.5"
+              style={{ boxShadow: "4px 4px 0px 0px #000" }}>
+              <Zap className="w-4 h-4 text-black" strokeWidth={2.5} />
+              <p className="font-black uppercase text-sm md:text-base text-black tracking-tighter tabular-nums">{formatTime(elapsed)}</p>
             </div>
-
-            <div className="flex items-center bg-tertiary-container px-4 py-2 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-on-tertiary-container">
-              <span className="text-sm font-semibold uppercase opacity-90 mr-2">Mistakes Left</span>
-              <span className="text-2xl font-black tabular-nums">{Math.max(0, cfg.maxMisses - misses)}</span>
+            {/* Mistakes Left */}
+            <div className="bg-white border-[3px] border-black px-3 md:px-5 py-1.5 md:py-2 rounded-2xl"
+              style={{ boxShadow: "4px 4px 0px 0px #000" }}>
+              <p className="font-black uppercase text-sm md:text-base text-black tracking-tighter">
+                ❤️ {Math.max(0, cfg.maxMisses - misses)}
+              </p>
             </div>
           </div>
         </header>

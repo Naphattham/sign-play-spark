@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Webcam from "react-webcam";
-import { Camera, Pause } from "lucide-react";
+import { Camera, Pause, Shield, Zap, Skull, ArrowLeft, Swords, Heart, Trophy, Star, Volume2 } from "lucide-react";
 import { CameraPermission } from "@/components/CameraPermission";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { useSignAndDistance } from "@/hooks/useSignAndDistance";
@@ -411,33 +411,71 @@ export default function SignDefenderPage() {
     return (
       <>
         {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
-        <main className="min-h-screen flex flex-col bg-background relative">
-          <div className="flex-1 flex items-center justify-center p-6">
-            <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-[2rem] p-10 text-center w-full max-w-md z-10">
-              <p className="text-xs font-black uppercase tracking-widest mb-1 text-muted-foreground">WAVE {wave}</p>
-              <h2 className="text-6xl font-black uppercase tracking-tighter mb-6 text-foreground whitespace-nowrap">
+        <main className="min-h-screen flex flex-col relative overflow-hidden sd-gradient-bg">
+          {/* Dot grid background */}
+          <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
+            backgroundImage: "radial-gradient(circle, hsl(342 100% 64% / 0.4) 1.5px, transparent 1.5px)",
+            backgroundSize: "32px 32px",
+          }} />
+
+          {/* Floating decorative monsters */}
+          <div className="absolute top-[10%] left-[8%] opacity-10 pointer-events-none sd-float">
+            <Skull size={80} strokeWidth={1.5} />
+          </div>
+          <div className="absolute bottom-[15%] right-[10%] opacity-10 pointer-events-none sd-float-delay">
+            <Skull size={60} strokeWidth={1.5} />
+          </div>
+          <div className="absolute top-[20%] right-[15%] opacity-8 pointer-events-none sd-float">
+            <Zap size={50} strokeWidth={1.5} />
+          </div>
+
+          <div className="flex-1 flex items-center justify-center p-4 md:p-6">
+            <div className="sd-slide-up bg-white dark:bg-slate-800 border-[3px] md:border-[4px] border-black rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-10 text-center w-full max-w-md z-10 relative"
+              style={{ boxShadow: "6px 6px 0px 0px #000" }}>
+
+              {/* Wave badge */}
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-300 border-[3px] border-black px-5 py-1.5 rounded-full"
+                style={{ boxShadow: "3px 3px 0 0 #000" }}>
+                <p className="font-black uppercase text-xs tracking-widest text-black">WAVE {wave}</p>
+              </div>
+
+              {/* Skull icon */}
+              <div className="mx-auto mb-3 md:mb-4 mt-2 w-12 h-12 md:w-16 md:h-16 rounded-full bg-rose-500 border-[3px] border-black flex items-center justify-center"
+                style={{ boxShadow: "3px 3px 0 0 #000" }}>
+                <Skull className="w-6 h-6 md:w-8 md:h-8 text-white" strokeWidth={2.5} />
+              </div>
+
+              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-4 md:mb-6 text-foreground whitespace-nowrap sd-title-glitch">
                 GAME <span className="text-primary">OVER</span>
               </h2>
-              <div className="neo-brutalism bg-secondary rounded-2xl px-8 py-4 mb-8 inline-block">
-                <p className="text-xs font-black uppercase tracking-wider text-foreground opacity-70">Final Score</p>
-                <p className="text-5xl font-black text-foreground">{score}</p>
+
+              {/* Score card */}
+              <div className="bg-secondary border-[3px] border-black rounded-2xl px-6 md:px-8 py-4 md:py-5 mb-6 md:mb-8 inline-block relative"
+                style={{ boxShadow: "4px 4px 0 0 #000" }}>
+                <Trophy className="absolute -top-3 -right-3 w-7 h-7 md:w-8 md:h-8 text-yellow-600 bg-yellow-300 rounded-full p-1 border-2 border-black" />
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground opacity-60 mb-1">FINAL SCORE</p>
+                <p className="text-4xl md:text-6xl font-black text-foreground leading-none">{score}</p>
+                <p className="text-[10px] md:text-xs font-bold text-foreground/50 mt-1 uppercase">Points Earned</p>
               </div>
-              <div className="flex flex-col gap-4">
+
+              <div className="flex flex-col gap-3">
                 <button
                   disabled={isReturningHome}
                   onClick={() => setPhase("idle")}
-                  className="neo-brutalism bg-primary text-white font-black uppercase text-xl py-4 rounded-2xl
-                    transition-all duration-200 hover:-translate-y-1 hover:brightness-110 disabled:opacity-50"
+                  className="bg-primary text-white font-black uppercase text-lg md:text-xl py-4 rounded-2xl border-[3px] border-black
+                    transition-all duration-200 hover:-translate-y-1 hover:brightness-110 disabled:opacity-50 flex items-center justify-center gap-2"
+                  style={{ boxShadow: "5px 5px 0px 0px #000" }}
                 >
-                  PLAY AGAIN
+                  <Swords className="w-5 h-5" /> PLAY AGAIN
                 </button>
                 <button
                   disabled={isReturningHome}
                   onClick={handleBackToHome}
-                  className="neo-brutalism bg-white dark:bg-slate-700 text-foreground font-black uppercase text-base py-3 rounded-2xl
-                    transition-all duration-200 hover:-translate-y-1 disabled:opacity-50"
+                  className="bg-white dark:bg-slate-700 text-foreground font-black uppercase text-sm md:text-base py-3 rounded-2xl border-[3px] border-black
+                    transition-all duration-200 hover:-translate-y-1 disabled:opacity-50 flex items-center justify-center gap-2"
+                  style={{ boxShadow: "4px 4px 0px 0px #000" }}
                 >
-                  ← BACK TO CHALLENGE
+                  <ArrowLeft className="w-4 h-4" /> BACK TO CHALLENGE
                 </button>
               </div>
             </div>
@@ -460,98 +498,135 @@ export default function SignDefenderPage() {
     return (
       <>
         {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
-        <main className="min-h-screen bg-background text-foreground relative p-4 md:p-8 flex flex-col items-center">
+        <main className="min-h-screen text-foreground relative p-3 sm:p-4 md:p-8 flex flex-col items-center overflow-hidden sd-gradient-bg">
+          {/* Dot grid background */}
+          <div className="absolute inset-0 opacity-15 pointer-events-none" style={{
+            backgroundImage: "radial-gradient(circle, hsl(342 100% 64% / 0.35) 1.5px, transparent 1.5px)",
+            backgroundSize: "32px 32px",
+          }} />
+
+          {/* Floating decorative elements - hidden on very small screens */}
+          <div className="absolute top-[8%] right-[12%] opacity-[0.07] pointer-events-none sd-float hidden sm:block">
+            <Zap size={90} strokeWidth={1.5} />
+          </div>
+          <div className="absolute bottom-[12%] left-[6%] opacity-[0.07] pointer-events-none sd-float-delay hidden sm:block">
+            <Shield size={70} strokeWidth={1.5} />
+          </div>
+          <div className="absolute top-[60%] right-[5%] opacity-[0.05] pointer-events-none sd-float hidden md:block">
+            <Swords size={60} strokeWidth={1.5} />
+          </div>
+
           {/* Top-left Back Button */}
           <div className="absolute top-4 left-4 md:top-8 md:left-8 z-30">
             <button
               onClick={handleBackToHome}
-              className="neo-brutalism bg-white dark:bg-slate-800 text-foreground text-sm md:text-base font-black py-2 px-4 rounded-xl transition-all hover:-translate-y-1 uppercase flex items-center justify-center gap-2"
+              className="bg-white dark:bg-slate-800 text-foreground text-sm md:text-base font-black py-2.5 px-5 rounded-xl transition-all hover:-translate-y-1 uppercase flex items-center justify-center gap-2 border-[3px] border-black active:translate-y-0"
+              style={{ boxShadow: "4px 4px 0px 0px #000" }}
             >
-              ← Back to Challenge
+              <ArrowLeft className="w-4 h-4" /> Back
             </button>
           </div>
 
-          <div className="max-w-6xl mx-auto flex flex-col items-center w-full">
+          <div className="max-w-6xl mx-auto flex flex-col items-center w-full relative z-10">
             {/* Centered Title */}
-            <div className="text-center mb-8 mt-12 md:mt-0">
-              <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-2">Sign</h1>
-              <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none text-primary">Defender</h1>
-              <div className="h-2 bg-foreground w-20 mx-auto mt-4 rounded-full neo-brutalism-sm"></div>
-              <p className="mt-4 font-bold text-base text-muted-foreground">ทำท่ามือให้ตรงกับมอนสเตอร์เพื่อทำลายพวกมัน!</p>
+            <div className="text-center mb-4 sm:mb-6 md:mb-8 mt-14 md:mt-0 sd-slide-up">
+              <div className="inline-flex items-center gap-2 bg-primary/10 border-2 border-primary/30 rounded-full px-3 sm:px-4 py-1 mb-3 sm:mb-4">
+                <Swords className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary" />
+                <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-primary">Defense Mode</span>
+              </div>
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9] mb-1 sd-title-glitch">Sign</h1>
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9] text-primary sd-title-glitch">Defender</h1>
+              <div className="h-1.5 bg-foreground w-16 mx-auto mt-4 rounded-full border-[2px] border-black" style={{ boxShadow: "2px 2px 0 0 #000" }} />
+              <p className="mt-4 font-bold text-sm md:text-base text-muted-foreground max-w-sm mx-auto">
+                ทำท่ามือให้ตรงกับมอนสเตอร์เพื่อทำลายพวกมัน!
+              </p>
             </div>
 
             {/* Main Content Area: Side-by-side */}
-            <div className="flex flex-col md:flex-row gap-6 w-full items-stretch justify-center">
+            <div className="flex flex-col md:flex-row gap-4 md:gap-5 w-full items-stretch justify-center">
 
-              {/* Left Column */}
-              <div className="w-full max-w-[400px] flex flex-col gap-4">
-                {/* How to Play Card (Left) */}
-                <div className="neo-brutalism bg-white dark:bg-slate-800 rounded-xl p-5 w-full flex flex-col text-sm h-full">
-                  <h2 className="text-xl font-black uppercase mb-3 border-b-[3px] border-foreground pb-2">How to Play</h2>
-                  <ul className="space-y-4 flex-grow flex flex-col justify-center font-bold">
-                    <li className="flex items-start">
-                      <span className="neo-brutalism bg-primary text-white font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-xs">01</span>
-                      <p className="pt-1">มอนสเตอร์เคลื่อนเข้าหาศูนย์กลาง</p>
+              {/* Left Column: How to Play */}
+              <div className="w-full md:max-w-[400px] flex flex-col sd-slide-up" style={{ animationDelay: "0.1s" }}>
+                {/* How to Play Card */}
+                <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 w-full flex flex-col text-sm h-full border-[3px] border-black relative"
+                  style={{ boxShadow: "6px 6px 0px 0px #000" }}>
+                  {/* Badge */}
+                  {/* <div className="absolute -top-3 left-5 bg-primary text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border-[2px] border-black"
+                    style={{ boxShadow: "2px 2px 0 0 #000" }}>
+                    📖 Tutorial
+                  </div> */}
+                  <h2 className="text-lg md:text-xl font-black uppercase mb-4 border-b-[3px] border-foreground pb-2 mt-2 flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-primary" /> How to Play
+                  </h2>
+                  <ul className="space-y-3 flex-grow flex flex-col justify-center font-bold">
+                    <li className="flex items-start group">
+                      <span className="bg-primary text-white font-black rounded-xl w-8 h-8 flex items-center justify-center shrink-0 mr-3 text-xs border-[2px] border-black transition-transform group-hover:scale-110"
+                        style={{ boxShadow: "2px 2px 0 0 #000" }}>
+                        <Swords className="w-4 h-4" />
+                      </span>
+                      <p className="pt-1.5 text-sm">มอนสเตอร์เคลื่อนเข้าหาศูนย์กลาง</p>
                     </li>
-                    <li className="flex items-start">
-                      <span className="neo-brutalism bg-primary text-white font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-xs">02</span>
-                      <p className="pt-1">ทำท่าภาษามือไทยให้ตรงกับคำบนมอนสเตอร์</p>
+                    <li className="flex items-start group">
+                      <span className="bg-primary text-white font-black rounded-xl w-8 h-8 flex items-center justify-center shrink-0 mr-3 text-xs border-[2px] border-black transition-transform group-hover:scale-110"
+                        style={{ boxShadow: "2px 2px 0 0 #000" }}>
+                        <Camera className="w-4 h-4" />
+                      </span>
+                      <p className="pt-1.5 text-sm">ทำท่าภาษามือไทยให้ตรงกับคำบนมอนสเตอร์</p>
                     </li>
-                    <li className="flex items-start">
-                      <span className="neo-brutalism bg-primary text-white font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-xs">03</span>
-                      <div className="pt-1">
-                        <p>โดนโจมตีจนหัวใจหมด = GAME OVER</p>
-                      </div>
+                    <li className="flex items-start group">
+                      <span className="bg-primary text-white font-black rounded-xl w-8 h-8 flex items-center justify-center shrink-0 mr-3 text-xs border-[2px] border-black transition-transform group-hover:scale-110"
+                        style={{ boxShadow: "2px 2px 0 0 #000" }}>
+                        <Heart className="w-4 h-4" />
+                      </span>
+                      <p className="pt-1.5 text-sm">โดนโจมตีจนหัวใจหมด = GAME OVER</p>
                     </li>
-                    <li className="flex flex-col pt-4 border-t-[3px] border-foreground gap-2">
+                    <li className="flex flex-col pt-3 border-t-[3px] border-foreground/20 gap-2 mt-1">
                       <div className="flex items-center">
-                        <span className="neo-brutalism bg-secondary text-foreground font-black rounded-full w-7 h-7 flex items-center justify-center shrink-0 mr-3 text-sm">
-                          ★
+                        <span className="bg-secondary text-foreground font-black rounded-xl w-8 h-8 flex items-center justify-center shrink-0 mr-3 text-sm border-[2px] border-black"
+                          style={{ boxShadow: "2px 2px 0 0 #000" }}>
+                          <Star className="w-4 h-4" />
                         </span>
-                        <p className="font-bold">คะแนนต่อมอนสเตอร์ 1 ตัว:</p>
+                        <p className="font-bold text-sm">คะแนนต่อมอนสเตอร์ 1 ตัว:</p>
                       </div>
-                      <div className="pl-10 space-y-1 text-xs font-black uppercase tracking-tight">
-                        <p className="text-green-600">● EASY : +5 PTS / MONSTER</p>
-                        <p className="text-amber-500">● MEDIUM : +10 PTS / MONSTER</p>
-                        <p className="text-rose-600">● HARD : +15 PTS / MONSTER</p>
+                      <div className="pl-11 space-y-1.5 text-xs font-black uppercase tracking-tight">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-green-500 border border-black" /> 
+                          <span className="text-green-600">EASY : +5 PTS</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-black" /> 
+                          <span className="text-amber-500">MEDIUM : +10 PTS</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-black" /> 
+                          <span className="text-rose-600">HARD : +15 PTS</span>
+                        </div>
                       </div>
                     </li>
                   </ul>
                 </div>
-
-                {/* Mode Selection */}
-                <div className="relative flex bg-white dark:bg-slate-800 rounded-xl p-2 neo-brutalism w-full border-[3px] border-black shadow-[4px_4px_0_0_#000]">
-                  {/* Sliding Background */}
-                  <div
-                    className="absolute top-2 bottom-2 left-2 rounded-lg bg-primary border-[2px] border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform duration-300 ease-out"
-                    style={{
-                      width: 'calc((100% - 16px) / 3)',
-                      transform: `translateX(calc(${mode === 'easy' ? 0 : mode === 'medium' ? 1 : 2} * 100%))`
-                    }}
-                  />
-                  {(["easy", "medium", "hard"] as const).map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => setMode(m)}
-                      className={`relative z-10 flex-1 flex items-center justify-center py-2 sm:py-2.5 rounded-lg font-black uppercase text-sm transition-colors duration-300 ${mode === m
-                        ? 'text-white'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5'
-                        }`}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
               </div>
 
-              {/* Camera & Start Section (Right) */}
-              <div className="w-full max-w-[360px] flex flex-col gap-4">
-
+              {/* Right Column: Camera Feed only */}
+              <div className="w-full md:max-w-[360px] flex flex-col sd-slide-up" style={{ animationDelay: "0.2s" }}>
                 {/* Camera Feed */}
-                <div className="w-full aspect-square neo-brutalism bg-black rounded-xl relative overflow-hidden flex-shrink-0 border-[3px] border-foreground">
-                  <div className="absolute top-2 left-2 bg-primary text-white text-[10px] font-black px-2 py-1 rounded-full uppercase flex items-center gap-1 z-10 border-[2px] border-foreground shadow-[2px_2px_0_0_#000]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                <div className="w-full aspect-[4/3] sm:aspect-square md:aspect-auto md:h-full bg-black rounded-xl sm:rounded-2xl relative overflow-hidden flex-shrink-0 md:flex-shrink md:min-h-0 border-[3px] sm:border-[4px] border-black"
+                  style={{ boxShadow: "6px 6px 0px 0px #000" }}>
+                  {/* Scan line effect */}
+                  <div className="absolute inset-0 pointer-events-none z-20 opacity-[0.03]"
+                    style={{
+                      background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px)",
+                    }} />
+                  <div className="absolute top-2.5 left-2.5 bg-red-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase flex items-center gap-1.5 z-10 border-[2px] border-black"
+                    style={{ boxShadow: "2px 2px 0 0 #000" }}>
+                    <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
                     LIVE
+                  </div>
+                  {/* Camera status badge */}
+                  <div className={`absolute top-2.5 right-2.5 text-[10px] font-black px-2.5 py-1 rounded-full uppercase z-10 border-[2px] border-black ${
+                    signRecognition.distanceStatus === 'good' ? 'bg-green-400 text-black' : 'bg-yellow-300 text-black'
+                  }`} style={{ boxShadow: "2px 2px 0 0 #000" }}>
+                    {signRecognition.distanceStatus === 'good' ? '✓ Ready' : '⏳ Setup'}
                   </div>
                   {cameraPermissionGranted ? (
                     <>
@@ -561,7 +636,7 @@ export default function SignDefenderPage() {
                         mirrored
                         onUserMediaError={handleUserMediaError}
                         videoConstraints={VIDEO_CONSTRAINTS}
-                        className="w-full h-full object-cover opacity-80"
+                        className="w-full h-full object-cover"
                         style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}
                       />
                       <canvas
@@ -569,11 +644,14 @@ export default function SignDefenderPage() {
                         className="absolute top-0 left-0 w-full h-full pointer-events-none"
                         style={{ transform: "scaleX(-1)" }}
                       />
-                      {/* Distance Status Overlay inside Webcam */}
+                      {/* Distance Status Overlay */}
                       {(signRecognition.distanceStatus === "too_close" || signRecognition.distanceStatus === "too_far" || signRecognition.distanceStatus === "no_face") && (
-                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10 flex-col p-2 text-center">
-                          <span className="text-2xl mb-1">⚠️</span>
-                          <span className="text-xs font-black text-white uppercase leading-tight">
+                        <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-10 flex-col p-4 text-center backdrop-blur-sm">
+                          <div className="w-14 h-14 rounded-full bg-yellow-400 border-[3px] border-black flex items-center justify-center mb-3"
+                            style={{ boxShadow: "3px 3px 0 0 #000" }}>
+                            <span className="text-2xl">⚠️</span>
+                          </div>
+                          <span className="text-sm font-black text-white uppercase leading-tight bg-black/40 px-4 py-2 rounded-xl">
                             {signRecognition.distanceStatus === "too_close" ? "ถอยออกหน่อย" :
                               signRecognition.distanceStatus === "too_far" ? "เข้ามาใกล้หน่อย" : "ไม่พบใบหน้า"}
                           </span>
@@ -581,28 +659,71 @@ export default function SignDefenderPage() {
                       )}
                     </>
                   ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-white/50 p-4 text-center">
-                      <Camera size={48} className="opacity-50 mb-2 mt-4" />
-                      <p className="font-bold text-sm">ยังไม่ได้เปิดกล้อง</p>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-white/40 p-4 text-center bg-gradient-to-b from-black/80 to-black/95">
+                      <div className="w-16 h-16 rounded-full border-[3px] border-white/20 flex items-center justify-center mb-3">
+                        <Camera size={32} className="opacity-40" />
+                      </div>
+                      <p className="font-black text-sm uppercase tracking-wider">ยังไม่ได้เปิดกล้อง</p>
+                      <p className="font-bold text-xs opacity-50 mt-1">กดปุ่มด้านล่างเพื่อเริ่ม</p>
                     </div>
                   )}
                 </div>
+              </div>
+            </div>
 
-                {/* Start Button */}
+            {/* Bottom Row: Mode Selection + Start Button (aligned side-by-side) */}
+            <div className="flex flex-col md:flex-row gap-4 md:gap-5 w-full items-stretch justify-center mt-4 sd-slide-up" style={{ animationDelay: "0.3s" }}>
+              {/* Mode Selection */}
+              <div className="relative flex bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-1.5 sm:p-2 w-full md:max-w-[400px] border-[3px] border-black"
+                style={{ boxShadow: "5px 5px 0px 0px #000" }}>
+                {/* Sliding Background */}
+                <div
+                  className="absolute top-2 bottom-2 left-2 rounded-xl transition-all duration-300 ease-out border-[2px] border-black"
+                  style={{
+                    width: 'calc((100% - 16px) / 3)',
+                    transform: `translateX(calc(${mode === 'easy' ? 0 : mode === 'medium' ? 1 : 2} * 100%))`,
+                    background: mode === 'easy' ? 'hsl(142 70% 49%)' : mode === 'medium' ? 'hsl(44 100% 60%)' : 'hsl(0 84% 60%)',
+                    boxShadow: "2px 2px 0px 0px rgba(0,0,0,1)",
+                  }}
+                />
+                {(["easy", "medium", "hard"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setMode(m)}
+                    className={`relative z-10 flex-1 flex items-center justify-center py-2 sm:py-2.5 md:py-3 rounded-lg sm:rounded-xl font-black uppercase text-xs sm:text-sm tracking-tight transition-colors duration-300 ${mode === m
+                      ? 'text-white'
+                      : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                  >
+                    {m === 'easy' && '🟢 '}{m === 'medium' && '🟡 '}{m === 'hard' && '🔴 '}
+                    {m}
+                  </button>
+                ))}
+              </div>
+
+              {/* Start Button */}
+              <div className="w-full md:max-w-[360px]">
                 {!cameraPermissionGranted ? (
                   <button
                     onClick={() => setShowCameraPermission(true)}
-                    className="neo-brutalism bg-secondary text-foreground text-xl font-black py-3 px-6 rounded-xl transition-all uppercase w-full border-[3px] border-black shadow-[4px_4px_0_0_#000] hover:-translate-y-1 active:translate-y-1"
+                    className="bg-secondary text-foreground text-base sm:text-lg md:text-xl font-black py-3 sm:py-3.5 px-4 sm:px-6 rounded-xl sm:rounded-2xl transition-all uppercase w-full border-[3px] border-black hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-2 h-full"
+                    style={{ boxShadow: "5px 5px 0px 0px #000" }}
                   >
-                    📹 ขออนุญาตใช้งานกล้อง
+                    <Camera className="w-5 h-5" /> ขออนุญาตใช้งานกล้อง
                   </button>
                 ) : (
                   <button
                     onClick={startGame}
                     disabled={!isReady}
-                    className={`neo-brutalism bg-primary text-white text-xl font-black py-3 px-6 rounded-xl transition-all uppercase w-full ${isReady ? 'hover:-translate-y-1 hover:brightness-110 active:translate-y-1' : 'opacity-50 cursor-not-allowed'}`}
+                    className={`relative text-white text-base sm:text-lg md:text-xl font-black py-3 sm:py-3.5 px-4 sm:px-6 rounded-xl sm:rounded-2xl transition-all uppercase w-full border-[3px] border-black overflow-hidden flex items-center justify-center gap-2 h-full ${isReady ? 'bg-primary hover:-translate-y-1 hover:brightness-110 active:translate-y-0' : 'bg-gray-400 cursor-not-allowed'}`}
+                    style={{ boxShadow: isReady ? "5px 5px 0px 0px #000" : "3px 3px 0px 0px #000" }}
                   >
-                    {isReady ? "START GAME" : `LOADING… ${bufferPct}%`}
+                    {!isReady && (
+                      <div className="absolute left-0 top-0 h-full bg-primary/50 transition-all duration-300" style={{ width: `${bufferPct}%` }} />
+                    )}
+                    <span className="relative z-10 flex items-center gap-2">
+                      {isReady ? <><Swords className="w-5 h-5" /> START GAME</> : `⏳ LOADING… ${bufferPct}%`}
+                    </span>
                   </button>
                 )}
               </div>
@@ -634,95 +755,99 @@ export default function SignDefenderPage() {
       {/* ── Exit Modal ── */}
       {showExitModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm pointer-events-auto">
-          <div className="brutal-card-lg max-w-sm w-full bg-white dark:bg-slate-800 neo-brutalism rounded-2xl border-[4px] border-black shadow-[8px_8px_0_0_#000] p-6 text-center animate-in fade-in zoom-in duration-200">
+          <div className="max-w-sm w-full bg-white dark:bg-slate-800 rounded-2xl border-[4px] border-black p-6 text-center sd-slide-up"
+            style={{ boxShadow: "8px 8px 0px 0px #000" }}>
+            {/* Pause icon */}
+            <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-yellow-300 border-[3px] border-black flex items-center justify-center"
+              style={{ boxShadow: "3px 3px 0 0 #000" }}>
+              <Pause className="w-7 h-7 text-black" strokeWidth={3} />
+            </div>
             <h2 className="text-3xl font-black uppercase tracking-tighter mb-2 text-foreground">Game Paused</h2>
-            <p className="font-bold text-muted-foreground mb-6">
+            <p className="font-bold text-muted-foreground mb-6 text-sm">
               คุณต้องการออกจากเกมใช่หรือไม่?<br />ความคืบหน้าจะหายไป
             </p>
-            <div className="flex gap-4">
-
-              {/* 📍 ปุ่มซ้าย: ออกจากเกม (เรียก handleEndGame) */}
+            <div className="flex gap-3">
               <button
                 onClick={() => {
                   closeExitModal();
                   handleEndGame();
                 }}
-                className="flex-1 neo-brutalism bg-white dark:bg-slate-700 text-rose-600 font-black uppercase py-3 rounded-xl border-[3px] border-black shadow-[4px_4px_0_0_#000] hover:-translate-y-1 transition-all"
+                className="flex-1 bg-white dark:bg-slate-700 text-rose-600 font-black uppercase py-3 rounded-xl border-[3px] border-black hover:-translate-y-1 transition-all flex items-center justify-center gap-1.5"
+                style={{ boxShadow: "4px 4px 0px 0px #000" }}
               >
-                ออกจากเกม
+                <Skull className="w-4 h-4" /> ออกจากเกม
               </button>
-
-              {/* 📍 ปุ่มขวา: เล่นต่อ (แค่ปิด Modal เพื่อให้เกมเดินต่อ) */}
               <button
                 onClick={closeExitModal}
-                className="flex-1 neo-brutalism bg-primary text-white font-black uppercase py-3 rounded-xl border-[3px] border-black shadow-[4px_4px_0_0_#000] hover:-translate-y-1 hover:brightness-110 transition-all"
+                className="flex-1 bg-primary text-white font-black uppercase py-3 rounded-xl border-[3px] border-black hover:-translate-y-1 hover:brightness-110 transition-all flex items-center justify-center gap-1.5"
+                style={{ boxShadow: "4px 4px 0px 0px #000" }}
               >
-                เล่นต่อ
+                <Swords className="w-4 h-4" /> เล่นต่อ
               </button>
-
             </div>
           </div>
         </div>
       )}
 
       <main
-        className="fixed inset-0 select-none overflow-hidden"
-        style={{ background: "hsl(44 95% 96%)", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+        className="fixed inset-0 select-none overflow-hidden sd-gradient-bg"
       >
         {/* ── Fixed Top HUD ────────────────────────────────────────────── */}
-        <header className="fixed top-0 left-0 w-full px-6 py-4 z-50 flex flex-row justify-between items-center pointer-events-none gap-4">
+        <header className="fixed top-0 left-0 w-full px-3 md:px-6 py-3 md:py-4 z-50 flex flex-row justify-between items-center pointer-events-none gap-2 md:gap-4">
 
-          {/* 📍 ฝั่งซ้ายสุด: Pause Button */}
+          {/* Pause Button */}
           <button
             onClick={openExitModal}
-            className="pointer-events-auto shrink-0 bg-white border-[3px] border-black px-4 md:px-6 py-2 rounded-2xl flex items-center justify-center gap-1.5 md:gap-2 transition-all hover:translate-x-[1px] hover:translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px]"
-            style={{ boxShadow: "4px 4px 0px 0px #000", transition: "box-shadow 0.1s, transform 0.1s" }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px 0px #000"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "4px 4px 0px 0px #000"; }}
+            className="pointer-events-auto shrink-0 bg-white border-[3px] border-black px-3 md:px-5 py-2 rounded-2xl flex items-center justify-center gap-1.5 md:gap-2 transition-all hover:-translate-y-0.5 active:translate-y-0.5"
+            style={{ boxShadow: "4px 4px 0px 0px #000" }}
           >
-            {/* ปรับขนาดไอคอนให้สมดุลกับตัวหนังสือ */}
-            <Pause className="w-5 h-5 md:w-6 md:h-6 text-black" strokeWidth={3} />
-            {/* ปรับขนาดตัวหนังสือให้เท่ากับปุ่มอื่น (text-base md:text-lg) */}
-            <span className="font-black uppercase tracking-tighter text-base md:text-lg text-black">PAUSE</span>
+            <Pause className="w-5 h-5 text-black" strokeWidth={3} />
+            <span className="font-black uppercase tracking-tighter text-sm md:text-base text-black hidden sm:inline">PAUSE</span>
           </button>
 
-          {/* 📍 ฝั่งขวาสุด: Right HUD Cluster */}
-          <div className="pointer-events-auto flex flex-row flex-wrap justify-end items-center gap-3">
+          {/* Right HUD Cluster */}
+          <div className="pointer-events-auto flex flex-row flex-wrap justify-end items-center gap-2 md:gap-3">
 
             {/* Mode */}
             <div
-              className={`border-[3px] border-black px-4 md:px-6 py-2 rounded-2xl flex items-center justify-center
+              className={`border-[3px] border-black px-3 md:px-5 py-1.5 md:py-2 rounded-2xl flex items-center justify-center gap-1
         ${mode === 'easy' ? 'bg-green-400' : mode === 'medium' ? 'bg-yellow-400' : 'bg-red-500'}`}
               style={{ boxShadow: "4px 4px 0px 0px #000" }}
             >
-              <p className="font-black uppercase text-base md:text-lg text-black tracking-tighter italic">
-                {mode === 'easy' ? 'EASY' : mode === 'medium' ? 'Medium' : 'HARD'}
+              <span className="text-sm">{mode === 'easy' ? '🟢' : mode === 'medium' ? '🟡' : '🔴'}</span>
+              <p className="font-black uppercase text-sm md:text-base text-black tracking-tighter">
+                {mode.toUpperCase()}
               </p>
             </div>
 
             {/* Wave */}
             <div
-              className="bg-yellow-300 border-[3px] border-black px-4 md:px-6 py-2 rounded-2xl"
+              className="bg-yellow-300 border-[3px] border-black px-3 md:px-5 py-1.5 md:py-2 rounded-2xl flex items-center gap-1.5"
               style={{ boxShadow: "4px 4px 0px 0px #000" }}
             >
-              <p className="font-black uppercase text-base md:text-lg text-black tracking-tighter italic">WAVE {wave}</p>
+              <Zap className="w-4 h-4 text-black" strokeWidth={2.5} />
+              <p className="font-black uppercase text-sm md:text-base text-black tracking-tighter">W{wave}</p>
             </div>
 
             {/* Score */}
             <div
-              className="bg-white border-[3px] border-black px-4 md:px-6 py-2 rounded-2xl min-w-[120px] md:min-w-[160px]"
+              className="bg-white border-[3px] border-black px-3 md:px-5 py-1.5 md:py-2 rounded-2xl flex items-center gap-1.5"
               style={{ boxShadow: "4px 4px 0px 0px #000" }}
             >
-              <p className="font-black uppercase text-base md:text-lg text-black tracking-tighter">SCORE: {score} PTS</p>
+              <Star className="w-4 h-4 text-yellow-500" fill="currentColor" />
+              <p className="font-black text-sm md:text-base text-black tracking-tighter">{score}</p>
+              <span className="text-[10px] md:text-xs font-black text-black/40 uppercase">PTS</span>
             </div>
 
             {/* Hearts */}
             <div
-              className="bg-white border-[3px] border-black px-3 md:px-5 py-2 rounded-2xl flex gap-1.5 items-center"
+              className="bg-white border-[3px] border-black px-2.5 md:px-4 py-1.5 md:py-2 rounded-2xl flex gap-1 items-center"
               style={{ boxShadow: "4px 4px 0px 0px #000" }}
             >
               {Array.from({ length: 3 }, (_, i) => (
-                <img key={i} src={heartImg} alt="Heart" className={`w-6 h-6 md:w-7 md:h-7 object-contain ${i < hp ? "opacity-100" : "opacity-20 grayscale"}`} draggable={false} />
+                <img key={i} src={heartImg} alt="Heart"
+                  className={`w-5 h-5 md:w-6 md:h-6 object-contain transition-all duration-300 ${i < hp ? "opacity-100 scale-100" : "opacity-20 grayscale scale-75"}`}
+                  draggable={false} />
               ))}
             </div>
 
@@ -733,43 +858,52 @@ export default function SignDefenderPage() {
         <div className="absolute inset-0">
           {/* Dot grid */}
           <div
-            className="absolute inset-0 opacity-30 pointer-events-none"
+            className="absolute inset-0 opacity-20 pointer-events-none"
             style={{
-              backgroundImage: "radial-gradient(circle, hsl(342 100% 64% / 0.5) 1.5px, transparent 1.5px)",
+              backgroundImage: "radial-gradient(circle, hsl(342 100% 64% / 0.4) 1.5px, transparent 1.5px)",
               backgroundSize: "36px 36px",
             }}
           />
 
           {/* Decorative concentric rings */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="rounded-full border-[16px] absolute" style={{ width: 700, height: 700, borderColor: "rgba(0,0,0,0.04)" }} />
-            <div className="rounded-full border-[10px] absolute" style={{ width: 440, height: 440, borderColor: "rgba(0,0,0,0.04)" }} />
+            <div className="rounded-full border-[20px] absolute" style={{ width: 800, height: 800, borderColor: "rgba(0,0,0,0.02)" }} />
+            <div className="rounded-full border-[14px] absolute" style={{ width: 560, height: 560, borderColor: "rgba(0,0,0,0.03)" }} />
+            <div className="rounded-full border-[8px] absolute" style={{ width: 340, height: 340, borderColor: "rgba(0,0,0,0.04)" }} />
           </div>
 
-          {/* Center Shield */}
+          {/* Center Shield with glow */}
           <div
             className="absolute z-10"
             style={{ left: "50%", top: "50%", transform: "translate(-50%,-50%)" }}
           >
+            {/* Pulse rings */}
+            <div className="absolute rounded-full border-2 border-primary/20 pointer-events-none"
+              style={{ width: 160, height: 160, left: "50%", top: "50%", transform: "translate(-50%,-50%)", opacity: 0, animation: "sd-pulse-ring 3s ease-out infinite" }} />
+            <div className="absolute rounded-full border-2 border-primary/15 pointer-events-none"
+              style={{ width: 160, height: 160, left: "50%", top: "50%", transform: "translate(-50%,-50%)", opacity: 0, animation: "sd-pulse-ring 3s ease-out 1s infinite" }} />
             <div
-              className="rounded-full border-[6px] border-black flex items-center justify-center relative"
+              className="rounded-full border-[6px] border-black flex items-center justify-center relative sd-glow-pulse"
               style={{
-                width: 96, height: 96,
-                background: "hsl(342 100% 50%)",
-                boxShadow: "0 0 40px hsl(342 100% 64% / 0.3), 6px 6px 0 0 #000",
+                width: 100, height: 100,
+                background: "linear-gradient(135deg, hsl(342 100% 55%), hsl(342 100% 45%))",
               }}
             >
-              <img src={shieldImg} alt="Shield" className="w-[52px] h-[52px] object-contain drop-shadow-md select-none" draggable={false} />
+              <img src={shieldImg} alt="Shield" className="w-[54px] h-[54px] object-contain drop-shadow-md select-none" draggable={false} />
             </div>
           </div>
 
           {/* POW! */}
           {powPos && (
             <div
-              className="absolute z-30 pointer-events-none flex flex-col items-center justify-center animate-bounce drop-shadow-[4px_4px_0_rgba(0,0,0,0.5)]"
+              className="absolute z-30 pointer-events-none flex flex-col items-center justify-center sd-shake"
               style={{ left: `${powPos.x}%`, top: `${powPos.y}%`, transform: "translate(-50%,-50%)" }}
             >
-              <img src={powImg} alt="POW" className="w-32 h-32 object-contain" draggable={false} />
+              <img src={powImg} alt="POW" className="w-36 h-36 object-contain drop-shadow-[4px_4px_0_rgba(0,0,0,0.5)]" draggable={false} />
+              <span className="font-black text-sm text-white bg-black/70 px-3 py-1 rounded-full border-2 border-white mt-1 whitespace-nowrap"
+                style={{ boxShadow: "2px 2px 0 0 #000" }}>
+                ✓ {powPos.word}
+              </span>
             </div>
           )}
 
@@ -777,12 +911,12 @@ export default function SignDefenderPage() {
           {monsters.map(m => (
             <div
               key={m.id}
-              className="absolute z-20 flex flex-col items-center gap-1"
-              style={{ left: `${m.x}%`, top: `${m.y}%`, transform: "translate(-50%,-50%)", width: m.size + 32 }}
+              className="absolute z-20 flex flex-col items-center gap-1 sd-monster-enter"
+              style={{ left: `${m.x}%`, top: `${m.y}%`, width: m.size + 32 }}
             >
               {/* Word overhead */}
               <div
-                className="bg-black text-white font-black text-center px-3 py-1 rounded-xl whitespace-nowrap tracking-tight z-10"
+                className="bg-black text-white font-black text-center px-3 py-1.5 rounded-xl whitespace-nowrap tracking-tight z-10"
                 style={{
                   fontSize: Math.max(12, m.size * 0.18),
                   boxShadow: `3px 3px 0px 0px ${m.color}`,
@@ -808,27 +942,33 @@ export default function SignDefenderPage() {
             </div>
           ))}
 
-          {/* Decorative bolt */}
-          <div className="absolute top-1/4 right-16 opacity-10 pointer-events-none rotate-12">
-            <span style={{ fontSize: 120, lineHeight: 1 }}>⚡</span>
+          {/* Decorative floating elements */}
+          <div className="absolute top-[15%] right-[8%] opacity-[0.06] pointer-events-none sd-float rotate-12">
+            <Zap size={100} strokeWidth={1.5} />
+          </div>
+          <div className="absolute bottom-[20%] left-[5%] opacity-[0.05] pointer-events-none sd-float-delay -rotate-6">
+            <Shield size={80} strokeWidth={1.5} />
           </div>
         </div>
 
         {/* ── Fixed Bottom-Right: Webcam Feed ──────────────────────────── */}
         {cameraPermissionGranted && (
-          <section className="fixed bottom-8 right-8 z-50">
+          <section className="fixed bottom-[72px] sm:bottom-20 md:bottom-8 right-2 sm:right-4 md:right-8 z-50">
             <div className="relative group">
               <div
-                className="w-56 h-56 bg-black border-[4px] border-black rounded-2xl overflow-hidden transition-transform group-hover:-translate-y-2"
+                className="w-28 h-28 sm:w-36 sm:h-36 md:w-52 md:h-52 bg-black border-[3px] sm:border-[4px] border-black rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-[8px_8px_0_0_#000]"
                 style={{ boxShadow: "6px 6px 0px 0px #000" }}
               >
+                {/* Scan lines */}
+                <div className="absolute inset-0 pointer-events-none z-20 opacity-[0.04]"
+                  style={{ background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px)" }} />
                 <Webcam
                   ref={webcamRef}
                   audio={false}
                   mirrored
                   onUserMediaError={handleUserMediaError}
                   videoConstraints={VIDEO_CONSTRAINTS}
-                  className="w-full h-full object-cover opacity-90"
+                  className="w-full h-full object-cover"
                   style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}
                 />
                 <canvas
@@ -838,16 +978,17 @@ export default function SignDefenderPage() {
                 />
 
                 {/* LIVE badge */}
-                <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-red-500 border-[2px] border-black px-2.5 py-1 rounded-full">
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                  <span className="text-white font-black text-[10px] uppercase tracking-widest">LIVE</span>
+                <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 bg-red-500 border-[2px] border-black px-2 py-0.5 rounded-full"
+                  style={{ boxShadow: "2px 2px 0 0 #000" }}>
+                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                  <span className="text-white font-black text-[9px] uppercase tracking-widest">LIVE</span>
                 </div>
 
                 {/* Distance warning overlay */}
                 {(signRecognition.distanceStatus === "too_close" || signRecognition.distanceStatus === "too_far") && (
-                  <div className="absolute inset-0 bg-black/65 flex flex-col items-center justify-center z-10 p-2 text-center">
-                    <span className="text-2xl">⚠️</span>
-                    <span className="text-[11px] font-black text-white uppercase leading-tight mt-1">
+                  <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-10 p-2 text-center backdrop-blur-sm">
+                    <span className="text-xl mb-1">⚠️</span>
+                    <span className="text-[10px] font-black text-white uppercase leading-tight bg-black/40 px-3 py-1 rounded-lg">
                       {signRecognition.distanceStatus === "too_close" ? "ถอยออกหน่อย" : "เข้ามาใกล้หน่อย"}
                     </span>
                   </div>
@@ -858,31 +999,31 @@ export default function SignDefenderPage() {
         )}
 
         {/* ── Fixed Bottom-Center: Feedback Bar ────────────────────────── */}
-        <footer className="fixed bottom-8 left-1/2 z-50 w-full max-w-xl px-4" style={{ transform: "translateX(-50%)" }}>
+        <footer className="fixed bottom-2 sm:bottom-3 md:bottom-6 left-2 right-[7.5rem] sm:right-[9.5rem] md:left-1/2 md:right-auto md:-translate-x-1/2 z-40 md:w-full md:max-w-lg md:px-4">
           <div
-            className="bg-white border-[3px] border-black rounded-3xl p-5 flex items-center gap-6"
-            style={{ boxShadow: "6px 6px 0px 0px #000" }}
+            className="bg-white border-[2px] sm:border-[3px] border-black rounded-xl sm:rounded-2xl p-2.5 sm:p-3 md:p-4 flex items-center gap-2 sm:gap-3 md:gap-5"
+            style={{ boxShadow: "5px 5px 0px 0px #000" }}
           >
             <div className="flex-shrink-0">
-              <p className="font-black text-black/40 uppercase text-[10px] tracking-[0.2em]">DETECTED SIGN:</p>
+              <p className="font-black text-black/40 uppercase text-[9px] tracking-[0.15em]">DETECTED:</p>
               <h2
-                className={`font-black text-4xl uppercase italic tracking-tighter ${currentConf >= CONFIDENCE_THRESHOLD && currentPred ? "text-rose-600" : "text-black/30"
+                className={`font-black text-xl sm:text-2xl md:text-3xl uppercase italic tracking-tighter leading-tight ${currentConf >= CONFIDENCE_THRESHOLD && currentPred ? "text-rose-600" : "text-black/25"
                   }`}
               >
                 {currentPred ? (WORD_LABELS[currentPred] ?? currentPred) : "WAITING…"}
               </h2>
             </div>
 
-            <div className="flex-grow h-10 bg-gray-100 rounded-xl border-[2px] border-black flex items-center px-3 relative overflow-hidden">
+            <div className="flex-grow h-7 sm:h-8 md:h-9 bg-gray-100 rounded-lg sm:rounded-xl border-[2px] border-black flex items-center px-2 sm:px-2.5 relative overflow-hidden">
               <div
-                className="h-full absolute left-0 top-0 rounded-xl transition-all duration-200"
+                className="h-full absolute left-0 top-0 rounded-xl transition-all duration-300"
                 style={{
                   width: `${Math.min(100, Math.round(currentConf * 100))}%`,
                   background: isReady ? "linear-gradient(90deg, hsl(342 100% 50%), hsl(342 100% 70%))" : "hsl(44 100% 60%)",
                 }}
               />
-              <p className={`relative z-10 text-black font-bold text-xs ${!isReady ? "animate-pulse" : ""}`}>
-                {!isReady ? "⏳ กำลังเตรียมพร้อม..." : "✨ ระบบพร้อมแล้ว! ทำท่ามือได้เลย"}
+              <p className={`relative z-10 text-black font-bold text-[9px] sm:text-[10px] md:text-xs ${!isReady ? "animate-pulse" : ""}`}>
+                {!isReady ? "⏳ กำลังเตรียมพร้อม..." : "✨ ทำท่ามือได้เลย!"}
               </p>
             </div>
           </div>

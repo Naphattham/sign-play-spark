@@ -85,7 +85,7 @@ const phraseIconMap: Record<string, string> = {
 // ─────────────────────────────────────────────
 
 const getScoreFromConfidence = (confidence: number): number => {
-  if (confidence >= 0.80) return 100;
+  if (confidence >= 0.75) return 100;
   if (confidence >= 0.65) return 70;
   if (confidence >= 0.50) return 40;
   return 0;

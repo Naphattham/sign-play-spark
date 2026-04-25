@@ -1,8 +1,11 @@
-import { useState, useEffect } from "react";
-import { Star, CheckCircle2, Gift, CalendarDays, Timer, BookOpen, BookMarked } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import {
+  Star, Gift, CalendarDays, Timer, BookOpen, BookMarked, Target,
+} from "lucide-react";
 import { auth, database } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { ref, get, set } from "firebase/database";
+import { QuestCard, type QuestStatus } from "./QuestCard";
 
 interface QuestViewProps {
   streak: number;
@@ -110,31 +113,21 @@ export function QuestView({ streak }: QuestViewProps) {
   const handleClaimWelcomeBonus = async () => {
     const user = auth.currentUser;
     if (!user || claimingWelcome || welcomeClaimed) return;
-
     setClaimingWelcome(true);
     try {
       const userRef = ref(database, `users/${user.uid}`);
       const snapshot = await get(userRef);
       if (snapshot.exists()) {
         const data = snapshot.val();
-        await set(userRef, {
-          ...data,
-          points: (data.points || 0) + 100,
-          welcomeBonusClaimed: true,
-        });
+        await set(userRef, { ...data, points: (data.points || 0) + 100, welcomeBonusClaimed: true });
         setWelcomeClaimed(true);
       }
-    } catch (error) {
-    } finally {
-      setClaimingWelcome(false);
-    }
+    } catch (error) { /* silent */ } finally { setClaimingWelcome(false); }
   };
 
-  // 1. เข้าสู่ระบบอย่างน้อย 1 ครั้ง/วัน
   const handleClaimDailyLogin = async () => {
     const user = auth.currentUser;
     if (!user || claimingDailyLogin || dailyLoginClaimed) return;
-
     setClaimingDailyLogin(true);
     try {
       const today = new Date().toISOString().split('T')[0];
@@ -142,24 +135,15 @@ export function QuestView({ streak }: QuestViewProps) {
       const snapshot = await get(userRef);
       if (snapshot.exists()) {
         const data = snapshot.val();
-        await set(userRef, {
-          ...data,
-          points: (data.points || 0) + 50,
-          dailyLoginClaimedDate: today,
-        });
+        await set(userRef, { ...data, points: (data.points || 0) + 50, dailyLoginClaimedDate: today });
         setDailyLoginClaimed(true);
       }
-    } catch (error) {
-    } finally {
-      setClaimingDailyLogin(false);
-    }
+    } catch (error) { /* silent */ } finally { setClaimingDailyLogin(false); }
   };
 
-  // 2. ฝึกซ้อม 30 นาที
   const handleClaimDailyPractice = async () => {
     const user = auth.currentUser;
     if (!user || claimingDailyPractice || dailyPracticeClaimed) return;
-
     setClaimingDailyPractice(true);
     try {
       const today = new Date().toISOString().split('T')[0];
@@ -167,24 +151,15 @@ export function QuestView({ streak }: QuestViewProps) {
       const snapshot = await get(userRef);
       if (snapshot.exists()) {
         const data = snapshot.val();
-        await set(userRef, {
-          ...data,
-          points: (data.points || 0) + 100,
-          dailyPracticeClaimedDate: today,
-        });
+        await set(userRef, { ...data, points: (data.points || 0) + 100, dailyPracticeClaimedDate: today });
         setDailyPracticeClaimed(true);
       }
-    } catch (error) {
-    } finally {
-      setClaimingDailyPractice(false);
-    }
+    } catch (error) { /* silent */ } finally { setClaimingDailyPractice(false); }
   };
 
-  // 3. เรียนรู้ 5 คำ
   const handleClaimLearn5Words = async () => {
     const user = auth.currentUser;
     if (!user || claimingLearn5Words || learn5WordsClaimed) return;
-
     setClaimingLearn5Words(true);
     try {
       const userRef = ref(database, `users/${user.uid}`);
@@ -194,17 +169,12 @@ export function QuestView({ streak }: QuestViewProps) {
         await set(userRef, { ...data, points: (data.points || 0) + 30, learn5WordsClaimed: true });
         setLearn5WordsClaimed(true);
       }
-    } catch (error) {
-    } finally {
-      setClaimingLearn5Words(false);
-    }
+    } catch (error) { /* silent */ } finally { setClaimingLearn5Words(false); }
   };
 
-  // 4. เรียนรู้ 10 คำ
   const handleClaimLearn10Words = async () => {
     const user = auth.currentUser;
     if (!user || claimingLearn10Words || learn10WordsClaimed) return;
-
     setClaimingLearn10Words(true);
     try {
       const userRef = ref(database, `users/${user.uid}`);
@@ -214,31 +184,58 @@ export function QuestView({ streak }: QuestViewProps) {
         await set(userRef, { ...data, points: (data.points || 0) + 100, learn10WordsClaimed: true });
         setLearn10WordsClaimed(true);
       }
-    } catch (error) {
-    } finally {
-      setClaimingLearn10Words(false);
-    }
+    } catch (error) { /* silent */ } finally { setClaimingLearn10Words(false); }
   };
 
   const practiceMinutes = Math.floor(practiceSeconds / 60);
 
+  // Compute quest statuses
+  const welcomeStatus: QuestStatus = welcomeClaimed ? "claimed" : "claimable";
+  const loginStatus: QuestStatus = dailyLoginClaimed ? "claimed" : "claimable";
+  const practiceStatus: QuestStatus = dailyPracticeClaimed ? "claimed" : practiceMinutes >= 30 ? "claimable" : "locked";
+  const learn5Status: QuestStatus = learn5WordsClaimed ? "claimed" : completedPhrasesCount >= 5 ? "claimable" : "locked";
+  const learn10Status: QuestStatus = learn10WordsClaimed ? "claimed" : completedPhrasesCount >= 10 ? "claimable" : "locked";
+
+  // Stats
+  const completedCount = useMemo(() => {
+    return [welcomeClaimed, dailyLoginClaimed, dailyPracticeClaimed, learn5WordsClaimed, learn10WordsClaimed]
+      .filter(Boolean).length;
+  }, [welcomeClaimed, dailyLoginClaimed, dailyPracticeClaimed, learn5WordsClaimed, learn10WordsClaimed]);
+
+  const totalQuests = 5;
+  const overallPercent = Math.round((completedCount / totalQuests) * 100);
+
+  /* ── Loading state ── */
   if (dataLoading) {
     return (
-      <div className="max-w-4xl mx-auto flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground font-bold font-body">กำลังโหลดภารกิจ...</p>
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 lg:p-12 bg-background">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-center h-64 sm:h-80">
+            <div className="text-center brutal-card p-6 sm:p-8 relative overflow-hidden">
+              <div className="absolute inset-0 quest-progress-shimmer" />
+              <div className="relative">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 relative">
+                  <div className="absolute inset-0 rounded-full border-[3px] border-muted" />
+                  <div className="absolute inset-0 rounded-full border-[3px] border-primary border-t-transparent animate-spin" />
+                  <Target className="w-6 h-6 sm:w-7 sm:h-7 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                </div>
+                <p className="text-muted-foreground font-bold font-body text-sm sm:text-base">
+                  กำลังโหลดภารกิจ...
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-12 bg-background">
-      {/* 🚨 คลุมด้วย div ที่คุณต้องการตรงนี้ */}
-      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8 md:space-y-12">
+    <div className="flex-1 overflow-y-auto quest-scroll p-3 sm:p-4 md:p-6 lg:p-10 bg-background">
+      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8 md:space-y-10">
 
-        <header className="mb-6 sm:mb-8 md:mb-12">
+        {/* ━━━ HEADER ━━━ */}
+        <header className="mb-6 sm:mb-8 md:mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter">
             Quest Master
           </h1>
@@ -248,303 +245,115 @@ export function QuestView({ streak }: QuestViewProps) {
           </p>
         </header>
 
-        <section className="mb-8 sm:mb-12 md:mb-16">
-          <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mb-3 sm:mb-4 md:mb-6">
-            <Star className="text-2xl sm:text-3xl md:text-4xl text-primary w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10" fill="currentColor" />
-            <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black uppercase">
-              ALL QUESTS
-            </h3>
-            <div className="h-0.5 sm:h-1 flex-1 bg-black" />
+        {/* ━━━ DAILY QUESTS ━━━ */}
+        <section>
+          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
+            <CalendarDays className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            <h2 className="text-base sm:text-lg md:text-xl font-black uppercase tracking-tight">
+              ภารกิจประจำวัน
+            </h2>
+            <div className="h-[2px] sm:h-[3px] flex-1 bg-foreground/10 rounded-full" />
+            <span className="text-[10px] sm:text-xs font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full border border-foreground/10 uppercase">
+              รีเซ็ตทุกวัน
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
+            <QuestCard
+              title="เข้าสู่ระบบ 1 ครั้ง/วัน"
+              description="เข้าสู่ระบบเพื่อใช้งานครั้งแรกของวัน รับคะแนนทันที"
+              icon={<CalendarDays />}
+              points={50}
+              status={loginStatus}
+              progressLabel="1/1 วัน"
+              progressPercent={100}
+              category="DAILY"
+              categoryColor="hsl(342 100% 90%)"
+              accentColor="hsl(342 100% 64%)"
+              delay={0}
+              claiming={claimingDailyLogin}
+              onClaim={handleClaimDailyLogin}
+            />
+            <QuestCard
+              title="ฝึกซ้อม 30 นาที"
+              description="เพียงเข้าใช้งานระบบครบ 30 นาทีใน 1 วัน"
+              icon={<Timer />}
+              points={100}
+              status={practiceStatus}
+              progressLabel={`${Math.min(practiceMinutes, 30)}/30 นาที`}
+              progressPercent={Math.min((practiceMinutes / 30) * 100, 100)}
+              category="DAILY"
+              categoryColor="hsl(342 100% 90%)"
+              accentColor="hsl(342 100% 64%)"
+              delay={80}
+              claiming={claimingDailyPractice}
+              onClaim={handleClaimDailyPractice}
+              lockedLabel={`กำลังดำเนินการ (${Math.min(practiceMinutes, 30)}/30 นาที)`}
+            />
+          </div>
+        </section>
 
-            {/* Welcome Bonus */}
-            <div
-              className={`${welcomeClaimed ? "bg-green-100 dark:bg-green-900/30" : "bg-white dark:bg-slate-800"} border-[2px] sm:border-[3px] border-foreground rounded-lg p-3 sm:p-4 md:p-6 flex flex-col gap-2 sm:gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500`}
-              style={{ boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)", animationDelay: '0ms' }}
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="text-base sm:text-lg md:text-xl lg:text-2xl font-black uppercase leading-tight">
-                    ยินดีต้อนรับสมาชิกใหม่!
-                  </h4>
-                  <p className="font-bold text-slate-600 dark:text-slate-400 text-xs sm:text-sm">
-                    สมัครสมาชิกครั้งแรก รับคะแนนโบนัสไปเลยฟรีๆ
-                  </p>
-                </div>
-                <div className={`${welcomeClaimed ? "bg-green-200" : "bg-secondary"} p-2 border-[3px] border-foreground rounded-lg flex flex-col items-center shrink-0`}>
-                  {welcomeClaimed ? <CheckCircle2 className="w-6 h-6" /> : <Gift className="w-6 h-6" />}
-                  <span className="text-xs font-black">100 PTS</span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="flex justify-between mb-2">
-                  <span className="font-black uppercase text-xs italic">ความคืบหน้า</span>
-                  <span className="font-black text-xs">
-                    {welcomeClaimed ? "สำเร็จแล้ว ✓" : "1/1 สมัครสมาชิกแล้ว"}
-                  </span>
-                </div>
-                <div className="w-full h-4 sm:h-5 md:h-6 bg-slate-200 border-[2px] sm:border-[3px] border-foreground rounded-sm overflow-hidden">
-                  <div
-                    className={`h-full transition-all duration-500 ${welcomeClaimed ? "bg-green-500" : "bg-primary"}`}
-                    style={{ width: "100%" }}
-                  />
-                </div>
-              </div>
-              {welcomeClaimed ? (
-                <button
-                  disabled
-                  className="w-full py-3 bg-green-200 border-[3px] border-foreground rounded-lg font-black uppercase cursor-not-allowed mt-2 flex items-center justify-center gap-2"
-                >
-                  <CheckCircle2 className="w-5 h-5" />
-                  รับรางวัลแล้ว!
-                </button>
-              ) : (
-                <button
-                  onClick={handleClaimWelcomeBonus}
-                  disabled={claimingWelcome}
-                  className="w-full py-3 bg-secondary border-[3px] border-foreground rounded-lg font-black uppercase hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-300 ease-in-out mt-2"
-                  style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}
-                >
-                  {claimingWelcome ? "กำลังรับรางวัล..." : "รับรางวัล 100 คะแนน!"}
-                </button>
-              )}
-            </div>
+        {/* ━━━ MILESTONE QUESTS ━━━ */}
+        <section>
+          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
+            <Star className="w-5 h-5 sm:w-6 sm:h-6 text-secondary fill-secondary" />
+            <h2 className="text-base sm:text-lg md:text-xl font-black uppercase tracking-tight">
+              ภารกิจพิเศษ
+            </h2>
+            <div className="h-[2px] sm:h-[3px] flex-1 bg-foreground/10 rounded-full" />
+            <span className="text-[10px] sm:text-xs font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full border border-foreground/10 uppercase">
+              ทำได้ครั้งเดียว
+            </span>
+          </div>
 
-            {/* 1. เข้าสู่ระบบ 1 ครั้งต่อวัน */}
-            <div
-              className={`${dailyLoginClaimed ? "bg-green-100 dark:bg-green-900/30" : "bg-[#f94fa4]/20 dark:bg-[#f94fa4]/30"} border-[2px] sm:border-[3px] border-foreground rounded-lg p-3 sm:p-4 md:p-6 flex flex-col gap-2 sm:gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500`}
-              style={{ boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)", animationDelay: '100ms' }}
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="text-base sm:text-lg md:text-xl lg:text-2xl font-black uppercase leading-tight">
-                    เข้าสู่ระบบ 1 ครั้ง/วัน
-                  </h4>
-                  <p className="font-bold text-slate-600 dark:text-slate-400 text-xs sm:text-sm">
-                    เข้าสู่ระบบเพื่อใช้งานครั้งแรกของวัน รับคะแนนทันที
-                  </p>
-                </div>
-                <div className={`${dailyLoginClaimed ? "bg-green-200" : "bg-primary text-white"} p-2 border-[3px] border-foreground rounded-lg flex flex-col items-center shrink-0`}>
-                  {dailyLoginClaimed ? <CheckCircle2 className="w-6 h-6" /> : <CalendarDays className="w-6 h-6" />}
-                  <span className="text-xs font-black">50 PTS</span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="flex justify-between mb-2">
-                  <span className="font-black uppercase text-xs italic">ความคืบหน้า</span>
-                  <span className="font-black text-xs">
-                    {dailyLoginClaimed ? "สำเร็จแล้ว ✓" : "1/1 วัน"}
-                  </span>
-                </div>
-                <div className="w-full h-4 sm:h-5 md:h-6 bg-slate-200 border-[2px] sm:border-[3px] border-foreground rounded-sm overflow-hidden">
-                  <div
-                    className={`h-full transition-all duration-500 ${dailyLoginClaimed ? "bg-green-500" : "bg-primary"}`}
-                    style={{ width: "100%" }}
-                  />
-                </div>
-              </div>
-              {dailyLoginClaimed ? (
-                <button
-                  disabled
-                  className="w-full py-3 bg-green-200 border-[3px] border-foreground rounded-lg font-black uppercase cursor-not-allowed mt-2 flex items-center justify-center gap-2"
-                >
-                  <CheckCircle2 className="w-5 h-5" />
-                  รับรางวัลแล้ว!
-                </button>
-              ) : (
-                <button
-                  onClick={handleClaimDailyLogin}
-                  disabled={claimingDailyLogin}
-                  className="w-full py-3 bg-secondary border-[3px] border-foreground rounded-lg font-black uppercase hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-300 ease-in-out mt-2"
-                  style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}
-                >
-                  {claimingDailyLogin ? "กำลังรับรางวัล..." : "รับรางวัล 50 คะแนน!"}
-                </button>
-              )}
-            </div>
-
-            {/* 2. ฝึกซ้อม 30 นาที/วัน */}
-            <div
-              className={`${dailyPracticeClaimed ? "bg-green-100 dark:bg-green-900/30" : practiceMinutes >= 30 ? "bg-[#f94fa4]/20 dark:bg-[#f94fa4]/30" : "bg-white dark:bg-slate-800"} border-[2px] sm:border-[3px] border-foreground rounded-lg p-3 sm:p-4 md:p-6 flex flex-col gap-2 sm:gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500`}
-              style={{ boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)", animationDelay: '200ms' }}
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="text-base sm:text-lg md:text-xl lg:text-2xl font-black uppercase leading-tight">
-                    ฝึกซ้อม 30 นาที
-                  </h4>
-                  <p className="font-bold text-slate-600 dark:text-slate-400 text-xs sm:text-sm">
-                    เพียงเข้าใช้งานระบบครบ 30 นาทีใน 1 วัน
-                  </p>
-                </div>
-                <div className={`${dailyPracticeClaimed ? "bg-green-200" : "bg-primary text-white"} p-2 border-[3px] border-foreground rounded-lg flex flex-col items-center shrink-0`}>
-                  {dailyPracticeClaimed ? <CheckCircle2 className="w-6 h-6" /> : <Timer className="w-6 h-6" />}
-                  <span className="text-xs font-black">100 PTS</span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="flex justify-between mb-2">
-                  <span className="font-black uppercase text-xs italic">ความคืบหน้า</span>
-                  <span className="font-black text-xs">
-                    {dailyPracticeClaimed ? "สำเร็จแล้ว ✓" : `${Math.min(practiceMinutes, 30)}/30 นาที`}
-                  </span>
-                </div>
-                <div className="w-full h-4 sm:h-5 md:h-6 bg-slate-200 border-[2px] sm:border-[3px] border-foreground rounded-sm overflow-hidden">
-                  <div
-                    className={`h-full transition-all duration-500 ${dailyPracticeClaimed ? "bg-green-500" : "bg-primary"}`}
-                    style={{ width: `${Math.min((practiceMinutes / 30) * 100, 100)}%` }}
-                  />
-                </div>
-              </div>
-              {dailyPracticeClaimed ? (
-                <button
-                  disabled
-                  className="w-full py-3 bg-green-200 border-[3px] border-foreground rounded-lg font-black uppercase cursor-not-allowed mt-2 flex items-center justify-center gap-2"
-                >
-                  <CheckCircle2 className="w-5 h-5" />
-                  รับรางวัลแล้ว!
-                </button>
-              ) : practiceMinutes >= 30 ? (
-                <button
-                  onClick={handleClaimDailyPractice}
-                  disabled={claimingDailyPractice}
-                  className="w-full py-3 bg-secondary border-[3px] border-foreground rounded-lg font-black uppercase hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-300 ease-in-out mt-2"
-                  style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}
-                >
-                  {claimingDailyPractice ? "กำลังรับรางวัล..." : "รับรางวัล 100 คะแนน!"}
-                </button>
-              ) : (
-                <button
-                  disabled
-                  className="w-full py-3 bg-slate-200 border-[3px] border-foreground rounded-lg font-black uppercase cursor-not-allowed opacity-50 mt-2"
-                >
-                  กำลังดำเนินการ ({Math.min(practiceMinutes, 30)}/30 นาที)
-                </button>
-              )}
-            </div>
-
-            {/* 3. เรียนรู้ 5 คำ */}
-            <div
-              className={`${learn5WordsClaimed ? "bg-green-100 dark:bg-green-900/30" : completedPhrasesCount >= 5 ? "bg-[#f94fa4]/20 dark:bg-[#f94fa4]/30" : "bg-white dark:bg-slate-800"} border-[2px] sm:border-[3px] border-foreground rounded-lg p-3 sm:p-4 md:p-6 flex flex-col gap-2 sm:gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500`}
-              style={{ boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)", animationDelay: '300ms' }}
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="text-base sm:text-lg md:text-xl lg:text-2xl font-black uppercase leading-tight">
-                    เรียนรู้ครบ 5 คำ
-                  </h4>
-                  <p className="font-bold text-slate-600 dark:text-slate-400 text-xs sm:text-sm">
-                    สะสมคำศัพท์ที่คุณฝึกผ่านครบ 5 คำ
-                  </p>
-                </div>
-                <div className={`${learn5WordsClaimed ? "bg-green-200" : "bg-primary text-white"} p-2 border-[3px] border-foreground rounded-lg flex flex-col items-center shrink-0`}>
-                  {learn5WordsClaimed ? <CheckCircle2 className="w-6 h-6" /> : <BookOpen className="w-6 h-6" />}
-                  <span className="text-xs font-black">30 PTS</span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="flex justify-between mb-2">
-                  <span className="font-black uppercase text-xs italic">ความคืบหน้า</span>
-                  <span className="font-black text-xs">
-                    {learn5WordsClaimed ? "สำเร็จแล้ว ✓" : `${Math.min(completedPhrasesCount, 5)}/5 คำ`}
-                  </span>
-                </div>
-                <div className="w-full h-4 sm:h-5 md:h-6 bg-slate-200 border-[2px] sm:border-[3px] border-foreground rounded-sm overflow-hidden">
-                  <div
-                    className={`h-full transition-all duration-500 ${learn5WordsClaimed ? "bg-green-500" : "bg-[#f94fa4]"}`}
-                    style={{ width: `${Math.min((completedPhrasesCount / 5) * 100, 100)}%` }}
-                  />
-                </div>
-              </div>
-              {learn5WordsClaimed ? (
-                <button
-                  disabled
-                  className="w-full py-3 bg-green-200 border-[3px] border-foreground rounded-lg font-black uppercase cursor-not-allowed mt-2 flex items-center justify-center gap-2"
-                >
-                  <CheckCircle2 className="w-5 h-5" />
-                  รับรางวัลแล้ว!
-                </button>
-              ) : completedPhrasesCount >= 5 ? (
-                <button
-                  onClick={handleClaimLearn5Words}
-                  disabled={claimingLearn5Words}
-                  className="w-full py-3 bg-secondary border-[3px] border-foreground rounded-lg font-black uppercase hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-300 ease-in-out mt-2"
-                  style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}
-                >
-                  {claimingLearn5Words ? "กำลังรับรางวัล..." : "รับรางวัล 30 คะแนน!"}
-                </button>
-              ) : (
-                <button
-                  disabled
-                  className="w-full py-3 bg-slate-200 border-[3px] border-foreground rounded-lg font-black uppercase cursor-not-allowed opacity-50 mt-2"
-                >
-                  กำลังดำเนินการ ({Math.min(completedPhrasesCount, 5)}/5 คำ)
-                </button>
-              )}
-            </div>
-
-            {/* 4. เรียนรู้ 10 คำ */}
-            <div
-              className={`${learn10WordsClaimed ? "bg-green-100 dark:bg-green-900/30" : completedPhrasesCount >= 10 ? "bg-[#f94fa4]/20 dark:bg-[#f94fa4]/30" : "bg-white dark:bg-slate-800"} border-[2px] sm:border-[3px] border-foreground rounded-lg p-3 sm:p-4 md:p-6 flex flex-col gap-2 sm:gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500`}
-              style={{ boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)", animationDelay: '400ms' }}
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="text-base sm:text-lg md:text-xl lg:text-2xl font-black uppercase leading-tight">
-                    เรียนรู้ครบ 10 คำ
-                  </h4>
-                  <p className="font-bold text-slate-600 dark:text-slate-400 text-xs sm:text-sm">
-                    สะสมคำศัพท์ที่คุณฝึกผ่านครบ 10 คำ
-                  </p>
-                </div>
-                <div className={`${learn10WordsClaimed ? "bg-green-200" : "bg-primary text-white"} p-2 border-[3px] border-foreground rounded-lg flex flex-col items-center shrink-0`}>
-                  {learn10WordsClaimed ? <CheckCircle2 className="w-6 h-6" /> : <BookMarked className="w-6 h-6" />}
-                  <span className="text-xs font-black">100 PTS</span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="flex justify-between mb-2">
-                  <span className="font-black uppercase text-xs italic">ความคืบหน้า</span>
-                  <span className="font-black text-xs">
-                    {learn10WordsClaimed ? "สำเร็จแล้ว ✓" : `${Math.min(completedPhrasesCount, 10)}/10 คำ`}
-                  </span>
-                </div>
-                <div className="w-full h-4 sm:h-5 md:h-6 bg-slate-200 border-[2px] sm:border-[3px] border-foreground rounded-sm overflow-hidden">
-                  <div
-                    className={`h-full transition-all duration-500 ${learn10WordsClaimed ? "bg-green-500" : "bg-[#f94fa4]"}`}
-                    style={{ width: `${Math.min((completedPhrasesCount / 10) * 100, 100)}%` }}
-                  />
-                </div>
-              </div>
-              {learn10WordsClaimed ? (
-                <button
-                  disabled
-                  className="w-full py-3 bg-green-200 border-[3px] border-foreground rounded-lg font-black uppercase cursor-not-allowed mt-2 flex items-center justify-center gap-2"
-                >
-                  <CheckCircle2 className="w-5 h-5" />
-                  รับรางวัลแล้ว!
-                </button>
-              ) : completedPhrasesCount >= 10 ? (
-                <button
-                  onClick={handleClaimLearn10Words}
-                  disabled={claimingLearn10Words}
-                  className="w-full py-3 bg-secondary border-[3px] border-foreground rounded-lg font-black uppercase hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-300 ease-in-out mt-2"
-                  style={{ boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" }}
-                >
-                  {claimingLearn10Words ? "กำลังรับรางวัล..." : "รับรางวัล 100 คะแนน!"}
-                </button>
-              ) : (
-                <button
-                  disabled
-                  className="w-full py-3 bg-slate-200 border-[3px] border-foreground rounded-lg font-black uppercase cursor-not-allowed opacity-50 mt-2"
-                >
-                  กำลังดำเนินการ ({Math.min(completedPhrasesCount, 10)}/10 คำ)
-                </button>
-              )}
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
+            <QuestCard
+              title="ยินดีต้อนรับสมาชิกใหม่!"
+              description="สมัครสมาชิกครั้งแรก รับคะแนนโบนัสไปเลยฟรีๆ"
+              icon={<Gift />}
+              points={100}
+              status={welcomeStatus}
+              progressLabel="1/1 สมัครสมาชิกแล้ว"
+              progressPercent={100}
+              category="ONE-TIME"
+              categoryColor="hsl(44 100% 82%)"
+              accentColor="hsl(44 100% 55%)"
+              delay={0}
+              claiming={claimingWelcome}
+              onClaim={handleClaimWelcomeBonus}
+            />
+            <QuestCard
+              title="เรียนรู้ครบ 5 คำ"
+              description="สะสมคำศัพท์ที่คุณฝึกผ่านครบ 5 คำ"
+              icon={<BookOpen />}
+              points={30}
+              status={learn5Status}
+              progressLabel={`${Math.min(completedPhrasesCount, 5)}/5 คำ`}
+              progressPercent={Math.min((completedPhrasesCount / 5) * 100, 100)}
+              category="ONE-TIME"
+              categoryColor="hsl(44 100% 82%)"
+              accentColor="hsl(270 70% 60%)"
+              delay={80}
+              claiming={claimingLearn5Words}
+              onClaim={handleClaimLearn5Words}
+              lockedLabel={`กำลังดำเนินการ (${Math.min(completedPhrasesCount, 5)}/5 คำ)`}
+            />
+            <QuestCard
+              title="เรียนรู้ครบ 10 คำ"
+              description="สะสมคำศัพท์ที่คุณฝึกผ่านครบ 10 คำ"
+              icon={<BookMarked />}
+              points={100}
+              status={learn10Status}
+              progressLabel={`${Math.min(completedPhrasesCount, 10)}/10 คำ`}
+              progressPercent={Math.min((completedPhrasesCount / 10) * 100, 100)}
+              category="ONE-TIME"
+              categoryColor="hsl(44 100% 82%)"
+              accentColor="hsl(25 95% 55%)"
+              delay={160}
+              claiming={claimingLearn10Words}
+              onClaim={handleClaimLearn10Words}
+              lockedLabel={`กำลังดำเนินการ (${Math.min(completedPhrasesCount, 10)}/10 คำ)`}
+            />
           </div>
         </section>
 
