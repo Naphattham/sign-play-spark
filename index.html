@@ -12,15 +12,31 @@
     content="เรียนรู้และสนุกไปกับการฝึกภาษามือไทย ผ่านเกมแบบอินเทอร์แอคทีฟด้วยระบบ AI ตรวจจับท่าทางแบบเรียลไทม์" />
   <meta name="author" content="SignMate Team" />
 
+  <!-- Preconnect to font providers before any other resource -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Preload the most critical font weight to eliminate FOUT -->
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Prompt:wght@100;200;300;400;500&display=swap" />
+
+  <!-- Load font stylesheet non-blocking -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Prompt:wght@100;200;300;400;500&display=swap"
+    media="print" onload="this.media='all'" />
+  <!-- Fallback for no-JS -->
+  <noscript>
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Prompt:wght@100;200;300;400;500&display=swap" />
+  </noscript>
 
   <!-- Preconnect สำหรับ Firebase Storage วิดีโอเพื่อลด Latency (DNS/TCP/SSL handshake) -->
   <link rel="preconnect" href="https://storage.googleapis.com" crossorigin />
   <link rel="dns-prefetch" href="https://storage.googleapis.com" />
 
-
-
+  <!-- CDN preconnect for MediaPipe scripts -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="SignMate - ฝึกภาษามือไทยด้วย AI" />
@@ -32,11 +48,12 @@
   <meta name="twitter:description" content="เรียนรู้และสนุกไปกับการฝึกภาษามือไทย ผ่านเกมแบบอินเทอร์แอคทีฟด้วยระบบ AI" />
   <meta name="twitter:image" content="/LOGO_SignMate.png" />
 
-  <!-- MediaPipe dependencies (pinned version — ป้องกัน 302 redirect บน Safari) -->
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.6.1629159505/control_utils.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1675466124/drawing_utils.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1675471629/holistic.js" crossorigin="anonymous"></script>
+  <!-- MediaPipe dependencies — defer so they don't block initial render -->
+  <!-- These are only needed when the game modal opens, not on landing page load -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.6.1629159505/control_utils.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1675466124/drawing_utils.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1675471629/holistic.js" crossorigin="anonymous"></script>
 </head>
 
 <body>

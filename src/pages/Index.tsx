@@ -1061,6 +1061,14 @@ const Index = () => {
         onCloseModal={handleCloseModal}
         onPhraseSelect={handlePhraseSelect}
         onResetPhraseState={resetPhraseState}
+        onCategoryChange={(cat) => {
+          const phrases = getPhrasesByCategory(cat as Category);
+          setCategory(cat as Category);
+          setActivePhrase(phrases[0]);
+          handlePhraseSelect(phrases[0]);
+          resetPhraseState();
+          localStorage.setItem('lastCategory', cat);
+        }}
         selectedVariant={selectedVariant}
         byeStep={byeStep}
         eatStep={eatStep}

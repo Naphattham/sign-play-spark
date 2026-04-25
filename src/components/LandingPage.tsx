@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { X, Check } from "lucide-react";
 import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "@/lib/auth";
 import { database } from "@/lib/firebase";
-import { ref as dbRef, get } from "firebase/database";
+import { ref as dbRef, onValue } from "firebase/database";
 import { getVideoUrl } from "@/lib/categories";
 import { VideoPlayer } from "@/components/VideoPlayer";
 
@@ -27,18 +27,17 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
   const [totalUsers, setTotalUsers] = useState<number>(0);
 
   useEffect(() => {
-    const fetchTotalUsers = async () => {
-      try {
-        const usersRef = dbRef(database, 'users');
-        const snapshot = await get(usersRef);
-        if (snapshot.exists()) {
-          setTotalUsers(Object.keys(snapshot.val()).length);
-        }
-      } catch (error) {
-        console.error("Error fetching total users:", error);
+    const statsRef = dbRef(database, 'stats/totalUsers');
+    const unsubscribe = onValue(statsRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setTotalUsers(snapshot.val() as number);
+      } else {
+        setTotalUsers(0);
       }
-    };
-    fetchTotalUsers();
+    }, (error) => {
+      console.error("Error fetching total users:", error);
+    });
+    return () => unsubscribe();
   }, []);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -113,61 +112,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
   return (
     <>
       <div className="min-h-screen text-sq-black bg-sq-cream flex flex-col">
-        {/* Custom Styles */}
-        <style>
-          {`
-          @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@100;200;300;400;500&display=swap');
-          
-          body {
-            font-family: 'Prompt', sans-serif;
-          }
 
-          h1, h2, h3, .brand-font {
-            font-family: 'Prompt', sans-serif;
-          }
-
-          .sq-border {
-            border: 3px solid #1A1A1A;
-            box-shadow: 4px 4px 0px #1A1A1A;
-          }
-          
-          .sq-border-lg {
-            border: 4px solid #1A1A1A;
-            box-shadow: 6px 6px 0px #1A1A1A;
-          }
-
-          .sq-button-hover:active {
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0px #1A1A1A;
-          }
-
-          .video-container video {
-            transition: opacity 0.3s ease-in-out;
-          }
-
-          @keyframes fadeIn {
-            from {
-              opacity: 0;
-            }
-            to {
-              opacity: 1;
-            }
-          }
-
-          .video-fade-in {
-            animation: fadeIn 0.3s ease-in-out;
-          }
-
-          .hero-visual-section {
-            will-change: auto;
-          }
-
-          .video-display-box {
-            min-height: 0;
-            contain: layout;
-          }
-        `}
-        </style>
 
         {/* Navigation */}
         <nav className="w-full py-3 px-4 sm:py-4 sm:px-6 md:py-6 md:px-8 flex justify-between items-center border-b-4 border-sq-black bg-white">
@@ -235,7 +180,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-green-400 flex items-center justify-center text-white font-bold text-xs sm:text-sm">AS</div>
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-sq-pink flex items-center justify-center text-white font-bold text-xs sm:text-sm">MK</div>
               </div>
-              <p className="font-bold text-sq-black/60 text-xs sm:text-sm">มีผู้เรียนลงทะเบียนทั้งหมด 50 คน!</p>
+              <p className="font-bold text-sq-black/60 text-xs sm:text-sm">มีผู้เรียนลงทะเบียนทั้งหมด {totalUsers.toLocaleString()} คน!</p>
             </div>
           </div>
 
@@ -349,7 +294,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-green-400 flex items-center justify-center text-white font-bold text-xs sm:text-sm">AS</div>
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-sq-black bg-sq-pink flex items-center justify-center text-white font-bold text-xs sm:text-sm">MK</div>
               </div>
-              <p className="font-bold text-sq-black/60 text-xs sm:text-sm">มีผู้เรียนลงทะเบียนทั้งหมด 50 คน!</p>
+              <p className="font-bold text-sq-black/60 text-xs sm:text-sm">มีผู้เรียนลงทะเบียนทั้งหมด {totalUsers.toLocaleString()} คน!</p>
             </div>
           </div>
         </main>

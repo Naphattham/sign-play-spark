@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@100;200;300;400;500&display=swap');
+/* Google Fonts (Prompt) is loaded non-blocking via <link> in index.html */
+
 
 @tailwind base;
 @tailwind components;
@@ -171,15 +172,75 @@
   }
 }
 
-/* Hardware acceleration for smooth video rendering */
+/* ─── LandingPage utility classes (extracted from inline styles) ─── */
+.sq-border {
+  border: 3px solid #1A1A1A;
+  box-shadow: 4px 4px 0px #1A1A1A;
+}
+
+.sq-border-lg {
+  border: 4px solid #1A1A1A;
+  box-shadow: 6px 6px 0px #1A1A1A;
+}
+
+.sq-button-hover:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #1A1A1A;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.video-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.video-display-box {
+  min-height: 0;
+  contain: layout;
+}
+
+/* ─── Hardware acceleration for video elements ─── */
+/* Only promote to its own GPU layer — avoid always-on will-change */
 video {
   transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+}
+
+/* Promote to GPU layer only during active playback */
+video[autoplay],
+video.is-playing {
   will-change: transform;
 }
 
 .webcam-container {
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
+}
+
+/* ─── Smooth scroll ─── */
+html {
+  scroll-behavior: smooth;
+  /* Reduce layout recalculations during scroll */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Prevent invisible/offscreen layout work ─── */
+.hero-visual-section {
+  contain: layout style;
+}
+
+/* ─── Reduce paint during transitions ─── */
+.transition-all,
+[class*="transition-"] {
+  will-change: auto;
+}
+
+/* ─── Optimized scrollbar (prevents layout shift) ─── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.2) transparent;
 }

@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
-import tutorial1 from "@/asset/image/tutorial-Howtoplay/tutorial-1.jpg";
-import tutorial2 from "@/asset/image/tutorial-Howtoplay/tutorial-2.jpg";
-import tutorial3 from "@/asset/image/tutorial-Howtoplay/tutorial-3.jpg";
-import tutorial4 from "@/asset/image/tutorial-Howtoplay/tutorial-4.jpg";
-
-const SLIDES = [tutorial1, tutorial2, tutorial3, tutorial4];
+// Use public paths instead of static imports so images are loaded on-demand
+// (not bundled into JS) — saves ~5.5 MB from initial page load
+const SLIDES = [
+  "/tutorial-1.jpg",
+  "/tutorial-2.jpg",
+  "/tutorial-3.jpg",
+  "/tutorial-4.jpg",
+];
 
 interface TutorialModalProps {
   onClose: () => void;

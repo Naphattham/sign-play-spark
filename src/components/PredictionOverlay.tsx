@@ -112,6 +112,7 @@ export interface PredictionOverlayProps {
   onCloseModal: () => void;
   onPhraseSelect: (phrase: Phrase) => void;
   onResetPhraseState: () => void;
+  onCategoryChange: (category: string) => void;
 
   // ── Variant & step state ──
   selectedVariant: "adult" | "friend";
@@ -177,6 +178,7 @@ export const PredictionOverlay = ({
   onCloseModal,
   onPhraseSelect,
   onResetPhraseState,
+  onCategoryChange,
 
   // Variant & step
   selectedVariant,
@@ -254,21 +256,40 @@ export const PredictionOverlay = ({
                 }`}
             >
               {/* ── Modal Header ── */}
-              <header className="flex items-center justify-end p-2 sm:p-3 md:p-4 lg:p-6 border-b-[3px] border-foreground bg-yellow-400">
+              <header className="flex items-center justify-between p-2 sm:p-3 md:p-4 lg:p-6 border-b-[3px] border-foreground bg-yellow-400">
+                {/* Left: unit toggle buttons — active expands into label pill */}
+                <div className="flex items-center gap-2 sm:gap-3">
+                  {([
+                    { num: 1, cat: "general",  label: "GENERAL" },
+                    { num: 2, cat: "emotions", label: "EMOTIONS" },
+                    { num: 3, cat: "qa",       label: "Q&A" },
+                    { num: 4, cat: "illness",  label: "ILLNESS" },
+                  ] as { num: number; cat: string; label: string }[]).map(({ num, cat, label }) => {
+                    const isActive = category === cat;
+                    return isActive ? (
+                      <div
+                        key={cat}
+                        className="flex items-center gap-1.5 px-3 lg:px-4 py-1.5 lg:py-2 bg-pink-400 border-[3px] border-foreground rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                      >
+                        <span className="text-white font-black text-xs lg:text-sm whitespace-nowrap">
+                          UNIT {num}: {label}
+                        </span>
+                      </div>
+                    ) : (
+                      <button
+                        key={cat}
+                        onClick={() => onCategoryChange(cat)}
+                        title={`Unit ${num}: ${label}`}
+                        className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border-[3px] border-foreground bg-white text-foreground font-black text-xs sm:text-sm transition-all hover:scale-110 hover:bg-pink-100 active:scale-95 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                      >
+                        {num}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Right: close button */}
                 <div className="flex items-center gap-3 lg:gap-4">
-                  <div className="hidden md:flex items-center px-3 lg:px-4 py-1.5 lg:py-2 bg-pink-400 border-[3px] border-foreground rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                    <span className="text-white font-black text-xs lg:text-sm">
-                      UNIT{" "}
-                      {category === "general"
-                        ? "1"
-                        : category === "emotions"
-                          ? "2"
-                          : category === "qa"
-                            ? "3"
-                            : "4"}
-                      : {category.toUpperCase()}
-                    </span>
-                  </div>
                   <button
                     onClick={onCloseModal}
                     className="flex items-center justify-center w-10 h-10 bg-white border-[3px] border-foreground rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 transition-transform"
