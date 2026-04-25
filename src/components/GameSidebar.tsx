@@ -121,13 +121,13 @@ export function GameSidebar({
 
       {/* Sidebar wrapper — the arrow tab is positioned at the right edge of this wrapper */}
       <div
-        className={`fixed lg:static z-40 top-0 left-0 h-screen transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed lg:static z-40 top-0 left-0 h-dvh transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         style={{ width: "fit-content" }}
       >
         <aside
-          className="h-full w-64 bg-primary border-r-[3px] border-foreground flex flex-col"
+          className="h-full w-64 bg-primary border-r-[3px] border-foreground flex flex-col overflow-hidden"
         >
         <div className="p-6 border-b-[3px] border-foreground">
           <h1 
@@ -140,7 +140,7 @@ export function GameSidebar({
           <p className="text-primary-foreground/80 text-sm mt-1 font-body">Learn. Sign. Level Up!</p>
         </div>
 
-        <nav className="flex-1 p-4 flex flex-col overflow-y-auto">
+        <nav className="flex-1 min-h-0 p-4 flex flex-col overflow-y-auto">
           <div className="space-y-2 mb-4">
             <button
               onClick={onHome}
@@ -206,7 +206,7 @@ export function GameSidebar({
 
         </nav>
 
-        <div className="p-4 border-t-[3px] border-foreground">
+        <div className="p-4 border-t-[3px] border-foreground shrink-0">
           <div
             onClick={onProfile}
             className="bg-secondary rounded-lg border-[2px] border-foreground shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] px-3 py-2.5 flex items-center gap-2.5 cursor-pointer hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] transition-all"
