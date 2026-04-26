@@ -2,6 +2,8 @@ import { useMemo } from "react";
 import { Trophy, Crown, ChevronUp } from "lucide-react";
 import { getAvatarUrl } from "@/lib/avatar";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
+import { auth } from "@/lib/firebase";
+import { useEffect, useState } from "react";
 import firstPlaceImg from "@/asset/image/1st.webp";
 import secondPlaceImg from "@/asset/image/2nd.webp";
 import thirdPlaceImg from "@/asset/image/3rd.webp";
@@ -259,21 +261,24 @@ function PodiumContestant({
 function LeaderboardRow({
   entry,
   index,
+  currentUserId,
 }: {
-  entry: { rank: number; username: string; points: number; photoURL?: string };
+  entry: { id?: string; rank: number; username: string; points: number; photoURL?: string };
   index: number;
+  currentUserId?: string;
 }) {
   const isEven = index % 2 === 0;
+  const isCurrentUser = entry.id === currentUserId && currentUserId != null;
 
   return (
     <div
       className={`
-        lb-entry-slide group
+        lb-entry-slide group relative
         flex items-center gap-2 sm:gap-3 md:gap-4
         px-3 sm:px-4 md:px-5
         py-1.5 sm:py-2 md:py-2.5
         font-body transition-all duration-200
-        ${isEven ? "bg-card" : "bg-muted/30"}
+        ${isCurrentUser ? "bg-primary/15" : isEven ? "bg-card" : "bg-muted/30"}
         hover:bg-secondary/20 hover:translate-x-1
       `}
       style={{ animationDelay: `${index * 60}ms` }}
@@ -298,8 +303,8 @@ function LeaderboardRow({
       </div>
 
       {/* Username */}
-      <span className="flex-1 font-bold break-words text-xs sm:text-sm md:text-base group-hover:text-primary transition-colors">
-        {entry.username}
+      <span className={`flex-1 font-bold break-words text-xs sm:text-sm md:text-base group-hover:text-primary transition-colors ${isCurrentUser ? "text-primary" : ""}`}>
+        {entry.username} {isCurrentUser && <span className="text-[10px] sm:text-xs opacity-70 ml-1">(You)</span>}
       </span>
 
       {/* Points */}
@@ -323,6 +328,14 @@ function LeaderboardRow({
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 export function LeaderboardView() {
   const { leaderboardData, loading: dataLoading } = useLeaderboard();
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>(auth.currentUser?.uid);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUserId(user?.uid);
+    });
+    return unsubscribe;
+  }, []);
 
   const topThree = useMemo(
     () => leaderboardData.filter((entry) => entry.rank <= 3),
@@ -432,7 +445,7 @@ export function LeaderboardView() {
           {/* Scrollable list */}
           <div className="divide-y-[2px] divide-foreground/10 overflow-y-auto flex-1 min-h-0 lb-scroll">
             {rest.map((entry, i) => (
-              <LeaderboardRow key={entry.rank} entry={entry} index={i} />
+              <LeaderboardRow key={entry.rank} entry={entry} index={i} currentUserId={currentUserId} />
             ))}
           </div>
 

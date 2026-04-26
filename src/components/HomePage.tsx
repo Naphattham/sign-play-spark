@@ -31,9 +31,16 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
     return Math.abs(lastSignIn - created) < 5 * 60 * 1000;
   })();
 
-  // ── Daily Practice tracking (mirrors QuestView logic) ──────────────────────
   const [practiceMinutes, setPracticeMinutes] = useState(0);
   const [dailyPracticeClaimed, setDailyPracticeClaimed] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>(auth.currentUser?.uid);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUserId(user?.uid);
+    });
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     const readPractice = () => {
@@ -70,6 +77,8 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
 
   const practiceProgressPct = Math.min((practiceMinutes / 30) * 100, 100);
   const topThree = leaderboardData.slice(0, 3);
+  const currentUserEntry = leaderboardData.find(entry => entry.id === currentUserId);
+  const isUserInTopThree = topThree.some(entry => entry.id === currentUserId);
 
   // Get last accessed category and phrase from localStorage
   const lastCategory = (localStorage.getItem('lastCategory') as Category) || 'general';
@@ -129,8 +138,8 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
   };
 
   return (
-    <div className="w-full max-w-screen-xl mx-auto px-3 py-3 sm:px-4 sm:py-5 md:px-6 md:py-8">
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-5 md:gap-6 xl:gap-8">
+    <div className="w-full h-full overflow-hidden max-w-screen-xl mx-auto px-3 py-3 sm:px-4 sm:py-5 md:px-6 md:py-8">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-5 md:gap-6 xl:gap-8 h-full">
 
         {/* ── Left Column ── */}
         <div className="xl:col-span-8 space-y-4 sm:space-y-5 md:space-y-6">
@@ -277,6 +286,34 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
                     {index === 0 && <img src={goldMedalImg} alt="Gold Medal" className="w-6 h-6 sm:w-7 sm:h-7 shrink-0 object-contain" />}
                   </div>
                 ))}
+                
+                {!isUserInTopThree && currentUserEntry && (
+                  <div
+                    className="flex items-center gap-2 sm:gap-3 rounded-lg p-2 sm:p-2.5"
+                  >
+                    <span className="text-base sm:text-lg font-black italic w-5 shrink-0">{currentUserEntry.rank}</span>
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-foreground overflow-hidden shrink-0 bg-muted">
+                      <img
+                        alt={currentUserEntry.username}
+                        src={currentUserEntry.photoURL || getAvatarUrl(null, currentUserEntry.username)}
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          const img = e.target as HTMLImageElement;
+                          img.src = getAvatarUrl(null, currentUserEntry.username);
+                        }}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-black uppercase text-xs sm:text-sm leading-none truncate">
+                        {currentUserEntry.username?.split(" ")[0]} <span className="opacity-70 text-[10px] sm:text-xs ml-1">(คุณ)</span>
+                      </p>
+                      <p className="text-[10px] sm:text-xs font-bold text-muted-foreground mt-0.5">
+                        {currentUserEntry.points.toLocaleString()} Pts
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

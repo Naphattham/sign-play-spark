@@ -3,6 +3,7 @@ import { ref, get } from "firebase/database";
 import { database } from "@/lib/firebase";
 
 export interface LeaderboardEntry {
+  id: string;
   rank: number;
   username: string;
   points: number;
@@ -29,6 +30,7 @@ export function useLeaderboard() {
             const userData = childSnapshot.val();
 
             users.push({
+              id: childSnapshot.key as string,
               rank: 0,
               username: userData.username || userData.displayName || 'Anonymous',
               points: userData.points || 0,
