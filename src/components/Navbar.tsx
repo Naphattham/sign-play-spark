@@ -20,27 +20,27 @@ export function Navbar({ onLoginClick }: NavbarProps) {
           <img 
             src={neoRunGif} 
             alt="Running Neo" 
-            className="h-12 sm:h-16 w-auto"
+            className="h-10 sm:h-14 w-auto"
           />
           <img 
             src={postRunGif} 
             alt="Running Post" 
-            className="h-16 sm:h-20 w-auto -scale-x-100"
+            className="h-14 sm:h-16 w-auto -scale-x-100"
           />
           <img 
             src={iceRunGif} 
             alt="Running Ice" 
-            className="h-16 sm:h-20 w-auto"
+            className="h-14 sm:h-16 w-auto"
           />
           <img 
             src={faiRunGif} 
             alt="Running Fai" 
-            className="h-16 sm:h-20 w-auto -scale-x-100"
+            className="h-14 sm:h-16 w-auto -scale-x-100"
           />
           <img 
             src={ajRunGif} 
             alt="Running AJ" 
-            className="h-16 sm:h-20 w-auto -scale-x-100"
+            className="h-14 sm:h-16 w-auto -scale-x-100"
           />
         </div>
       </div>
