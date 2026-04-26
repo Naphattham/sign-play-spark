@@ -58,9 +58,32 @@ function PodiumBlock({
         height: `${height}px`,
       }}
     >
+      {/* ── Top face (3D depth illusion) ── */}
+      <div
+        className="absolute left-0 bottom-full w-full h-[10px] sm:h-[14px] border-[3px] border-b-0 border-foreground origin-bottom-left rounded-lg z-0"
+        style={{
+          background: topColor,
+          transform: "skewX(-45deg)",
+        }}
+      />
+
+      {/* ── Right side face (3D depth illusion) ── */}
+      <div
+        className="absolute left-full bottom-0 h-full w-[10px] sm:w-[14px] border-[3px] border-l-0 border-foreground origin-bottom-left rounded-r-lg rounded-tl-lg z-0"
+        style={{
+          background: darkColor,
+          transform: "skewY(-45deg)",
+        }}
+      />
+
+      {/* ── Back Corner Gap Patch ── */}
+      <div
+        className="absolute -top-[10px] sm:-top-[14px] -right-[10px] sm:-right-[14px] w-[16px] sm:w-[20px] h-[16px] sm:h-[20px] bg-foreground rounded-tr-[6px] sm:rounded-tr-[8px] z-[-1]"
+      />
+
       {/* ── Front face ── */}
       <div
-        className="absolute inset-0 rounded-t-lg border-[3px] border-foreground overflow-hidden"
+        className="absolute inset-0 border-[3px] border-foreground overflow-hidden rounded-t-lg z-10"
         style={{
           background: color,
           boxShadow: "inset 0 2px 20px rgba(255,255,255,0.15)",
@@ -99,26 +122,6 @@ function PodiumBlock({
         {/* Shimmer for #1 */}
         {rank === 1 && <div className="absolute inset-0 lb-shimmer" />}
       </div>
-
-      {/* ── Right side face (3D depth illusion) ── */}
-      <div
-        className="absolute top-[3px] -right-[10px] sm:-right-[14px] w-[10px] sm:w-[14px] rounded-r-sm border-r-[3px] border-b-[3px] border-t-[3px] border-foreground"
-        style={{
-          height: `calc(100% - 3px)`,
-          background: darkColor,
-          clipPath: "polygon(0 6px, 100% 0, 100% 100%, 0 calc(100% - 0px))",
-        }}
-      />
-
-      {/* ── Top face (3D depth illusion) ── */}
-      <div
-        className="absolute -top-[10px] sm:-top-[14px] left-[3px] h-[10px] sm:h-[14px] rounded-t-sm border-t-[3px] border-l-[3px] border-r-[3px] border-foreground"
-        style={{
-          width: `calc(100% + 7px)`,
-          background: topColor,
-          clipPath: "polygon(0 100%, 10px 0, calc(100%) 0, calc(100% - 10px) 100%)",
-        }}
-      />
     </div>
   );
 }
@@ -220,9 +223,9 @@ function PodiumContestant({
 
         {/* Name */}
         <p
-          className={`font-black ${config.nameSize} text-center line-clamp-1 w-14 sm:w-18 md:w-22 break-words`}
+          className={`font-black ${config.nameSize} text-center w-20 sm:w-24 md:w-32 break-words leading-tight mt-1.5 sm:mt-2 md:mt-3`}
         >
-          {entry.username?.split(" ")[0]?.toUpperCase()}
+          {entry.username?.toUpperCase()}
         </p>
 
         {/* Points */}
@@ -295,7 +298,7 @@ function LeaderboardRow({
       </div>
 
       {/* Username */}
-      <span className="flex-1 font-bold truncate text-xs sm:text-sm md:text-base group-hover:text-primary transition-colors">
+      <span className="flex-1 font-bold break-words text-xs sm:text-sm md:text-base group-hover:text-primary transition-colors">
         {entry.username}
       </span>
 
