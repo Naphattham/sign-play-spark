@@ -31,7 +31,7 @@ export function WebcamView({
       const canvas = canvasRef.current;
 
       if (video && video.readyState >= 3 && !isReadyRef.current) {
-        video.play().catch((e) => console.warn("Video play interrupted:", e));
+        video.play().catch((e) => {});
 
         if (canvas) {
           canvas.width = video.videoWidth;

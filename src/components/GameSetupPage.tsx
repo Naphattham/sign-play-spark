@@ -134,7 +134,7 @@ export function GameSetupPage() {
 
         {/* ━━━ GAME CARDS GRID ━━━ */}
         <section>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             {gameCards.map((card, index) => {
               const isLocked = !card.available || (card.desktopOnly && !isDesktop);
 

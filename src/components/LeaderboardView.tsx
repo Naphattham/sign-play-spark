@@ -102,7 +102,7 @@ function PodiumBlock({
 
       {/* ── Right side face (3D depth illusion) ── */}
       <div
-        className="absolute top-[6px] -right-[10px] sm:-right-[14px] w-[10px] sm:w-[14px] rounded-r-sm border-r-[3px] border-b-[3px] border-t-[3px] border-foreground"
+        className="absolute top-[3px] -right-[10px] sm:-right-[14px] w-[10px] sm:w-[14px] rounded-r-sm border-r-[3px] border-b-[3px] border-t-[3px] border-foreground"
         style={{
           height: `calc(100% - 3px)`,
           background: darkColor,
@@ -186,7 +186,7 @@ function PodiumContestant({
   return (
     <div className={`flex flex-col items-center ${config.order} ${config.containerW}`}>
       {/* ── Player info above podium ── */}
-      <div className="flex flex-col items-center gap-0.5 sm:gap-1 mb-2 sm:mb-3">
+      <div className="flex flex-col items-center gap-0.5 sm:gap-1 mb-4 sm:mb-6">
         {/* Badge image */}
         <div
           className="lb-badge-pop"
@@ -377,7 +377,7 @@ export function LeaderboardView() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto flex flex-col h-full px-2 sm:px-4 md:px-0 gap-3 sm:gap-4">
+    <div className="max-w-4xl mx-auto flex flex-col h-full px-2 sm:px-4 md:px-0 gap-3 sm:gap-4 pb-24 sm:pb-6 md:pb-0">
 
       {/* ─── 3D Podium for Top 3 ─── */}
       <div className="relative pt-1 sm:pt-2 shrink-0">
@@ -385,8 +385,7 @@ export function LeaderboardView() {
         <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-foreground/5 via-foreground/3 to-transparent rounded-b-2xl pointer-events-none" />
         {/* Spotlight glow behind #1 */}
         <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[40%] h-[60%] bg-secondary/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="flex items-end justify-center gap-1.5 sm:gap-2 md:gap-3 px-2 sm:px-4 pb-2 sm:pb-3">
+        <div className="flex items-end justify-center gap-2.5 sm:gap-3.5 md:gap-5 px-2 sm:px-4 pb-2 sm:pb-3">
           <PodiumContestant
             entry={getTop(2)}
             rank={2}
@@ -409,8 +408,6 @@ export function LeaderboardView() {
             podiumHeight={40}
           />
         </div>
-
-
       </div>
 
       {/* ─── Rest of leaderboard ─── */}

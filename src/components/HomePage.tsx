@@ -7,6 +7,7 @@ import { auth, database } from "@/lib/firebase";
 import { ref, get } from "firebase/database";
 import steakImg from "@/asset/image/steak.webp";
 import trophyImg from "@/asset/image/Trophy.webp";
+import goldMedalImg from "@/asset/image/first-gold-medal.png";
 
 interface HomePageProps {
   onCategorySelect: (category: Category) => void;
@@ -129,10 +130,10 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
 
   return (
     <div className="w-full max-w-screen-xl mx-auto px-3 py-3 sm:px-4 sm:py-5 md:px-6 md:py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 md:gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-5 md:gap-6 xl:gap-8">
 
         {/* ── Left Column ── */}
-        <div className="lg:col-span-8 space-y-4 sm:space-y-5 md:space-y-6">
+        <div className="xl:col-span-8 space-y-4 sm:space-y-5 md:space-y-6">
 
           {/* Hero */}
           <section className="brutal-card bg-accent p-4 sm:p-5 md:p-8 rounded-xl relative overflow-hidden flex flex-col sm:flex-row items-center gap-4 sm:gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -140,7 +141,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
               <span className="inline-block bg-foreground text-background px-2.5 py-1 sm:px-3 sm:py-1 rounded font-black text-xs sm:text-sm uppercase tracking-widest">
                 Master Signer • LVL {level}
               </span>
-              <h2 className="text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-black text-foreground mt-2 sm:mt-3 md:mt-4 leading-none uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+              <h2 className="text-3xl sm:text-4xl md:text-4xl xl:text-5xl font-black text-foreground mt-2 sm:mt-3 md:mt-4 leading-none uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
                 {isNewUser ? 'Welcome,' : 'Welcome Back,'}
                 <br />
                 <span className="truncate block">{auth.currentUser?.displayName?.split(" ")[0] || 'Questor'}!</span>
@@ -181,7 +182,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
               style={{ animationDelay: '100ms' }}
             >
               {/* Video — 16:9 on all sizes, fixed width on sm+ */}
-              <div className="w-full sm:w-36 md:w-44 lg:w-52 shrink-0 aspect-square bg-muted rounded-lg border-2 border-foreground overflow-hidden">
+              <div className="w-full sm:w-36 md:w-44 xl:w-52 shrink-0 aspect-square bg-muted rounded-lg border-2 border-foreground overflow-hidden">
                 <VideoPlayer
                   key={getVideoSrc()}
                   autoPlay
@@ -224,7 +225,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
         </div>
 
         {/* ── Right Column (Sidebar) ── */}
-        <div className="lg:col-span-4 space-y-4 sm:space-y-5 md:space-y-6">
+        <div className="xl:col-span-4 space-y-4 sm:space-y-5 md:space-y-6">
 
           {/* Top Challengers */}
           <section className="brutal-card bg-card p-3 sm:p-4 md:p-6 rounded-xl">
@@ -273,7 +274,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
                         {entry.points.toLocaleString()} Pts
                       </p>
                     </div>
-                    {index === 0 && <span className="text-xl sm:text-2xl shrink-0" aria-hidden>🏅</span>}
+                    {index === 0 && <img src={goldMedalImg} alt="Gold Medal" className="w-6 h-6 sm:w-7 sm:h-7 shrink-0 object-contain" />}
                   </div>
                 ))}
               </div>

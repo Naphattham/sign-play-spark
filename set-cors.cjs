@@ -20,7 +20,7 @@ const corsConfiguration = [
 
 bucket.setCorsConfiguration(corsConfiguration)
   .then(() => {
-    console.log("✅ อัปเดต CORS สำเร็จแล้ว! Safari ควรจะเล่นวิดีโอได้แล้วครับ");
+     // CORS configuration updated successfully
   })
   .catch((err) => {
     console.error("❌ เกิดข้อผิดพลาด:", err);

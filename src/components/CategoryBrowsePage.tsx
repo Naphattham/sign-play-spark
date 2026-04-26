@@ -138,7 +138,7 @@ export function CategoryBrowsePage() {
 
   return (
     <>
-      <div className="min-h-screen text-foreground cb-hero-bg dot-grid flex flex-col">
+      <div className="h-[100dvh] overflow-y-auto scroll-smooth text-foreground cb-hero-bg dot-grid flex flex-col" style={{ WebkitOverflowScrolling: 'touch' }}>
 
         <Navbar onLoginClick={() => setShowLoginModal(true)} />
 
@@ -263,7 +263,7 @@ export function CategoryBrowsePage() {
         </main>
 
         {/* ── Footer ── */}
-        <footer className="bg-pink-500 py-5 sm:py-8 px-4 sm:px-8 border-t-[3px] border-foreground mt-auto relative overflow-hidden">
+        <footer className="bg-pink-500 py-5 sm:py-8 px-4 sm:px-8 border-t-[3px] border-foreground mt-auto relative overflow-hidden shrink-0">
           <div className="absolute inset-0 cb-shimmer-bar pointer-events-none" />
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 relative z-10">
             <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>

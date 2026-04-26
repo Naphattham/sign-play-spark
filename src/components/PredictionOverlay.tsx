@@ -305,7 +305,7 @@ export const PredictionOverlay = ({
                 <button
                   onClick={onPrevPhrase}
                   disabled={isFirstPhrase}
-                  className={`absolute left-2 sm:left-4 md:left-6 lg:left-8 top-1/2 -translate-y-1/2 z-50 w-10 sm:w-14 md:w-20 lg:w-24 hover:-translate-x-2 transition-transform cursor-pointer ${isFirstPhrase ? "opacity-30 pointer-events-none" : ""
+                  className={`absolute left-3 sm:left-5 md:left-6 lg:left-8 top-1/2 -translate-y-1/2 z-50 w-12 sm:w-16 md:w-20 lg:w-24 hover:-translate-x-2 transition-transform cursor-pointer ${isFirstPhrase ? "opacity-30 pointer-events-none" : ""
                     }`}
                 >
                   <img
@@ -319,7 +319,7 @@ export const PredictionOverlay = ({
                 <button
                   onClick={onNextPhrase}
                   disabled={isLastPhrase}
-                  className={`absolute right-2 sm:right-4 md:right-6 lg:right-8 top-1/2 -translate-y-1/2 z-50 w-10 sm:w-14 md:w-20 lg:w-24 hover:translate-x-2 transition-transform cursor-pointer ${isLastPhrase ? "opacity-30 pointer-events-none" : ""
+                  className={`absolute right-3 sm:right-5 md:right-6 lg:right-8 top-1/2 -translate-y-1/2 z-50 w-12 sm:w-16 md:w-20 lg:w-24 hover:translate-x-2 transition-transform cursor-pointer ${isLastPhrase ? "opacity-30 pointer-events-none" : ""
                     }`}
                 >
                   <img
@@ -435,7 +435,7 @@ export const PredictionOverlay = ({
 
                       {/* ── Left column: Tutorial video + variant buttons ── */}
                       <div className="relative flex flex-col gap-1 sm:gap-1.5 lg:gap-2 w-full items-center lg:items-end">
-                        <div className="relative aspect-square w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mr-0 bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+                        <div className="relative aspect-square w-full max-w-[240px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[360px] mx-auto lg:mr-0 bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
                           <VideoCard
                             phrase={activePhrase?.text ?? "Hello"}
                             category={activePhrase?.category ?? "general"}
@@ -469,7 +469,7 @@ export const PredictionOverlay = ({
 
                         {/* g1 variant buttons */}
                         {activePhrase?.id === "g1" && (
-                          <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
+                          <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
                             <button
                               onClick={() => onVariantChange("adult")}
                               className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
@@ -493,7 +493,7 @@ export const PredictionOverlay = ({
 
                         {/* g4 variant buttons */}
                         {activePhrase?.id === "g4" && (
-                          <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
+                          <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
                             <button
                               onClick={() => onVariantChange("adult")}
                               className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
@@ -517,7 +517,7 @@ export const PredictionOverlay = ({
 
                         {/* g6 variant buttons */}
                         {activePhrase?.id === "g6" && (
-                          <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
+                          <div className="flex gap-1.5 lg:gap-2 max-w-[240px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[360px] mx-auto lg:mx-0 w-full">
                             <button
                               onClick={() => onVariantChange("adult")}
                               className={`flex-1 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-colors font-black text-xs lg:text-sm hover:translate-y-0.5 ${selectedVariant === "adult"
@@ -542,7 +542,7 @@ export const PredictionOverlay = ({
 
                       {/* ── Right column: Webcam + action button ── */}
                       <div className="flex flex-col gap-1 sm:gap-1.5 lg:gap-2 w-full items-center lg:items-start">
-                        <div className="relative aspect-square w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+                        <div className="relative aspect-square w-full max-w-[240px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[360px] mx-auto lg:mx-0 bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
                           <WebcamView
                             onNextLevel={() => onSetIsPhraseCompleted(true)}
                             cameraEnabled={cameraPermissionGranted}
@@ -641,7 +641,7 @@ export const PredictionOverlay = ({
                             return (
                               <button
                                 onClick={onShowCameraPermission}
-                                className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-blue-500 hover:bg-blue-600 text-white"
+                                className="w-full max-w-[240px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-blue-500 hover:bg-blue-600 text-white"
                               >
                                 📹 อนุญาตการเข้าถึงกล้อง
                               </button>
@@ -665,7 +665,7 @@ export const PredictionOverlay = ({
                             return (
                               <button
                                 onClick={onTryAgain}
-                                className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-purple-500 hover:bg-purple-600 text-white"
+                                className="w-full max-w-[240px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-purple-500 hover:bg-purple-600 text-white"
                               >
                                 <RotateCcw size={14} className="shrink-0" /> TRY AGAIN
                               </button>
@@ -674,7 +674,7 @@ export const PredictionOverlay = ({
 
                           if (buttonState === "collect" && isPhraseCompleted) {
                             return (
-                              <div className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 flex flex-col gap-1.5">
+                              <div className="w-full max-w-[240px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[360px] mx-auto lg:mx-0 flex flex-col gap-1.5">
                                 <button
                                   onClick={() => {
                                     if (isLocked) return;
@@ -718,7 +718,7 @@ export const PredictionOverlay = ({
                             return (
                               <button
                                 onClick={onStop}
-                                className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-red-500 hover:bg-red-600 text-white"
+                                className="w-full max-w-[240px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-red-500 hover:bg-red-600 text-white"
                               >
                                 ⏹ STOP
                               </button>
@@ -738,7 +738,7 @@ export const PredictionOverlay = ({
                             return (
                               <button
                                 disabled
-                                className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1.5 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-sky-400 text-white opacity-75 cursor-wait"
+                                className="w-full max-w-[240px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1.5 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-sky-400 text-white opacity-75 cursor-wait"
                               >
                                 <span className="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full" />
                                 กำลังเปิดกล้อง...
@@ -750,7 +750,7 @@ export const PredictionOverlay = ({
                           return (
                             <button
                               onClick={onStart}
-                              className="w-full max-w-[240px] sm:max-w-[300px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-green-500 hover:bg-green-600 text-white hover:translate-y-0.5"
+                              className="w-full max-w-[240px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-green-500 hover:bg-green-600 text-white hover:translate-y-0.5"
                             >
                               ▶ START
                             </button>
@@ -760,8 +760,8 @@ export const PredictionOverlay = ({
                     </div>
                   </div>
 
-                  {/* ── Footer phrase strip ── */}
-                  <footer className="mt-1 sm:mt-2 pt-1 sm:pt-2 border-t-[2px] border-slate-200 dark:border-slate-800 w-full">
+                  {/* ── Footer phrase strip (Tablet & Desktop: Inside Main) ── */}
+                  <footer className="hidden sm:block mt-1 sm:mt-2 pt-1 sm:pt-2 border-t-[2px] border-slate-200 dark:border-slate-800 w-full">
                     <div className="flex justify-start lg:justify-center gap-2 sm:gap-4 pb-2 pt-3 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                       {currentCategoryPhrases.map((phrase) => {
                         const isActive = phrase.id === activePhrase?.id;
@@ -830,6 +830,76 @@ export const PredictionOverlay = ({
                     </div>
                   </footer>
                 </main>
+
+                {/* ── Footer phrase strip (Mobile: Outside Main) ── */}
+                <footer className="block sm:hidden bg-[#f8f6f6] dark:bg-[#221610] pt-1 sm:pt-2 border-t-[2px] border-slate-200 dark:border-slate-800 w-full shrink-0 z-20">
+                    <div className="flex justify-start lg:justify-center gap-2 sm:gap-4 pb-2 pt-3 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                      {currentCategoryPhrases.map((phrase) => {
+                        const isActive = phrase.id === activePhrase?.id;
+                        const isCompleted = isPhraseCompletedCheck(phrase.id, completedPhrases);
+                        return (
+                          <div
+                            key={phrase.id}
+                            onClick={() => {
+                              onPhraseSelect(phrase);
+                              onResetPhraseState();
+                            }}
+                            className={`relative border-[2px] border-foreground rounded-lg flex items-center py-1 px-2 sm:py-2 sm:px-3 cursor-pointer flex-none w-[120px] sm:w-[140px] md:w-[160px] min-h-[48px] sm:min-h-[56px] transition-all ${isActive
+                              ? "shadow-[0px_0px_0px_3px_rgba(253,224,71,1)] scale-[1.02] z-10"
+                              : "opacity-70 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:opacity-100 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                              } ${isCompleted ? "bg-green-50" : "bg-white"}`}
+                          >
+                            {isCompleted ? (
+                              <div className="absolute -top-2 -right-2 bg-green-500 text-white font-black text-[7px] sm:text-[9px] px-1.5 py-0.5 rounded-full border-[1.5px] border-foreground z-10 flex items-center gap-1">
+                                <Check size={10} className="shrink-0" strokeWidth={4} />{" "}
+                                <span className="hidden sm:inline">
+                                  {phrase.id === "g1" ||
+                                    phrase.id === "g4" ||
+                                    phrase.id === "g6"
+                                    ? "200"
+                                    : "100"}{" "}
+                                  pts
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="absolute -top-2 -right-2 bg-[#f94fa4] text-white font-black text-[7px] sm:text-[9px] px-1.5 py-0.5 rounded-full border-[1.5px] border-foreground z-10">
+                                +
+                                {phrase.id === "g1" ||
+                                  phrase.id === "g4" ||
+                                  phrase.id === "g6"
+                                  ? "200"
+                                  : "100"}{" "}
+                                pts
+                              </div>
+                            )}
+
+                            {/* Icon */}
+                            <div className="w-7 h-7 sm:w-9 sm:h-9 border-[1.5px] border-foreground rounded-md flex items-center justify-center text-sm sm:text-base shrink-0 mr-2 sm:mr-3 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] bg-pink-300 p-0.5">
+                              {phraseIconMap[phrase.id] ? (
+                                <img
+                                  src={phraseIconMap[phrase.id]}
+                                  alt={phrase.text}
+                                  className="w-full h-full object-contain"
+                                />
+                              ) : (
+                                phrase.emoji || "✋"
+                              )}
+                            </div>
+
+                            {/* Text */}
+                            <div className="flex flex-col flex-1 overflow-hidden justify-center">
+                              <h3 className="font-black text-[9px] sm:text-[11px] md:text-[12px] text-slate-800 truncate leading-tight mb-0.5">
+                                {phrase.text}
+                              </h3>
+                              <p className="text-gray-500 font-bold text-[7px] sm:text-[8px] md:text-[9px] truncate">
+                                {phrase.english || phrase.text}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </footer>
               </div>
             </div>
           </div>

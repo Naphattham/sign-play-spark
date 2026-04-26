@@ -257,6 +257,10 @@ export const signInWithGoogle = async () => {
 export const signOutUser = async () => {
   try {
     await signOut(auth);
+    // Clear session-scoped flags so HowToPlay and camera permission
+    // are re-evaluated on the next login.
+    sessionStorage.removeItem('howToPlayShown');
+    sessionStorage.removeItem('cameraPermissionGranted');
     return { error: null };
   } catch (error: any) {
     return { error: getErrorMessage(error.code) };

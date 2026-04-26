@@ -231,7 +231,7 @@ export function QuestView({ streak }: QuestViewProps) {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto quest-scroll p-3 sm:p-4 md:p-6 lg:p-10 bg-background">
+    <div className="flex-1 overflow-y-auto scroll-smooth quest-scroll no-scrollbar p-3 sm:p-4 md:p-6 lg:p-10 bg-background">
       <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8 md:space-y-10">
 
         {/* ━━━ HEADER ━━━ */}
@@ -239,7 +239,7 @@ export function QuestView({ streak }: QuestViewProps) {
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter">
             Quest Master
           </h1>
-          <div className="h-2 sm:h-3 w-20 sm:w-28 md:w-32 bg-primary mt-1 sm:mt-2"></div>
+          <div className="h-2 sm:h-3 w-20 sm:w-28 md:w-32 bg-primary mt-1.5 sm:mt-2 rounded-sm" />
           <p className="text-sm sm:text-base text-muted-foreground font-medium mt-2">
             รับเควสประจำวัน เพื่อก้าวสู่ความเป็นสุดยอดนักภาษามือ
           </p>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Home, ChevronRight, ChevronLeft } from "lucide-react";
+import { User, ChevronRight, ChevronLeft } from "lucide-react";
 import { auth, database } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { ref as dbRef, get, onValue } from "firebase/database";
@@ -14,6 +14,7 @@ import trophyImg from "@/asset/image/Trophy.webp";
 import questImg from "@/asset/image/quest.webp";
 import challengeImg from "@/asset/image/challenge.webp";
 import lessonImg from "@/asset/image/lesson.webp";
+import homeImg from "@/asset/image/Home_Icon.png";
 
 const iconMap: Record<string, string> = {
   Hand: generalImg,
@@ -150,7 +151,7 @@ export function GameSidebar({
                 }`}
               style={showHome ? { boxShadow: "2px 2px 0px 0px hsl(0 0% 0%)" } : {}}
             >
-              <Home size={18} />
+              <img src={homeImg} alt="Home" className="w-[18px] h-[18px] object-contain" />
               Home
             </button>
 

@@ -175,7 +175,7 @@ export function videoFrameToDataUrl(video: HTMLVideoElement): string {
  * (แนะนำให้เรียกใช้ตอนผู้ใช้ Login สำเร็จ)
  */
 export async function warmUpModel(): Promise<void> {
-
+        // console.error('Error processing frame:', error);
   try {
     // การเรียก getModelInfo ตอนนี้จะสั่งให้ Backend โหลด TF Model ด้วย
     await getModelInfo();
