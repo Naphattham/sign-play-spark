@@ -14,12 +14,13 @@ interface HomePageProps {
   onResumeLesson: () => void;
   onLeaderboard: () => void;
   onLessons: () => void;
+  onQuest: () => void;
   completedPhrases: Set<string>;
   streak: number;
   level: number;
 }
 
-export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLessons, completedPhrases, streak, level }: HomePageProps) {
+export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLessons, onQuest, completedPhrases, streak, level }: HomePageProps) {
   const { leaderboardData, loading } = useLeaderboard();
 
   // Detect new user: creationTime and lastSignInTime are within 5 minutes of each other
@@ -327,9 +328,17 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
 
           {/* Daily Goals */}
           <section className="brutal-card bg-foreground text-background p-3 sm:p-4 md:p-6 rounded-xl">
-            <h3 className="text-sm sm:text-base md:text-lg font-black uppercase italic tracking-tighter mb-3 sm:mb-4 text-accent">
-              Daily Goals
-            </h3>
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 className="text-sm sm:text-base md:text-lg font-black uppercase italic tracking-tighter text-accent">
+                Daily Goals
+              </h3>
+              <button
+                onClick={onQuest}
+                className="text-xs sm:text-sm font-bold underline decoration-primary decoration-2 underline-offset-4 touch-manipulation min-h-[36px] flex items-center transition-colors hover:text-primary"
+              >
+                View
+              </button>
+            </div>
             <div className="space-y-3 sm:space-y-4">
 
               {/* Goal 1 — always complete */}

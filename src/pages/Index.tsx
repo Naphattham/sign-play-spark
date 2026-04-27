@@ -305,6 +305,7 @@ const Index = () => {
                 }}
                 onLeaderboard={() => setView("leaderboard")}
                 onLessons={() => setView("lessons")}
+                onQuest={() => setView("quest")}
                 completedPhrases={authState.completedPhrases}
                 streak={authState.userStreak}
                 level={authState.userLevel}

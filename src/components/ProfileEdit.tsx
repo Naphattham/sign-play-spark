@@ -301,12 +301,12 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
 
           {/* Cropper Modal */}
           <Dialog open={showCropper} onOpenChange={setShowCropper}>
-            <DialogContent className="brutal-card-lg w-full max-w-2xl">
+            <DialogContent className="brutal-card-lg w-[92vw] sm:w-full max-w-lg p-4 sm:p-6 rounded-2xl gap-3 sm:gap-4 max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="font-display text-xl">Crop Your Photo</DialogTitle>
+                <DialogTitle className="font-display text-lg sm:text-xl">Crop Your Photo</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4">
-                <div className="relative w-full h-64 sm:h-80 md:h-96 border-[3px] border-foreground rounded-lg overflow-hidden bg-foreground">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="relative w-full h-56 sm:h-64 md:h-80 border-[3px] border-foreground rounded-lg overflow-hidden bg-foreground shrink-0">
                   {imageSrc && (
                     <Cropper
                       image={imageSrc}
