@@ -7,6 +7,7 @@ import { addUserPoints } from "@/lib/auth";
 import { getVideoUrl } from "@/lib/categories";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { useAudio } from "@/lib/audioContext";
+import heartIcon from "../asset/image/monster/heart.webp";
 
 // ─── Types ──────────────────────────────────────────────────────────────
 type Difficulty = "easy" | "medium" | "hard";
@@ -503,7 +504,7 @@ export default function SignMasterMemoryPage() {
                         {m.toUpperCase()}
                       </span>
                       <span className="text-[9px] sm:text-[10px] opacity-80">
-                        {m === 'easy' ? '50 PTS · ผิดได้ 5' : m === 'medium' ? '100 PTS · ผิดได้ 10' : '200 PTS · ผิดได้ 20'}
+                        {m === 'easy' ? '50 PTS · ผิดได้ 5 ครั้ง' : m === 'medium' ? '100 PTS · ผิดได้ 10 ครั้ง' : '200 PTS · ผิดได้ 20 ครั้ง'}
                       </span>
                     </button>
                   ))}
@@ -730,9 +731,12 @@ export default function SignMasterMemoryPage() {
             {/* Mistakes Left */}
             <div className="bg-white border-[3px] border-black px-3 md:px-5 py-1.5 md:py-2 rounded-2xl"
               style={{ boxShadow: "4px 4px 0px 0px #000" }}>
-              <p className="font-black uppercase text-sm md:text-base text-black tracking-tighter">
-                ❤️ {Math.max(0, cfg.maxMisses - misses)}
-              </p>
+              <div className="flex items-center gap-1 md:gap-1.5">
+                <img src={heartIcon} alt="Heart" className="w-4 h-4 md:w-5 md:h-5 object-contain" />
+                <p className="font-black uppercase text-sm md:text-base text-black tracking-tighter">
+                  {Math.max(0, cfg.maxMisses - misses)}
+                </p>
+              </div>
             </div>
           </div>
         </header>
