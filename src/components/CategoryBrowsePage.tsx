@@ -64,10 +64,13 @@ const CATEGORY_THEMES: Record<Category, { bg: string; accent: string; glow: stri
 
 export function CategoryBrowsePage() {
   const navigate = useNavigate();
-  const [selectedVideo, setSelectedVideo] = useState<{ phrase: string; category: Category } | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<{ phrase: string; category: Category; subPhrase?: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [hoveredVideo, setHoveredVideo] = useState<string | null>(null);
 
-  const getVideoSrc = (phrase: string, category: Category) => {
+  const getVideoSrc = (phrase: string, category: Category, subPhrase?: string) => {
+    if (subPhrase) return getVideoUrl(category, subPhrase);
+
     let videoFileName = phrase;
     if (category === "general") {
       if (phrase.includes("สวัสดี") && phrase.includes("|")) videoFileName = "สวัสดี (ผู้ใหญ่)";
@@ -80,7 +83,9 @@ export function CategoryBrowsePage() {
     return getVideoUrl(category, videoFileName);
   };
 
-  const totalPhrases = categories.reduce((acc, c) => acc + getPhrasesByCategory(c.id).length, 0);
+  const totalPhrases = categories.reduce((acc, c) => {
+    return acc + getPhrasesByCategory(c.id).reduce((sum, p) => sum + (p.text.includes("|") ? 2 : 1), 0);
+  }, 0);
 
   return (
     <>
@@ -164,7 +169,7 @@ export function CategoryBrowsePage() {
                       </div>
                     </div>
                     <div className="bg-white/30 backdrop-blur-sm border-2 border-foreground/30 rounded-lg px-2.5 py-1 cb-badge-count" style={{ animationDelay: `${0.4 + catIdx * 0.1}s` }}>
-                      <span className="text-xs sm:text-sm font-black">{categoryPhrases.length} คำ</span>
+                      <span className="text-xs sm:text-sm font-black">{categoryPhrases.reduce((sum, p) => sum + (p.text.includes("|") ? 2 : 1), 0)} คำ</span>
                     </div>
                   </div>
 
@@ -174,8 +179,15 @@ export function CategoryBrowsePage() {
                       {filtered.map((phrase, phraseIdx) => (
                         <button
                           key={phrase.id}
-                          onMouseEnter={() => { fetch(getVideoSrc(phrase.text, category.id)).catch(() => {}); }}
-                          onClick={() => setSelectedVideo({ phrase: phrase.text, category: category.id })}
+                          onMouseEnter={() => setHoveredVideo(getVideoSrc(phrase.text, category.id))}
+                          onMouseLeave={() => setHoveredVideo(null)}
+                          onClick={() => {
+                            let initialSubPhrase = undefined;
+                            if (phrase.text.includes("สวัสดี") && phrase.text.includes("|")) initialSubPhrase = "สวัสดี (ผู้ใหญ่)";
+                            else if (phrase.text.includes("กินแล้ว") && phrase.text.includes("|")) initialSubPhrase = "กินแล้ว";
+                            else if (phrase.text.includes("สบายดี") && phrase.text.includes("|")) initialSubPhrase = "สบายดี";
+                            setSelectedVideo({ phrase: phrase.text, category: category.id, subPhrase: initialSubPhrase });
+                          }}
                           className="cb-phrase-pop group relative bg-gradient-to-br from-white to-gray-50 p-2.5 sm:p-3 rounded-xl border-[2.5px] border-foreground font-bold text-left text-xs sm:text-sm transition-all duration-200 hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_0_#1a1a1a]"
                           style={{
                             animationDelay: `${0.3 + catIdx * 0.1 + phraseIdx * 0.04}s`,
@@ -243,16 +255,64 @@ export function CategoryBrowsePage() {
             <div className="p-3 sm:p-5 flex flex-col items-center shrink-0">
               <div className="bg-foreground rounded-xl overflow-hidden border-[3px] border-foreground aspect-square w-full max-w-sm cb-border-glow">
                 <VideoPlayer
-                  key={getVideoSrc(selectedVideo.phrase, selectedVideo.category)}
-                  src={getVideoSrc(selectedVideo.phrase, selectedVideo.category)}
+                  key={getVideoSrc(selectedVideo.phrase, selectedVideo.category, selectedVideo.subPhrase)}
+                  src={getVideoSrc(selectedVideo.phrase, selectedVideo.category, selectedVideo.subPhrase)}
                   autoPlay loop muted playsInline preload="auto"
                   className="w-full h-full object-cover"
                 />
               </div>
-              <p className="mt-3 font-bold text-foreground/50 text-xs sm:text-sm text-center">ดูวิดีโอและฝึกฝนท่าทางตามให้ได้ 🎯</p>
+              
+              {(() => {
+                if (!selectedVideo.phrase.includes("|")) return null;
+                
+                let options: { label: string; value: string }[] = [];
+                if (selectedVideo.phrase.includes("สวัสดี")) {
+                  options = [
+                    { label: "สวัสดีผู้ใหญ่", value: "สวัสดี (ผู้ใหญ่)" },
+                    { label: "สวัสดีเพื่อน", value: "สวัสดี (เพื่อน)" }
+                  ];
+                } else if (selectedVideo.phrase.includes("กินแล้ว")) {
+                  options = [
+                    { label: "กินแล้ว", value: "กินแล้ว" },
+                    { label: "ยังไม่ได้กิน", value: "ยังไม่ได้กิน" }
+                  ];
+                } else if (selectedVideo.phrase.includes("สบายดี")) {
+                  options = [
+                    { label: "สบายดี", value: "สบายดี" },
+                    { label: "ไม่สบายใจ", value: "ไม่สบายใจ" }
+                  ];
+                }
+                
+                if (options.length === 0) return null;
+
+                return (
+                  <div className="mt-4 flex gap-2 sm:gap-3 w-full max-w-sm">
+                    {options.map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setSelectedVideo({ ...selectedVideo, subPhrase: opt.value })}
+                        className={`flex-1 py-2.5 px-2 rounded-xl border-[2.5px] border-foreground font-bold text-xs sm:text-sm transition-all duration-200 ${
+                          selectedVideo.subPhrase === opt.value
+                            ? "bg-pink-400 text-white shadow-[2px_2px_0_0_#1a1a1a] translate-x-[1px] translate-y-[1px]"
+                            : "bg-white text-foreground hover:bg-pink-50 shadow-[4px_4px_0_0_#1a1a1a] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0_0_#1a1a1a]"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
+
+              <p className="mt-4 font-bold text-foreground/50 text-xs sm:text-sm text-center">ดูวิดีโอและฝึกฝนท่าทางตามให้ได้ 🎯</p>
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── Video Preloader ── */}
+      {hoveredVideo && (
+        <link rel="preload" as="video" href={hoveredVideo} type="video/mp4" />
       )}
 
     </>

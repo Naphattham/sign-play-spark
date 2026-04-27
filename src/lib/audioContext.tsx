@@ -61,11 +61,28 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.muted = isMuted;
-      // Also attempt to play if unmuted but currently paused
-      if (!isMuted && audioRef.current.paused) {
+      // Also attempt to play if unmuted but currently paused and tab is active
+      if (!isMuted && audioRef.current.paused && !document.hidden) {
         audioRef.current.play().catch(() => {});
       }
     }
+
+    const handleVisibilityChange = () => {
+      if (!audioRef.current) return;
+      
+      if (document.hidden) {
+        audioRef.current.pause();
+      } else {
+        if (!isMuted) {
+          audioRef.current.play().catch(() => {});
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [isMuted]);
 
   const toggleMute = () => setIsMuted((prev) => !prev);
