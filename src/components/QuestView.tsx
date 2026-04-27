@@ -231,8 +231,9 @@ export function QuestView({ streak }: QuestViewProps) {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto scroll-smooth quest-scroll no-scrollbar p-3 sm:p-4 md:p-6 lg:p-10 bg-background">
-      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8 md:space-y-10">
+    <div className="flex-1 bg-background rounded-xl">
+      <section className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full min-h-max pb-28 sm:pb-12 md:pb-12">
+        <div className="space-y-6 sm:space-y-8 md:space-y-10">
 
         {/* ━━━ HEADER ━━━ */}
         <header className="mb-6 sm:mb-8 md:mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -357,7 +358,8 @@ export function QuestView({ streak }: QuestViewProps) {
           </div>
         </section>
 
-      </div>
+        </div>
+      </section>
     </div>
   );
 }

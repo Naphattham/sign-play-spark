@@ -393,7 +393,7 @@ export function LeaderboardView() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto flex flex-col h-full px-2 sm:px-4 md:px-0 gap-3 sm:gap-4 pb-24 sm:pb-6 md:pb-0">
+    <div className="max-w-4xl mx-auto flex flex-col h-full px-2 sm:px-4 md:px-0 gap-3 sm:gap-4 pb-28 sm:pb-12 md:pb-12">
 
       {/* ─── 3D Podium for Top 3 ─── */}
       <div className="relative pt-1 sm:pt-2 shrink-0">
@@ -428,7 +428,7 @@ export function LeaderboardView() {
 
       {/* ─── Rest of leaderboard ─── */}
       {rest.length > 0 && (
-        <div className="brutal-card-lg overflow-hidden relative flex-1 min-h-0 flex flex-col">
+        <div className="brutal-card-lg overflow-hidden relative flex-1 min-h-[240px] sm:min-h-[320px] flex flex-col">
           {/* Header bar */}
           <div className="flex items-center justify-between px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 bg-foreground text-background shrink-0">
             <div className="flex items-center gap-2">

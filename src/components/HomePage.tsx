@@ -138,8 +138,8 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
   };
 
   return (
-    <div className="w-full h-full overflow-hidden max-w-screen-xl mx-auto px-3 py-3 sm:px-4 sm:py-5 md:px-6 md:py-8">
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-5 md:gap-6 xl:gap-8 h-full">
+    <div className="w-full max-w-screen-xl mx-auto px-3 pt-3 pb-28 sm:px-4 sm:pb-8 md:px-6 md:pb-12">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-5 md:gap-6 xl:gap-8">
 
         {/* ── Left Column ── */}
         <div className="xl:col-span-8 space-y-4 sm:space-y-5 md:space-y-6">

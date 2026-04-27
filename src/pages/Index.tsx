@@ -252,7 +252,7 @@ const Index = () => {
 
   // ── Main Render ────────────────────────────────────────
   return (
-    <div className="min-h-screen flex w-full">
+    <div className="min-h-[100dvh] flex w-full">
       <GameSidebar
         activeCategory={category}
         onCategoryChange={handleCategoryChange}
@@ -272,7 +272,7 @@ const Index = () => {
         onToggle={() => setSidebarOpen(!sidebarOpen)}
       />
 
-      <main className="flex-1 min-h-screen overflow-x-hidden">
+      <main className="flex-1 min-h-[100dvh] overflow-x-hidden">
         <MainHeader
           view={view}
           category={category}
@@ -280,7 +280,7 @@ const Index = () => {
           onLogout={handleLogout}
         />
 
-        <div className="h-[calc(100vh-2.75rem)] sm:h-[calc(100vh-3.25rem)] md:h-[calc(100vh-4rem)] flex flex-col overflow-hidden">
+        <div className="h-[calc(100dvh-2.75rem)] sm:h-[calc(100dvh-3.25rem)] md:h-[calc(100dvh-4rem)] flex flex-col overflow-hidden">
           {view === "home" && (
             <div className="p-3 sm:p-4 lg:p-6 h-full overflow-y-auto">
               <HomePage
@@ -332,12 +332,12 @@ const Index = () => {
             </div>
           )}
           {view === "quest" && (
-            <div className="h-full overflow-y-auto">
+            <div className="p-3 sm:p-4 lg:p-6 h-full overflow-y-auto">
               <QuestView streak={authState.userStreak} />
             </div>
           )}
           {view === "gamesetup" && (
-            <div className="h-full flex flex-col w-full">
+            <div className="p-3 sm:p-4 lg:p-6 h-full overflow-y-auto flex flex-col w-full">
               <GameSetupPage />
             </div>
           )}

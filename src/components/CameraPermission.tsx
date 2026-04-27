@@ -112,19 +112,20 @@ function CalibrationModal({ onClose, onPlay }: CalibrationModalProps) {
         }`}
     >
       <div
-        className={`relative w-full max-w-xl aspect-square bg-black border-[4px] border-black rounded-[2rem] shadow-[12px_12px_0_0_#000] overflow-hidden transition-all duration-500 ease-in-out ${isExiting
+        className={`relative w-full max-w-xl aspect-square bg-black border-[3px] sm:border-[4px] border-black rounded-3xl sm:rounded-[2rem] shadow-[8px_8px_0_0_#000] sm:shadow-[12px_12px_0_0_#000] overflow-hidden transition-all duration-500 ease-in-out ${isExiting
           ? "scale-90 opacity-0 shadow-none translate-y-4"
           : "animate-in zoom-in-95"
           }`}
       >
         {!isStarted ? (
-          <div className="absolute inset-0 bg-[#fefcf4] flex flex-col items-center justify-center gap-6 animate-in fade-in duration-300">
-            <div className="bg-[#efeee5] p-6 rounded-full border-[4px] border-black shadow-[6px_6px_0_0_#000]">
-              <Video size={64} className="text-[#c11660]" strokeWidth={2} />
+          <div className="absolute inset-0 bg-[#fefcf4] flex flex-col items-center justify-center gap-4 sm:gap-6 p-4 animate-in fade-in duration-300 text-center">
+            <div className="bg-[#efeee5] p-4 sm:p-6 rounded-full border-[3px] sm:border-[4px] border-black shadow-[4px_4px_0_0_#000] sm:shadow-[6px_6px_0_0_#000]">
+              <Video className="w-12 h-12 sm:w-16 sm:h-16 text-[#c11660]" strokeWidth={2} />
             </div>
-            <h3 className="text-3xl font-black uppercase text-[#383833]">มาทดสอบกล้องเตรียมลุยกันเถอะ!</h3>            <button
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-black uppercase text-[#383833]">มาทดสอบกล้องเตรียมลุยกันเถอะ!</h3>
+            <button
               onClick={handleStart}
-              className="w-full max-w-sm bg-[#c11660] text-white font-black text-2xl py-5 rounded-2xl border-[4px] border-black shadow-[6px_6px_0_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0_0_#000] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all uppercase tracking-widest"
+              className="w-[90%] sm:w-full max-w-xs sm:max-w-sm bg-[#c11660] text-white font-black text-lg sm:text-xl md:text-2xl py-3.5 sm:py-5 rounded-xl sm:rounded-2xl border-[3px] sm:border-[4px] border-black shadow-[4px_4px_0_0_#000] sm:shadow-[6px_6px_0_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_#000] sm:hover:shadow-[4px_4px_0_0_#000] active:translate-x-[4px] sm:active:translate-x-[6px] active:translate-y-[4px] sm:active:translate-y-[6px] active:shadow-none transition-all uppercase tracking-widest mt-2 sm:mt-0"
             >
               START CAMERA
             </button>
@@ -211,48 +212,48 @@ export function CameraPermission({ onAllow, onSkip, skipCalibration }: CameraPer
         </div>
       </div>
 
-      <div className="relative z-10 flex items-center justify-center min-h-screen px-4 sm:px-6 bg-black/40 backdrop-blur-sm">
-        <div className="relative w-full max-w-lg bg-white border-[4px] border-black rounded-3xl shadow-[8px_8px_0_0_#000] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+      <div className="relative z-10 flex items-center justify-center min-h-[100dvh] px-4 sm:px-6 py-6 bg-black/40 backdrop-blur-sm overflow-y-auto">
+        <div className="relative w-full max-w-md bg-white border-[3px] sm:border-[4px] border-black rounded-2xl sm:rounded-3xl shadow-[4px_4px_0_0_#000] sm:shadow-[8px_8px_0_0_#000] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 my-auto">
 
-          <div className="bg-[#f9d066] border-b-[4px] border-black pt-10 pb-8 px-6 flex flex-col items-center justify-center relative">
-            <Star className="absolute top-4 left-6 text-black opacity-30 w-6 h-6" />
-            <Star className="absolute bottom-4 right-6 text-black opacity-30 w-8 h-8" />
+          <div className="bg-[#f9d066] border-b-[3px] sm:border-b-[4px] border-black pt-6 sm:pt-8 pb-5 sm:pb-6 px-4 sm:px-6 flex flex-col items-center justify-center relative">
+            <Star className="absolute top-3 left-4 text-black opacity-30 w-5 h-5 sm:w-6 sm:h-6" />
+            <Star className="absolute bottom-3 right-4 text-black opacity-30 w-6 h-6 sm:w-8 sm:h-8" />
 
-            <div className="relative z-10 bg-white p-5 rounded-full border-[4px] border-black shadow-[6px_6px_0_0_#000] animate-[bounce_3s_infinite]">
-              <Camera size={48} className="text-black" strokeWidth={2.5} />
-              <div className="absolute -top-2 -right-2 bg-[#c11660] p-1.5 rounded-full border-[3px] border-black">
-                <Star size={16} fill="white" className="text-white" />
+            <div className="relative z-10 bg-white p-3 sm:p-4 rounded-full border-[3px] sm:border-[4px] border-black shadow-[4px_4px_0_0_#000] sm:shadow-[6px_6px_0_0_#000] animate-[bounce_3s_infinite]">
+              <Camera className="text-black w-8 h-8 sm:w-10 sm:h-10" strokeWidth={2.5} />
+              <div className="absolute -top-1 sm:-top-2 -right-1 sm:-right-2 bg-[#c11660] p-1 sm:p-1.5 rounded-full border-[2px] sm:border-[3px] border-black">
+                <Star className="text-white w-3 h-3 sm:w-4 sm:h-4" fill="white" />
               </div>
             </div>
           </div>
 
-          <div className="p-6 md:p-8 flex flex-col gap-6 text-center">
+          <div className="p-4 sm:p-6 md:p-8 flex flex-col gap-4 sm:gap-5 text-center">
             <div>
-              <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter leading-none text-[#383833] mb-3">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter leading-none text-[#383833] mb-2 sm:mb-3">
                 Ready to Sign<br /> <span className="text-[#c11660] drop-shadow-[2px_2px_0_rgba(0,0,0,0.1)]">Questor?</span>
               </h1>
-              <p className="text-base font-bold text-[#65655f] leading-snug">
+              <p className="text-xs sm:text-sm font-bold text-[#65655f] leading-snug">
                 เราจำเป็นต้องใช้กล้องเพื่อตรวจจับท่าทาง<br />
                 ของคุณแบบเรียลไทม์ และช่วยให้คุณอัปเลเวล!
               </p>
             </div>
 
-            <div className="bg-[#efeee5] border-[3px] border-black rounded-2xl p-3 flex items-center gap-3 text-left shadow-[4px_4px_0_0_#000] -rotate-1 hover:rotate-0 transition-transform duration-300">
-              <div className="bg-[#c11660] w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border-[2px] border-black">
-                <ShieldCheck size={24} className="text-white" strokeWidth={2.5} />
+            <div className="bg-[#efeee5] border-[2px] sm:border-[3px] border-black rounded-xl sm:rounded-2xl p-2.5 sm:p-3 flex items-center gap-2 sm:gap-3 text-left shadow-[3px_3px_0_0_#000] sm:shadow-[4px_4px_0_0_#000] -rotate-1 hover:rotate-0 transition-transform duration-300">
+              <div className="bg-[#c11660] w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border-[2px] border-black">
+                <ShieldCheck className="text-white w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2.5} />
               </div>
               <div className="flex-1">
-                <div className="font-black text-[#c11660] text-sm uppercase tracking-wide leading-none mb-1">
+                <div className="font-black text-[#c11660] text-xs sm:text-sm uppercase tracking-wide leading-none mb-1">
                   เป็นส่วนตัว 100%
                 </div>
-                <div className="text-[11px] font-bold text-[#65655f] leading-tight mt-1">
-                  วิดีโอจะถูกประมวลผลแค่ในอุปกรณ์ ไม่มีการอัปโหลดขึ้นคลาวด์ <br />
+                <div className="text-[10px] sm:text-[11px] font-bold text-[#65655f] leading-tight">
+                  วิดีโอจะถูกประมวลผลแค่ในอุปกรณ์ ไม่มีการอัปโหลดขึ้นคลาวด์ <br className="hidden sm:block" />
                   หรือแอบบันทึกภาพ
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 mt-2">
+            <div className="flex flex-col gap-2 sm:gap-3 mt-1 sm:mt-2">
               <button
                 onClick={() => {
                   if (skipCalibration) {
@@ -261,24 +262,24 @@ export function CameraPermission({ onAllow, onSkip, skipCalibration }: CameraPer
                     setShowTutorial(true);
                   }
                 }}
-                className="group relative w-full bg-[#c11660] hover:bg-[#af0054] text-white border-[4px] border-black rounded-2xl py-4 transition-all shadow-[6px_6px_0_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0_0_#000] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none"
+                className="group relative w-full bg-[#c11660] hover:bg-[#af0054] text-white border-[3px] sm:border-[4px] border-black rounded-xl sm:rounded-2xl py-3 sm:py-4 transition-all shadow-[4px_4px_0_0_#000] sm:shadow-[6px_6px_0_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_#000] sm:hover:shadow-[4px_4px_0_0_#000] active:translate-x-[4px] sm:active:translate-x-[6px] active:translate-y-[4px] sm:active:translate-y-[6px] active:shadow-none"
               >
-                <span className="relative z-10 flex items-center justify-center gap-2 font-black text-lg uppercase tracking-wide">
-                  อนุญาตใช้งานกล้อง <Video size={24} strokeWidth={2.5} />
+                <span className="relative z-10 flex items-center justify-center gap-2 font-black text-sm sm:text-base lg:text-lg uppercase tracking-wide">
+                  อนุญาตใช้งานกล้อง <Video className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" strokeWidth={2.5} />
                 </span>
               </button>
 
               <button
                 onClick={onSkip}
-                className="w-full bg-white hover:bg-[#efeee5] text-[#383833] border-[3px] border-black rounded-2xl py-3.5 transition-all shadow-[4px_4px_0_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
+                className="w-full bg-white hover:bg-[#efeee5] text-[#383833] border-[2px] sm:border-[3px] border-black rounded-xl sm:rounded-2xl py-2.5 sm:py-3.5 transition-all shadow-[3px_3px_0_0_#000] sm:shadow-[4px_4px_0_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0_0_#000] sm:hover:shadow-[2px_2px_0_0_#000] active:translate-x-[3px] sm:active:translate-x-[4px] active:translate-y-[3px] sm:active:translate-y-[4px] active:shadow-none"
               >
-                <span className="font-black text-sm uppercase tracking-wide">
+                <span className="font-black text-xs sm:text-sm uppercase tracking-wide">
                   ข้ามไปก่อน
                 </span>
               </button>
             </div>
 
-            <p className="text-[10px] font-bold text-[#81817a] leading-tight px-2">
+            <p className="text-[9px] sm:text-[10px] font-bold text-[#81817a] leading-tight px-1 sm:px-2">
               การอนุญาตเข้าถึงกล้อง ถือว่าคุณยอมรับ <a className="text-[#c11660] underline hover:text-black" href="#">นโยบายความเป็นส่วนตัว</a> ของเรา SignQuest ประมวลผลข้อมูลทั้งหมดบนอุปกรณ์ของคุณเท่านั้น
             </p>
           </div>
