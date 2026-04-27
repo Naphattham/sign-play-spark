@@ -263,7 +263,7 @@ export default function MatchAndSignPage() {
   return (
     <>
       {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
-      <main className="min-h-screen sd-gradient-bg relative flex flex-col text-foreground">
+      <main className="h-[100dvh] overflow-hidden sd-gradient-bg relative flex flex-col text-foreground">
         <DotGrid />
 
         {/* HUD */}
@@ -297,7 +297,8 @@ export default function MatchAndSignPage() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 flex flex-col items-center justify-center px-3 md:px-6 py-4 md:py-6 gap-4 md:gap-6 relative z-10">
+        <div className="flex-1 flex flex-col px-3 md:px-6 py-2 sm:py-4 md:py-6 relative z-10 overflow-y-auto">
+          <div className="mt-2 sm:m-auto flex flex-col items-center w-full gap-4 md:gap-6 pb-8">
           {/* Word Question Card */}
           <div className="w-full max-w-sm md:max-w-md sd-slide-up">
             <div className="bg-primary text-white border-[3px] sm:border-[4px] border-black rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 text-center relative overflow-hidden"
@@ -313,7 +314,7 @@ export default function MatchAndSignPage() {
           </div>
 
           {/* Video Choices */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 w-full max-w-4xl sd-slide-up" style={{ animationDelay: "0.1s" }}>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 w-full max-w-[320px] sm:max-w-md md:max-w-2xl lg:max-w-4xl mx-auto sd-slide-up" style={{ animationDelay: "0.1s" }}>
             {options.map((opt, i) => {
               let btnBg = "bg-white dark:bg-slate-800";
               let borderColor = "border-black";
@@ -357,6 +358,7 @@ export default function MatchAndSignPage() {
               style={{ boxShadow: selectedOption !== null ? "2px 2px 0px 0px #000" : "4px 4px 0px 0px #000" }}>
               <SkipForward className="w-4 h-4" /> SKIP
             </button>
+          </div>
           </div>
         </div>
       </main>

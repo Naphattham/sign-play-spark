@@ -28,6 +28,7 @@ import whyImg from "@/asset/image/Why.webp";
 import angryImg from "@/asset/image/angry.webp";
 import yesImg from "@/asset/image/yes.webp";
 import noImg from "@/asset/image/no.webp";
+import videoCameraImg from "@/asset/image/video-camera.webp";
 import headacheImg from "@/asset/image/headache.webp";
 import coldImg from "@/asset/image/cold.webp";
 import fineUnhappyImg from "@/asset/image/I'm fine | Unhappy.webp";
@@ -250,9 +251,9 @@ export const PredictionOverlay = ({
           />
 
           {/* Modal panel */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 pointer-events-none">
             <div
-              className={`bg-white dark:bg-slate-900 border-[2px] sm:border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col max-w-7xl w-full h-[95vh] sm:h-[90vh] pointer-events-auto ${isClosingModal ? "animate-modal-out" : "animate-modal-in"
+              className={`bg-white dark:bg-slate-900 border-[2px] sm:border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col max-w-7xl w-full h-[calc(100dvh-1rem)] sm:h-[90vh] lg:h-[96vh] pointer-events-auto ${isClosingModal ? "animate-modal-out" : "animate-modal-in"
                 }`}
             >
               {/* ── Modal Header ── */}
@@ -329,8 +330,8 @@ export const PredictionOverlay = ({
                   />
                 </button>
 
-                <main className="flex-1 p-1 sm:p-2 lg:p-3 xl:p-4 px-8 sm:px-12 md:px-4 bg-[#f8f6f6] dark:bg-[#221610] overflow-y-auto flex flex-col justify-between">
-                  <div className="flex-1 flex flex-col justify-center">
+                <main className="flex-1 p-2 sm:p-3 lg:p-4 xl:p-6 px-10 sm:px-12 md:px-6 bg-[#f8f6f6] dark:bg-[#221610] overflow-y-auto lg:overflow-y-hidden flex flex-col">
+                  <div className="m-auto w-full flex flex-col py-4 sm:py-0">
 
                     {/* ── Phrase title ── */}
                     <div className="flex items-center justify-center mb-1.5 sm:mb-3 lg:mb-4 pt-1 sm:pt-0">
@@ -431,10 +432,10 @@ export const PredictionOverlay = ({
                       )}
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5 sm:gap-2 lg:gap-3 items-start max-w-[740px] mx-auto w-full">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-2 lg:gap-3 items-start max-w-[740px] mx-auto w-full mb-8 sm:mb-10 lg:mb-4">
 
                       {/* ── Left column: Tutorial video + variant buttons ── */}
-                      <div className="relative flex flex-col gap-1 sm:gap-1.5 lg:gap-2 w-full items-center lg:items-end">
+                      <div className="relative flex flex-col gap-3 sm:gap-1.5 lg:gap-2 w-full items-center lg:items-end">
                         <div className="relative aspect-square w-full max-w-[240px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[360px] mx-auto lg:mr-0 bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
                           <VideoCard
                             phrase={activePhrase?.text ?? "Hello"}
@@ -541,7 +542,7 @@ export const PredictionOverlay = ({
                       </div>
 
                       {/* ── Right column: Webcam + action button ── */}
-                      <div className="flex flex-col gap-1 sm:gap-1.5 lg:gap-2 w-full items-center lg:items-start">
+                      <div className="flex flex-col gap-3 sm:gap-1.5 lg:gap-2 w-full items-center lg:items-start">
                         <div className="relative aspect-square w-full max-w-[240px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[360px] mx-auto lg:mx-0 bg-slate-200 dark:bg-slate-700 border-[3px] border-foreground rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
                           <WebcamView
                             onNextLevel={() => onSetIsPhraseCompleted(true)}
@@ -641,9 +642,9 @@ export const PredictionOverlay = ({
                             return (
                               <button
                                 onClick={onShowCameraPermission}
-                                className="w-full max-w-[240px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-1 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-blue-500 hover:bg-blue-600 text-white"
+                                className="w-full max-w-[240px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[360px] mx-auto lg:mx-0 h-12 lg:h-14 flex items-center justify-center gap-2 border-[3px] border-foreground rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black text-xs lg:text-sm bg-blue-500 hover:bg-blue-600 text-white"
                               >
-                                📹 อนุญาตการเข้าถึงกล้อง
+                                <img src={videoCameraImg} alt="Video Camera" className="w-5 h-5 sm:w-6 sm:h-6 object-contain" /> อนุญาตการเข้าถึงกล้อง
                               </button>
                             );
                           }
@@ -761,7 +762,7 @@ export const PredictionOverlay = ({
                   </div>
 
                   {/* ── Footer phrase strip (Tablet & Desktop: Inside Main) ── */}
-                  <footer className="hidden sm:block mt-1 sm:mt-2 pt-1 sm:pt-2 border-t-[2px] border-slate-200 dark:border-slate-800 w-full">
+                  <footer className="hidden sm:block mt-auto pt-2 sm:pt-4 border-t-[2px] border-slate-200 dark:border-slate-800 w-full shrink-0">
                     <div className="flex justify-start lg:justify-center gap-2 sm:gap-4 pb-2 pt-3 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                       {currentCategoryPhrases.map((phrase) => {
                         const isActive = phrase.id === activePhrase?.id;
@@ -782,7 +783,7 @@ export const PredictionOverlay = ({
                               <div className="absolute -top-2 -right-2 bg-green-500 text-white font-black text-[7px] sm:text-[9px] px-1.5 py-0.5 rounded-full border-[1.5px] border-foreground z-10 flex items-center gap-1">
                                 <Check size={10} className="shrink-0" strokeWidth={4} />{" "}
                                 <span className="hidden sm:inline">
-                                  {phrase.id === "g1" ||
+                                 ผ่าน {phrase.id === "g1" ||
                                     phrase.id === "g4" ||
                                     phrase.id === "g6"
                                     ? "200"
@@ -852,8 +853,8 @@ export const PredictionOverlay = ({
                             {isCompleted ? (
                               <div className="absolute -top-2 -right-2 bg-green-500 text-white font-black text-[7px] sm:text-[9px] px-1.5 py-0.5 rounded-full border-[1.5px] border-foreground z-10 flex items-center gap-1">
                                 <Check size={10} className="shrink-0" strokeWidth={4} />{" "}
-                                <span className="hidden sm:inline">
-                                  {phrase.id === "g1" ||
+                                <span>
+                                  ผ่าน {phrase.id === "g1" ||
                                     phrase.id === "g4" ||
                                     phrase.id === "g6"
                                     ? "200"

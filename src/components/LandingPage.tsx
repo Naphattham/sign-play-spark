@@ -9,6 +9,10 @@ import { getVideoUrl } from "@/lib/categories";
 import { VideoPlayer } from "@/components/VideoPlayer";
 
 import generalImg from "@/asset/image/general.webp";
+import lessonImg from "@/asset/image/lesson.webp";
+import trophyImg from "@/asset/image/Trophy.webp";
+import targetImg from "@/asset/image/target.webp";
+import joystickImg from "@/asset/image/joystick.webp";
 
 interface LandingPageProps {
   onLoginSuccess: () => void;
@@ -74,15 +78,15 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
             <div className="lp-hero-text flex flex-wrap justify-center md:justify-start gap-3 pt-2 w-full" style={{ animationDelay: "0.3s" }}>
               <button
                 onClick={() => setShowLoginModal(true)}
-                className="brutal-btn bg-amber-300 font-black text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl lp-cta-glow flex-1 sm:flex-none"
+                className="brutal-btn bg-amber-300 font-black text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl lp-cta-glow flex items-center justify-center gap-2 flex-1 sm:flex-none"
               >
-                🎮 เริ่มเกม
+                <img src={joystickImg} alt="Joystick" className="w-6 h-6 sm:w-7 sm:h-7 object-contain" /> เริ่มเกม
               </button>
               <button
                 onClick={() => navigate("/categories")}
                 className="brutal-btn bg-white font-bold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl flex items-center justify-center gap-2 flex-1 sm:flex-none hover:bg-gray-50"
               >
-                📚 สำรวจบทเรียน
+                <img src={lessonImg} alt="Lesson" className="w-5 h-5 object-contain" /> สำรวจบทเรียน
               </button>
             </div>
 
@@ -122,11 +126,10 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
                     <button
                       key={v.label}
                       onClick={() => setSelectedVideo(v.url)}
-                      className={`p-2 rounded-lg border-[2.5px] border-foreground flex justify-center items-center font-bold text-xs sm:text-sm relative transition-all duration-200 ${
-                        selectedVideo === v.url
+                      className={`p-2 rounded-lg border-[2.5px] border-foreground flex justify-center items-center font-bold text-xs sm:text-sm relative transition-all duration-200 ${selectedVideo === v.url
                           ? "bg-amber-300 shadow-[2px_2px_0_0_#1a1a1a]"
                           : "bg-gray-100 opacity-60 hover:opacity-80 shadow-[2px_2px_0_0_#1a1a1a]"
-                      }`}
+                        }`}
                     >
                       {v.label}
                       {selectedVideo === v.url && (
@@ -152,8 +155,6 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
               {/* Bottom stats bar */}
               <div className="mt-2.5 flex justify-between items-center">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-amber-500 text-base">⭐</span>
-                  <span className="font-black text-pink-500 text-sm">+10 pts</span>
                 </div>
                 <div className="w-7 h-7 rounded-full bg-pink-500 border-[2.5px] border-foreground flex items-center justify-center shadow-[2px_2px_0_0_#1a1a1a]">
                   <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
@@ -166,7 +167,9 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
               className="absolute -bottom-4 -left-3 sm:-bottom-5 sm:-left-5 bg-pink-500 text-white p-2 sm:p-2.5 rounded-xl border-[2.5px] border-foreground shadow-[3px_3px_0_0_#1a1a1a] items-center gap-1.5 hidden sm:flex lp-float-badge"
               style={{ "--badge-rotate": "-5deg" } as React.CSSProperties}
             >
-              <div className="bg-white/20 p-1 rounded-lg text-base">🏆</div>
+              <div className="bg-white/20 p-1.5 rounded-lg flex items-center justify-center">
+                <img src={trophyImg} alt="Trophy" className="w-5 h-5 object-contain" />
+              </div>
               <div>
                 <p className="text-[9px] font-bold uppercase leading-tight">Daily Streak</p>
                 <p className="font-black text-sm leading-none">15 DAYS!</p>
@@ -177,7 +180,9 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
               className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 bg-amber-300 text-foreground p-2 sm:p-2.5 rounded-xl border-[2.5px] border-foreground shadow-[3px_3px_0_0_#1a1a1a] items-center gap-1.5 hidden sm:flex lp-float-badge"
               style={{ "--badge-rotate": "4deg", animationDelay: "1.5s" } as React.CSSProperties}
             >
-              <div className="bg-white/40 p-1 rounded-lg text-base">🎯</div>
+              <div className="bg-white/40 p-1.5 rounded-lg flex items-center justify-center">
+                <img src={targetImg} alt="Target" className="w-5 h-5 object-contain" />
+              </div>
               <div>
                 <p className="text-[9px] font-bold uppercase leading-tight">Accuracy</p>
                 <p className="font-black text-sm leading-none">98%</p>

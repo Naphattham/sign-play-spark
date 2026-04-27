@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "@/lib/auth";
+import handWaveImg from "@/asset/image/hand_wave.webp";
 
 interface LoginModalProps {
   show: boolean;
@@ -89,7 +90,9 @@ export function LoginModal({ show, onClose }: LoginModalProps) {
             <X size={18} strokeWidth={3} className="text-white" />
           </button>
           <div className="text-center text-white">
-            <div className="text-3xl sm:text-4xl md:text-5xl mb-1.5 sm:mb-2.5 cb-float-icon inline-block">👋</div>
+            <div className="mb-1.5 sm:mb-2.5 cb-float-icon inline-flex items-center justify-center">
+              <img src={handWaveImg} alt="Wave" className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 object-contain" />
+            </div>
             <h2 className="font-black text-xl sm:text-2xl md:text-3xl mb-0.5 sm:mb-1 leading-tight">{isSignup ? "New Player?" : "Welcome Back!"}</h2>
             <p className="font-semibold text-white/70 text-[11px] sm:text-xs md:text-sm">{isSignup ? "Create a profile to start winning." : "Log in to continue your streak."}</p>
           </div>

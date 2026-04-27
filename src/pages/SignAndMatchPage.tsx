@@ -268,7 +268,7 @@ export default function SignAndMatchPage() {
   return (
     <>
       {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
-      <main className="min-h-screen sd-gradient-bg relative flex flex-col text-foreground">
+      <main className="h-[100dvh] overflow-hidden sd-gradient-bg relative flex flex-col text-foreground">
         <DotGrid />
 
         {/* ── HUD ── */}
@@ -305,7 +305,8 @@ export default function SignAndMatchPage() {
         </div>
 
         {/* ── Content ── */}
-        <div className="flex-1 flex flex-col items-center justify-center px-3 md:px-6 py-4 md:py-6 gap-4 md:gap-6 relative z-10">
+        <div className="flex-1 flex flex-col px-3 md:px-6 py-2 sm:py-4 md:py-6 relative z-10 overflow-y-auto">
+          <div className="mt-2 sm:m-auto flex flex-col items-center w-full gap-4 md:gap-6 pb-8">
           {/* Video Card */}
           <div className="w-full max-w-[240px] sm:max-w-[280px] md:max-w-[320px] sd-slide-up">
             <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl border-[3px] sm:border-[4px] border-black overflow-hidden relative"
@@ -359,6 +360,7 @@ export default function SignAndMatchPage() {
               style={{ boxShadow: selectedOption !== null ? "2px 2px 0px 0px #000" : "4px 4px 0px 0px #000" }}>
               <SkipForward className="w-4 h-4" /> SKIP
             </button>
+          </div>
           </div>
         </div>
       </main>

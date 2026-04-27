@@ -280,7 +280,7 @@ export function CameraPermission({ onAllow, onSkip, skipCalibration }: CameraPer
             </div>
 
             <p className="text-[9px] sm:text-[10px] font-bold text-[#81817a] leading-tight px-1 sm:px-2">
-              การอนุญาตเข้าถึงกล้อง ถือว่าคุณยอมรับ <a className="text-[#c11660] underline hover:text-black" href="#">นโยบายความเป็นส่วนตัว</a> ของเรา SignQuest ประมวลผลข้อมูลทั้งหมดบนอุปกรณ์ของคุณเท่านั้น
+              การอนุญาตเข้าถึงกล้อง ถือว่าคุณยอมรับ <a className="text-[#c11660]">นโยบายความเป็นส่วนตัว</a> ของเรา SignMate ประมวลผลข้อมูลทั้งหมดบนอุปกรณ์ของคุณเท่านั้น
             </p>
           </div>
         </div>
