@@ -20,6 +20,8 @@ import m9 from "@/asset/image/monster/my_monster-9.webp";
 import powImg from "@/asset/image/monster/pow.webp";
 import shieldImg from "@/asset/image/monster/shield.webp";
 import heartImg from "@/asset/image/monster/heart.webp";
+import videoCameraImg from "@/asset/image/video-camera.webp";
+import hourglassImg from "@/asset/image/hourglass.webp";
 
 const MONSTER_IMAGES = [m1, m2, m3, m4, m5, m6, m7, m8, m9];
 
@@ -406,11 +408,14 @@ export default function SignDefenderPage() {
   const bufferPct = Math.round((signRecognition.bufferLength / 40) * 100);
   const isReady = signRecognition.bufferLength >= 40;
 
+  if (isReturningHome) {
+    return <LoadingScreen message="Returning to Challenge..." />;
+  }
+
   // ─── GAME OVER ────────────────────────────────────────────────────────────
   if (phase === "gameover") {
     return (
       <>
-        {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
         <main className="min-h-screen flex flex-col relative overflow-hidden sd-gradient-bg">
           {/* Dot grid background */}
           <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
@@ -497,7 +502,6 @@ export default function SignDefenderPage() {
   if (phase === "idle") {
     return (
       <>
-        {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
         <main className="min-h-screen text-foreground relative p-3 sm:p-4 md:p-8 flex flex-col items-center overflow-hidden sd-gradient-bg">
           {/* Dot grid background */}
           <div className="absolute inset-0 opacity-15 pointer-events-none" style={{
@@ -709,7 +713,7 @@ export default function SignDefenderPage() {
                     className="bg-secondary text-foreground text-base sm:text-lg md:text-xl font-black py-3 sm:py-3.5 px-4 sm:px-6 rounded-xl sm:rounded-2xl transition-all uppercase w-full border-[3px] border-black hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-2 h-full"
                     style={{ boxShadow: "5px 5px 0px 0px #000" }}
                   >
-                    <Camera className="w-5 h-5" /> ขออนุญาตใช้งานกล้อง
+                    <img src={videoCameraImg} alt="Camera" className="w-5 h-5 object-contain" /> ขออนุญาตใช้งานกล้อง
                   </button>
                 ) : (
                   <button
@@ -722,7 +726,7 @@ export default function SignDefenderPage() {
                       <div className="absolute left-0 top-0 h-full bg-primary/50 transition-all duration-300" style={{ width: `${bufferPct}%` }} />
                     )}
                     <span className="relative z-10 flex items-center gap-2">
-                      {isReady ? <><Swords className="w-5 h-5" /> START GAME</> : `⏳ LOADING… ${bufferPct}%`}
+                      {isReady ? <><Swords className="w-5 h-5" /> START GAME</> : <><img src={hourglassImg} alt="Loading" className="w-5 h-5 object-contain" /> LOADING… {bufferPct}%</>}
                     </span>
                   </button>
                 )}
@@ -750,8 +754,6 @@ export default function SignDefenderPage() {
   // ─── PLAYING SCREEN ───────────────────────────────────────────────────────
   return (
     <>
-      {isReturningHome && <LoadingScreen message="Returning to Challenge..." />}
-
       {/* ── Exit Modal ── */}
       {showExitModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm pointer-events-auto">

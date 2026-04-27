@@ -8,6 +8,7 @@ import { AudioProvider, useAudio } from "@/lib/audioContext";
 import { Volume2, VolumeX } from "lucide-react";
 import { getVideoUrl } from "@/lib/categories";
 import { VideoPlayer } from "@/components/VideoPlayer";
+import { PublicLayout } from "@/components/PublicLayout";
 
 // Lazy-load heavy pages — code only downloaded when user navigates there
 const Index = lazy(() => import("./pages/Index.tsx"));
@@ -103,8 +104,10 @@ const App = () => (
           <GlobalVideoPreloader videoFiles={PRELOAD_VIDEOS} />
           <Suspense fallback={<PageLoader />}>
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/categories" element={<CategoryBrowsePage />} />
+              <Route element={<PublicLayout />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/categories" element={<CategoryBrowsePage />} />
+              </Route>
               {/* <Route path="/game-setup" element={<GameSetupPage />} /> */}
               <Route path="/match-and-sign" element={<MatchAndSignPage />} />
               <Route path="/sign-and-match" element={<SignAndMatchPage />} />

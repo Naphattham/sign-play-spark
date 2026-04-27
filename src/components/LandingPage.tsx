@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, Zap, Trophy, Gamepad2, BookOpen, Users, Sparkles } from "lucide-react";
-import { Navbar } from "@/components/Navbar";
-import { LoginModal } from "@/components/LoginModal";
+import { Check, Zap, Trophy, Gamepad2, BookOpen, Sparkles } from "lucide-react";
+import { useNavbarContext } from "@/components/PublicLayout";
 import { database } from "@/lib/firebase";
 import { ref as dbRef, onValue } from "firebase/database";
 import { getVideoUrl } from "@/lib/categories";
@@ -27,7 +26,7 @@ const FEATURES = [
 
 export function LandingPage({ onLoginSuccess }: LandingPageProps) {
   const navigate = useNavigate();
-  const [showLoginModal, setShowLoginModal] = useState(false);
+  const { openLogin } = useNavbarContext();
   const [selectedVideo, setSelectedVideo] = useState(getVideoUrl("general", "สวัสดี (ผู้ใหญ่)main"));
   const [totalUsers, setTotalUsers] = useState<number>(0);
 
@@ -49,10 +48,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
   const videoFriend = getVideoUrl("general", "สวัสดี (เพื่อน)main");
 
   return (
-    <>
-      <div className="h-[100dvh] overflow-y-auto scroll-smooth text-foreground cb-hero-bg dot-grid flex flex-col" style={{ WebkitOverflowScrolling: 'touch' }}>
-
-        <Navbar onLoginClick={() => setShowLoginModal(true)} />
+    <div className="flex flex-col flex-1">
 
         {/* ── Hero Section ── */}
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16 flex-1 flex flex-col md:flex-row items-center gap-8 md:gap-12 lg:gap-20">
@@ -77,7 +73,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
             {/* CTA Buttons */}
             <div className="lp-hero-text flex flex-wrap justify-center md:justify-start gap-3 pt-2 w-full" style={{ animationDelay: "0.3s" }}>
               <button
-                onClick={() => setShowLoginModal(true)}
+                onClick={openLogin}
                 className="brutal-btn bg-amber-300 font-black text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl lp-cta-glow flex items-center justify-center gap-2 flex-1 sm:flex-none"
               >
                 <img src={joystickImg} alt="Joystick" className="w-6 h-6 sm:w-7 sm:h-7 object-contain" /> เริ่มเกม
@@ -220,10 +216,6 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
             <p className="font-bold text-white/50 text-xs sm:text-sm text-center">© 2026 SignMate Interactive. All rights reserved.</p>
           </div>
         </footer>
-      </div>
-
-      {/* ── Login Modal ── */}
-      <LoginModal show={showLoginModal} onClose={() => setShowLoginModal(false)} />
-    </>
+    </div>
   );
 }
