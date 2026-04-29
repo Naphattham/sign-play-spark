@@ -2,6 +2,7 @@ export type Category = "general" | "emotions" | "qa" | "illness";
 
 export interface Phrase {
   id: string;
+  slug: string; // English slug key for logging (e.g. "hello", "sore_throat")
   text: string;
   category: Category;
   videoUrl?: string;
@@ -24,11 +25,12 @@ export const categories: { id: Category; label: string; icon: string; color: str
 
 export const phrases: Phrase[] = [
   // General (บทสนทนาทั่วไป)
-  { 
-    id: "g1", 
-    text: "สวัสดี (ผู้ใหญ่ | เพื่อน)", 
-    category: "general", 
-    emoji: "👋", 
+  {
+    id: "g1",
+    slug: "hello",
+    text: "สวัสดี (ผู้ใหญ่ | เพื่อน)",
+    category: "general",
+    emoji: "👋",
     english: "Hello",
     modelClasses: ["hello_adult", "hello_friend"],
     variantModelMapping: {
@@ -36,169 +38,185 @@ export const phrases: Phrase[] = [
       friend: "hello_friend"
     }
   },
-  { 
-    id: "g2", 
-    text: "ลาก่อน", 
-    category: "general", 
-    emoji: "👋", 
+  {
+    id: "g2",
+    slug: "goodbye",
+    text: "ลาก่อน",
+    category: "general",
+    emoji: "👋",
     english: "Goodbye",
     modelClasses: ["bye_go", "bye_me"]
   },
-  { 
-    id: "g3", 
-    text: "กินข้าวหรือยัง?", 
-    category: "general", 
-    emoji: "🍚", 
+  {
+    id: "g3",
+    slug: "have_you_eaten",
+    text: "กินข้าวหรือยัง?",
+    category: "general",
+    emoji: "🍚",
     english: "Have you eaten?",
     modelClasses: ["rice", "eat", "yet"]
   },
-  { 
-    id: "g4", 
-    text: "กินแล้ว | ยังไม่ได้กิน", 
-    category: "general", 
-    emoji: "✅", 
+  {
+    id: "g4",
+    slug: "already_ate_or_not",
+    text: "กินแล้ว | ยังไม่ได้กิน",
+    category: "general",
+    emoji: "✅",
     english: "Already ate | Not yet",
     modelClasses: ["already", "yet", "eat"]
   },
-  { 
-    id: "g5", 
-    text: "สบายดีไหม?", 
-    category: "general", 
-    emoji: "😊", 
+  {
+    id: "g5",
+    slug: "how_are_you",
+    text: "สบายดีไหม?",
+    category: "general",
+    emoji: "😊",
     english: "How are you?",
     modelClass: "how_are_you"
   },
-  { 
-    id: "g6", 
-    text: "สบายดี", 
-    category: "general", 
-    emoji: "👍", 
-    english: "I'm fine",
-    modelClass: "fine"
+  {
+    id: "g6",
+    slug: "fine_or_unhappy",
+    text: "สบายดี | ไม่สบายใจ",
+    category: "general",
+    emoji: "👍",
+    english: "I'm fine | Unhappy",
+    modelClasses: ["fine", "unhappy"],
+    variantModelMapping: {
+      adult: "fine",
+      friend: "unhappy"
+    }
   },
-  
+
   // Emotions (อารมณ์)
-  { 
-    id: "e1", 
-    text: "โกรธ", 
-    category: "emotions", 
-    emoji: "😡", 
+  {
+    id: "e1",
+    slug: "angry",
+    text: "โกรธ",
+    category: "emotions",
+    emoji: "😡",
     english: "Angry",
     modelClass: "angry"
   },
-  { 
-    id: "e2", 
-    text: "กลัว", 
-    category: "emotions", 
-    emoji: "😨", 
+  {
+    id: "e2",
+    slug: "fear",
+    text: "กลัว",
+    category: "emotions",
+    emoji: "😨",
     english: "Scared",
     modelClass: "fear"
   },
-  { 
-    id: "e3", 
-    text: "รัก", 
-    category: "emotions", 
-    emoji: "❤️", 
+  {
+    id: "e3",
+    slug: "love",
+    text: "รัก",
+    category: "emotions",
+    emoji: "❤️",
     english: "Love",
     modelClass: "love"
   },
-  { 
-    id: "e4", 
-    text: "ไม่สบายใจ", 
-    category: "emotions", 
-    emoji: "🙁", 
-    english: "Uncomfortable",
-    modelClass: "unhappy"
-  },
-  { 
-    id: "e5", 
-    text: "เหนื่อย", 
-    category: "emotions", 
-    emoji: "😩", 
+
+  {
+    id: "e4",
+    slug: "tired",
+    text: "เหนื่อย",
+    category: "emotions",
+    emoji: "😩",
     english: "Tired",
     modelClass: "tired"
   },
-  
+
   // Q&A (คำถาม-คำตอบ)
-  { 
-    id: "q1", 
-    text: "อะไร?", 
-    category: "qa", 
-    emoji: "❓", 
+  {
+    id: "q1",
+    slug: "what",
+    text: "อะไร?",
+    category: "qa",
+    emoji: "❓",
     english: "What?",
     modelClass: "what"
   },
-  { 
-    id: "q2", 
-    text: "ทำไม?", 
-    category: "qa", 
-    emoji: "🤔", 
+  {
+    id: "q2",
+    slug: "why",
+    text: "ทำไม?",
+    category: "qa",
+    emoji: "🤔",
     english: "Why?",
     modelClass: "why"
   },
-  { 
-    id: "q3", 
-    text: "เท่าไหร่?", 
-    category: "qa", 
-    emoji: "💰", 
+  {
+    id: "q3",
+    slug: "how_much",
+    text: "เท่าไหร่?",
+    category: "qa",
+    emoji: "💰",
     english: "How much?",
     modelClass: "how_much"
   },
-  { 
-    id: "q4", 
-    text: "ใช่", 
-    category: "qa", 
-    emoji: "✅", 
+  {
+    id: "q4",
+    slug: "yes",
+    text: "ใช่",
+    category: "qa",
+    emoji: "✅",
     english: "Yes",
     modelClass: "yes"
   },
-  { 
-    id: "q5", 
-    text: "ไม่", 
-    category: "qa", 
-    emoji: "❌", 
+  {
+    id: "q5",
+    slug: "no",
+    text: "ไม่",
+    category: "qa",
+    emoji: "❌",
     english: "No",
     modelClass: "no"
   },
 
   // Illness (อาการเจ็บป่วย)
-  { 
-    id: "i1", 
-    text: "เป็นหวัด", 
-    category: "illness", 
-    emoji: "🤧", 
+  {
+    id: "i1",
+    slug: "cold",
+    text: "เป็นหวัด",
+    category: "illness",
+    emoji: "🤧",
     english: "Cold",
     modelClass: "cold"
   },
-  { 
-    id: "i2", 
-    text: "เจ็บคอ", 
-    category: "illness", 
-    emoji: "😷", 
+  {
+    id: "i2",
+    slug: "sore_throat",
+    text: "เจ็บคอ",
+    category: "illness",
+    emoji: "😷",
     english: "Sore throat",
     modelClass: "sore_throat"
   },
-  { 
-    id: "i3", 
-    text: "ปวดท้อง", 
-    category: "illness", 
-    emoji: "🤰", 
+  {
+    id: "i3",
+    slug: "stomachache",
+    text: "ปวดท้อง",
+    category: "illness",
+    emoji: "🤰",
     english: "Stomachache",
     modelClass: "stomachache"
   },
-  { 
-    id: "i4", 
-    text: "ปวดหัว", 
-    category: "illness", 
-    emoji: "🤕", 
+  {
+    id: "i4",
+    slug: "headache",
+    text: "ปวดหัว",
+    category: "illness",
+    emoji: "🤕",
     english: "Headache",
     modelClass: "headache"
   },
-  { 
-    id: "i5", 
-    text: "เป็นไข้", 
-    category: "illness", 
-    emoji: "🌡️", 
+  {
+    id: "i5",
+    slug: "fever",
+    text: "เป็นไข้",
+    category: "illness",
+    emoji: "🌡️",
     english: "Fever",
     modelClass: "fever"
   },
@@ -206,6 +224,21 @@ export const phrases: Phrase[] = [
 
 export const getPhrasesByCategory = (category: Category) =>
   phrases.filter((p) => p.category === category);
+
+/**
+ * Resolves the primary model class name for a phrase, used for logging.
+ * Respects variantModelMapping > modelClass > first of modelClasses.
+ */
+export function resolveTargetClass(phrase: Phrase, variant?: "adult" | "friend"): string {
+  if (phrase.variantModelMapping && variant) {
+    const mapping = phrase.variantModelMapping[variant];
+    if (typeof mapping === 'string') return mapping;
+    if (Array.isArray(mapping) && mapping.length > 0) return mapping[0];
+  }
+  if (phrase.modelClass) return phrase.modelClass;
+  if (phrase.modelClasses && phrase.modelClasses.length > 0) return phrase.modelClasses[0];
+  return '';
+}
 
 // Helper function to find phrase by model class prediction
 export const getPhraseByModelClass = (modelClass: string): Phrase | undefined => {
@@ -218,8 +251,8 @@ export const getPhraseByModelClass = (modelClass: string): Phrase | undefined =>
 
 // Helper function to check if a model prediction matches a phrase
 export const checkPhraseMatch = (
-  phrase: Phrase, 
-  modelClass: string, 
+  phrase: Phrase,
+  modelClass: string,
   variant?: "adult" | "friend"
 ): boolean => {
   // If phrase has variant mapping and a variant is specified, use it
@@ -231,11 +264,20 @@ export const checkPhraseMatch = (
       return variantClasses.includes(modelClass);
     }
   }
-  
+
   // Fallback to original behavior
   if (phrase.modelClass === modelClass) return true;
   if (phrase.modelClasses?.includes(modelClass)) return true;
   return false;
+};
+
+// Helper function to check if a phrase is fully completed 
+// (for phrases with multiple sub-parts like g1 and g4, verifies both are collected)
+export const isPhraseCompletedCheck = (phraseId: string, completedPhrases: Set<string>): boolean => {
+  if (phraseId === "g1" || phraseId === "g4" || phraseId === "g6") {
+    return completedPhrases.has(`${phraseId}_adult`) && completedPhrases.has(`${phraseId}_friend`);
+  }
+  return completedPhrases.has(phraseId);
 };
 
 export const leaderboardData = [
@@ -250,3 +292,84 @@ export const leaderboardData = [
   { rank: 9, username: "MuteButLoud", points: 3200 },
   { rank: 10, username: "NewLearner", points: 1050 },
 ];
+
+/**
+ * Direct map from logical video keys to /videos/*.webp public paths.
+ * Each key is the Thai display name or internal English key used in the app.
+ */
+export const VIDEO_URL_MAP: Record<string, string> = {
+  // General — main clips
+  "สวัสดี (ผู้ใหญ่)": "/videos/general/hello_adult.mp4",
+  "สวัสดี (ผู้ใหญ่)main": "/videos/general/hello_adult_main.mp4",
+  "สวัสดี (เพื่อน)": "/videos/general/hello_friend.mp4",
+  "สวัสดี (เพื่อน)main": "/videos/general/hello_friend_main.mp4",
+  "สบายดีไหม": "/videos/general/how_are_you.mp4",
+  "สบายดี": "/videos/general/fine.mp4",
+  "ไม่สบายใจ": "/videos/general/unhappy.mp4",
+  "กินข้าวแล้วหรือยัง": "/videos/general/Are_you_eaten.mp4",
+  "กินข้าวหรือยัง": "/videos/general/Are_you_eaten.mp4",
+  "กินแล้ว": "/videos/general/already_eat.mp4",
+  "ยังไม่ได้กิน": "/videos/general/not_eat.mp4",
+  "ลาก่อน": "/videos/general/goodbye.mp4",
+  // General — live step clips
+  "กิน": "/videos/general/eat.mp4",
+  "แล้ว": "/videos/general/already.mp4",
+  "ยัง": "/videos/general/not_yet.mp4",
+  "ฉัน": "/videos/general/me.mp4",
+  "ไป": "/videos/general/go.mp4",
+  "ข้าว": "/videos/general/rice.mp4",
+  "หรือยัง": "/videos/general/or_not_yet.mp4",
+  // Emotions
+  "กลัว": "/videos/emotions/fear.mp4",
+  "รัก": "/videos/emotions/love.mp4",
+  "เหนื่อย": "/videos/emotions/tired.mp4",
+  "โกรธ": "/videos/emotions/angry.mp4",
+  // Q&A
+  "ทำไม": "/videos/qa/why.mp4",
+  "อะไร": "/videos/qa/what.mp4",
+  "เท่าไหร่": "/videos/qa/how_much.mp4",
+  "ใช่": "/videos/qa/yes.mp4",
+  "ไม่": "/videos/qa/no.mp4",
+  // Illness
+  "ปวดท้อง": "/videos/illness/stomachache.mp4",
+  "ปวดหัว": "/videos/illness/headache.mp4",
+  "เจ็บคอ": "/videos/illness/sore_throat.mp4",
+  "เป็นหวัด": "/videos/illness/cold.mp4",
+  "เป็นไข้": "/videos/illness/fever.mp4",
+  // Tips
+  "hello_adult-tip": "/videos/Tips_video/hello_adult-tip.mp4",
+  "hello_friend-tip": "/videos/Tips_video/hello_friend-tip.mp4",
+  "bye_me-tip": "/videos/Tips_video/bye_me-tip.mp4",
+  "bye_go-tip": "/videos/Tips_video/bye_go-tip.mp4",
+  "rice-tip": "/videos/Tips_video/rice-tip.mp4",
+  "eat-tip": "/videos/Tips_video/eat-tip.mp4",
+  "yet-tip": "/videos/Tips_video/yet-tip.mp4",
+  "already-tip": "/videos/Tips_video/already-tip.mp4",
+  "how_are_you-tip": "/videos/Tips_video/how_are_you-tip.mp4",
+  "fine-tip": "/videos/Tips_video/fine-tip.mp4",
+  "unhappy-tip": "/videos/Tips_video/unhappy-tip.mp4",
+  "angry-tip": "/videos/Tips_video/angry-tip.mp4",
+  "fear-tip": "/videos/Tips_video/fear-tip.mp4",
+  "love-tip": "/videos/Tips_video/love-tip.mp4",
+  "tired-tip": "/videos/Tips_video/tired-tip.mp4",
+  "what-tip": "/videos/Tips_video/what-tip.mp4",
+  "why-tip": "/videos/Tips_video/why-tip.mp4",
+  "how_much-tip": "/videos/Tips_video/how_much-tip.mp4",
+  "yes-tip": "/videos/Tips_video/yes-tip.mp4",
+  "no-tip": "/videos/Tips_video/no-tip.mp4",
+  "stomachache-tip": "/videos/Tips_video/stomachache-tip.mp4",
+  "headache-tip": "/videos/Tips_video/headache-tip.mp4",
+  "sore_throat-tip": "/videos/Tips_video/sore_throat-tip.mp4",
+  "cold-tip": "/videos/Tips_video/cold-tip.mp4",
+  "fever-tip": "/videos/Tips_video/fever-tip.mp4",
+};
+
+/**
+ * Returns the direct /videos/*.mp4 path for a given display name or tip key.
+ * Fallback: constructs a best-guess path if key is not in the map.
+ */
+export const getVideoUrl = (category: Category | string, fileName: string): string => {
+  if (VIDEO_URL_MAP[fileName]) return VIDEO_URL_MAP[fileName];
+  // Fallback — construct path directly (English filename, no mapping needed)
+  return `/videos/${category}/${fileName}.mp4`;
+};

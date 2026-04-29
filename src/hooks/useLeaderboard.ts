@@ -3,6 +3,7 @@ import { ref, get } from "firebase/database";
 import { database } from "@/lib/firebase";
 
 export interface LeaderboardEntry {
+  id: string;
   rank: number;
   username: string;
   points: number;
@@ -17,18 +18,19 @@ export function useLeaderboard() {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        console.log("Fetching leaderboard data...");
+
         const usersRef = ref(database, 'users');
         const snapshot = await get(usersRef);
 
-        console.log("Snapshot exists:", snapshot.exists());
+
         
         if (snapshot.exists()) {
           const users: LeaderboardEntry[] = [];
           snapshot.forEach((childSnapshot) => {
             const userData = childSnapshot.val();
-            console.log("User data:", userData);
+
             users.push({
+              id: childSnapshot.key as string,
               rank: 0,
               username: userData.username || userData.displayName || 'Anonymous',
               points: userData.points || 0,
@@ -41,11 +43,10 @@ export function useLeaderboard() {
             user.rank = index + 1;
           });
 
-          console.log("Total users found:", users.length);
-          console.log("Leaderboard data:", users);
+
           setLeaderboardData(users);
         } else {
-          console.log("No users found in database");
+
         }
       } catch (err) {
         console.error("Error fetching leaderboard:", err);

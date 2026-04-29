@@ -7,8 +7,112 @@ import {
   User,
   updateProfile,
 } from "firebase/auth";
-import { ref, set, get } from "firebase/database";
+import { ref, set, get, update, increment } from "firebase/database";
 import { auth, database } from "./firebase";
+
+// Add points to a user's total points
+export const addUserPoints = async (uid: string, pointsToAdd: number) => {
+  try {
+    const userRef = ref(database, `users/${uid}`);
+    const snapshot = await get(userRef);
+    if (!snapshot.exists()) return { error: "User not found" };
+    const userData = snapshot.val();
+    const newPoints = (userData.points || 0) + pointsToAdd;
+    await update(userRef, { points: newPoints });
+
+    return { points: newPoints, error: null };
+  } catch (error: any) {
+    console.error("Error adding points:", error);
+    return { points: 0, error: error.message };
+  }
+};
+
+// Increment user level by 1
+export const incrementUserLevel = async (uid: string) => {
+  try {
+    const userRef = ref(database, `users/${uid}`);
+    const snapshot = await get(userRef);
+    if (!snapshot.exists()) return { error: "User not found" };
+    const userData = snapshot.val();
+    const newLevel = (userData.level || 1) + 1;
+    await update(userRef, { level: newLevel });
+
+    return { level: newLevel, error: null };
+  } catch (error: any) {
+    console.error("Error incrementing level:", error);
+    return { level: 0, error: error.message };
+  }
+};
+
+// Update cumulative per-phrase points (capped at 100 per phrase)
+// Returns the actual delta added
+export const updatePhrasePoints = async (
+  uid: string,
+  phraseKey: string,
+  newTierScore: number // the score tier attempted (40 / 70 / 100)
+): Promise<{ delta: number; totalForPhrase: number; error: string | null }> => {
+  try {
+    const userRef = ref(database, `users/${uid}`);
+    const snapshot = await get(userRef);
+    if (!snapshot.exists()) return { delta: 0, totalForPhrase: 0, error: "User not found" };
+
+    const userData = snapshot.val();
+    const phrasePoints: Record<string, number> = userData.phrasePoints || {};
+    const current = phrasePoints[phraseKey] || 0;
+
+    // Delta = how many more points they earn on top of current
+    const delta = Math.max(0, newTierScore - current);
+    if (delta <= 0) return { delta: 0, totalForPhrase: current, error: null };
+
+    const newTotal = Math.min(100, current + delta); // cap at 100
+    phrasePoints[phraseKey] = newTotal;
+
+    await update(userRef, { phrasePoints });
+
+    return { delta, totalForPhrase: newTotal, error: null };
+  } catch (error: any) {
+    console.error("Error updating phrase points:", error);
+    return { delta: 0, totalForPhrase: 0, error: error.message };
+  }
+};
+
+// Save an unlocked hint key to user's record in DB
+export const saveUnlockedHint = async (uid: string, hintKey: string) => {
+  try {
+    const userRef = ref(database, `users/${uid}`);
+    const snapshot = await get(userRef);
+    if (!snapshot.exists()) return { error: "User not found" };
+    const userData = snapshot.val();
+    const unlockedHints: string[] = userData.unlockedHints || [];
+    if (!unlockedHints.includes(hintKey)) {
+      unlockedHints.push(hintKey);
+      await update(userRef, { unlockedHints });
+    }
+    return { unlockedHints, error: null };
+  } catch (error: any) {
+    console.error("Error saving unlocked hint:", error);
+    return { unlockedHints: [], error: error.message };
+  }
+};
+
+// Add a completed phrase to user's record in DB
+export const addCompletedPhrase = async (uid: string, phraseId: string) => {
+  try {
+    const userRef = ref(database, `users/${uid}`);
+    const snapshot = await get(userRef);
+    if (!snapshot.exists()) return { error: "User not found" };
+    const userData = snapshot.val();
+    const completedPhrases: string[] = userData.completedPhrases || [];
+    if (!completedPhrases.includes(phraseId)) {
+      completedPhrases.push(phraseId);
+      await update(userRef, { completedPhrases });
+    }
+    return { completedPhrases, error: null };
+  } catch (error: any) {
+    console.error("Error adding completed phrase:", error);
+    return { completedPhrases: [], error: error.message };
+  }
+};
 
 // Sign up with email and password
 export const signUpWithEmail = async (
@@ -43,6 +147,11 @@ export const signUpWithEmail = async (
       streak: 1,
       lastLoginDate: today.toISOString(),
       completedPhrases: [],
+    });
+
+    // Update global stat
+    await update(ref(database, 'stats'), {
+      totalUsers: increment(1)
     });
 
     return { user, error: null };
@@ -81,13 +190,7 @@ export const signInWithGoogle = async () => {
       photoURL = photoURL.split('=')[0];
     }
 
-    console.log("Google sign-in user data:", {
-      uid: user.uid,
-      displayName: user.displayName,
-      photoURL: photoURL,
-      originalPhotoURL: user.photoURL,
-      email: user.email
-    });
+
 
     // Ensure Firebase Auth profile has the photo
     if (photoURL) {
@@ -118,8 +221,13 @@ export const signInWithGoogle = async () => {
         lastLoginDate: today.toISOString(),
         completedPhrases: [],
       };
-      console.log("Creating new user in database:", userData);
+
       await set(userRef, userData);
+
+      // Update global stat
+      await update(ref(database, 'stats'), {
+        totalUsers: increment(1)
+      });
     } else {
       // Existing user - update photoURL from Google if it has changed
       const existingData = snapshot.val();
@@ -130,7 +238,7 @@ export const signInWithGoogle = async () => {
           displayName: user.displayName || existingData.displayName,
           username: user.displayName || existingData.username,
         };
-        console.log("Updating existing user with Google photo:", updatedData);
+
         await set(userRef, updatedData);
       }
     }
@@ -149,6 +257,10 @@ export const signInWithGoogle = async () => {
 export const signOutUser = async () => {
   try {
     await signOut(auth);
+    // Clear session-scoped flags so HowToPlay and camera permission
+    // are re-evaluated on the next login.
+    sessionStorage.removeItem('howToPlayShown');
+    sessionStorage.removeItem('cameraPermissionGranted');
     return { error: null };
   } catch (error: any) {
     return { error: getErrorMessage(error.code) };

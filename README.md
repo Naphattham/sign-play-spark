@@ -1,73 +1,86 @@
-# Welcome to your Lovable project
+# SignMate (SignQuest)
 
-## Project info
+**เว็บไซต์**: [https://signmate-test.web.app/](https://signmate-test.web.app/)
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+แอปพลิเคชันสำหรับเรียนรู้และฝึกฝนภาษามือผ่านเกมแบบอินเทอร์แอกทีฟ โดยใช้การเปิดกล้องเว็บแคมเพื่อจับภาพและวิเคราะห์ท่าทางภาษามือแบบเรียลไทม์ ผู้ใช้จะได้รับความสนุกสนานควบคู่ไปกับการเรียนรู้ผ่านมินิเกมต่างๆ
 
-## How can I edit this code?
+## 🌟 ฟีเจอร์หลัก (Features)
 
-There are several ways of editing your application.
+- **AI Sign Recognition**: ระบบตรวจจับภาษามือผ่านกล้องหน้าโดยใช้โมเดล Deep Learning (Keras) ประมวลผลแบบเรียลไทม์
+- **Interactive Mini-Games**: สนุกไปกับเกมที่ช่วยฝึกฝนภาษามือ
+  - *Sign Defender*
+  - *Match & Sign*
+  - *Sign Master Memory*
+- **User Authentication**: ระบบสมัครสมาชิกและเข้าสู่ระบบ (Firebase Auth)
+- **Profile & Leaderboard**: ระบบจัดการโปรไฟล์ส่วนตัวและการจัดอันดับผู้เล่นเพื่อความท้าทาย
 
-**Use Lovable**
+## 💻 Tech Stack ที่ใช้
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+**Frontend:**
+- **React.js** + **TypeScript**
+- **Vite** (Build Tool)
+- **Tailwind CSS** + **shadcn/ui** (UI Framework)
+- **React Router Dom** (Routing)
+- **React Webcam** (สำหรับเปิดกล้อง)
 
-Changes made via Lovable will be committed automatically to this repo.
+**Backend & ML:**
+- **Firebase** (Hosting, Authentication, Firestore / Realtime Database)
+- **Python** (Cloud Functions / Model API)
+- **Keras** (Machine Learning Model - `final_model.keras`)
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🚀 การติดตั้งและใช้งานโปรเจกต์ (Local Development)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### ข้อกำหนดเบื้องต้น (Prerequisites)
+- [Node.js](https://nodejs.org/) แนะนำเวอร์ชัน v20.19.0
+- [Python 3.x](https://www.python.org/) สำหรับรันส่วนของ Backend/Model (ถ้าต้องการ) แนะนำเวอร์ชัน Python 3.11.9
 
-Follow these steps:
+### 1. การทำงานกับ Frontend
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+โคลนโปรเจกต์และติดตั้ง Dependencies:
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```bash
+# 1. เข้าสู่โฟลเดอร์โปรเจกต์
+cd sign-play-spark
 
-# Step 3: Install the necessary dependencies.
-npm i
+# 2. ติดตั้ง Dependencies ฝั่ง Frontend
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 3. รัน Development Server
 npm run dev
 ```
+หลังจากรันเสร็จเรียบร้อยแล้วสามารถเข้าไปดูได้ที่ `http://localhost:5173`
 
-**Edit a file directly in GitHub**
+### 2. การทำงานกับ Backend / Firebase Functions
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+โปรเจกต์นี้มีเซอร์วิสที่ใช้ Python สำหรับจัดการ API ตรวจจับภาษามือ
 
-**Use GitHub Codespaces**
+```bash
+# 1. เข้าไปที่โฟลเดอร์ functions
+cd functions
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# 2. สร้าง Virtual Environment (แนะนำ)
+python -m venv venv
+source venv/bin/activate  # สำหรับ Mac/Linux
+# venv\Scripts\activate   # สำหรับ Windows
 
-## What technologies are used for this project?
+# 3. ติดตั้งไลบรารี
+pip install -r requirements.txt
+```
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🚀 การ Deploy
 
-## How can I deploy this project?
+โปรเจกต์นี้โฮสต์อยู่บน **Firebase Hosting**
+เว็บที่ Deploy ไว้แล้วสามารถเข้าถึงได้ที่: [https://signmate-test.web.app/](https://signmate-test.web.app/)
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+หากต้องการ Deploy อัปเดตใหม่ สามารถทำได้ผ่าน Firebase CLI:
+```bash
+# บิวต์ Production
+npm run build
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+# Deploy ไปยัง Firebase
+firebase deploy
+```

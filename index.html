@@ -1,34 +1,65 @@
 <!doctype html>
 <html lang="th">
-  <head>
-    <meta charset="UTF-8" />
-    
-    <link rel="icon" type="image/png" href="/LOGO_SignMate.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <title>SignMate - ฝึกภาษามือไทยด้วย AI</title>
-    <meta name="description" content="เรียนรู้และสนุกไปกับการฝึกภาษามือไทย ผ่านเกมแบบอินเทอร์แอคทีฟด้วยระบบ AI ตรวจจับท่าทางแบบเรียลไทม์" />
-    <meta name="author" content="SignMate Team" />
-    
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="SignMate - ฝึกภาษามือไทยด้วย AI" />
-    <meta property="og:description" content="เรียนรู้และสนุกไปกับการฝึกภาษามือไทย ผ่านเกมแบบอินเทอร์แอคทีฟด้วยระบบ AI" />
-    <meta property="og:image" content="/LOGO_SignMate.png" />
-    
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="SignMate - ฝึกภาษามือไทยด้วย AI" />
-    <meta name="twitter:description" content="เรียนรู้และสนุกไปกับการฝึกภาษามือไทย ผ่านเกมแบบอินเทอร์แอคทีฟด้วยระบบ AI" />
-    <meta name="twitter:image" content="/LOGO_SignMate.png" />
+<head>
+  <meta charset="UTF-8" />
 
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1675471629/holistic.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
-    
-  </head>
+  <link rel="icon" type="image/png" href="/LOGO_SignMate.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+  <title>SignMate - ฝึกภาษามือด้วย AI</title>
+  <meta name="description"
+    content="เรียนรู้และสนุกไปกับการฝึกภาษามือ ผ่านเกมแบบอินเทอร์แอคทีฟด้วยระบบ AI ตรวจจับท่าทางแบบเรียลไทม์" />
+  <meta name="author" content="SignMate Team" />
+
+  <!-- Preconnect to font providers before any other resource -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Preload the most critical font weight to eliminate FOUT -->
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Prompt:wght@100;200;300;400;500&display=swap" />
+
+  <!-- Load font stylesheet non-blocking -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Prompt:wght@100;200;300;400;500&display=swap"
+    media="print" onload="this.media='all'" />
+  <!-- Fallback for no-JS -->
+  <noscript>
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Prompt:wght@100;200;300;400;500&display=swap" />
+  </noscript>
+
+  <!-- Preconnect สำหรับ Firebase Storage วิดีโอเพื่อลด Latency (DNS/TCP/SSL handshake) -->
+  <link rel="preconnect" href="https://storage.googleapis.com" crossorigin />
+  <link rel="dns-prefetch" href="https://storage.googleapis.com" />
+
+  <!-- CDN preconnect for MediaPipe scripts -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="SignMate - ฝึกภาษามือด้วย AI" />
+  <meta property="og:description" content="เรียนรู้และสนุกไปกับการฝึกภาษามือ ผ่านเกมแบบอินเทอร์แอคทีฟด้วยระบบ AI" />
+  <meta property="og:image" content="/LOGO_SignMate.png" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="SignMate - ฝึกภาษามือด้วย AI" />
+  <meta name="twitter:description" content="เรียนรู้และสนุกไปกับการฝึกภาษามือ ผ่านเกมแบบอินเทอร์แอคทีฟด้วยระบบ AI" />
+  <meta name="twitter:image" content="/LOGO_SignMate.png" />
+
+  <!-- MediaPipe dependencies moved to body to prevent render blocking -->
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+
+  <!-- MediaPipe dependencies — Load at the bottom to prevent initial render blocking -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.6.1629159505/control_utils.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1675466124/drawing_utils.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1675471629/holistic.js" crossorigin="anonymous"></script>
+</body>
+
 </html>

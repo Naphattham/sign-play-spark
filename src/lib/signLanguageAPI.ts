@@ -76,10 +76,21 @@ export async function processFrame(frameDataUrl: string): Promise<KeypointsRespo
   }
 }
 
+export interface PredictSignOptions {
+  keypointsBuffer: number[][];
+  userId?: string;
+  targetWord?: string;
+}
+
 /**
- * Predict sign language from a sequence of keypoints
+ * Predict sign language from a sequence of keypoints.
+ * Optionally pass userId and targetWord for server-side usage logging.
  */
-export async function predictSign(keypointsBuffer: number[][]): Promise<PredictionResponse> {
+export async function predictSign({
+  keypointsBuffer,
+  userId = 'guest',
+  targetWord = '',
+}: PredictSignOptions): Promise<PredictionResponse> {
   try {
     const response = await fetch(PREDICT_SIGN_URL, {
       method: 'POST',
@@ -87,7 +98,11 @@ export async function predictSign(keypointsBuffer: number[][]): Promise<Predicti
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ keypoints_buffer: keypointsBuffer }),
+      body: JSON.stringify({
+        keypoints_buffer: keypointsBuffer,
+        userId,
+        targetWord,
+      }),
     });
 
     if (!response.ok) {
@@ -160,11 +175,11 @@ export function videoFrameToDataUrl(video: HTMLVideoElement): string {
  * (แนะนำให้เรียกใช้ตอนผู้ใช้ Login สำเร็จ)
  */
 export async function warmUpModel(): Promise<void> {
-  console.log("🔥 Warming up AI model in background...");
+        // console.error('Error processing frame:', error);
   try {
     // การเรียก getModelInfo ตอนนี้จะสั่งให้ Backend โหลด TF Model ด้วย
     await getModelInfo();
-    console.log("✅ AI model is warmed up and ready!");
+
   } catch (error) {
     console.warn("⚠️ Warm up failed, but will retry when playing.", error);
   }

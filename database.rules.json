@@ -12,6 +12,10 @@
       "$uid": {
         ".write": "auth != null && auth.uid === $uid"
       }
+    },
+    "stats": {
+      ".read": true,
+      ".write": "auth != null"
     }
   }
 }
