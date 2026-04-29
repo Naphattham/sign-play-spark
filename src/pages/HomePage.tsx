@@ -1,5 +1,5 @@
 import { Category, getPhrasesByCategory, isPhraseCompletedCheck, getVideoUrl } from "@/lib/categories";
-import { VideoPlayer } from "@/components/VideoPlayer";
+import { VideoPlayer } from "@/components/common/VideoPlayer";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { getAvatarUrl } from "@/lib/avatar";
 import { useState, useEffect } from "react";

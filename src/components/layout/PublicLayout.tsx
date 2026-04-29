@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, createContext, useContext } from "react";
 import { Outlet } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { Navbar, type NavbarHandle } from "@/components/Navbar";
+import { Navbar, type NavbarHandle } from "@/components/layout/Navbar";
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 interface NavbarContextValue {

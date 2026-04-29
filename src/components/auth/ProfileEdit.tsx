@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import Cropper, { Area } from "react-easy-crop";
 import { ArrowLeft, Upload, Check } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { auth, database, storage } from "@/lib/firebase";
 import { ref as dbRef, update, get } from "firebase/database";

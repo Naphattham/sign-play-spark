@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Zap, Trophy, Gamepad2, BookOpen, Sparkles } from "lucide-react";
-import { useNavbarContext } from "@/components/PublicLayout";
+import { useNavbarContext } from "@/components/layout/PublicLayout";
 import { database } from "@/lib/firebase";
 import { ref as dbRef, onValue } from "firebase/database";
 import { getVideoUrl } from "@/lib/categories";
-import { VideoPlayer } from "@/components/VideoPlayer";
+import { VideoPlayer } from "@/components/common/VideoPlayer";
 
 import generalImg from "@/asset/image/general.webp";
 import lessonImg from "@/asset/image/lesson.webp";

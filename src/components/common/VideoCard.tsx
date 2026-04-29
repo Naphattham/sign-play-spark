@@ -1,6 +1,6 @@
 import type { Category } from "@/lib/categories";
 import { getVideoUrl } from "@/lib/categories";
-import { VideoPlayer } from "@/components/VideoPlayer";
+import { VideoPlayer } from "@/components/common/VideoPlayer";
 
 interface VideoCardProps {
   phrase: string;

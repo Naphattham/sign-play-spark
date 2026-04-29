@@ -4,17 +4,17 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AudioProvider, useAudio } from "@/lib/audioContext";
+import { AudioProvider, useAudio } from "@/contexts/AudioContext";
 import { Volume2, VolumeX } from "lucide-react";
 import { getVideoUrl } from "@/lib/categories";
-import { VideoPlayer } from "@/components/VideoPlayer";
-import { PublicLayout } from "@/components/PublicLayout";
+import { VideoPlayer } from "@/components/common/VideoPlayer";
+import { PublicLayout } from "@/components/layout/PublicLayout";
 
 // Lazy-load heavy pages — code only downloaded when user navigates there
 const Index = lazy(() => import("./pages/Index.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const CategoryBrowsePage = lazy(() =>
-  import("@/components/CategoryBrowsePage").then((m) => ({ default: m.CategoryBrowsePage }))
+  import("@/pages/CategoryBrowsePage").then((m) => ({ default: m.CategoryBrowsePage }))
 );
 const MatchAndSignPage = lazy(() => import("@/pages/MatchAndSignPage"));
 const SignAndMatchPage = lazy(() => import("@/pages/SignAndMatchPage"));
@@ -105,7 +105,7 @@ const App = () => (
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route element={<PublicLayout />}>
-                <Route path="/" element={<Index />} />
+                <Route path="/*" element={<Index />} />
                 <Route path="/categories" element={<CategoryBrowsePage />} />
               </Route>
               {/* <Route path="/game-setup" element={<GameSetupPage />} /> */}

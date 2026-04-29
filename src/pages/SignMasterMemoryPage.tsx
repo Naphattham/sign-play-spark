@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Star, Zap, Smile, Meh, Frown, RotateCcw, ArrowLeft, Trophy, Swords, Eye, Pause } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { LoadingScreen } from "@/components/LoadingScreen";
+import { LoadingScreen } from "@/components/common/LoadingScreen";
 import { auth } from "@/lib/firebase";
 import { addUserPoints } from "@/lib/auth";
 import { getVideoUrl } from "@/lib/categories";
-import { VideoPlayer } from "@/components/VideoPlayer";
-import { useAudio } from "@/lib/audioContext";
+import { VideoPlayer } from "@/components/common/VideoPlayer";
+import { useAudio } from "@/contexts/AudioContext";
 import heartIcon from "../asset/image/monster/heart.webp";
 
 // ─── Types ──────────────────────────────────────────────────────────────

@@ -1,11 +1,11 @@
 import { useState, forwardRef, useImperativeHandle } from "react";
 import { useNavigate } from "react-router-dom";
-import { LoginModal } from "@/components/LoginModal";
-import neoRunGif from "../asset/image/rungif/neo-run.gif";
-import postRunGif from "../asset/image/rungif/post-run.gif";
-import iceRunGif from "../asset/image/rungif/ice-run.gif";
-import ajRunGif from "../asset/image/rungif/aj-run.gif";
-import faiRunGif from "../asset/image/rungif/fai-run.gif";
+import { LoginModal } from "@/components/auth/LoginModal";
+import neoRunGif from "@/asset/image/rungif/neo-run.gif";
+import postRunGif from "@/asset/image/rungif/post-run.gif";
+import iceRunGif from "@/asset/image/rungif/ice-run.gif";
+import ajRunGif from "@/asset/image/rungif/aj-run.gif";
+import faiRunGif from "@/asset/image/rungif/fai-run.gif";
 
 export interface NavbarHandle {
   openLogin: () => void;

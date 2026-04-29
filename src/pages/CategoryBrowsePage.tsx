@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, ArrowLeft, Play, Search } from "lucide-react";
 import { categories, getPhrasesByCategory, type Category, getVideoUrl } from "@/lib/categories";
-import { VideoPlayer } from "@/components/VideoPlayer";
+import { VideoPlayer } from "@/components/common/VideoPlayer";
 
 // Category images
 import generalImg from "@/asset/image/general.webp";

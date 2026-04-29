@@ -1,20 +1,19 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { GameSidebar } from "@/components/GameSidebar";
-import { LeaderboardView } from "@/components/LeaderboardView";
-import { AuthModal } from "@/components/AuthModal";
-import { ProfileEdit } from "@/components/ProfileEdit";
-import { LandingPage } from "@/components/LandingPage";
-import { LoadingScreen } from "@/components/LoadingScreen";
-import { PredictionOverlay } from "@/components/PredictionOverlay";
-import { HomePage } from "@/components/HomePage";
-import { LessonsPage } from "@/components/LessonsPage";
-import { QuestView } from "@/components/QuestView";
-import { GameSetupPage } from "@/components/GameSetupPage";
-import { CameraPermission } from "@/components/CameraPermission";
-import { TutorialModal } from "@/components/TutorialModal";
-import { MainHeader } from "@/components/MainHeader";
-import { GameView } from "@/components/GameView";
+import { GameSidebar } from "@/components/common/GameSidebar";
+import { LeaderboardView } from "@/components/common/LeaderboardView";
+import { ProfileEdit } from "@/components/auth/ProfileEdit";
+import { LandingPage } from "@/pages/LandingPage";
+import { LoadingScreen } from "@/components/common/LoadingScreen";
+import { PredictionOverlay } from "@/components/common/PredictionOverlay";
+import { HomePage } from "@/pages/HomePage";
+import { LessonsPage } from "@/pages/LessonsPage";
+import { QuestView } from "@/components/common/QuestView";
+import { GameSetupPage } from "@/pages/GameSetupPage";
+import { CameraPermission } from "@/components/common/CameraPermission";
+import { TutorialModal } from "@/components/common/TutorialModal";
+import { MainHeader } from "@/components/layout/MainHeader";
+import { GameView } from "@/components/common/GameView";
 import { Category, Phrase, getPhrasesByCategory, resolveTargetClass } from "@/lib/categories";
 import { View } from "@/lib/gameConstants";
 import { useAuthState } from "@/hooks/useAuthState";
@@ -31,7 +30,6 @@ const Index = () => {
   const navigate = useNavigate();
   const [view, setView] = useState<View>(((location.state as any)?.view as View) || "home");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -453,8 +451,6 @@ const Index = () => {
         getCurrentHintVideos={game.getCurrentHintVideos}
         getCurrentHintText={game.getCurrentHintText}
       />
-
-      <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
 
       {camera.showHowToPlay && !camera.showCameraPermission && (
         <TutorialModal onClose={() => camera.setShowHowToPlay(false)} />

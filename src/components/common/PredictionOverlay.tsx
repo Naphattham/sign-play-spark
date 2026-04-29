@@ -1,9 +1,9 @@
 import { X, Check, AlertTriangle, RotateCcw } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Phrase, checkPhraseMatch, isPhraseCompletedCheck } from "@/lib/categories";
-import { VideoCard } from "@/components/VideoCard";
-import { VideoPlayer } from "@/components/VideoPlayer";
-import { WebcamView } from "@/components/WebcamView";
+import { VideoCard } from "@/components/common/VideoCard";
+import { VideoPlayer } from "@/components/common/VideoPlayer";
+import { WebcamView } from "@/components/common/WebcamView";
 
 // ── Asset imports ──
 import arrowLeftImg from "@/asset/image/arrow_left.webp";

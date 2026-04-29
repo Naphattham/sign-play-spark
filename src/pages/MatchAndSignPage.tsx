@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { LoadingScreen } from "@/components/LoadingScreen";
+import { LoadingScreen } from "@/components/common/LoadingScreen";
 import { auth } from "@/lib/firebase";
 import { addUserPoints } from "@/lib/auth";
 import { getVideoUrl } from "@/lib/categories";
-import { VideoPlayer } from "@/components/VideoPlayer";
+import { VideoPlayer } from "@/components/common/VideoPlayer";
 import { Star, CheckCircle2, XCircle, SkipForward, ArrowLeft, Trophy, Zap, BookOpen, Swords, Eye } from "lucide-react";
 
 function shuffleArray<T>(array: T[]): T[] {
