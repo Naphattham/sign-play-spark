@@ -258,8 +258,8 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
   };
 
   return (
-    <div className="w-full">
-      <button onClick={onBack} className="brutal-btn-secondary flex items-center gap-2 text-sm mb-6 transition-all duration-300 ease-in-out hover:brightness-105">
+    <div className="relative flex flex-col min-h-[calc(100vh-6rem)] w-full pb-2">
+      <button onClick={onBack} className="brutal-btn-secondary w-fit flex items-center gap-2 text-sm mb-6 transition-all duration-300 ease-in-out hover:brightness-105">
         <ArrowLeft size={16} />
         Back to Home
       </button>
@@ -375,6 +375,17 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
             <Check size={18} />
             {isSaving ? "Saving..." : "Save Changes"}
           </button>
+        </div>
+      </div>
+
+      {/* Powered by */}
+      <div
+        className="w-full mt-auto pt-10 mb-6 flex flex-col md:flex-row items-center justify-center gap-2 text-xs text-sq-black/70 font-medium"
+      >
+        <span>Powered by</span>
+        <div className="flex items-center gap-2">
+          <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-6 md:h-7 object-contain" />
+          <span>School of Engineering · Bangkok University</span>
         </div>
       </div>
     </div>

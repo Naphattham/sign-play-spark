@@ -53,7 +53,7 @@ export const phraseIconMap: Record<string, string> = {
   e1: angryImg,
   e2: scaredImg,
   e3: loveImg,
-  e5: tiredImg,
+  e4: tiredImg,
   q1: whatImg,
   q2: whyImg,
   q3: howMuchImg,

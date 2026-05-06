@@ -72,7 +72,7 @@ export function LoadingScreen({ message = "กำลังโหลด..." }: { 
         </div>
 
         {/* ── Brand name ── */}
-        <div className="mb-12">
+        <div className="mb-6">
           <h1
             className="brand-font text-sq-black leading-[0.85] tracking-tight inline-block text-left"
             style={{
@@ -84,6 +84,9 @@ export function LoadingScreen({ message = "กำลังโหลด..." }: { 
             <div className="text-6xl md:text-8xl font-bold ml-2">Sign</div>
             <div className="text-6xl md:text-8xl font-bold text-sq-pink ml-[1.5em] -mt-2 md:-mt-3">Mate</div>
           </h1>
+
+
+
           <p
             className="text-sm md:text-base text-sq-black/40 tracking-[0.3em] uppercase mt-4 font-medium"
             style={{
@@ -106,7 +109,7 @@ export function LoadingScreen({ message = "กำลังโหลด..." }: { 
         >
           {/* Bar container */}
           <div className="relative h-7 md:h-8 bg-white rounded-full border-[3px] border-sq-black overflow-hidden"
-               style={{ boxShadow: "3px 3px 0px #1A1A1A" }}>
+            style={{ boxShadow: "3px 3px 0px #1A1A1A" }}>
             {/* Fill */}
             <div
               className="absolute inset-y-0 left-0 rounded-full loading-bar-fill"
@@ -146,6 +149,22 @@ export function LoadingScreen({ message = "กำลังโหลด..." }: { 
               style={{ animationDelay: `${i * 0.15}s` }}
             ></div>
           ))}
+        </div>
+
+      </div>
+
+      {/* Powered by */}
+      <div
+        className="absolute bottom-8 left-0 right-0 flex flex-col md:flex-row items-center justify-center gap-2 text-xs text-sq-black/70 font-medium"
+        style={{
+          opacity: showContent ? 1 : 0,
+          transition: "opacity 0.6s ease 0.4s",
+        }}
+      >
+        <span>Powered by</span>
+        <div className="flex items-center gap-2">
+          <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-6 md:h-7 object-contain" />
+          <span>School of Engineering · Bangkok University</span>
         </div>
       </div>
 

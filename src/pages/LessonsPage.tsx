@@ -32,8 +32,8 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
   const totalProgressPercent = totalAll > 0 ? Math.round((completedAll / totalAll) * 100) : 0;
 
   return (
-    <div className="flex-1 bg-background rounded-xl">
-      <section className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full min-h-max pb-28 sm:pb-12 md:pb-12">
+    <div className="relative flex-1 bg-background rounded-xl">
+      <section className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full min-h-[calc(100vh-10rem)] pb-28 sm:pb-12 md:pb-12">
         <div className="mb-4 sm:mb-6 text-center md:text-left animate-in fade-in slide-in-from-bottom-4 duration-500">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-1 md:mb-2 font-display">เริ่มเรียนรู้กันเลย!</h2>
           <p className="text-sm sm:text-base md:text-lg text-muted-foreground font-medium font-body">เลือกหัวข้อที่คุณต้องการฝึกฝนภาษามือวันนี้</p>
@@ -101,6 +101,17 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
           </button>
         </div>        
       </section>
+
+      {/* Powered by */}
+      <div
+        className="w-full mt-auto pt-10 mb-6 flex flex-col md:flex-row items-center justify-center gap-2 text-xs text-sq-black/70 font-medium"
+      >
+        <span>Powered by</span>
+        <div className="flex items-center gap-2">
+          <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-6 md:h-7 object-contain" />
+          <span>School of Engineering · Bangkok University</span>
+        </div>
+      </div>
     </div>
   );
 }

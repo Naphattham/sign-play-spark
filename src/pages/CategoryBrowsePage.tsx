@@ -89,7 +89,7 @@ export function CategoryBrowsePage() {
 
   return (
     <>
-      <div className="flex flex-col">
+      <div className="flex flex-col min-h-[100dvh]">
 
         {/* ── Hero Section ── */}
         <header className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-6 sm:pt-10 pb-2 sm:pb-6">
