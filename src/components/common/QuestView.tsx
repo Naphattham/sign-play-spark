@@ -368,7 +368,9 @@ export function QuestView({ streak }: QuestViewProps) {
         <span>Powered by</span>
         <div className="flex items-center gap-2">
           <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-6 md:h-7 object-contain" />
-          <span>School of Engineering · Bangkok University</span>
+          <a href="https://www.bu.ac.th/th/engineering/ai-engineering-datascience" target="_blank" rel="noopener noreferrer" className="hover:underline">
+            School of Engineering · Bangkok University
+          </a>
         </div>
       </div>
     </div>
