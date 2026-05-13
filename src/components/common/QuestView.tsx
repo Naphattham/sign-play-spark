@@ -231,8 +231,8 @@ export function QuestView({ streak }: QuestViewProps) {
   }
 
   return (
-    <div className="flex-1 bg-background rounded-xl">
-      <section className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full min-h-max pb-28 sm:pb-12 md:pb-12">
+    <div className="relative flex-1 flex flex-col bg-background rounded-xl">
+      <section className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full min-h-[calc(100vh-10rem)] pb-10">
         <div className="space-y-6 sm:space-y-8 md:space-y-10">
 
         {/* ━━━ HEADER ━━━ */}
@@ -360,6 +360,19 @@ export function QuestView({ streak }: QuestViewProps) {
 
         </div>
       </section>
+
+      {/* Powered by */}
+      <div
+        className="w-full mt-auto pt-10 mb-6 flex flex-col md:flex-row items-center justify-center gap-2 text-xs text-sq-black/70 font-medium"
+      >
+        <span>Powered by</span>
+        <div className="flex items-center gap-2">
+          <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-6 md:h-7 object-contain" />
+          <a href="https://www.bu.ac.th/th/engineering/ai-engineering-datascience" target="_blank" rel="noopener noreferrer" className="hover:underline">
+            School of Engineering · Bangkok University
+          </a>
+        </div>
+      </div>
     </div>
   );
 }

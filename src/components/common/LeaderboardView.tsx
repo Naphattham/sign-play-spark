@@ -393,7 +393,7 @@ export function LeaderboardView() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto flex flex-col h-full px-2 sm:px-4 md:px-0 gap-3 sm:gap-4 pb-28 sm:pb-12 md:pb-12">
+    <div className="relative max-w-4xl mx-auto w-full flex flex-col min-h-[calc(100vh-6rem)] px-2 sm:px-4 md:px-0 gap-3 sm:gap-4 pb-2">
 
       {/* ─── 3D Podium for Top 3 ─── */}
       <div className="relative pt-1 sm:pt-2 shrink-0">
@@ -428,7 +428,7 @@ export function LeaderboardView() {
 
       {/* ─── Rest of leaderboard ─── */}
       {rest.length > 0 && (
-        <div className="brutal-card-lg overflow-hidden relative flex-1 min-h-[240px] sm:min-h-[320px] flex flex-col">
+        <div className="brutal-card-lg overflow-hidden relative min-h-[280px] sm:min-h-[330px] max-h-[280px] sm:max-h-[330px] flex flex-col">
           {/* Header bar */}
           <div className="flex items-center justify-between px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 bg-foreground text-background shrink-0">
             <div className="flex items-center gap-2">
@@ -455,6 +455,19 @@ export function LeaderboardView() {
           )}
         </div>
       )}
+
+      {/* Powered by */}
+      <div
+        className="w-full mt-auto pt-10 mb-6 flex flex-col md:flex-row items-center justify-center gap-2 text-xs text-sq-black/70 font-medium"
+      >
+        <span>Powered by</span>
+        <div className="flex items-center gap-2">
+          <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-6 md:h-7 object-contain" />
+          <a href="https://www.bu.ac.th/th/engineering/ai-engineering-datascience" target="_blank" rel="noopener noreferrer" className="hover:underline">
+            School of Engineering · Bangkok University
+          </a>
+        </div>
+      </div>
     </div>
   );
 }

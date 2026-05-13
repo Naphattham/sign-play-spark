@@ -48,7 +48,7 @@ export function LandingPage({ onLoginSuccess }: LandingPageProps) {
   const videoFriend = getVideoUrl("general", "สวัสดี (เพื่อน)main");
 
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex flex-col flex-1 min-h-[100dvh]">
 
         {/* ── Hero Section ── */}
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16 flex-1 flex flex-col md:flex-row items-center gap-8 md:gap-12 lg:gap-20">

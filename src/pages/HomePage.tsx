@@ -139,7 +139,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
   };
 
   return (
-    <div className="w-full max-w-screen-xl mx-auto px-3 pt-3 pb-28 sm:px-4 sm:pb-8 md:px-6 md:pb-12">
+    <div className="relative flex flex-col min-h-[calc(100vh-5rem)] w-full max-w-screen-xl mx-auto px-3 pt-3 pb-2 sm:px-4 md:px-6">
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-5 md:gap-6 xl:gap-8">
 
         {/* ── Left Column ── */}
@@ -385,6 +385,19 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
             </div>
           </section>
 
+        </div>
+      </div>
+
+      {/* Powered by */}
+      <div
+        className="w-full mt-auto pt-10 mb-6 flex flex-col md:flex-row items-center justify-center gap-2 text-xs text-sq-black/70 font-medium"
+      >
+        <span>Powered by</span>
+        <div className="flex items-center gap-2">
+          <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-6 md:h-7 object-contain" />
+          <a href="https://www.bu.ac.th/th/engineering/ai-engineering-datascience" target="_blank" rel="noopener noreferrer" className="hover:underline">
+            School of Engineering · Bangkok University
+          </a>
         </div>
       </div>
     </div>
