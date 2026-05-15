@@ -102,238 +102,258 @@ export function GameSetupPage() {
       <section className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full min-h-[calc(100vh-10rem)] pb-10">
         <div className="space-y-6 sm:space-y-8 md:space-y-10">
 
-        {/* ━━━ HEADER ━━━ */}
-        <header
-          className={`transition-all duration-700 ease-out ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-            }`}
-        >
-          {/* Top badge row */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-            <div className="flex items-center gap-1.5 sm:gap-2 bg-foreground text-background px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg">
-              <Gamepad2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest">
-                Game Center
-              </span>
+          {/* ━━━ HEADER ━━━ */}
+          <header
+            className={`transition-all duration-700 ease-out ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+              }`}
+          >
+            {/* Top badge row */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <div className="flex items-center gap-1.5 sm:gap-2 bg-foreground text-background px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg">
+                <Gamepad2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest">
+                  Game Center
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-primary/20">
+                <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-primary" />
+                <span className="text-[10px] sm:text-xs font-bold">
+                  {availableCount}/{gameCards.length} พร้อมเล่น
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-primary/20">
-              <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-primary" />
-              <span className="text-[10px] sm:text-xs font-bold">
-                {availableCount}/{gameCards.length} พร้อมเล่น
-              </span>
-            </div>
-          </div>
 
-          {/* Title */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter leading-[0.9]">
-            Challenge
-          </h1>
-          <div className="h-2 sm:h-3 w-20 sm:w-28 md:w-32 bg-primary mt-1.5 sm:mt-2 rounded-sm" />
-          <p className="text-sm sm:text-base text-muted-foreground font-medium mt-2 sm:mt-3 max-w-lg">
-            เลือกโหมดเกมที่สนใจ ฝึกฝนทักษะภาษามือ แล้วมาสนุกไปด้วยกัน!
-          </p>
-        </header>
+            {/* Title */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter leading-[0.9]">
+              Challenge
+            </h1>
+            <div className="h-2 sm:h-3 w-20 sm:w-28 md:w-32 bg-primary mt-1.5 sm:mt-2 rounded-sm" />
+            <p className="text-sm sm:text-base text-muted-foreground font-medium mt-2 sm:mt-3 max-w-lg">
+              เลือกโหมดเกมที่สนใจ ฝึกฝนทักษะภาษามือ แล้วมาสนุกไปด้วยกัน!
+            </p>
+          </header>
 
-        {/* ━━━ GAME CARDS GRID ━━━ */}
-        <section>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-            {gameCards.map((card, index) => {
-              const isLocked = !card.available || (card.desktopOnly && !isDesktop);
+          {/* ━━━ GAME CARDS GRID ━━━ */}
+          <section>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
+              {gameCards.map((card, index) => {
+                const isLocked = !card.available || (card.desktopOnly && !isDesktop);
 
-              return (
-                <div
-                  key={card.id}
-                  className={`
+                return (
+                  <div
+                    key={card.id}
+                    className={`
                     relative group flex flex-col rounded-xl
                     border-[3px] border-foreground
                     bg-card
                     transition-all duration-400 ease-out
                     ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}
                     ${!isLocked
-                      ? "hover:-translate-y-2 hover:shadow-[6px_6px_0px_0px_hsl(0_0%_0%)]"
-                      : "cursor-not-allowed"
-                    }
+                        ? "hover:-translate-y-2 hover:shadow-[6px_6px_0px_0px_hsl(0_0%_0%)]"
+                        : "cursor-not-allowed"
+                      }
                   `}
-                  style={{
-                    boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)",
-                    transitionDelay: `${150 + index * 100}ms`,
-                  }}
-                  onMouseEnter={() => setHoveredId(card.id)}
-                  onMouseLeave={() => setHoveredId(null)}
-                >
-                  {/* ── Icon Hero Area ── */}
-                  <div
-                    className={`
+                    style={{
+                      boxShadow: "4px 4px 0px 0px hsl(0 0% 0%)",
+                      transitionDelay: `${150 + index * 100}ms`,
+                    }}
+                    onMouseEnter={() => setHoveredId(card.id)}
+                    onMouseLeave={() => setHoveredId(null)}
+                  >
+                    {/* ── Icon Hero Area ── */}
+                    <div
+                      className={`
                       relative h-40 sm:h-44 md:h-48 w-full
                       flex items-center justify-center
                       rounded-t-[9px] overflow-hidden
                       transition-all duration-500
                       ${isLocked ? "grayscale opacity-60" : ""}
                     `}
-                    style={{
-                      background: isLocked
-                        ? "hsl(var(--muted))"
-                        : `linear-gradient(135deg, ${card.colorLight}, ${card.color}20)`,
-                    }}
-                  >
-                    {/* Decorative bg circles */}
-                    <div
-                      className="absolute -top-4 -right-4 w-20 h-20 sm:w-24 sm:h-24 rounded-full opacity-20 transition-transform duration-700 group-hover:scale-125"
-                      style={{ background: card.color }}
-                    />
-                    <div
-                      className="absolute -bottom-3 -left-3 w-14 h-14 sm:w-16 sm:h-16 rounded-full opacity-15 transition-transform duration-700 group-hover:scale-110"
-                      style={{ background: card.color }}
-                    />
+                      style={{
+                        background: isLocked
+                          ? "hsl(var(--muted))"
+                          : `linear-gradient(135deg, ${card.colorLight}, ${card.color}20)`,
+                      }}
+                    >
+                      {/* Decorative bg circles */}
+                      <div
+                        className="absolute -top-4 -right-4 w-20 h-20 sm:w-24 sm:h-24 rounded-full opacity-20 transition-transform duration-700 group-hover:scale-125"
+                        style={{ background: card.color }}
+                      />
+                      <div
+                        className="absolute -bottom-3 -left-3 w-14 h-14 sm:w-16 sm:h-16 rounded-full opacity-15 transition-transform duration-700 group-hover:scale-110"
+                        style={{ background: card.color }}
+                      />
 
-                    {/* Icon container with ring */}
-                    <div
-                      className={`
+                      {/* Icon container with ring */}
+                      <div
+                        className={`
                         relative z-10 w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18
                         rounded-xl border-[3px] border-foreground
                         flex items-center justify-center
                         transition-all duration-500
                         group-hover:scale-110 group-hover:rotate-3
                       `}
-                      style={{
-                        background: isLocked ? "hsl(var(--muted))" : card.colorLight,
-                        boxShadow: isLocked ? "none" : `3px 3px 0px 0px hsl(0 0% 0%)`,
-                      }}
-                    >
-                      {iconMap[card.id](isLocked)}
+                        style={{
+                          background: isLocked ? "hsl(var(--muted))" : card.colorLight,
+                          boxShadow: isLocked ? "none" : `3px 3px 0px 0px hsl(0 0% 0%)`,
+                        }}
+                      >
+                        {iconMap[card.id](isLocked)}
 
-                      {/* Sparkle indicator */}
-                      {!isLocked && hoveredId === card.id && (
-                        <Sparkles className="absolute -top-2 -right-2 w-4 h-4 sm:w-5 sm:h-5 text-primary animate-bounce" />
+                        {/* Sparkle indicator */}
+                        {!isLocked && hoveredId === card.id && (
+                          <Sparkles className="absolute -top-2 -right-2 w-4 h-4 sm:w-5 sm:h-5 text-primary animate-bounce" />
+                        )}
+                      </div>
+
+                      {/* Locked overlay badge */}
+                      {isLocked && (
+                        <div className="absolute inset-0 bg-foreground/10 flex items-center justify-center z-20">
+                          <div className="flex items-center gap-1.5 bg-foreground text-background px-3 py-1.5 rounded-lg border-2 border-foreground shadow-[2px_2px_0px_0px_hsl(0_0%_0%/0.3)]">
+                            {!card.available ? (
+                              <>
+                                <Lock className="w-3.5 h-3.5" />
+                                <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider">
+                                  Coming Soon
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <Monitor className="w-3.5 h-3.5" />
+                                <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider">
+                                  Desktop Only
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        </div>
                       )}
+
                     </div>
 
-                    {/* Locked overlay badge */}
-                    {isLocked && (
-                      <div className="absolute inset-0 bg-foreground/10 flex items-center justify-center z-20">
-                        <div className="flex items-center gap-1.5 bg-foreground text-background px-3 py-1.5 rounded-lg border-2 border-foreground shadow-[2px_2px_0px_0px_hsl(0_0%_0%/0.3)]">
-                          {!card.available ? (
-                            <>
-                              <Lock className="w-3.5 h-3.5" />
-                              <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider">
-                                Coming Soon
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <Monitor className="w-3.5 h-3.5" />
-                              <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider">
-                                Desktop Only
-                              </span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    )}
+                    {/* ── Content Area ── */}
+                    <div className="flex-1 flex flex-col p-2.5 sm:p-3 gap-1.5 sm:gap-2">
+                      {/* Subtitle */}
+                      <span
+                        className="text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-colors duration-300"
+                        style={{ color: isLocked ? "hsl(var(--muted-foreground))" : card.color }}
+                      >
+                        {card.subtitle}
+                      </span>
 
-                  </div>
+                      {/* Title */}
+                      <h3 className={`text-base sm:text-lg font-black uppercase leading-tight transition-colors duration-300 ${isLocked ? "text-muted-foreground" : "group-hover:text-primary"
+                        }`}>
+                        {card.title}
+                      </h3>
 
-                  {/* ── Content Area ── */}
-                  <div className="flex-1 flex flex-col p-2.5 sm:p-3 gap-1.5 sm:gap-2">
-                    {/* Subtitle */}
-                    <span
-                      className="text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-colors duration-300"
-                      style={{ color: isLocked ? "hsl(var(--muted-foreground))" : card.color }}
-                    >
-                      {card.subtitle}
-                    </span>
+                      {/* Description */}
+                      <p className={`text-[10px] sm:text-xs font-medium leading-relaxed line-clamp-2 ${isLocked ? "text-muted-foreground/50" : "text-muted-foreground"
+                        }`}>
+                        {card.description}
+                      </p>
 
-                    {/* Title */}
-                    <h3 className={`text-base sm:text-lg font-black uppercase leading-tight transition-colors duration-300 ${isLocked ? "text-muted-foreground" : "group-hover:text-primary"
-                      }`}>
-                      {card.title}
-                    </h3>
+                      {/* Spacer */}
+                      <div className="flex-1 min-h-0" />
 
-                    {/* Description */}
-                    <p className={`text-[10px] sm:text-xs font-medium leading-relaxed line-clamp-2 ${isLocked ? "text-muted-foreground/50" : "text-muted-foreground"
-                      }`}>
-                      {card.description}
-                    </p>
-
-                    {/* Spacer */}
-                    <div className="flex-1 min-h-0" />
-
-                    {/* Action Button */}
-                    <button
-                      disabled={isLocked}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (!isLocked) navigate(card.route);
-                      }}
-                      className={`
+                      {/* Action Button */}
+                      <button
+                        disabled={isLocked}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isLocked) navigate(card.route);
+                        }}
+                        className={`
                         w-full py-2 sm:py-2.5 rounded-lg
                         border-[3px] border-foreground
                         text-xs sm:text-sm font-black uppercase tracking-wider
                         flex items-center justify-center gap-2
                         transition-all duration-300 ease-out
                         ${!isLocked
-                          ? "bg-primary text-primary-foreground hover:brightness-110 hover:translate-x-[-2px] hover:translate-y-[-2px] active:translate-x-0 active:translate-y-0"
-                          : "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
-                        }
+                            ? "bg-primary text-primary-foreground hover:brightness-110 hover:translate-x-[-2px] hover:translate-y-[-2px] active:translate-x-0 active:translate-y-0"
+                            : "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
+                          }
                       `}
-                      style={{
-                        boxShadow: isLocked ? "none" : "3px 3px 0px 0px hsl(0 0% 0%)",
-                      }}
-                    >
-                      {isLocked ? (
-                        <>
-                          <Lock className="w-3.5 h-3.5" />
-                          Locked
-                        </>
-                      ) : (
-                        <>
-                          Play Now
-                          <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300 group-hover:translate-x-1" />
-                        </>
-                      )}
-                    </button>
+                        style={{
+                          boxShadow: isLocked ? "none" : "3px 3px 0px 0px hsl(0 0% 0%)",
+                        }}
+                      >
+                        {isLocked ? (
+                          <>
+                            <Lock className="w-3.5 h-3.5" />
+                            Locked
+                          </>
+                        ) : (
+                          <>
+                            Play Now
+                            <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+                );
+              })}
+            </div>
+          </section>
 
-        {/* ━━━ MOBILE INFO BANNER ━━━ */}
-        {!isDesktop && (
-          <div
-            className={`
+          {/* ━━━ MOBILE INFO BANNER ━━━ */}
+          {!isDesktop && (
+            <div
+              className={`
               brutal-card bg-foreground text-background p-3 sm:p-4 rounded-xl
               flex items-start gap-3
               transition-all duration-700 ease-out
               ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
             `}
-            style={{ transitionDelay: "700ms" }}
-          >
-            <Monitor className="w-5 h-5 sm:w-6 sm:h-6 text-secondary shrink-0 mt-0.5" />
-            <div>
-              <p className="text-xs sm:text-sm font-bold">
-                บางเกมรองรับเฉพาะ Desktop
-              </p>
-              <p className="text-[10px] sm:text-xs text-background/60 font-medium mt-0.5">
-                Sign Master Memory และ Sign Defender ต้องใช้กล้องเว็บแคม จึงเปิดเฉพาะบนคอมพิวเตอร์
-              </p>
+              style={{ transitionDelay: "700ms" }}
+            >
+              <Monitor className="w-5 h-5 sm:w-6 sm:h-6 text-secondary shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs sm:text-sm font-bold">
+                  บางเกมรองรับเฉพาะ Desktop
+                </p>
+                <p className="text-[10px] sm:text-xs text-background/60 font-medium mt-0.5">
+                  Sign Master Memory และ Sign Defender ต้องใช้กล้องเว็บแคม จึงเปิดเฉพาะบนคอมพิวเตอร์
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         </div>
       </section>
 
       {/* Powered by */}
-      <div
-        className="w-full mt-auto pt-10 mb-6 flex flex-col md:flex-row items-center justify-center gap-2 text-xs text-sq-black/70 font-medium"
-      >
-        <span>Powered by</span>
-        <div className="flex items-center gap-2">
-          <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-6 md:h-7 object-contain" />
-          <a href="https://www.bu.ac.th/th/engineering/ai-engineering-datascience" target="_blank" rel="noopener noreferrer" className="hover:underline">
-            School of Engineering · Bangkok University
-          </a>
+      <div className="w-full mt-auto pt-10 mb-6 flex flex-col items-center justify-center gap-2 md:gap-3 text-[10px] sm:text-xs text-sq-black/70 font-medium">
+
+        {/* ส่วนที่ 1: BU - Mobile อยู่บรรทัดเดียวกัน / Desktop เรียงต่อกับส่วนอื่น */}
+        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3">
+
+          <div className="flex flex-row items-center gap-2">
+            <span className="whitespace-nowrap">Powered by</span>
+            <div className="flex items-center gap-2">
+              <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-5 md:h-7 object-contain" />
+              <a href="https://www.bu.ac.th/th/engineering/ai-engineering-datascience" target="_blank" rel="noopener noreferrer" className="hover:underline whitespace-nowrap">
+                School of Engineering · Bangkok University
+              </a>
+            </div>
+          </div>
+
+          {/* เครื่องหมาย & แสดงเฉพาะ Desktop */}
+          <span className="hidden md:inline text-sq-black/40">&</span>
+
+          {/* ส่วนที่ 2: Suan Dusit - Mobile อยู่บรรทัดเดียวกัน */}
+          <div className="flex flex-row items-center gap-2">
+            {/* แก้ตรงนี้: md:hidden จะทำให้หายไปใน Desktop และแสดงผลเฉพาะบน Mobile */}
+            <span className="whitespace-nowrap md:hidden">Associate with</span>
+
+            <div className="flex items-center gap-2">
+              <img src="/SuanDusit_LOGO.webp" alt="Suan Dusit Logo" className="h-5 md:h-7 object-contain" />
+              <span className="whitespace-nowrap">Suan Dusit University</span>
+            </div>
+          </div>
+
         </div>
       </div>
     </main>

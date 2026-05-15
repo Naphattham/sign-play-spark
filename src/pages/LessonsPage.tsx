@@ -41,7 +41,7 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 font-body">
           {/* Category 1: General Conversation */}
-          <button 
+          <button
             onClick={() => handleCategoryClick("general")}
             className="group relative bg-primary border-[3px] border-foreground rounded-[1.5rem] md:rounded-[2rem] p-6 lg:p-8 text-left flex flex-col justify-between h-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-bottom-4"
             style={{ animationDelay: '0ms', animationDuration: '500ms', animationFillMode: 'both' }}
@@ -56,7 +56,7 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
           </button>
 
           {/* Category 2: Emotions */}
-          <button 
+          <button
             onClick={() => handleCategoryClick("emotions")}
             className="group relative bg-secondary border-[3px] border-foreground rounded-[1.5rem] md:rounded-[2rem] p-6 lg:p-8 text-left flex flex-col justify-between h-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-bottom-4"
             style={{ animationDelay: '100ms', animationDuration: '500ms', animationFillMode: 'both' }}
@@ -71,7 +71,7 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
           </button>
 
           {/* Category 3: Q&A */}
-          <button 
+          <button
             onClick={() => handleCategoryClick("qa")}
             className="group relative bg-orange-300 border-[3px] border-foreground rounded-[1.5rem] md:rounded-[2rem] p-6 lg:p-8 text-left flex flex-col justify-between h-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-bottom-4"
             style={{ animationDelay: '200ms', animationDuration: '500ms', animationFillMode: 'both' }}
@@ -86,7 +86,7 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
           </button>
 
           {/* Category 4: Illness */}
-          <button 
+          <button
             onClick={() => handleCategoryClick("illness")}
             className="group relative bg-emerald-400 border-[3px] border-foreground rounded-[1.5rem] md:rounded-[2rem] p-6 lg:p-8 text-left flex flex-col justify-between h-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-bottom-4"
             style={{ animationDelay: '300ms', animationDuration: '500ms', animationFillMode: 'both' }}
@@ -99,19 +99,39 @@ export function LessonsPage({ onCategorySelect, completedPhrases, streak }: Less
               <h3 className="text-2xl md:text-3xl lg:text-4xl font-black text-white leading-tight font-display">อาการเจ็บป่วย</h3>
             </div>
           </button>
-        </div>        
+        </div>
       </section>
 
       {/* Powered by */}
-      <div
-        className="w-full mt-auto pt-10 mb-6 flex flex-col md:flex-row items-center justify-center gap-2 text-xs text-sq-black/70 font-medium"
-      >
-        <span>Powered by</span>
-        <div className="flex items-center gap-2">
-          <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-6 md:h-7 object-contain" />
-          <a href="https://www.bu.ac.th/th/engineering/ai-engineering-datascience" target="_blank" rel="noopener noreferrer" className="hover:underline">
-            School of Engineering · Bangkok University
-          </a>
+      <div className="w-full mt-auto pt-10 mb-6 flex flex-col items-center justify-center gap-2 md:gap-3 text-[10px] sm:text-xs text-sq-black/70 font-medium">
+
+        {/* ส่วนที่ 1: BU - Mobile อยู่บรรทัดเดียวกัน / Desktop เรียงต่อกับส่วนอื่น */}
+        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3">
+
+          <div className="flex flex-row items-center gap-2">
+            <span className="whitespace-nowrap">Powered by</span>
+            <div className="flex items-center gap-2">
+              <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-5 md:h-7 object-contain" />
+              <a href="https://www.bu.ac.th/th/engineering/ai-engineering-datascience" target="_blank" rel="noopener noreferrer" className="hover:underline whitespace-nowrap">
+                School of Engineering · Bangkok University
+              </a>
+            </div>
+          </div>
+
+          {/* เครื่องหมาย & แสดงเฉพาะ Desktop */}
+          <span className="hidden md:inline text-sq-black/40">&</span>
+
+          {/* ส่วนที่ 2: Suan Dusit - Mobile อยู่บรรทัดเดียวกัน */}
+          <div className="flex flex-row items-center gap-2">
+            {/* แก้ตรงนี้: md:hidden จะทำให้หายไปใน Desktop และแสดงผลเฉพาะบน Mobile */}
+            <span className="whitespace-nowrap md:hidden">Associate with</span>
+
+            <div className="flex items-center gap-2">
+              <img src="/SuanDusit_LOGO.webp" alt="Suan Dusit Logo" className="h-5 md:h-7 object-contain" />
+              <span className="whitespace-nowrap">Suan Dusit University</span>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

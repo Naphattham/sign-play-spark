@@ -218,14 +218,18 @@ export function CategoryBrowsePage() {
           )}
         </main>
 
+
         {/* ── Footer ── */}
         <footer className="bg-pink-500 py-5 sm:py-8 px-4 sm:px-8 border-t-[3px] border-foreground mt-auto relative overflow-hidden shrink-0">
           <div className="absolute inset-0 cb-shimmer-bar pointer-events-none" />
-          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 relative z-10">
-            <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+          <div className="max-w-6xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-5 sm:gap-6 relative z-10">
+            <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity shrink-0" onClick={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
               <span className="font-black text-xl tracking-tight text-white">SignMate</span>
             </div>
-            <p className="font-bold text-white/50 text-xs sm:text-sm text-center">© 2026 SignMate Interactive. All rights reserved.</p>
+            
+
+
+            <p className="font-bold text-white/50 text-xs sm:text-sm text-center shrink-0">© 2026 SignMate Interactive. All rights reserved.</p>
           </div>
         </footer>
       </div>

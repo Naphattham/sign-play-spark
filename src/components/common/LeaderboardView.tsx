@@ -457,15 +457,35 @@ export function LeaderboardView() {
       )}
 
       {/* Powered by */}
-      <div
-        className="w-full mt-auto pt-10 mb-6 flex flex-col md:flex-row items-center justify-center gap-2 text-xs text-sq-black/70 font-medium"
-      >
-        <span>Powered by</span>
-        <div className="flex items-center gap-2">
-          <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-6 md:h-7 object-contain" />
-          <a href="https://www.bu.ac.th/th/engineering/ai-engineering-datascience" target="_blank" rel="noopener noreferrer" className="hover:underline">
-            School of Engineering · Bangkok University
-          </a>
+      <div className="w-full mt-auto pt-10 mb-6 flex flex-col items-center justify-center gap-2 md:gap-3 text-[10px] sm:text-xs text-sq-black/70 font-medium">
+
+        {/* ส่วนที่ 1: BU - Mobile อยู่บรรทัดเดียวกัน / Desktop เรียงต่อกับส่วนอื่น */}
+        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3">
+
+          <div className="flex flex-row items-center gap-2">
+            <span className="whitespace-nowrap">Powered by</span>
+            <div className="flex items-center gap-2">
+              <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-5 md:h-7 object-contain" />
+              <a href="https://www.bu.ac.th/th/engineering/ai-engineering-datascience" target="_blank" rel="noopener noreferrer" className="hover:underline whitespace-nowrap">
+                School of Engineering · Bangkok University
+              </a>
+            </div>
+          </div>
+
+          {/* เครื่องหมาย & แสดงเฉพาะ Desktop */}
+          <span className="hidden md:inline text-sq-black/40">&</span>
+
+          {/* ส่วนที่ 2: Suan Dusit - Mobile อยู่บรรทัดเดียวกัน */}
+          <div className="flex flex-row items-center gap-2">
+            {/* แก้ตรงนี้: md:hidden จะทำให้หายไปใน Desktop และแสดงผลเฉพาะบน Mobile */}
+            <span className="whitespace-nowrap md:hidden">Associate with</span>
+
+            <div className="flex items-center gap-2">
+              <img src="/SuanDusit_LOGO.webp" alt="Suan Dusit Logo" className="h-5 md:h-7 object-contain" />
+              <span className="whitespace-nowrap">Suan Dusit University</span>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

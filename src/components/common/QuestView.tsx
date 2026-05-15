@@ -235,142 +235,162 @@ export function QuestView({ streak }: QuestViewProps) {
       <section className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full min-h-[calc(100vh-10rem)] pb-10">
         <div className="space-y-6 sm:space-y-8 md:space-y-10">
 
-        {/* ━━━ HEADER ━━━ */}
-        <header className="mb-6 sm:mb-8 md:mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter">
-            Quest Master
-          </h1>
-          <div className="h-2 sm:h-3 w-20 sm:w-28 md:w-32 bg-primary mt-1.5 sm:mt-2 rounded-sm" />
-          <p className="text-sm sm:text-base text-muted-foreground font-medium mt-2">
-            รับเควสประจำวัน เพื่อก้าวสู่ความเป็นสุดยอดนักภาษามือ
-          </p>
-        </header>
+          {/* ━━━ HEADER ━━━ */}
+          <header className="mb-6 sm:mb-8 md:mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter">
+              Quest Master
+            </h1>
+            <div className="h-2 sm:h-3 w-20 sm:w-28 md:w-32 bg-primary mt-1.5 sm:mt-2 rounded-sm" />
+            <p className="text-sm sm:text-base text-muted-foreground font-medium mt-2">
+              รับเควสประจำวัน เพื่อก้าวสู่ความเป็นสุดยอดนักภาษามือ
+            </p>
+          </header>
 
-        {/* ━━━ DAILY QUESTS ━━━ */}
-        <section>
-          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
-            <CalendarDays className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-            <h2 className="text-base sm:text-lg md:text-xl font-black uppercase tracking-tight">
-              ภารกิจประจำวัน
-            </h2>
-            <div className="h-[2px] sm:h-[3px] flex-1 bg-foreground/10 rounded-full" />
-            <span className="text-[10px] sm:text-xs font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full border border-foreground/10 uppercase">
-              รีเซ็ตทุกวัน
-            </span>
-          </div>
+          {/* ━━━ DAILY QUESTS ━━━ */}
+          <section>
+            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
+              <CalendarDays className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+              <h2 className="text-base sm:text-lg md:text-xl font-black uppercase tracking-tight">
+                ภารกิจประจำวัน
+              </h2>
+              <div className="h-[2px] sm:h-[3px] flex-1 bg-foreground/10 rounded-full" />
+              <span className="text-[10px] sm:text-xs font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full border border-foreground/10 uppercase">
+                รีเซ็ตทุกวัน
+              </span>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
-            <QuestCard
-              title="เข้าสู่ระบบ 1 ครั้ง/วัน"
-              description="เข้าสู่ระบบเพื่อใช้งานครั้งแรกของวัน รับคะแนนทันที"
-              icon={<CalendarDays />}
-              points={50}
-              status={loginStatus}
-              progressLabel="1/1 วัน"
-              progressPercent={100}
-              category="DAILY"
-              categoryColor="hsl(342 100% 90%)"
-              accentColor="hsl(342 100% 64%)"
-              delay={0}
-              claiming={claimingDailyLogin}
-              onClaim={handleClaimDailyLogin}
-            />
-            <QuestCard
-              title="ฝึกซ้อม 30 นาที"
-              description="เพียงเข้าใช้งานระบบครบ 30 นาทีใน 1 วัน"
-              icon={<Timer />}
-              points={100}
-              status={practiceStatus}
-              progressLabel={`${Math.min(practiceMinutes, 30)}/30 นาที`}
-              progressPercent={Math.min((practiceMinutes / 30) * 100, 100)}
-              category="DAILY"
-              categoryColor="hsl(342 100% 90%)"
-              accentColor="hsl(342 100% 64%)"
-              delay={80}
-              claiming={claimingDailyPractice}
-              onClaim={handleClaimDailyPractice}
-              lockedLabel={`กำลังดำเนินการ (${Math.min(practiceMinutes, 30)}/30 นาที)`}
-            />
-          </div>
-        </section>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
+              <QuestCard
+                title="เข้าสู่ระบบ 1 ครั้ง/วัน"
+                description="เข้าสู่ระบบเพื่อใช้งานครั้งแรกของวัน รับคะแนนทันที"
+                icon={<CalendarDays />}
+                points={50}
+                status={loginStatus}
+                progressLabel="1/1 วัน"
+                progressPercent={100}
+                category="DAILY"
+                categoryColor="hsl(342 100% 90%)"
+                accentColor="hsl(342 100% 64%)"
+                delay={0}
+                claiming={claimingDailyLogin}
+                onClaim={handleClaimDailyLogin}
+              />
+              <QuestCard
+                title="ฝึกซ้อม 30 นาที"
+                description="เพียงเข้าใช้งานระบบครบ 30 นาทีใน 1 วัน"
+                icon={<Timer />}
+                points={100}
+                status={practiceStatus}
+                progressLabel={`${Math.min(practiceMinutes, 30)}/30 นาที`}
+                progressPercent={Math.min((practiceMinutes / 30) * 100, 100)}
+                category="DAILY"
+                categoryColor="hsl(342 100% 90%)"
+                accentColor="hsl(342 100% 64%)"
+                delay={80}
+                claiming={claimingDailyPractice}
+                onClaim={handleClaimDailyPractice}
+                lockedLabel={`กำลังดำเนินการ (${Math.min(practiceMinutes, 30)}/30 นาที)`}
+              />
+            </div>
+          </section>
 
-        {/* ━━━ MILESTONE QUESTS ━━━ */}
-        <section>
-          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
-            <Star className="w-5 h-5 sm:w-6 sm:h-6 text-secondary fill-secondary" />
-            <h2 className="text-base sm:text-lg md:text-xl font-black uppercase tracking-tight">
-              ภารกิจพิเศษ
-            </h2>
-            <div className="h-[2px] sm:h-[3px] flex-1 bg-foreground/10 rounded-full" />
-            <span className="text-[10px] sm:text-xs font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full border border-foreground/10 uppercase">
-              ทำได้ครั้งเดียว
-            </span>
-          </div>
+          {/* ━━━ MILESTONE QUESTS ━━━ */}
+          <section>
+            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
+              <Star className="w-5 h-5 sm:w-6 sm:h-6 text-secondary fill-secondary" />
+              <h2 className="text-base sm:text-lg md:text-xl font-black uppercase tracking-tight">
+                ภารกิจพิเศษ
+              </h2>
+              <div className="h-[2px] sm:h-[3px] flex-1 bg-foreground/10 rounded-full" />
+              <span className="text-[10px] sm:text-xs font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full border border-foreground/10 uppercase">
+                ทำได้ครั้งเดียว
+              </span>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
-            <QuestCard
-              title="ยินดีต้อนรับสมาชิกใหม่!"
-              description="สมัครสมาชิกครั้งแรก รับคะแนนโบนัสไปเลยฟรีๆ"
-              icon={<Gift />}
-              points={100}
-              status={welcomeStatus}
-              progressLabel="1/1 สมัครสมาชิกแล้ว"
-              progressPercent={100}
-              category="ONE-TIME"
-              categoryColor="hsl(44 100% 82%)"
-              accentColor="hsl(44 100% 55%)"
-              delay={0}
-              claiming={claimingWelcome}
-              onClaim={handleClaimWelcomeBonus}
-            />
-            <QuestCard
-              title="เรียนรู้ครบ 5 คำ"
-              description="สะสมคำศัพท์ที่คุณฝึกผ่านครบ 5 คำ"
-              icon={<BookOpen />}
-              points={30}
-              status={learn5Status}
-              progressLabel={`${Math.min(completedPhrasesCount, 5)}/5 คำ`}
-              progressPercent={Math.min((completedPhrasesCount / 5) * 100, 100)}
-              category="ONE-TIME"
-              categoryColor="hsl(44 100% 82%)"
-              accentColor="hsl(270 70% 60%)"
-              delay={80}
-              claiming={claimingLearn5Words}
-              onClaim={handleClaimLearn5Words}
-              lockedLabel={`กำลังดำเนินการ (${Math.min(completedPhrasesCount, 5)}/5 คำ)`}
-            />
-            <QuestCard
-              title="เรียนรู้ครบ 10 คำ"
-              description="สะสมคำศัพท์ที่คุณฝึกผ่านครบ 10 คำ"
-              icon={<BookMarked />}
-              points={100}
-              status={learn10Status}
-              progressLabel={`${Math.min(completedPhrasesCount, 10)}/10 คำ`}
-              progressPercent={Math.min((completedPhrasesCount / 10) * 100, 100)}
-              category="ONE-TIME"
-              categoryColor="hsl(44 100% 82%)"
-              accentColor="hsl(25 95% 55%)"
-              delay={160}
-              claiming={claimingLearn10Words}
-              onClaim={handleClaimLearn10Words}
-              lockedLabel={`กำลังดำเนินการ (${Math.min(completedPhrasesCount, 10)}/10 คำ)`}
-            />
-          </div>
-        </section>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
+              <QuestCard
+                title="ยินดีต้อนรับสมาชิกใหม่!"
+                description="สมัครสมาชิกครั้งแรก รับคะแนนโบนัสไปเลยฟรีๆ"
+                icon={<Gift />}
+                points={100}
+                status={welcomeStatus}
+                progressLabel="1/1 สมัครสมาชิกแล้ว"
+                progressPercent={100}
+                category="ONE-TIME"
+                categoryColor="hsl(44 100% 82%)"
+                accentColor="hsl(44 100% 55%)"
+                delay={0}
+                claiming={claimingWelcome}
+                onClaim={handleClaimWelcomeBonus}
+              />
+              <QuestCard
+                title="เรียนรู้ครบ 5 คำ"
+                description="สะสมคำศัพท์ที่คุณฝึกผ่านครบ 5 คำ"
+                icon={<BookOpen />}
+                points={30}
+                status={learn5Status}
+                progressLabel={`${Math.min(completedPhrasesCount, 5)}/5 คำ`}
+                progressPercent={Math.min((completedPhrasesCount / 5) * 100, 100)}
+                category="ONE-TIME"
+                categoryColor="hsl(44 100% 82%)"
+                accentColor="hsl(270 70% 60%)"
+                delay={80}
+                claiming={claimingLearn5Words}
+                onClaim={handleClaimLearn5Words}
+                lockedLabel={`กำลังดำเนินการ (${Math.min(completedPhrasesCount, 5)}/5 คำ)`}
+              />
+              <QuestCard
+                title="เรียนรู้ครบ 10 คำ"
+                description="สะสมคำศัพท์ที่คุณฝึกผ่านครบ 10 คำ"
+                icon={<BookMarked />}
+                points={100}
+                status={learn10Status}
+                progressLabel={`${Math.min(completedPhrasesCount, 10)}/10 คำ`}
+                progressPercent={Math.min((completedPhrasesCount / 10) * 100, 100)}
+                category="ONE-TIME"
+                categoryColor="hsl(44 100% 82%)"
+                accentColor="hsl(25 95% 55%)"
+                delay={160}
+                claiming={claimingLearn10Words}
+                onClaim={handleClaimLearn10Words}
+                lockedLabel={`กำลังดำเนินการ (${Math.min(completedPhrasesCount, 10)}/10 คำ)`}
+              />
+            </div>
+          </section>
 
         </div>
       </section>
 
       {/* Powered by */}
-      <div
-        className="w-full mt-auto pt-10 mb-6 flex flex-col md:flex-row items-center justify-center gap-2 text-xs text-sq-black/70 font-medium"
-      >
-        <span>Powered by</span>
-        <div className="flex items-center gap-2">
-          <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-6 md:h-7 object-contain" />
-          <a href="https://www.bu.ac.th/th/engineering/ai-engineering-datascience" target="_blank" rel="noopener noreferrer" className="hover:underline">
-            School of Engineering · Bangkok University
-          </a>
+      <div className="w-full mt-auto pt-10 mb-6 flex flex-col items-center justify-center gap-2 md:gap-3 text-[10px] sm:text-xs text-sq-black/70 font-medium">
+
+        {/* ส่วนที่ 1: BU - Mobile อยู่บรรทัดเดียวกัน / Desktop เรียงต่อกับส่วนอื่น */}
+        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3">
+
+          <div className="flex flex-row items-center gap-2">
+            <span className="whitespace-nowrap">Powered by</span>
+            <div className="flex items-center gap-2">
+              <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-5 md:h-7 object-contain" />
+              <a href="https://www.bu.ac.th/th/engineering/ai-engineering-datascience" target="_blank" rel="noopener noreferrer" className="hover:underline whitespace-nowrap">
+                School of Engineering · Bangkok University
+              </a>
+            </div>
+          </div>
+
+          {/* เครื่องหมาย & แสดงเฉพาะ Desktop */}
+          <span className="hidden md:inline text-sq-black/40">&</span>
+
+          {/* ส่วนที่ 2: Suan Dusit - Mobile อยู่บรรทัดเดียวกัน */}
+          <div className="flex flex-row items-center gap-2">
+            {/* แก้ตรงนี้: md:hidden จะทำให้หายไปใน Desktop และแสดงผลเฉพาะบน Mobile */}
+            <span className="whitespace-nowrap md:hidden">Associate with</span>
+
+            <div className="flex items-center gap-2">
+              <img src="/SuanDusit_LOGO.webp" alt="Suan Dusit Logo" className="h-5 md:h-7 object-contain" />
+              <span className="whitespace-nowrap">Suan Dusit University</span>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

@@ -257,11 +257,10 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
                 {topThree.map((entry, index) => (
                   <div
                     key={entry.rank}
-                    className={`flex items-center gap-2 sm:gap-3 rounded-lg ${
-                      index === 0
-                        ? 'p-2.5 sm:p-3 bg-accent/10 border-2 border-dashed border-foreground'
-                        : 'p-2 sm:p-2.5'
-                    }`}
+                    className={`flex items-center gap-2 sm:gap-3 rounded-lg ${index === 0
+                      ? 'p-2.5 sm:p-3 bg-accent/10 border-2 border-dashed border-foreground'
+                      : 'p-2 sm:p-2.5'
+                      }`}
                   >
                     <span className="text-base sm:text-lg font-black italic w-5 shrink-0">{entry.rank}</span>
                     <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-foreground overflow-hidden shrink-0 bg-muted">
@@ -287,7 +286,7 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
                     {index === 0 && <img src={goldMedalImg} alt="Gold Medal" className="w-6 h-6 sm:w-7 sm:h-7 shrink-0 object-contain" />}
                   </div>
                 ))}
-                
+
                 {!isUserInTopThree && currentUserEntry && (
                   <div
                     className="flex items-center gap-2 sm:gap-3 rounded-lg p-2 sm:p-2.5"
@@ -359,9 +358,8 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
 
               {/* Goal 2 — practice 30 min */}
               <div className="flex items-start gap-2.5 sm:gap-3">
-                <div className={`size-5 sm:size-6 border-2 border-background rounded-md flex items-center justify-center mt-0.5 shrink-0 ${
-                  dailyPracticeClaimed || practiceMinutes >= 30 ? 'bg-primary' : 'bg-background/20'
-                }`}>
+                <div className={`size-5 sm:size-6 border-2 border-background rounded-md flex items-center justify-center mt-0.5 shrink-0 ${dailyPracticeClaimed || practiceMinutes >= 30 ? 'bg-primary' : 'bg-background/20'
+                  }`}>
                   {(dailyPracticeClaimed || practiceMinutes >= 30) && (
                     <span className="text-xs font-black text-background leading-none">✓</span>
                   )}
@@ -389,15 +387,35 @@ export function HomePage({ onCategorySelect, onResumeLesson, onLeaderboard, onLe
       </div>
 
       {/* Powered by */}
-      <div
-        className="w-full mt-auto pt-10 mb-6 flex flex-col md:flex-row items-center justify-center gap-2 text-xs text-sq-black/70 font-medium"
-      >
-        <span>Powered by</span>
-        <div className="flex items-center gap-2">
-          <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-6 md:h-7 object-contain" />
-          <a href="https://www.bu.ac.th/th/engineering/ai-engineering-datascience" target="_blank" rel="noopener noreferrer" className="hover:underline">
-            School of Engineering · Bangkok University
-          </a>
+      <div className="w-full mt-auto pt-10 mb-6 flex flex-col items-center justify-center gap-2 md:gap-3 text-[10px] sm:text-xs text-sq-black/70 font-medium">
+
+        {/* ส่วนที่ 1: BU - Mobile อยู่บรรทัดเดียวกัน / Desktop เรียงต่อกับส่วนอื่น */}
+        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3">
+
+          <div className="flex flex-row items-center gap-2">
+            <span className="whitespace-nowrap">Powered by</span>
+            <div className="flex items-center gap-2">
+              <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-5 md:h-7 object-contain" />
+              <a href="https://www.bu.ac.th/th/engineering/ai-engineering-datascience" target="_blank" rel="noopener noreferrer" className="hover:underline whitespace-nowrap">
+                School of Engineering · Bangkok University
+              </a>
+            </div>
+          </div>
+
+          {/* เครื่องหมาย & แสดงเฉพาะ Desktop */}
+          <span className="hidden md:inline text-sq-black/40">&</span>
+
+          {/* ส่วนที่ 2: Suan Dusit - Mobile อยู่บรรทัดเดียวกัน */}
+          <div className="flex flex-row items-center gap-2">
+            {/* แก้ตรงนี้: md:hidden จะทำให้หายไปใน Desktop และแสดงผลเฉพาะบน Mobile */}
+            <span className="whitespace-nowrap md:hidden">Associate with</span>
+
+            <div className="flex items-center gap-2">
+              <img src="/SuanDusit_LOGO.webp" alt="Suan Dusit Logo" className="h-5 md:h-7 object-contain" />
+              <span className="whitespace-nowrap">Suan Dusit University</span>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

@@ -153,18 +153,30 @@ export function LoadingScreen({ message = "กำลังโหลด..." }: { 
 
       </div>
 
-      {/* Powered by */}
+      {/* Powered by Wrapper */}
       <div
-        className="absolute bottom-8 left-0 right-0 flex flex-col md:flex-row items-center justify-center gap-2 text-xs text-sq-black/70 font-medium"
+        className="absolute bottom-8 left-0 right-0 flex flex-col items-center justify-center gap-3 text-[10px] sm:text-xs text-sq-black/70 font-medium"
         style={{
           opacity: showContent ? 1 : 0,
           transition: "opacity 0.6s ease 0.4s",
         }}
       >
-        <span>Powered by</span>
-        <div className="flex items-center gap-2">
-          <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-6 md:h-7 object-contain" />
-          <span>School of Engineering · Bangkok University</span>
+        {/* Line 1: เปลี่ยนจาก flex-col เป็น flex-row เพื่อให้อยู่บรรทัดเดียวกันใน Mobile */}
+        <div className="flex flex-row items-center gap-2">
+          <span className="whitespace-nowrap">Powered by</span>
+          <div className="flex items-center gap-2">
+            <img src="/ONLYBU_LOGO.webp" alt="BU Logo" className="h-5 md:h-7 object-contain" />
+            <span className="whitespace-nowrap">School of Engineering · Bangkok University</span>
+          </div>
+        </div>
+
+        {/* Line 2: เปลี่ยนจาก flex-col เป็น flex-row เช่นกัน */}
+        <div className="flex flex-row items-center gap-2">
+          <span className="whitespace-nowrap">Associate with</span>
+          <div className="flex items-center gap-2">
+            <img src="/SuanDusit_LOGO.webp" alt="Suan Dusit Logo" className="h-5 md:h-7 object-contain" />
+            <span className="whitespace-nowrap">Suan Dusit University</span>
+          </div>
         </div>
       </div>
 
