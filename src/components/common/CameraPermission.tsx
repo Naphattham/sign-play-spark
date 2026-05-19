@@ -111,6 +111,12 @@ function CalibrationModal({ onClose, onPlay }: CalibrationModalProps) {
       className={`fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md pointer-events-auto transition-opacity duration-500 ease-in-out ${isExiting ? "opacity-0" : "opacity-100"
         }`}
     >
+      {/* กล่อง Alert ด้านบน (ย้ายออกมาด้านนอกเพื่อให้แสดงผลอิสระ และแสดงเฉพาะบน Mobile) */}
+      <div className="absolute top-10 w-full z-30 flex justify-center md:hidden px-4 pointer-events-none">
+        <div className="bg-white/95 border-[3px] border-red-500 rounded-full px-6 py-3 font-black text-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-red-500 animate-pulse text-center text-balance">
+          โปรดวางมือถือให้เห็นศีรษะจรดเอว
+        </div>
+      </div>
       <div
         className={`relative w-full max-w-xl aspect-square bg-black border-[3px] sm:border-[4px] border-black rounded-3xl sm:rounded-[2rem] shadow-[8px_8px_0_0_#000] sm:shadow-[12px_12px_0_0_#000] overflow-hidden transition-all duration-500 ease-in-out ${isExiting
           ? "scale-90 opacity-0 shadow-none translate-y-4"
